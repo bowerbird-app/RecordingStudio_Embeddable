@@ -35,9 +35,7 @@ class CreateRecordingStudioEmbeddableEmbeds < ActiveRecord::Migration[8.1]
 
   def active_embed_recording_index_predicate
     predicate = "recordable_type = 'RecordingStudioEmbeddable::Embed'"
-    if column_exists?(:recording_studio_recordings, :trashed_at)
-      predicate = "#{predicate} AND trashed_at IS NULL"
-    end
+    predicate = "#{predicate} AND trashed_at IS NULL" if column_exists?(:recording_studio_recordings, :trashed_at)
     predicate
   end
 end

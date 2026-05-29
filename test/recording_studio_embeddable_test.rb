@@ -158,6 +158,14 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes migration, "column_exists?(:recording_studio_recordings, :trashed_at)"
   end
 
+  def test_view_migration_uses_postgresql_safe_index_names
+    migration = File.read(File.expand_path("../db/migrate/20250101000002_create_recording_studio_embeddable_views.rb",
+                                           __dir__))
+
+    assert_includes migration, "idx_rse_views_embed_viewed_at"
+    refute_includes migration, "index_recording_studio_embeddable_views_on_embed_id_and_viewed_at"
+  end
+
   def test_recording_schema_detection_supports_recording_studio_versions_without_trashed_at
     with_stubbed_recording_class(column_names: %w[id parent_recording_id]) do
       refute RecordingStudioEmbeddable.recording_has_trashed_at?

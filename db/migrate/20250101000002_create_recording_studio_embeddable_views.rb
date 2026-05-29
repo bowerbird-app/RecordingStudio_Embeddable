@@ -34,13 +34,17 @@ class CreateRecordingStudioEmbeddableViews < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :recording_studio_embeddable_views, :viewed_at
-    add_index :recording_studio_embeddable_views, %i[embed_id viewed_at]
-    add_index :recording_studio_embeddable_views, %i[parent_recording_id viewed_at]
-    add_index :recording_studio_embeddable_views, %i[status viewed_at]
-    add_index :recording_studio_embeddable_views, %i[token_digest viewed_at]
-    add_index :recording_studio_embeddable_views, %i[referer_host viewed_at]
-    add_index :recording_studio_embeddable_views, %i[viewer_digest viewed_at]
-    add_index :recording_studio_embeddable_views, :bot
+    add_index :recording_studio_embeddable_views, :viewed_at, name: "idx_rse_views_viewed_at"
+    add_index :recording_studio_embeddable_views, %i[embed_id viewed_at], name: "idx_rse_views_embed_viewed_at"
+    add_index :recording_studio_embeddable_views, %i[parent_recording_id viewed_at],
+              name: "idx_rse_views_parent_recording_viewed_at"
+    add_index :recording_studio_embeddable_views, %i[status viewed_at], name: "idx_rse_views_status_viewed_at"
+    add_index :recording_studio_embeddable_views, %i[token_digest viewed_at],
+              name: "idx_rse_views_token_viewed_at"
+    add_index :recording_studio_embeddable_views, %i[referer_host viewed_at],
+              name: "idx_rse_views_referer_viewed_at"
+    add_index :recording_studio_embeddable_views, %i[viewer_digest viewed_at],
+              name: "idx_rse_views_viewer_viewed_at"
+    add_index :recording_studio_embeddable_views, :bot, name: "idx_rse_views_bot"
   end
 end

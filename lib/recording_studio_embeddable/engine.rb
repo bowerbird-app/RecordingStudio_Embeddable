@@ -21,6 +21,10 @@ module RecordingStudioEmbeddable
     end
 
     initializer "recording_studio_embeddable.recording_methods" do
+      ActiveSupport.on_load(:active_record) do
+        include RecordingStudioEmbeddable::Recordable
+      end
+
       config.to_prepare do
         next unless defined?(ActiveRecord::Base)
 
