@@ -9,7 +9,8 @@ module RecordingStudioEmbeddable
       def edit; end
 
       def update
-        if @embed.update(embed_params)
+        apply_embed_params
+        if @embed.save
           redirect_to edit_management_embed_path(@embed), notice: "Embed settings updated."
         else
           render :edit, status: :unprocessable_entity
@@ -33,6 +34,37 @@ module RecordingStudioEmbeddable
 
       def load_embed
         @embed = Embed.find(params[:id])
+      end
+
+      def apply_embed_params
+        permitted = embed_params
+        scalar_embed_param_names.each do |name|
+          @embed.public_send("#{name}=", permitted[name]) if permitted.key?(name)
+        end
+        json_embed_param_names.each do |name|
+          @embed.public_send("#{name}=", permitted[name]) if permitted.key?(name)
+        end
+      end
+
+      def scalar_embed_param_names
+        %i[
+          enabled
+          embed_url_strategy
+          default_embed_mode
+          inherit_global_domains
+          inherit_capability_domains
+        ]
+      end
+
+      def json_embed_param_names
+        %i[
+          allowed_embed_modes
+          allowed_embedder_domains
+          blocked_embedder_domains
+          sizing
+          cache_settings
+          logging_settings
+        ]
       end
 
       def embed_params
