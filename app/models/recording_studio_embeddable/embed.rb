@@ -35,7 +35,9 @@ module RecordingStudioEmbeddable
     def recording
       return unless defined?(RecordingStudio::Recording)
 
-      RecordingStudio::Recording.find_by(recordable_type: self.class.name, recordable_id: id, trashed_at: nil)
+      scope = RecordingStudio::Recording.where(recordable_type: self.class.name, recordable_id: id)
+      scope = scope.where(trashed_at: nil) if RecordingStudioEmbeddable.recording_has_trashed_at?
+      scope.first
     end
 
     def parent_recording

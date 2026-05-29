@@ -35,5 +35,14 @@ module RecordingStudioEmbeddable
     def reset_configuration!
       @configuration = Configuration.new
     end
+
+    def recording_has_trashed_at?
+      return false unless defined?(RecordingStudio::Recording)
+      return false unless RecordingStudio::Recording.respond_to?(:column_names)
+
+      RecordingStudio::Recording.column_names.include?("trashed_at")
+    rescue StandardError
+      false
+    end
   end
 end

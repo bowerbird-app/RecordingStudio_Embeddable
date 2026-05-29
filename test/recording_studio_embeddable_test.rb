@@ -154,6 +154,34 @@ class RecordingStudioEmbeddableTest < Minitest::Test
                                            __dir__))
 
     assert_includes migration, "index_rs_unique_active_embed_per_parent"
-    assert_includes migration, "recordable_type = 'RecordingStudioEmbeddable::Embed' AND trashed_at IS NULL"
+    assert_includes migration, "active_embed_recording_index_predicate"
+    assert_includes migration, "column_exists?(:recording_studio_recordings, :trashed_at)"
+  end
+
+  def test_recording_schema_detection_supports_recording_studio_versions_without_trashed_at
+    with_stubbed_recording_class(column_names: %w[id parent_recording_id]) do
+      refute RecordingStudioEmbeddable.recording_has_trashed_at?
+    end
+  end
+
+  def test_recording_schema_detection_supports_legacy_recording_studio_versions_with_trashed_at
+    with_stubbed_recording_class(column_names: %w[id parent_recording_id trashed_at]) do
+      assert RecordingStudioEmbeddable.recording_has_trashed_at?
+    end
+  end
+
+  private
+
+  def with_stubbed_recording_class(column_names:)
+    previous = RecordingStudio.const_defined?(:Recording, false) ? RecordingStudio.const_get(:Recording) : nil
+    RecordingStudio.send(:remove_const, :Recording) if previous
+    recording_class = Class.new do
+      define_singleton_method(:column_names) { column_names }
+    end
+    RecordingStudio.const_set(:Recording, recording_class)
+    yield
+  ensure
+    RecordingStudio.send(:remove_const, :Recording) if RecordingStudio.const_defined?(:Recording, false)
+    RecordingStudio.const_set(:Recording, previous) if previous
   end
 end

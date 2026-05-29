@@ -13,9 +13,10 @@ module RecordingStudioEmbeddable
     def embed_child_recording
       return unless defined?(RecordingStudio::Recording)
 
-      RecordingStudio::Recording
-        .where(parent_recording_id: id, recordable_type: "RecordingStudioEmbeddable::Embed", trashed_at: nil)
-        .first
+      scope = RecordingStudio::Recording
+              .where(parent_recording_id: id, recordable_type: "RecordingStudioEmbeddable::Embed")
+      scope = scope.where(trashed_at: nil) if RecordingStudioEmbeddable.recording_has_trashed_at?
+      scope.first
     end
 
     def ensure_embed!(actor: nil, **attributes)
