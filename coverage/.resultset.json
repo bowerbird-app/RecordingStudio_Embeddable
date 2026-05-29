@@ -1,7 +1,7 @@
 {
   "Unit Tests": {
     "coverage": {
-      "/workspace/lib/gem_template.rb": {
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable.rb": {
         "lines": [
           null,
           null,
@@ -10,248 +10,47 @@
           1,
           1,
           1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
           null,
           1,
           1,
+          1,
+          20,
+          null,
+          null,
           1,
           0,
           null,
           null,
           1,
-          0,
+          15,
           null,
           null,
           null
         ],
         "branches": {
-          "[:if, 0, 16, 6, 16, 42]": {
-            "[:then, 1, 16, 6, 16, 26]": 0,
-            "[:else, 2, 16, 6, 16, 42]": 0
+          "[:if, 0, 32, 6, 32, 42]": {
+            "[:then, 1, 32, 6, 32, 26]": 0,
+            "[:else, 2, 32, 6, 32, 42]": 0
           }
         }
       },
-      "/workspace/lib/gem_template/engine.rb": {
-        "lines": [
-          null,
-          null,
-          1,
-          1,
-          1,
-          null,
-          1,
-          1,
-          0,
-          null,
-          null,
-          1,
-          0,
-          null,
-          null,
-          1,
-          null,
-          1,
-          0,
-          null,
-          0,
-          null,
-          0,
-          0,
-          null,
-          0,
-          0,
-          null,
-          null,
-          0,
-          null,
-          null,
-          1,
-          0,
-          0,
-          null,
-          null,
-          1,
-          0,
-          null,
-          null,
-          null,
-          null,
-          1,
-          0,
-          null,
-          null,
-          1,
-          null,
-          0,
-          null,
-          null,
-          0,
-          null,
-          0,
-          null,
-          0,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          0,
-          0,
-          0,
-          0,
-          null,
-          null,
-          null,
-          0,
-          0,
-          0,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          0,
-          null,
-          null,
-          null,
-          1,
-          0,
-          null,
-          null,
-          null,
-          1,
-          0,
-          0,
-          null,
-          0,
-          0,
-          null,
-          0,
-          null,
-          null,
-          null,
-          null,
-          null,
-          1,
-          0,
-          0,
-          null,
-          0,
-          0,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
-        "branches": {
-          "[:unless, 0, 19, 8, 19, 28]": {
-            "[:else, 1, 19, 8, 19, 28]": 0,
-            "[:then, 2, 19, 8, 19, 14]": 0
-          },
-          "[:if, 3, 24, 10, 24, 36]": {
-            "[:then, 4, 24, 10, 24, 14]": 0,
-            "[:else, 5, 24, 10, 24, 36]": 0
-          },
-          "[:\"&.\", 6, 34, 30, 34, 53]": {
-            "[:then, 7, 34, 30, 34, 53]": 0,
-            "[:else, 8, 34, 30, 34, 53]": 0
-          },
-          "[:if, 9, 50, 6, 61, 9]": {
-            "[:then, 10, 52, 10, 58, 34]": 0,
-            "[:else, 11, 50, 6, 61, 9]": 0
-          },
-          "[:if, 12, 57, 10, 57, 75]": {
-            "[:then, 13, 57, 10, 57, 48]": 0,
-            "[:else, 14, 57, 10, 57, 75]": 0
-          },
-          "[:if, 15, 64, 6, 78, 9]": {
-            "[:then, 16, 65, 8, 77, 11]": 0,
-            "[:else, 17, 64, 6, 78, 9]": 0
-          },
-          "[:if, 18, 66, 8, 77, 11]": {
-            "[:then, 19, 67, 10, 67, 53]": 0,
-            "[:else, 20, 71, 12, 74, 36]": 0
-          },
-          "[:if, 21, 72, 12, 72, 81]": {
-            "[:then, 22, 72, 12, 72, 49]": 0,
-            "[:else, 23, 72, 12, 72, 81]": 0
-          },
-          "[:\"&.\", 24, 73, 54, 73, 64]": {
-            "[:then, 25, 73, 54, 73, 64]": 0,
-            "[:else, 26, 73, 54, 73, 64]": 0
-          },
-          "[:if, 27, 73, 12, 73, 64]": {
-            "[:then, 28, 73, 12, 73, 50]": 0,
-            "[:else, 29, 73, 12, 73, 64]": 0
-          },
-          "[:unless, 30, 92, 8, 92, 48]": {
-            "[:else, 31, 92, 8, 92, 48]": 0,
-            "[:then, 32, 92, 8, 92, 12]": 0
-          },
-          "[:if, 33, 95, 10, 95, 39]": {
-            "[:then, 34, 95, 10, 95, 14]": 0,
-            "[:else, 35, 95, 10, 95, 39]": 0
-          },
-          "[:unless, 36, 105, 8, 105, 52]": {
-            "[:else, 37, 105, 8, 105, 52]": 0,
-            "[:then, 38, 105, 8, 105, 12]": 0
-          }
-        }
-      },
-      "/workspace/lib/gem_template/configuration.rb": {
-        "lines": [
-          null,
-          null,
-          1,
-          null,
-          1,
-          1,
-          1,
-          1,
-          null,
-          1,
-          0,
-          0,
-          0,
-          0,
-          null,
-          null,
-          1,
-          null,
-          0,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          1,
-          0,
-          null,
-          0,
-          0,
-          0,
-          0,
-          null,
-          null,
-          null,
-          null
-        ],
-        "branches": {
-          "[:unless, 0, 27, 6, 27, 43]": {
-            "[:else, 1, 27, 6, 27, 43]": 0,
-            "[:then, 2, 27, 6, 27, 12]": 0
-          },
-          "[:if, 3, 32, 8, 32, 53]": {
-            "[:then, 4, 32, 8, 32, 30]": 0,
-            "[:else, 5, 32, 8, 32, 53]": 0
-          }
-        }
-      },
-      "/workspace/lib/gem_template/hooks.rb": {
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/hooks.rb": {
         "lines": [
           null,
           null,
@@ -280,11 +79,11 @@
           1,
           null,
           1,
-          0,
-          0,
-          0,
-          0,
-          0,
+          15,
+          15,
+          15,
+          15,
+          15,
           null,
           null,
           null,
@@ -571,7 +370,152 @@
           }
         }
       },
-      "/workspace/lib/gem_template/services/base_service.rb": {
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/configuration.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          1,
+          null,
+          1,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          15,
+          0,
+          null,
+          15,
+          15,
+          15,
+          null,
+          null,
+          1,
+          0,
+          null,
+          0,
+          0,
+          0,
+          null,
+          null,
+          null,
+          1,
+          null,
+          0,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "branches": {
+          "[:if, 0, 87, 27, 87, 78]": {
+            "[:then, 1, 87, 51, 87, 58]": 15,
+            "[:else, 2, 87, 61, 87, 78]": 0
+          },
+          "[:unless, 3, 92, 6, 92, 43]": {
+            "[:else, 4, 92, 6, 92, 43]": 0,
+            "[:then, 5, 92, 6, 92, 12]": 0
+          },
+          "[:if, 6, 96, 8, 96, 57]": {
+            "[:then, 7, 96, 8, 96, 34]": 0,
+            "[:else, 8, 96, 8, 96, 57]": 0
+          }
+        }
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/services/base_service.rb": {
         "lines": [
           null,
           null,
@@ -772,26 +716,43 @@
             "[:then, 20, 134, 8, 134, 14]": 0
           },
           "[:if, 21, 143, 8, 147, 11]": {
-            "[:then, 22, 144, 10, 144, 74]": 0,
+            "[:then, 22, 144, 10, 144, 88]": 0,
             "[:else, 23, 146, 10, 146, 17]": 0
           }
         }
       },
-      "/workspace/lib/gem_template/services/example_service.rb": {
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/capabilities/embeddable.rb": {
         "lines": [
           null,
           null,
           1,
           1,
+          1,
+          1,
           null,
-          null,
-          null,
-          null,
-          null,
-          null,
+          1,
+          2,
           null,
           null,
           1,
+          2,
+          null,
+          null,
+          1,
+          2,
+          2,
+          null,
+          null,
+          1,
+          2,
+          null,
+          null,
+          1,
+          0,
+          0,
+          0,
+          null,
+          null,
           1,
           0,
           null,
@@ -799,8 +760,44 @@
           1,
           null,
           1,
+          null,
           0,
           null,
+          0,
+          null,
+          0,
+          null,
+          null,
+          null,
+          null
+        ],
+        "branches": {
+          "[:unless, 0, 38, 8, 39, 68]": {
+            "[:else, 1, 38, 8, 39, 68]": 0,
+            "[:then, 2, 38, 8, 38, 70]": 0
+          },
+          "[:if, 3, 41, 8, 41, 78]": {
+            "[:then, 4, 41, 8, 41, 14]": 0,
+            "[:else, 5, 41, 8, 41, 78]": 0
+          }
+        }
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/recordable.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          null,
+          1,
+          0,
+          null,
+          0,
+          null,
+          null,
+          1,
+          1,
           0,
           0,
           null,
@@ -809,13 +806,1278 @@
           null
         ],
         "branches": {
-          "[:if, 0, 21, 8, 21, 82]": {
-            "[:then, 1, 21, 8, 21, 46]": 0,
-            "[:else, 2, 21, 8, 21, 82]": 0
+          "[:unless, 0, 9, 6, 10, 51]": {
+            "[:else, 1, 9, 6, 10, 51]": 0,
+            "[:then, 2, 9, 6, 9, 91]": 0
+          }
+        }
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/recording_methods.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          0,
+          null,
+          null,
+          null,
+          null,
+          1,
+          0,
+          0,
+          null,
+          0,
+          0,
+          0,
+          null,
+          0,
+          0,
+          0,
+          0,
+          null,
+          null,
+          0,
+          null,
+          null,
+          1,
+          0,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          0,
+          0,
+          null,
+          0,
+          0,
+          null,
+          null,
+          1,
+          0,
+          0,
+          null,
+          0,
+          0,
+          0,
+          0,
+          null,
+          0,
+          null,
+          null,
+          null,
+          null,
+          null,
+          1,
+          0,
+          0,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          null,
+          1,
+          0,
+          0,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          0,
+          null,
+          0,
+          null,
+          null,
+          null,
+          1,
+          null
+        ],
+        "branches": {
+          "[:\"&.\", 0, 6, 6, 6, 39]": {
+            "[:then, 1, 6, 6, 6, 39]": 0,
+            "[:else, 2, 6, 6, 6, 39]": 0
+          },
+          "[:unless, 3, 14, 6, 14, 56]": {
+            "[:else, 4, 14, 6, 14, 56]": 0,
+            "[:then, 5, 14, 6, 14, 12]": 0
+          },
+          "[:unless, 6, 22, 6, 22, 80]": {
+            "[:else, 7, 22, 6, 22, 80]": 0,
+            "[:then, 8, 22, 6, 22, 61]": 0
+          },
+          "[:if, 9, 23, 6, 23, 27]": {
+            "[:then, 10, 23, 6, 23, 18]": 0,
+            "[:else, 11, 23, 6, 23, 27]": 0
+          },
+          "[:if, 12, 27, 8, 27, 35]": {
+            "[:then, 13, 27, 8, 27, 23]": 0,
+            "[:else, 14, 27, 8, 27, 35]": 0
+          },
+          "[:\"&.\", 15, 44, 8, 44, 23]": {
+            "[:then, 16, 44, 8, 44, 23]": 0,
+            "[:else, 17, 44, 8, 44, 23]": 0
+          },
+          "[:\"&.\", 18, 48, 6, 48, 24]": {
+            "[:then, 19, 48, 6, 48, 24]": 0,
+            "[:else, 20, 48, 6, 48, 24]": 0
+          },
+          "[:unless, 21, 53, 6, 53, 24]": {
+            "[:else, 22, 53, 6, 53, 24]": 0,
+            "[:then, 23, 53, 6, 53, 12]": 0
+          },
+          "[:if, 24, 54, 6, 54, 32]": {
+            "[:then, 25, 54, 6, 54, 17]": 0,
+            "[:else, 26, 54, 6, 54, 32]": 0
+          },
+          "[:unless, 27, 62, 6, 62, 33]": {
+            "[:else, 28, 62, 6, 62, 33]": 0,
+            "[:then, 29, 62, 6, 62, 15]": 0
+          },
+          "[:\"&.\", 30, 66, 15, 66, 28]": {
+            "[:then, 31, 66, 15, 66, 28]": 0,
+            "[:else, 32, 66, 15, 66, 28]": 0
+          },
+          "[:if, 33, 93, 6, 93, 101]": {
+            "[:then, 34, 93, 6, 93, 66]": 0,
+            "[:else, 35, 93, 6, 93, 101]": 0
+          },
+          "[:unless, 36, 98, 6, 98, 44]": {
+            "[:else, 37, 98, 6, 98, 44]": 0,
+            "[:then, 38, 98, 6, 98, 12]": 0
+          }
+        }
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/renderer.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          null,
+          1,
+          2,
+          2,
+          2,
+          null,
+          1,
+          null,
+          1,
+          0,
+          null,
+          null,
+          null,
+          null,
+          null,
+          1,
+          1,
+          null,
+          1,
+          1,
+          null,
+          1,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          null,
+          1,
+          2,
+          2,
+          null,
+          null,
+          1,
+          2,
+          2,
+          null,
+          null,
+          1,
+          2,
+          2,
+          2,
+          2,
+          1,
+          null,
+          3,
+          2,
+          null,
+          null,
+          1,
+          3,
+          null,
+          0,
+          null,
+          1,
+          null,
+          2,
+          null,
+          null,
+          null,
+          1,
+          1,
+          1,
+          null,
+          0,
+          null,
+          0,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          1,
+          0,
+          null,
+          0,
+          null,
+          null,
+          null
+        ],
+        "branches": {
+          "[:if, 0, 10, 6, 10, 68]": {
+            "[:then, 1, 10, 6, 10, 34]": 1,
+            "[:else, 2, 10, 6, 10, 68]": 1
+          },
+          "[:if, 3, 14, 6, 20, 9]": {
+            "[:then, 4, 15, 8, 19, 9]": 0,
+            "[:else, 5, 14, 6, 20, 9]": 1
+          },
+          "[:\"&.\", 6, 16, 27, 16, 53]": {
+            "[:then, 7, 16, 27, 16, 53]": 0,
+            "[:else, 8, 16, 27, 16, 53]": 0
+          },
+          "[:\"&.\", 9, 17, 28, 17, 49]": {
+            "[:then, 10, 17, 28, 17, 49]": 0,
+            "[:else, 11, 17, 28, 17, 49]": 0
+          },
+          "[:\"&.\", 12, 17, 28, 17, 56]": {
+            "[:then, 13, 17, 28, 17, 56]": 0,
+            "[:else, 14, 17, 28, 17, 56]": 0
+          },
+          "[:if, 15, 22, 6, 22, 64]": {
+            "[:then, 16, 22, 6, 22, 32]": 0,
+            "[:else, 17, 22, 6, 22, 64]": 1
+          },
+          "[:if, 18, 25, 6, 25, 111]": {
+            "[:then, 19, 25, 6, 25, 34]": 0,
+            "[:else, 20, 25, 6, 25, 111]": 1
+          },
+          "[:if, 21, 36, 19, 36, 82]": {
+            "[:then, 22, 36, 56, 36, 76]": 2,
+            "[:else, 23, 36, 79, 36, 82]": 0
+          },
+          "[:\"&.\", 24, 41, 14, 41, 31]": {
+            "[:then, 25, 41, 14, 41, 31]": 2,
+            "[:else, 26, 41, 14, 41, 31]": 0
+          },
+          "[:if, 27, 42, 6, 42, 118]": {
+            "[:then, 28, 42, 64, 42, 113]": 1,
+            "[:else, 29, 42, 116, 42, 118]": 1
+          },
+          "[:\"&.\", 30, 46, 14, 46, 31]": {
+            "[:then, 31, 46, 14, 46, 31]": 2,
+            "[:else, 32, 46, 14, 46, 31]": 0
+          },
+          "[:if, 33, 48, 6, 48, 120]": {
+            "[:then, 34, 48, 6, 48, 67]": 0,
+            "[:else, 35, 48, 6, 48, 120]": 2
+          },
+          "[:if, 36, 49, 6, 51, 9]": {
+            "[:then, 37, 50, 8, 50, 74]": 1,
+            "[:else, 38, 49, 6, 51, 9]": 1
+          },
+          "[:if, 39, 53, 6, 53, 64]": {
+            "[:then, 40, 53, 41, 53, 59]": 1,
+            "[:else, 41, 53, 62, 53, 64]": 1
+          },
+          "[:case, 42, 57, 6, 64, 9]": {
+            "[:when, 43, 59, 8, 59, 31]": 0,
+            "[:when, 44, 61, 8, 61, 35]": 1,
+            "[:else, 45, 63, 8, 63, 10]": 2
+          },
+          "[:\"&.\", 46, 68, 19, 68, 40]": {
+            "[:then, 47, 68, 19, 68, 40]": 1,
+            "[:else, 48, 68, 19, 68, 40]": 0
+          },
+          "[:unless, 49, 69, 6, 69, 58]": {
+            "[:else, 50, 69, 6, 69, 58]": 0,
+            "[:then, 51, 69, 6, 69, 15]": 1
+          },
+          "[:unless, 52, 81, 6, 81, 58]": {
+            "[:else, 53, 81, 6, 81, 58]": 0,
+            "[:then, 54, 81, 6, 81, 18]": 0
+          }
+        }
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/security/domain_policy.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          1,
+          null,
+          1,
+          9,
+          9,
+          9,
+          9,
+          null,
+          9,
+          null,
+          null,
+          1,
+          4,
+          4,
+          4,
+          4,
+          null,
+          null,
+          1,
+          2,
+          2,
+          2,
+          1,
+          1,
+          null,
+          1,
+          null,
+          null,
+          1,
+          1,
+          1,
+          1,
+          null,
+          2,
+          null,
+          null,
+          1,
+          null,
+          1,
+          null,
+          1,
+          5,
+          2,
+          2,
+          null,
+          0,
+          null,
+          null,
+          null,
+          1,
+          6,
+          6,
+          6,
+          null,
+          6,
+          6,
+          6,
+          null,
+          null,
+          1,
+          2,
+          2,
+          2,
+          null,
+          2,
+          2,
+          2,
+          null,
+          null,
+          1,
+          3,
+          3,
+          null,
+          0,
+          null,
+          null,
+          1,
+          8,
+          null,
+          null,
+          1,
+          8,
+          null,
+          null,
+          1,
+          1,
+          null,
+          0,
+          null,
+          null,
+          1,
+          40,
+          null,
+          null,
+          1,
+          3,
+          3,
+          1,
+          null,
+          2,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "branches": {
+          "[:unless, 0, 10, 8, 10, 56]": {
+            "[:else, 1, 10, 8, 10, 56]": 9,
+            "[:then, 2, 10, 8, 10, 20]": 0
+          },
+          "[:if, 3, 11, 8, 11, 71]": {
+            "[:then, 4, 11, 8, 11, 20]": 0,
+            "[:else, 5, 11, 8, 11, 71]": 9
+          },
+          "[:if, 6, 12, 8, 12, 98]": {
+            "[:then, 7, 12, 8, 12, 20]": 0,
+            "[:else, 8, 12, 8, 12, 98]": 9
+          },
+          "[:unless, 9, 25, 8, 25, 49]": {
+            "[:else, 10, 25, 8, 25, 49]": 2,
+            "[:then, 11, 25, 8, 25, 20]": 0
+          },
+          "[:if, 12, 26, 8, 26, 34]": {
+            "[:then, 13, 26, 8, 26, 19]": 0,
+            "[:else, 14, 26, 8, 26, 34]": 2
+          },
+          "[:if, 15, 27, 8, 27, 59]": {
+            "[:then, 16, 27, 8, 27, 20]": 1,
+            "[:else, 17, 27, 8, 27, 59]": 1
+          },
+          "[:if, 18, 28, 8, 28, 105]": {
+            "[:then, 19, 28, 8, 28, 19]": 0,
+            "[:else, 20, 28, 8, 28, 105]": 1
+          },
+          "[:if, 21, 29, 8, 29, 45]": {
+            "[:then, 22, 29, 8, 29, 19]": 0,
+            "[:else, 23, 29, 8, 29, 45]": 1
+          },
+          "[:unless, 24, 36, 8, 36, 54]": {
+            "[:else, 25, 36, 8, 36, 54]": 1,
+            "[:then, 26, 36, 8, 36, 25]": 0
+          },
+          "[:if, 27, 37, 8, 37, 98]": {
+            "[:then, 28, 37, 8, 37, 20]": 0,
+            "[:else, 29, 37, 8, 37, 98]": 1
+          },
+          "[:if, 30, 49, 10, 49, 68]": {
+            "[:then, 31, 49, 27, 49, 62]": 2,
+            "[:else, 32, 49, 65, 49, 68]": 0
+          },
+          "[:if, 33, 57, 8, 59, 11]": {
+            "[:then, 34, 58, 10, 58, 109]": 6,
+            "[:else, 35, 57, 8, 59, 11]": 0
+          },
+          "[:if, 36, 60, 8, 60, 108]": {
+            "[:then, 37, 60, 8, 60, 77]": 6,
+            "[:else, 38, 60, 8, 60, 108]": 0
+          },
+          "[:if, 39, 67, 8, 69, 11]": {
+            "[:then, 40, 68, 10, 68, 109]": 2,
+            "[:else, 41, 67, 8, 69, 11]": 0
+          },
+          "[:if, 42, 70, 8, 70, 108]": {
+            "[:then, 43, 70, 8, 70, 77]": 2,
+            "[:else, 44, 70, 8, 70, 108]": 0
+          },
+          "[:if, 45, 76, 8, 76, 79]": {
+            "[:then, 46, 76, 8, 76, 19]": 0,
+            "[:else, 47, 76, 8, 76, 79]": 3
+          },
+          "[:if, 48, 77, 8, 77, 43]": {
+            "[:then, 49, 77, 8, 77, 19]": 3,
+            "[:else, 50, 77, 8, 77, 43]": 0
+          },
+          "[:if, 51, 91, 8, 91, 105]": {
+            "[:then, 52, 91, 8, 91, 77]": 1,
+            "[:else, 53, 91, 8, 91, 105]": 0
+          },
+          "[:if, 54, 102, 10, 106, 13]": {
+            "[:then, 55, 103, 12, 103, 98]": 1,
+            "[:else, 56, 105, 12, 105, 26]": 2
+          }
+        }
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/security/public_access.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          1,
+          null,
+          1,
+          1,
+          null,
+          null,
+          1,
+          1,
+          1,
+          1,
+          1,
+          null,
+          null,
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          null,
+          0,
+          null,
+          null,
+          1,
+          null,
+          1,
+          null,
+          1,
+          1,
+          null,
+          null,
+          1,
+          1,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          1,
+          0,
+          0,
+          null,
+          0,
+          0,
+          0,
+          null,
+          0,
+          null,
+          null,
+          1,
+          1,
+          null,
+          null,
+          null,
+          null
+        ],
+        "branches": {
+          "[:unless, 0, 20, 8, 20, 111]": {
+            "[:else, 1, 20, 8, 20, 111]": 1,
+            "[:then, 2, 20, 8, 20, 42]": 0
+          },
+          "[:\"&.\", 3, 21, 51, 21, 66]": {
+            "[:then, 4, 21, 51, 21, 66]": 1,
+            "[:else, 5, 21, 51, 21, 66]": 0
+          },
+          "[:unless, 6, 21, 8, 21, 66]": {
+            "[:else, 7, 21, 8, 21, 66]": 1,
+            "[:then, 8, 21, 8, 21, 43]": 0
+          },
+          "[:unless, 9, 22, 8, 22, 68]": {
+            "[:else, 10, 22, 8, 22, 68]": 1,
+            "[:then, 11, 22, 8, 22, 51]": 0
+          },
+          "[:unless, 12, 23, 8, 23, 78]": {
+            "[:else, 13, 23, 8, 23, 78]": 0,
+            "[:then, 14, 23, 8, 23, 48]": 1
+          },
+          "[:unless, 15, 24, 8, 24, 73]": {
+            "[:else, 16, 24, 8, 24, 73]": 0,
+            "[:then, 17, 24, 8, 24, 45]": 0
+          },
+          "[:unless, 18, 25, 8, 25, 78]": {
+            "[:else, 19, 25, 8, 25, 78]": 0,
+            "[:then, 20, 25, 8, 25, 48]": 0
+          },
+          "[:unless, 21, 49, 8, 49, 35]": {
+            "[:else, 22, 49, 8, 49, 35]": 0,
+            "[:then, 23, 49, 8, 49, 19]": 0
+          },
+          "[:if, 24, 51, 8, 51, 95]": {
+            "[:then, 25, 51, 8, 51, 47]": 0,
+            "[:else, 26, 51, 8, 51, 95]": 0
+          },
+          "[:if, 27, 52, 8, 52, 93]": {
+            "[:then, 28, 52, 8, 52, 46]": 0,
+            "[:else, 29, 52, 8, 52, 93]": 0
+          },
+          "[:if, 30, 53, 8, 53, 109]": {
+            "[:then, 31, 53, 8, 53, 54]": 0,
+            "[:else, 32, 53, 8, 53, 109]": 0
+          }
+        }
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/rate_limiters/null.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          null,
+          null
+        ],
+        "branches": {}
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/rate_limiters/rails_cache.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          1,
+          0,
+          null,
+          0,
+          0,
+          0,
+          null,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          null,
+          null
+        ],
+        "branches": {
+          "[:unless, 0, 7, 8, 7, 86]": {
+            "[:else, 1, 7, 8, 7, 86]": 0,
+            "[:then, 2, 7, 8, 7, 19]": 0
+          }
+        }
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/rate_limiters/redis.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          null,
+          0,
+          null,
+          0,
+          0,
+          0,
+          0,
+          null,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          null,
+          null
+        ],
+        "branches": {
+          "[:if, 0, 8, 8, 10, 11]": {
+            "[:then, 1, 9, 10, 9, 72]": 0,
+            "[:else, 2, 8, 8, 10, 11]": 0
+          },
+          "[:unless, 3, 11, 8, 11, 51]": {
+            "[:else, 4, 11, 8, 11, 51]": 0,
+            "[:then, 5, 11, 8, 11, 19]": 0
+          },
+          "[:if, 6, 15, 8, 15, 74]": {
+            "[:then, 7, 15, 8, 15, 44]": 0,
+            "[:else, 8, 15, 8, 15, 74]": 0
+          }
+        }
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/cache_policy.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          null,
+          1,
+          null,
+          null,
+          null
+        ],
+        "branches": {
+          "[:if, 0, 7, 6, 7, 85]": {
+            "[:then, 1, 7, 6, 7, 52]": 0,
+            "[:else, 2, 7, 6, 7, 85]": 1
+          },
+          "[:unless, 3, 8, 6, 8, 58]": {
+            "[:else, 4, 8, 6, 8, 58]": 1,
+            "[:then, 5, 8, 6, 8, 21]": 0
+          }
+        }
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/services/normalize_payload.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          1,
+          null,
+          1,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          1,
+          1,
+          1,
+          1,
+          null,
+          null,
+          1,
+          1,
+          null,
+          null,
+          null,
+          null
+        ],
+        "branches": {
+          "[:if, 0, 26, 8, 26, 60]": {
+            "[:then, 1, 26, 37, 26, 49]": 1,
+            "[:else, 2, 26, 52, 26, 60]": 0
+          }
+        }
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/services/bot_detector.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          1,
+          null,
+          1,
+          0,
+          null,
+          null,
+          null,
+          null
+        ],
+        "branches": {}
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/services/log_view.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          1,
+          null,
+          0,
+          0,
+          0,
+          0,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          0,
+          0,
+          null,
+          0,
+          null,
+          null,
+          1,
+          1,
+          null,
+          1,
+          0,
+          1,
+          0,
+          null,
+          1,
+          null,
+          1,
+          null,
+          null,
+          1,
+          0,
+          null,
+          0,
+          null,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          null,
+          null
+        ],
+        "branches": {
+          "[:if, 0, 40, 8, 42, 11]": {
+            "[:then, 1, 41, 10, 41, 91]": 0,
+            "[:else, 2, 40, 8, 42, 11]": 0
+          },
+          "[:\"&.\", 3, 9, 27, 9, 50]": {
+            "[:then, 4, 9, 27, 9, 50]": 0,
+            "[:else, 5, 9, 27, 9, 50]": 0
+          },
+          "[:if, 6, 10, 8, 10, 101]": {
+            "[:then, 7, 10, 8, 10, 56]": 0,
+            "[:else, 8, 10, 8, 10, 101]": 0
+          },
+          "[:\"&.\", 9, 10, 28, 10, 56]": {
+            "[:then, 10, 10, 28, 10, 56]": 0,
+            "[:else, 11, 10, 28, 10, 56]": 0
+          },
+          "[:\"&.\", 12, 13, 30, 13, 46]": {
+            "[:then, 13, 13, 30, 13, 46]": 0,
+            "[:else, 14, 13, 30, 13, 46]": 0
+          },
+          "[:\"&.\", 15, 13, 30, 13, 50]": {
+            "[:then, 16, 13, 30, 13, 50]": 0,
+            "[:else, 17, 13, 30, 13, 50]": 0
+          },
+          "[:\"&.\", 18, 14, 31, 14, 51]": {
+            "[:then, 19, 14, 31, 14, 51]": 0,
+            "[:else, 20, 14, 31, 14, 51]": 0
+          },
+          "[:\"&.\", 21, 15, 34, 15, 58]": {
+            "[:then, 22, 15, 34, 15, 58]": 0,
+            "[:else, 23, 15, 34, 15, 58]": 0
+          },
+          "[:\"&.\", 24, 15, 34, 15, 64]": {
+            "[:then, 25, 15, 34, 15, 64]": 0,
+            "[:else, 26, 15, 34, 15, 64]": 0
+          },
+          "[:\"&.\", 27, 16, 32, 16, 53]": {
+            "[:then, 28, 16, 32, 16, 53]": 0,
+            "[:else, 29, 16, 32, 16, 53]": 0
+          },
+          "[:\"&.\", 30, 17, 31, 17, 43]": {
+            "[:then, 31, 17, 31, 17, 43]": 0,
+            "[:else, 32, 17, 31, 17, 43]": 0
+          },
+          "[:\"&.\", 33, 18, 49, 18, 74]": {
+            "[:then, 34, 18, 49, 18, 74]": 0,
+            "[:else, 35, 18, 49, 18, 74]": 0
+          },
+          "[:\"&.\", 36, 19, 24, 19, 55]": {
+            "[:then, 37, 19, 24, 19, 55]": 0,
+            "[:else, 38, 19, 24, 19, 55]": 0
+          },
+          "[:if, 39, 47, 8, 47, 30]": {
+            "[:then, 40, 47, 8, 47, 14]": 0,
+            "[:else, 41, 47, 8, 47, 30]": 1
+          },
+          "[:if, 42, 49, 17, 55, 20]": {
+            "[:then, 43, 50, 19, 50, 72]": 0,
+            "[:else, 44, 51, 17, 54, 48]": 1
+          },
+          "[:if, 45, 51, 17, 54, 48]": {
+            "[:then, 46, 52, 19, 52, 52]": 0,
+            "[:else, 47, 54, 19, 54, 48]": 1
+          },
+          "[:if, 48, 60, 8, 60, 30]": {
+            "[:then, 49, 60, 8, 60, 14]": 0,
+            "[:else, 50, 60, 8, 60, 30]": 0
+          },
+          "[:\"&.\", 51, 62, 8, 62, 44]": {
+            "[:then, 52, 62, 8, 62, 44]": 0,
+            "[:else, 53, 62, 8, 62, 44]": 0
+          },
+          "[:if, 54, 68, 8, 68, 85]": {
+            "[:then, 55, 68, 74, 68, 79]": 0,
+            "[:else, 56, 68, 8, 68, 85]": 0
+          }
+        }
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/services/capture_view.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          1,
+          null,
+          0,
+          null,
+          0,
+          0,
+          0,
+          null,
+          null,
+          0,
+          null,
+          null,
+          null,
+          0,
+          0,
+          null,
+          0,
+          null,
+          null,
+          null,
+          null
+        ],
+        "branches": {
+          "[:if, 0, 19, 8, 21, 11]": {
+            "[:then, 1, 20, 10, 20, 91]": 0,
+            "[:else, 2, 19, 8, 21, 11]": 0
+          },
+          "[:unless, 3, 8, 8, 8, 82]": {
+            "[:else, 4, 8, 8, 8, 82]": 0,
+            "[:then, 5, 8, 8, 8, 14]": 0
+          },
+          "[:if, 6, 11, 8, 17, 11]": {
+            "[:then, 7, 12, 10, 13, 85]": 0,
+            "[:else, 8, 15, 10, 16, 92]": 0
+          },
+          "[:\"&.\", 9, 12, 62, 12, 71]": {
+            "[:then, 10, 12, 62, 12, 71]": 0,
+            "[:else, 11, 12, 62, 12, 71]": 0
+          }
+        }
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/lib/recording_studio_embeddable/engine.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          null,
+          1,
+          0,
+          null,
+          0,
+          0,
+          null,
+          0,
+          null,
+          null,
+          null,
+          0,
+          null,
+          0,
+          0,
+          null,
+          null,
+          1,
+          0,
+          0,
+          null,
+          0,
+          null,
+          0,
+          0,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "branches": {
+          "[:if, 0, 8, 6, 15, 9]": {
+            "[:then, 1, 10, 10, 13, 13]": 0,
+            "[:else, 2, 8, 6, 15, 9]": 0
+          },
+          "[:if, 3, 11, 10, 11, 89]": {
+            "[:then, 4, 11, 10, 11, 62]": 0,
+            "[:else, 5, 11, 10, 11, 89]": 0
+          },
+          "[:unless, 6, 17, 6, 17, 102]": {
+            "[:else, 7, 17, 6, 17, 102]": 0,
+            "[:then, 8, 17, 6, 17, 10]": 0
+          },
+          "[:if, 9, 20, 53, 20, 95]": {
+            "[:then, 10, 20, 79, 20, 88]": 0,
+            "[:else, 11, 20, 91, 20, 95]": 0
+          },
+          "[:unless, 12, 25, 8, 25, 48]": {
+            "[:else, 13, 25, 8, 25, 48]": 0,
+            "[:then, 14, 25, 8, 25, 12]": 0
+          },
+          "[:if, 15, 29, 8, 31, 11]": {
+            "[:then, 16, 30, 10, 30, 88]": 0,
+            "[:else, 17, 29, 8, 31, 11]": 0
+          }
+        }
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/app/models/recording_studio_embeddable/application_record.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          null,
+          null
+        ],
+        "branches": {}
+      },
+      "/tmp/workspace/bowerbird-app/RecordingStudio_Embeddable/app/models/recording_studio_embeddable/embed.rb": {
+        "lines": [
+          null,
+          null,
+          1,
+          1,
+          1,
+          null,
+          1,
+          null,
+          1,
+          null,
+          1,
+          1,
+          1,
+          null,
+          1,
+          null,
+          1,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          0,
+          0,
+          0,
+          null,
+          0,
+          0,
+          null,
+          null,
+          0,
+          0,
+          0,
+          null,
+          0,
+          0,
+          0,
+          null,
+          null,
+          1,
+          0,
+          0,
+          null,
+          0,
+          null,
+          null,
+          null,
+          1,
+          0,
+          null,
+          null,
+          1,
+          1,
+          1,
+          null,
+          null,
+          null,
+          null
+        ],
+        "branches": {
+          "[:unless, 0, 36, 6, 36, 56]": {
+            "[:else, 1, 36, 6, 36, 56]": 0,
+            "[:then, 2, 36, 6, 36, 12]": 0
+          },
+          "[:if, 3, 42, 6, 42, 77]": {
+            "[:then, 4, 42, 6, 42, 33]": 0,
+            "[:else, 5, 42, 6, 42, 77]": 0
+          },
+          "[:\"&.\", 6, 42, 6, 42, 33]": {
+            "[:then, 7, 42, 6, 42, 33]": 0,
+            "[:else, 8, 42, 6, 42, 33]": 0
+          },
+          "[:if, 9, 73, 6, 73, 60]": {
+            "[:then, 10, 73, 6, 73, 44]": 0,
+            "[:else, 11, 73, 6, 73, 60]": 0
+          },
+          "[:if, 12, 77, 6, 77, 42]": {
+            "[:then, 13, 77, 6, 77, 26]": 0,
+            "[:else, 14, 77, 6, 77, 42]": 0
+          },
+          "[:if, 15, 78, 6, 80, 9]": {
+            "[:then, 16, 79, 8, 79, 99]": 0,
+            "[:else, 17, 78, 6, 80, 9]": 0
+          },
+          "[:if, 18, 81, 6, 83, 9]": {
+            "[:then, 19, 82, 8, 82, 99]": 0,
+            "[:else, 20, 81, 6, 83, 9]": 0
+          },
+          "[:if, 21, 84, 6, 85, 81]": {
+            "[:then, 22, 84, 6, 84, 92]": 0,
+            "[:else, 23, 84, 6, 85, 81]": 0
+          },
+          "[:if, 24, 86, 6, 88, 9]": {
+            "[:then, 25, 87, 8, 87, 76]": 0,
+            "[:else, 26, 86, 6, 88, 9]": 0
+          },
+          "[:if, 27, 89, 6, 89, 67]": {
+            "[:then, 28, 89, 6, 89, 32]": 0,
+            "[:else, 29, 89, 6, 89, 67]": 0
+          },
+          "[:if, 30, 90, 6, 90, 71]": {
+            "[:then, 31, 90, 6, 90, 34]": 0,
+            "[:else, 32, 90, 6, 90, 71]": 0
+          },
+          "[:if, 33, 91, 6, 91, 55]": {
+            "[:then, 34, 91, 6, 91, 26]": 0,
+            "[:else, 35, 91, 6, 91, 55]": 0
+          },
+          "[:if, 36, 96, 8, 96, 60]": {
+            "[:then, 37, 96, 8, 96, 12]": 0,
+            "[:else, 38, 96, 8, 96, 60]": 0
           }
         }
       }
     },
-    "timestamp": 1778125833
+    "timestamp": 1780027644
   }
 }
