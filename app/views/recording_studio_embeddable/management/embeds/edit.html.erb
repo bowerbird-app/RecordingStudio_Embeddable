@@ -1,0 +1,36 @@
+<h1>Embed settings</h1>
+
+<%= form_with model: @embed, url: management_embed_path(@embed), method: :patch do |form| %>
+  <% if @embed.errors.any? %>
+    <div role="alert"><%= @embed.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <p>
+    <%= form.label :enabled %>
+    <%= form.check_box :enabled %>
+  </p>
+
+  <p>
+    <%= form.label :allowed_embedder_domains, "Allowed domains (one per line)" %><br>
+    <textarea name="embed[allowed_embedder_domains][]" rows="4" cols="60"><%= @embed.allowed_domains.join("\n") %></textarea>
+  </p>
+
+  <p>
+    <%= form.label :blocked_embedder_domains, "Blocked domains (one per line)" %><br>
+    <textarea name="embed[blocked_embedder_domains][]" rows="4" cols="60"><%= @embed.blocked_domains.join("\n") %></textarea>
+  </p>
+
+  <%= form.submit "Save" %>
+<% end %>
+
+<h2>Embed code</h2>
+<textarea readonly rows="5" cols="100"><%= @embed.parent_recording&.embed_code(host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %></textarea>
+
+<h2>Summary</h2>
+<% summary = RecordingStudioEmbeddable::View.summary_for(@embed) %>
+<ul>
+  <li>Total: <%= summary[:total] %></li>
+  <li>Humans: <%= summary[:humans] %></li>
+  <li>Bots: <%= summary[:bots] %></li>
+  <li>Unique visitors: <%= summary[:unique_visitors] %></li>
+</ul>

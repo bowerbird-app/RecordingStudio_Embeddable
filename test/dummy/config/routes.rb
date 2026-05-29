@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   # Keep legacy links working by redirecting the base path to the app home.
   get "/recording_studio", to: redirect("/"), as: nil
   mount RecordingStudio::Engine, at: "/recording_studio"
+  mount RecordingStudioEmbeddable::Engine, at: "/recording_studio_embeddable"
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -22,6 +23,7 @@ Rails.application.routes.draw do
   get "docs/recordings_tree", to: "docs#recordings_tree", as: :docs_recordings_tree
   get "docs/gem_views", to: "docs#gem_views", as: :docs_gem_views
   get "docs/methods", to: "docs#methods", as: :docs_methods
+  get "pages/:id/embed", to: "pages#embed", as: :page_embed
 
   # Defines the root path route ("/")
   root "home#index"

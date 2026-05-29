@@ -1,0 +1,16 @@
+default: &default
+  allowed_embedder_domains: []
+  blocked_embedder_domains: []
+  require_publishable: true
+  rate_limiter: rails_cache
+  rate_limit: 120
+  rate_limit_window: 60
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default

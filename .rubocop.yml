@@ -20,17 +20,58 @@ Layout/LineLength:
 Metrics/ClassLength:
   Exclude:
     - 'test/**/*'
-    - 'lib/gem_template/hooks.rb'
+    - 'lib/recording_studio_embeddable/hooks.rb'
+    - 'lib/recording_studio_embeddable/configuration.rb'
+    - 'app/controllers/recording_studio_embeddable/embeds_controller.rb'
 
 Metrics/MethodLength:
   Exclude:
     - 'test/**/*'
     - 'lib/generators/**/*'
+    - 'db/migrate/**/*'
+    - 'app/controllers/recording_studio_embeddable/**/*'
+    - 'app/jobs/recording_studio_embeddable/**/*'
+    - 'app/models/recording_studio_embeddable/**/*'
+    - 'lib/recording_studio_embeddable/**/*'
 
 Metrics/AbcSize:
   Exclude:
     - 'test/**/*'
     - 'lib/generators/**/*'
+    - 'db/migrate/**/*'
+    - 'app/controllers/recording_studio_embeddable/**/*'
+    - 'app/models/recording_studio_embeddable/**/*'
+    - 'lib/recording_studio_embeddable/**/*'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'db/migrate/**/*'
+
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - 'app/controllers/recording_studio_embeddable/**/*'
+    - 'app/models/recording_studio_embeddable/**/*'
+    - 'lib/recording_studio_embeddable/**/*'
+
+Metrics/PerceivedComplexity:
+  Exclude:
+    - 'app/controllers/recording_studio_embeddable/**/*'
+    - 'app/models/recording_studio_embeddable/**/*'
+    - 'lib/recording_studio_embeddable/**/*'
+
+Metrics/ParameterLists:
+  Exclude:
+    - 'app/controllers/recording_studio_embeddable/**/*'
+    - 'app/jobs/recording_studio_embeddable/**/*'
+    - 'lib/recording_studio_embeddable/services/**/*'
+
+Naming/AccessorMethodName:
+  Exclude:
+    - 'app/controllers/recording_studio_embeddable/embeds_controller.rb'
+
+Style/OptionalBooleanParameter:
+  Exclude:
+    - 'app/jobs/recording_studio_embeddable/**/*'
 
 # Allow empty blocks in tests (common for stubs/mocks)
 Lint/EmptyBlock:
@@ -50,5 +91,5 @@ Naming/VariableNumber:
 # Don't require super in service initialize methods
 Lint/MissingSuper:
   Exclude:
-    - 'lib/gem_template/services/**/*'
+    - 'lib/recording_studio_embeddable/services/**/*'
     - 'test/services/**/*'

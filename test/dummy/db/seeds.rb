@@ -25,11 +25,12 @@ folder_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
   recordable: folder
 )
 
-RecordingStudio::Recording.unscoped.find_or_create_by!(
+page_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
   root_recording_id: root_recording.id,
   parent_recording_id: folder_recording.id,
   recordable: page
 )
+page_recording.ensure_embed!(enabled: true, allowed_embedder_domains: ["example.com"]) if page_recording.respond_to?(:ensure_embed!)
 
 # Grant root-level admin access to the admin user
 Current.actor = user
@@ -43,3 +44,4 @@ RecordingStudio::Recording.unscoped.find_or_create_by!(
 puts "Seeded: admin@admin.com / Password"
 puts "Seeded: Workspace '#{workspace.name}' with root recording ##{root_recording.id}"
 puts "Seeded: Folder '#{folder.name}' and page '#{page.title}'"
+puts "Seeded: Page public embed at /recording_studio_embeddable/embeds/#{page_recording.embed&.token}" if page_recording.respond_to?(:embed)
