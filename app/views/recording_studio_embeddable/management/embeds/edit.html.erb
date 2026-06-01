@@ -4,52 +4,23 @@
 <% summary = RecordingStudioEmbeddable::View.summary_for(@embed) %>
 
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
+  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) %>
+
   <%= render FlatPack::PageTitle::Component.new(
     title: "Embed",
     subtitle: recordable_title,
-    variant: :h1
+    variant: :h1,
+    large_subtitle: true
   ) %>
 
   <%= form_with model: @embed, url: management_embed_path(@embed), method: :patch, class: "space-y-6" do |_form| %>
-    <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
-      <% card.body do %>
-        <div class="space-y-4">
-          <% if @embed.errors.any? %>
-            <p role="alert" class="text-sm text-red-700"><%= @embed.errors.full_messages.to_sentence %></p>
-          <% end %>
-
-          <%= render FlatPack::Switch::Component.new(
-            name: "embed[enabled]",
-            label: "Enabled",
-            checked: @embed.enabled
-          ) %>
-
-          <%= render FlatPack::TextArea::Component.new(
-            name: "embed[allowed_embedder_domains_text]",
-            label: "Allowed domains (one per line)",
-            value: @embed.allowed_domains.join("\n"),
-            rows: 6,
-            placeholder: "example.com"
-          ) %>
-
-          <%= render FlatPack::TextArea::Component.new(
-            name: "embed[blocked_embedder_domains_text]",
-            label: "Blocked domains (one per line)",
-            value: @embed.blocked_domains.join("\n"),
-            rows: 6,
-            placeholder: "bad-domain.example"
-          ) %>
-
-          <%= render FlatPack::Button::Component.new(
-            text: "Save changes",
-            style: :primary,
-            size: :md,
-            type: "submit"
-          ) %>
-        </div>
-      <% end %>
-    <% end %>
-  <% end %>
+    <div class="embed-enabled-switch">
+      <%= render FlatPack::Switch::Component.new(
+        name: "embed[enabled]",
+        label: "Enabled",
+        checked: @embed.enabled
+      ) %>
+    </div>
 
   <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
     <% card.body do %>
@@ -73,4 +44,48 @@
       </div>
     <% end %>
   <% end %>
+
+    <% if @embed.errors.any? %>
+      <p role="alert" class="text-sm text-red-700"><%= @embed.errors.full_messages.to_sentence %></p>
+    <% end %>
+
+    <%= render FlatPack::Accordion::Component.new do |accordion| %>
+      <% accordion.item(id: "embed-domain-controls", title: "Domain controls") do %>
+        <div class="space-y-4">
+          <%= render FlatPack::TextArea::Component.new(
+            name: "embed[allowed_embedder_domains_text]",
+            label: "Allowed domains (one per line)",
+            value: @embed.allowed_domains.join("\n"),
+            rows: 6,
+            placeholder: "example.com"
+          ) %>
+
+          <%= render FlatPack::TextArea::Component.new(
+            name: "embed[blocked_embedder_domains_text]",
+            label: "Blocked domains (one per line)",
+            value: @embed.blocked_domains.join("\n"),
+            rows: 6,
+            placeholder: "bad-domain.example"
+          ) %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <%= render FlatPack::Button::Component.new(
+      text: "Save changes",
+      style: :primary,
+      size: :md,
+      type: "submit"
+    ) %>
+  <% end %>
 </div>
+
+<style>
+  .embed-enabled-switch input.peer:not(:checked) + [role="switch"] {
+    background-color: var(--switch-track-background-color) !important;
+  }
+
+  .embed-enabled-switch input.peer:checked + [role="switch"] {
+    background-color: var(--switch-track-checked-background-color) !important;
+  }
+</style>
