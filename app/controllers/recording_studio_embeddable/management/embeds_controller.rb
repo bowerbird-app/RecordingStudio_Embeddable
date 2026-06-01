@@ -41,13 +41,21 @@ module RecordingStudioEmbeddable
 
       def apply_embed_params
         permitted = embed_params.to_h.symbolize_keys
+        enabled_param = params.dig(:embed, :enabled)
+        permitted[:enabled] = if enabled_param.nil?
+                                false
+                              else
+                                ActiveModel::Type::Boolean.new.cast(enabled_param)
+                              end
 
         if permitted.key?(:allowed_embedder_domains_text)
-          permitted[:allowed_embedder_domains] = normalize_domain_lines(permitted.delete(:allowed_embedder_domains_text))
+          permitted[:allowed_embedder_domains] =
+            normalize_domain_lines(permitted.delete(:allowed_embedder_domains_text))
         end
 
         if permitted.key?(:blocked_embedder_domains_text)
-          permitted[:blocked_embedder_domains] = normalize_domain_lines(permitted.delete(:blocked_embedder_domains_text))
+          permitted[:blocked_embedder_domains] =
+            normalize_domain_lines(permitted.delete(:blocked_embedder_domains_text))
         end
 
         scalar_embed_param_names.each do |name|
@@ -99,10 +107,10 @@ module RecordingStudioEmbeddable
 
       def normalize_domain_lines(text)
         text.to_s
-          .split(/\r?\n/)
-          .map(&:strip)
-          .reject(&:blank?)
-          .uniq
+            .split(/\r?\n/)
+            .map(&:strip)
+            .reject(&:blank?)
+            .uniq
       end
 
       def assign_recordable_instance_variable
