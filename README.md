@@ -28,8 +28,17 @@ end
 The Recording Studio capability form is also available:
 
 ```ruby
-RecordingStudio::Capabilities::Embeddable.to(renderer: "pages/embed")
+RecordingStudio::Capabilities::Embeddable.to(
+  renderer: "pages/embed",
+  cache: { max_age: 600, stale_while_revalidate: 60 }
+)
 ```
+
+`cache` supports per-model overrides for public embed caching.
+- If omitted, caching is disabled for that model.
+- `cache: false` disables HTTP caching for that recordable model.
+- `cache: true` keeps global defaults.
+- `cache: { ... }` customizes policy values for that model.
 
 Recording methods added to `RecordingStudio::Recording` include `embed`, `current_embed`, `embed_child_recording`, `ensure_embed!`, `embeddable?`, `embed_enabled?`, `embed_public_path`, `embed_public_url`, `embed_code`, `update_embed!`, `disable_embed!`, and `enable_embed!`.
 

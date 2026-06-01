@@ -1,7 +1,8 @@
 class Article < ApplicationRecord
   include RecordingStudio::Capabilities::Embeddable.to(
-    public_controller: "articles",
-    public_action: :show,
+    embed_controller: "articles",
+    embed_action: :show,
+    cache: { max_age: 600, stale_while_revalidate: 120 },
     require_publishable: true
   )
 

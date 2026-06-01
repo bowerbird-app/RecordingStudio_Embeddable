@@ -25,10 +25,14 @@ module RecordingStudioEmbeddable
       return render_denied(access) unless access.allowed?
 
       set_security_headers(access.domain_policy)
-      set_public_cache_headers
-      unless stale?(etag: cache_key_parts, last_modified: last_modified_at, public: true)
-        capture_public_view(@embed, "not_modified", 304, cache_hit: true)
-        return
+      if cache_policy[:enabled]
+        set_public_cache_headers
+        unless stale?(etag: cache_key_parts, last_modified: last_modified_at, public: true)
+          capture_public_view(@embed, "not_modified", 304, cache_hit: true)
+          return
+        end
+      else
+        response.cache_control.replace(no_store: true)
       end
 
       capture_public_view(@embed, "rendered", 200)
@@ -72,12 +76,15 @@ module RecordingStudioEmbeddable
     end
 
     def set_public_cache_headers
-      policy = CachePolicy.resolve(embed: @embed, recording: @parent_recording)
       response.cache_control.replace(
-        public: policy[:public],
-        max_age: policy[:max_age],
-        stale_while_revalidate: policy[:stale_while_revalidate]
+        public: cache_policy[:public],
+        max_age: cache_policy[:max_age],
+        stale_while_revalidate: cache_policy[:stale_while_revalidate]
       )
+    end
+
+    def cache_policy
+      @cache_policy ||= CachePolicy.resolve(embed: @embed, recording: @parent_recording)
     end
 
     def last_modified_at

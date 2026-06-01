@@ -8,8 +8,10 @@ module RecordingStudioEmbeddable
       options = options_for(recording)
       configured = normalize(options[:renderer])
       return configured[:template] if configured[:template].present?
-      if options[:public_controller].present? && options[:public_action].present?
-        return "#{options[:public_controller]}/#{options[:public_action]}"
+      explicit_controller = options[:embed_controller].presence || options[:public_controller].presence
+      explicit_action = options[:embed_action].presence || options[:public_action].presence
+      if explicit_controller && explicit_action
+        return "#{explicit_controller}/#{explicit_action}"
       end
 
       resolver = RecordingStudioEmbeddable.configuration.embed_renderer_resolver ||
@@ -76,8 +78,8 @@ module RecordingStudioEmbeddable
       return {} unless klass&.respond_to?(:model_name)
 
       options = options_for(recording)
-      explicit_controller = options[:public_controller].presence
-      explicit_action = options[:public_action].presence
+      explicit_controller = options[:embed_controller].presence || options[:public_controller].presence
+      explicit_action = options[:embed_action].presence || options[:public_action].presence
       if explicit_controller && explicit_action
         return {
           controller: explicit_controller,

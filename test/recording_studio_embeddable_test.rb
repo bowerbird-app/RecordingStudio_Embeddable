@@ -36,7 +36,23 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     def self.model_name = ActiveModel::Name.new(self, nil, "FakeArticle")
 
     def self.recording_studio_embeddable_options
-      { public_controller: "articles", public_action: :show }
+      { embed_controller: "articles", embed_action: :show }
+    end
+  end
+
+  class FakeCachedRecordable
+    def self.model_name = ActiveModel::Name.new(self, nil, "FakePage")
+
+    def self.recording_studio_embeddable_options
+      { cache: { max_age: 1800, stale_while_revalidate: 120 } }
+    end
+  end
+
+  class FakeNonCachedRecordable
+    def self.model_name = ActiveModel::Name.new(self, nil, "FakePage")
+
+    def self.recording_studio_embeddable_options
+      { cache: false }
     end
   end
 
@@ -59,12 +75,12 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_capability_key_and_options
-    capability = RecordingStudio::Capabilities::Embeddable.to(public_controller: "pages", public_action: :show)
+    capability = RecordingStudio::Capabilities::Embeddable.to(embed_controller: "pages", embed_action: :show)
 
     assert_equal :embeddable, capability.key
     assert_equal true, capability.options[:enabled]
-    assert_equal "pages", capability.options[:public_controller]
-    assert_equal :show, capability.options[:public_action]
+    assert_equal "pages", capability.options[:embed_controller]
+    assert_equal :show, capability.options[:embed_action]
   end
 
   def test_token_generation_is_url_safe_and_stable_length
@@ -168,8 +184,36 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   def test_cache_policy_merges_defaults
     RecordingStudioEmbeddable.configuration.cache_policy = { max_age: 60 }
 
-    assert_equal({ public: true, max_age: 60, stale_while_revalidate: 60 },
+    assert_equal({ enabled: false, public: true, max_age: 60, stale_while_revalidate: 60 },
                  RecordingStudioEmbeddable::CachePolicy.resolve(embed: nil, recording: nil))
+  end
+
+  def test_cache_policy_enables_cache_with_boolean_flag
+    klass = Class.new do
+      def self.model_name = ActiveModel::Name.new(self, nil, "FakePage")
+
+      def self.recording_studio_embeddable_options
+        { cache: true }
+      end
+    end
+    recording = FakeRecording.new(klass.new, Time.now)
+
+    assert_equal true, RecordingStudioEmbeddable::CachePolicy.resolve(embed: nil, recording: recording)[:enabled]
+  end
+
+  def test_cache_policy_allows_per_recordable_cache_overrides
+    recording = FakeRecording.new(FakeCachedRecordable.new, Time.now)
+
+    assert_equal(
+      { enabled: true, public: true, max_age: 1800, stale_while_revalidate: 120 },
+      RecordingStudioEmbeddable::CachePolicy.resolve(embed: nil, recording: recording)
+    )
+  end
+
+  def test_cache_policy_can_disable_caching_for_recordable
+    recording = FakeRecording.new(FakeNonCachedRecordable.new, Time.now)
+
+    assert_equal false, RecordingStudioEmbeddable::CachePolicy.resolve(embed: nil, recording: recording)[:enabled]
   end
 
   def test_view_logging_uses_digests_not_raw_ip
