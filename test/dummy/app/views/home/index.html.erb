@@ -44,6 +44,20 @@
                   </td>
                   <td class="px-4 py-3">
                     <div class="flex flex-wrap items-center gap-2">
+                      <% if recording.recordable_type == "Page" %>
+                        <%= link_to edit_dummy_page_path(recording.recordable), class: "inline-flex" do %>
+                          <%= render FlatPack::Button::Component.new(text: "Edit Page", style: :ghost, size: :sm) %>
+                        <% end %>
+                      <% elsif recording.recordable_type == "Article" %>
+                        <%= link_to edit_dummy_article_path(recording.recordable), class: "inline-flex" do %>
+                          <%= render FlatPack::Button::Component.new(text: "Edit Article", style: :ghost, size: :sm) %>
+                        <% end %>
+                      <% elsif recording.recordable_type == "Document" %>
+                        <%= link_to edit_dummy_document_path(recording.recordable), class: "inline-flex" do %>
+                          <%= render FlatPack::Button::Component.new(text: "Edit Document", style: :ghost, size: :sm) %>
+                        <% end %>
+                      <% end %>
+
                       <% if embed.present? %>
                         <%= link_to "/recording_studio_embeddable/management/embeds/#{embed.id}/edit", class: "inline-flex" do %>
                           <%= render FlatPack::Button::Component.new(text: "Embed", style: :secondary, size: :sm) %>

@@ -20,6 +20,10 @@ page = Page.find_or_create_by!(title: "Getting Started")
 article = Article.find_or_create_by!(title: "Article Requires Publishable")
 document = Document.find_or_create_by!(title: "Document Publishable Only")
 
+Page.where(id: page.id).update_all(description: "Page description used by both publishable and embeddable rendering.")
+Article.where(id: article.id).update_all(description: "Article description for embeddable behavior testing.")
+Document.where(id: document.id).update_all(description: "Document description for publishable-only behavior testing.")
+
 # Create the root recording
 root_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
   recordable: workspace,

@@ -8,6 +8,9 @@ module RecordingStudioEmbeddable
       options = options_for(recording)
       configured = normalize(options[:renderer])
       return configured[:template] if configured[:template].present?
+      if options[:public_controller].present? && options[:public_action].present?
+        return "#{options[:public_controller]}/#{options[:public_action]}"
+      end
 
       resolver = RecordingStudioEmbeddable.configuration.embed_renderer_resolver ||
                  RecordingStudioEmbeddable.configuration.renderer_resolver
@@ -23,6 +26,9 @@ module RecordingStudioEmbeddable
 
       convention = convention_for(recording)
       return convention[:template] if convention[:template].present? && template_exists?(convention[:template])
+      if convention[:fallback_template].present? && template_exists?(convention[:fallback_template])
+        return convention[:fallback_template]
+      end
 
       FALLBACK
     end
@@ -66,9 +72,33 @@ module RecordingStudioEmbeddable
 
     def self.convention_for(recording)
       recordable = recording&.recordable
-      return {} unless recordable.respond_to?(:model_name)
+      klass = recordable&.class
+      return {} unless klass&.respond_to?(:model_name)
 
-      plural = recordable.model_name.route_key
+      options = options_for(recording)
+      explicit_controller = options[:public_controller].presence
+      explicit_action = options[:public_action].presence
+      if explicit_controller && explicit_action
+        return {
+          controller: explicit_controller,
+          action: explicit_action.to_sym,
+          template: "#{explicit_controller}/#{explicit_action}",
+          fallback_template: "#{explicit_controller}/embed",
+          layout: "recording_studio_embeddable/embed"
+        }
+      end
+
+      plural = klass.model_name.route_key
+      if publishable_recordable?(recordable)
+        return {
+          controller: plural,
+          action: :show,
+          template: "#{plural}/show",
+          fallback_template: "#{plural}/embed",
+          layout: "recording_studio_embeddable/embed"
+        }
+      end
+
       {
         controller: plural,
         action: :embed,
@@ -77,10 +107,16 @@ module RecordingStudioEmbeddable
       }
     end
 
+    def self.publishable_recordable?(recordable)
+      klass = recordable.class
+      klass.respond_to?(:recording_studio_publishable_options) ||
+        recordable.respond_to?(:recording_studio_publishable_options)
+    end
+
     def self.template_exists?(path)
       return false unless defined?(ActionController::Base)
 
-      ActionController::Base.view_paths.exists?(path, [], true)
+      ActionView::LookupContext.new(ActionController::Base.view_paths).exists?(path, [], false)
     end
   end
 end

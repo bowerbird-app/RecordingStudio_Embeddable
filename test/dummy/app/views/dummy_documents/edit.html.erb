@@ -1,0 +1,31 @@
+<div class="mx-auto flex w-full max-w-4xl flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: "Edit Document",
+    subtitle: "Update document fields and compare publishable output behavior.",
+    variant: :h1
+  ) %>
+
+  <%= form_with url: dummy_document_path(@document), method: :patch, class: "space-y-4" do %>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "title",
+      label: "Document name",
+      value: @document.title,
+      placeholder: "Enter a document name"
+    ) %>
+
+    <%= render FlatPack::TextArea::Component.new(
+      name: "description",
+      label: "Description",
+      value: @document.description,
+      rows: 6,
+      placeholder: "Enter document description"
+    ) %>
+
+    <div class="flex items-center gap-3">
+      <%= render FlatPack::Button::Component.new(text: "Save document", style: :primary, size: :md, type: "submit") %>
+      <%= link_to root_path, class: "inline-flex" do %>
+        <%= render FlatPack::Button::Component.new(text: "Cancel", style: :ghost, size: :md) %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

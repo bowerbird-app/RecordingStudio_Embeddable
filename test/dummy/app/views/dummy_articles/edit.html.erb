@@ -1,0 +1,31 @@
+<div class="mx-auto flex w-full max-w-4xl flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: "Edit Article",
+    subtitle: "Update article fields and compare embeddable output behavior.",
+    variant: :h1
+  ) %>
+
+  <%= form_with url: dummy_article_path(@article), method: :patch, class: "space-y-4" do %>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "title",
+      label: "Article name",
+      value: @article.title,
+      placeholder: "Enter an article name"
+    ) %>
+
+    <%= render FlatPack::TextArea::Component.new(
+      name: "description",
+      label: "Description",
+      value: @article.description,
+      rows: 6,
+      placeholder: "Enter article description"
+    ) %>
+
+    <div class="flex items-center gap-3">
+      <%= render FlatPack::Button::Component.new(text: "Save article", style: :primary, size: :md, type: "submit") %>
+      <%= link_to root_path, class: "inline-flex" do %>
+        <%= render FlatPack::Button::Component.new(text: "Cancel", style: :ghost, size: :md) %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

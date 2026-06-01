@@ -24,6 +24,22 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
   FakeRecording = Struct.new(:recordable, :updated_at)
 
+  class FakePublishableRecordable
+    def self.model_name = ActiveModel::Name.new(self, nil, "FakeArticle")
+
+    def self.recording_studio_publishable_options
+      { public_controller: "articles", public_action: :show }
+    end
+  end
+
+  class FakeExplicitPublicRouteRecordable
+    def self.model_name = ActiveModel::Name.new(self, nil, "FakeArticle")
+
+    def self.recording_studio_embeddable_options
+      { public_controller: "articles", public_action: :show }
+    end
+  end
+
   def setup
     RecordingStudioEmbeddable.reset_configuration!
   end
@@ -43,11 +59,12 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_capability_key_and_options
-    capability = RecordingStudio::Capabilities::Embeddable.to(renderer: "pages/embed")
+    capability = RecordingStudio::Capabilities::Embeddable.to(public_controller: "pages", public_action: :show)
 
     assert_equal :embeddable, capability.key
     assert_equal true, capability.options[:enabled]
-    assert_equal "pages/embed", capability.options[:renderer]
+    assert_equal "pages", capability.options[:public_controller]
+    assert_equal :show, capability.options[:public_action]
   end
 
   def test_token_generation_is_url_safe_and_stable_length
@@ -72,6 +89,36 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
     assert_equal "recording_studio_embeddable/embeds/default",
                  RecordingStudioEmbeddable::Renderer.resolve(recording, nil)
+  end
+
+  def test_renderer_convention_prefers_show_for_publishable_recordables
+    recording = FakeRecording.new(FakePublishableRecordable.new, Time.now)
+
+    details = RecordingStudioEmbeddable::Renderer.convention_for(recording)
+
+    assert_equal :show, details[:action]
+    assert_equal "fake_articles/show", details[:template]
+    assert_equal "fake_articles/embed", details[:fallback_template]
+  end
+
+  def test_renderer_convention_uses_embed_for_non_publishable_recordables
+    recording = FakeRecording.new(FakeRecordable.new(true), Time.now)
+
+    details = RecordingStudioEmbeddable::Renderer.convention_for(recording)
+
+    assert_equal :embed, details[:action]
+    assert_equal "fake_pages/embed", details[:template]
+    assert_nil details[:fallback_template]
+  end
+
+  def test_renderer_convention_prefers_explicit_public_route_options
+    recording = FakeRecording.new(FakeExplicitPublicRouteRecordable.new, Time.now)
+
+    details = RecordingStudioEmbeddable::Renderer.convention_for(recording)
+
+    assert_equal :show, details[:action]
+    assert_equal "articles/show", details[:template]
+    assert_equal "articles/embed", details[:fallback_template]
   end
 
   def test_domain_policy_validates_and_matches_wildcards
@@ -137,7 +184,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     page = File.read(File.expand_path("dummy/app/models/page.rb", __dir__))
 
     assert_includes routes, "mount RecordingStudioEmbeddable::Engine"
-    assert_includes page, "recording_studio_embeddable"
+    assert_includes page, "RecordingStudio::Capabilities::Embeddable.to"
     assert File.exist?(File.expand_path("dummy/app/views/pages/embed.html.erb", __dir__))
   end
 

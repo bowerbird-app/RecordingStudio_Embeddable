@@ -13,6 +13,13 @@
       placeholder: "Enter a page name"
     ) %>
 
+    <%= render FlatPack::TextArea::Component.new(
+      name: "description",
+      label: "Description",
+      rows: 6,
+      placeholder: "Enter page description"
+    ) %>
+
     <%= render FlatPack::Button::Component.new(text: "Create page", style: :primary, size: :md, type: "submit") %>
   <% end %>
 </div>
