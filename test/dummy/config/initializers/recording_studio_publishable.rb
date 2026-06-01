@@ -14,6 +14,13 @@ if defined?(RecordingStudioPublishable)
     end
   end
 
+  module RecordingStudioPublishableDummyPageNavCloseUrlCompat
+    def initialize(close_url: nil, anchor_url: nil, **system_arguments)
+      anchor_url ||= close_url
+      super(anchor_url: anchor_url, **system_arguments)
+    end
+  end
+
   module RecordingStudioPublishableDummyRecordingCacheFix
     def publishable_child_recording
       cached = @publishable_child_recording if instance_variable_defined?(:@publishable_child_recording)
@@ -39,5 +46,19 @@ if defined?(RecordingStudioPublishable)
     next if RecordingStudio::Recording < RecordingStudioPublishableDummyRecordingCacheFix
 
     RecordingStudio::Recording.prepend(RecordingStudioPublishableDummyRecordingCacheFix)
+  end
+
+  Rails.application.config.to_prepare do
+    next unless defined?(FlatPack::PageNav::Component)
+
+    initialize_params = FlatPack::PageNav::Component.instance_method(:initialize).parameters
+    has_anchor_url = initialize_params.any? { |(_, name)| name == :anchor_url }
+    has_close_url = initialize_params.any? { |(_, name)| name == :close_url }
+
+    next unless has_anchor_url
+    next if has_close_url
+    next if FlatPack::PageNav::Component < RecordingStudioPublishableDummyPageNavCloseUrlCompat
+
+    FlatPack::PageNav::Component.prepend(RecordingStudioPublishableDummyPageNavCloseUrlCompat)
   end
 end
