@@ -16,5 +16,8 @@ class Page < ApplicationRecord
     )
   end
 
-  recording_studio_embeddable renderer: "pages/embed", require_publishable: defined?(RecordingStudioPublishable)
+  include RecordingStudio::Capabilities::Embeddable.to(
+    renderer: "pages/embed",
+    require_publishable: defined?(RecordingStudioPublishable)
+  )
 end

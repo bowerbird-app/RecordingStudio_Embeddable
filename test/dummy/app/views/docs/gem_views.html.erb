@@ -22,7 +22,7 @@
 
   <%= render FlatPack::SectionTitle::Component.new(
     title: "Recordable declaration",
-    subtitle: "Define embeddable behavior on the recordable model",
+    subtitle: "Define embeddable behavior on the recordable model via capability include",
   ) %>
 
   <%= render FlatPack::CodeBlock::Component.new(
@@ -30,7 +30,10 @@
     code: <<~'CODE'
       # app/models/page.rb
       class Page < ApplicationRecord
-        recording_studio_embeddable renderer: "pages/embed", require_publishable: true
+        include RecordingStudio::Capabilities::Embeddable.to(
+          renderer: "pages/embed",
+          require_publishable: true
+        )
       end
     CODE
   ) %>
