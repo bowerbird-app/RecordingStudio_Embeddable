@@ -2,7 +2,7 @@ class HomeController < ApplicationController
   before_action :load_edit_button_component, if: :publishable_available?
 
   def index
-    @page_recordings = RecordingStudio::Recording.where(recordable_type: "Page")
+    @recordings = RecordingStudio::Recording.where(recordable_type: %w[Page Article Document])
       .includes(:recordable, :parent_recording)
       .order(:created_at, :id)
   end
