@@ -1,7 +1,21 @@
-<% recordable = @embed.parent_recording&.recordable %>
+<% parent_recording = @embed.parent_recording %>
+<% recordable = parent_recording&.recordable %>
 <% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
-<% embed_code = @embed.parent_recording&.embed_code(host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
+<% embed_code = parent_recording&.embed_code(host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
 <% summary = RecordingStudioEmbeddable::View.summary_for(@embed) %>
+<% embed_options = RecordingStudioEmbeddable::Renderer.options_for(parent_recording) %>
+<% publishable_required = ActiveModel::Type::Boolean.new.cast(embed_options.fetch(:require_publishable, RecordingStudioEmbeddable.configuration.require_publishable)) %>
+<% publishable_ready = if parent_recording.respond_to?(:currently_published?)
+     parent_recording.currently_published?
+   elsif parent_recording.respond_to?(:current_publishable)
+     parent_recording.current_publishable.present?
+   elsif parent_recording.respond_to?(:publishable_child_recording)
+     parent_recording.publishable_child_recording.present?
+   else
+     false
+   end %>
+<% show_unpublished_warning = publishable_required && !publishable_ready %>
+<% disable_embed_form = show_unpublished_warning %>
 
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
   <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) %>
@@ -13,12 +27,22 @@
     large_subtitle: true
   ) %>
 
+  <% if show_unpublished_warning %>
+    <%= render FlatPack::Alert::Component.new(
+      title: "This page is not published",
+      description: "Publish this page first before using its embed.",
+      style: :warning
+    ) %>
+  <% end %>
+
   <%= form_with model: @embed, url: management_embed_path(@embed), method: :patch, class: "space-y-6" do |_form| %>
+    <fieldset <%= "disabled" if disable_embed_form %> class="space-y-6 <%= "opacity-60" if disable_embed_form %>">
     <div class="embed-enabled-switch">
       <%= render FlatPack::Switch::Component.new(
         name: "embed[enabled]",
         label: "Enabled",
-        checked: @embed.enabled
+        checked: @embed.enabled,
+        disabled: disable_embed_form
       ) %>
     </div>
 
@@ -57,7 +81,8 @@
             label: "Allowed domains (one per line)",
             value: @embed.allowed_domains.join("\n"),
             rows: 6,
-            placeholder: "example.com"
+            placeholder: "example.com",
+            disabled: disable_embed_form
           ) %>
 
           <%= render FlatPack::TextArea::Component.new(
@@ -65,7 +90,8 @@
             label: "Blocked domains (one per line)",
             value: @embed.blocked_domains.join("\n"),
             rows: 6,
-            placeholder: "bad-domain.example"
+            placeholder: "bad-domain.example",
+            disabled: disable_embed_form
           ) %>
         </div>
       <% end %>
@@ -75,8 +101,10 @@
       text: "Save changes",
       style: :primary,
       size: :md,
-      type: "submit"
+      type: "submit",
+      disabled: disable_embed_form
     ) %>
+    </fieldset>
   <% end %>
 </div>
 
