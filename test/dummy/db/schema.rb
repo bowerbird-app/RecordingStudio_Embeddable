@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_05_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_29_090556) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -137,6 +137,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_000001) do
     t.index ["recording_id"], name: "index_recording_studio_events_on_recording_id"
   end
 
+  create_table "recording_studio_publishable_publishables", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "canonical_url"
+    t.datetime "created_at", null: false
+    t.string "meta_robots"
+    t.datetime "publish_at"
+    t.text "seo_description"
+    t.string "seo_title"
+    t.string "slug", null: false
+    t.text "social_description"
+    t.uuid "social_image_attachment_recording_id"
+    t.string "social_title"
+    t.string "status", default: "draft", null: false
+    t.string "time_zone"
+    t.datetime "unpublish_at"
+    t.datetime "updated_at", null: false
+    t.index ["canonical_url"], name: "index_rs_publishables_on_canonical_url"
+    t.index ["slug"], name: "index_rs_publishables_on_slug"
+    t.index ["social_image_attachment_recording_id"], name: "index_rs_publishables_on_social_image_attachment_recording_id"
+    t.index ["status", "publish_at", "unpublish_at"], name: "index_publishables_on_status_and_publish_times"
+    t.index ["status", "publish_at", "unpublish_at"], name: "index_rs_publishables_on_state_window"
+  end
+
   create_table "recording_studio_recordings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.uuid "parent_recording_id"
@@ -146,6 +168,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_000001) do
     t.datetime "trashed_at"
     t.datetime "updated_at", null: false
     t.index ["parent_recording_id"], name: "index_recording_studio_recordings_on_parent_recording_id"
+    t.index ["parent_recording_id"], name: "index_rs_publishable_child_per_parent", unique: true, where: "(((recordable_type)::text = 'RecordingStudioPublishable::Publishable'::text) AND (trashed_at IS NULL))"
     t.index ["parent_recording_id"], name: "index_rs_unique_active_access_boundary_per_parent", unique: true, where: "(((recordable_type)::text = 'RecordingStudio::AccessBoundary'::text) AND (trashed_at IS NULL))"
     t.index ["parent_recording_id"], name: "index_rs_unique_active_embed_per_parent", unique: true, where: "(((recordable_type)::text = 'RecordingStudioEmbeddable::Embed'::text) AND (trashed_at IS NULL))"
     t.index ["recordable_id", "root_recording_id"], name: "idx_rs_recordings_root_access", where: "(((recordable_type)::text = 'RecordingStudio::Access'::text) AND (parent_recording_id IS NOT NULL) AND (trashed_at IS NULL))"
@@ -175,6 +198,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_000001) do
   add_foreign_key "recording_studio_device_sessions", "recording_studio_recordings", column: "root_recording_id"
   add_foreign_key "recording_studio_embeddable_views", "recording_studio_embeddable_embeds", column: "embed_id"
   add_foreign_key "recording_studio_events", "recording_studio_recordings", column: "recording_id"
+  add_foreign_key "recording_studio_publishable_publishables", "recording_studio_recordings", column: "social_image_attachment_recording_id", name: "fk_rs_publishables_social_image_attachment_recording"
   add_foreign_key "recording_studio_recordings", "recording_studio_recordings", column: "parent_recording_id"
   add_foreign_key "recording_studio_recordings", "recording_studio_recordings", column: "root_recording_id"
 end

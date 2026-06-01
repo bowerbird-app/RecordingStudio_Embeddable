@@ -1,7 +1,20 @@
-class Page < ApplicationRecord
-  recording_studio_embeddable renderer: "pages/embed", require_publishable: false
+begin
+  require "recording_studio_publishable"
+rescue LoadError
+  nil
+end
 
-  def published?
-    true
+class Page < ApplicationRecord
+  if defined?(RecordingStudioPublishable::ParentRecordable)
+    include RecordingStudioPublishable::ParentRecordable
+
+    recording_studio_publishable(
+      public_controller: "pages",
+      public_action: :show,
+      schedule: true,
+      seo: false
+    )
   end
+
+  recording_studio_embeddable renderer: "pages/embed", require_publishable: defined?(RecordingStudioPublishable)
 end

@@ -25,10 +25,19 @@ class DocsController < ApplicationController
 
   def gem_views
     prefix = "#{RecordingStudioEmbeddable::Engine.root}/"
+    default_embed_template_path = RecordingStudioEmbeddable::Engine.root.join(
+      "app/views/recording_studio_embeddable/embeds/default.html.erb"
+    )
 
     @engine_views = Dir.glob(RecordingStudioEmbeddable::Engine.root.join("app/views/recording_studio_embeddable/**/*.erb").to_s)
       .sort
       .map { |path| path.delete_prefix(prefix) }
+
+    @parent_recordable = "Gem View Preview"
+    @default_embed_template_path = default_embed_template_path.relative_path_from(
+      RecordingStudioEmbeddable::Engine.root
+    ).to_s
+    @default_embed_source = File.read(default_embed_template_path)
   end
 
   def methods

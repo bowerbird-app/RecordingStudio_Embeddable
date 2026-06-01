@@ -19,6 +19,9 @@ module RecordingStudioEmbeddable
 
       def preview
         @recording = @embed.parent_recording
+        @parent_recordable = @recording&.recordable if @recording.respond_to?(:recordable)
+        @recordable = @parent_recordable
+        assign_recordable_instance_variable
         render Renderer.resolve(@recording, @embed), layout: "recording_studio_embeddable/iframe"
       end
 
@@ -37,7 +40,16 @@ module RecordingStudioEmbeddable
       end
 
       def apply_embed_params
-        permitted = embed_params
+        permitted = embed_params.to_h.symbolize_keys
+
+        if permitted.key?(:allowed_embedder_domains_text)
+          permitted[:allowed_embedder_domains] = normalize_domain_lines(permitted.delete(:allowed_embedder_domains_text))
+        end
+
+        if permitted.key?(:blocked_embedder_domains_text)
+          permitted[:blocked_embedder_domains] = normalize_domain_lines(permitted.delete(:blocked_embedder_domains_text))
+        end
+
         scalar_embed_param_names.each do |name|
           @embed.public_send("#{name}=", permitted[name]) if permitted.key?(name)
         end
@@ -70,6 +82,8 @@ module RecordingStudioEmbeddable
       def embed_params
         params.require(:embed).permit(
           :enabled,
+          :allowed_embedder_domains_text,
+          :blocked_embedder_domains_text,
           :embed_url_strategy,
           :default_embed_mode,
           :inherit_global_domains,
@@ -81,6 +95,20 @@ module RecordingStudioEmbeddable
           cache_settings: {},
           logging_settings: {}
         )
+      end
+
+      def normalize_domain_lines(text)
+        text.to_s
+          .split(/\r?\n/)
+          .map(&:strip)
+          .reject(&:blank?)
+          .uniq
+      end
+
+      def assign_recordable_instance_variable
+        return unless @parent_recordable.respond_to?(:model_name)
+
+        instance_variable_set(:"@#{@parent_recordable.model_name.element}", @parent_recordable)
       end
     end
   end

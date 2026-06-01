@@ -29,10 +29,11 @@ Then open the app and sign in with:
 
 ## Useful Routes
 
-- `/` - dummy app home page and template guidance
+- `/` - embeddable dummy index with a table of page recordings and edit/preview actions
 - `/recording_studio` - redirects to `/` while the mounted Recording Studio engine stays available under that prefix for non-root routes
 - `/users/sign_in` - Devise sign-in page
 - `/docs/install`, `/docs/config`, `/docs/recordable_types`, `/docs/recordings_tree`, `/docs/gem_views`, `/docs/methods` - starter sidebar pages to adapt for the gem
+- `/dummy/pages/new` - add-page form used to create embeddable test pages
 - `/up` - Rails health check
 
 ## Why This App Exists

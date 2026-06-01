@@ -1,36 +1,76 @@
-<h1>Embed settings</h1>
+<% recordable = @embed.parent_recording&.recordable %>
+<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
+<% embed_code = @embed.parent_recording&.embed_code(host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
+<% summary = RecordingStudioEmbeddable::View.summary_for(@embed) %>
 
-<%= form_with model: @embed, url: management_embed_path(@embed), method: :patch do |form| %>
-  <% if @embed.errors.any? %>
-    <div role="alert"><%= @embed.errors.full_messages.to_sentence %></div>
+<div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: "Embed",
+    subtitle: recordable_title,
+    variant: :h1
+  ) %>
+
+  <%= form_with model: @embed, url: management_embed_path(@embed), method: :patch, class: "space-y-6" do |_form| %>
+    <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
+      <% card.body do %>
+        <div class="space-y-4">
+          <% if @embed.errors.any? %>
+            <p role="alert" class="text-sm text-red-700"><%= @embed.errors.full_messages.to_sentence %></p>
+          <% end %>
+
+          <%= render FlatPack::Switch::Component.new(
+            name: "embed[enabled]",
+            label: "Enabled",
+            checked: @embed.enabled
+          ) %>
+
+          <%= render FlatPack::TextArea::Component.new(
+            name: "embed[allowed_embedder_domains_text]",
+            label: "Allowed domains (one per line)",
+            value: @embed.allowed_domains.join("\n"),
+            rows: 6,
+            placeholder: "example.com"
+          ) %>
+
+          <%= render FlatPack::TextArea::Component.new(
+            name: "embed[blocked_embedder_domains_text]",
+            label: "Blocked domains (one per line)",
+            value: @embed.blocked_domains.join("\n"),
+            rows: 6,
+            placeholder: "bad-domain.example"
+          ) %>
+
+          <%= render FlatPack::Button::Component.new(
+            text: "Save changes",
+            style: :primary,
+            size: :md,
+            type: "submit"
+          ) %>
+        </div>
+      <% end %>
+    <% end %>
   <% end %>
 
-  <p>
-    <%= form.label :enabled %>
-    <%= form.check_box :enabled %>
-  </p>
+  <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
+    <% card.body do %>
+      <div class="space-y-3">
+        <h2 class="text-base font-semibold">Embed code</h2>
+        <textarea readonly rows="6" class="w-full rounded-md border border-(--surface-border-color) bg-(--surface-raised-background-color) p-3 font-mono text-sm"><%= embed_code %></textarea>
+      </div>
+    <% end %>
+  <% end %>
 
-  <p>
-    <%= form.label :allowed_embedder_domains, "Allowed domains (one per line)" %><br>
-    <textarea name="embed[allowed_embedder_domains][]" rows="4" cols="60"><%= @embed.allowed_domains.join("\n") %></textarea>
-  </p>
-
-  <p>
-    <%= form.label :blocked_embedder_domains, "Blocked domains (one per line)" %><br>
-    <textarea name="embed[blocked_embedder_domains][]" rows="4" cols="60"><%= @embed.blocked_domains.join("\n") %></textarea>
-  </p>
-
-  <%= form.submit "Save" %>
-<% end %>
-
-<h2>Embed code</h2>
-<textarea readonly rows="5" cols="100"><%= @embed.parent_recording&.embed_code(host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %></textarea>
-
-<h2>Summary</h2>
-<% summary = RecordingStudioEmbeddable::View.summary_for(@embed) %>
-<ul>
-  <li>Total: <%= summary[:total] %></li>
-  <li>Humans: <%= summary[:humans] %></li>
-  <li>Bots: <%= summary[:bots] %></li>
-  <li>Unique visitors: <%= summary[:unique_visitors] %></li>
-</ul>
+  <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
+    <% card.body do %>
+      <div class="space-y-3">
+        <h2 class="text-base font-semibold">View summary</h2>
+        <div class="grid gap-2 text-sm sm:grid-cols-2">
+          <p><strong>Total:</strong> <%= summary[:total] %></p>
+          <p><strong>Humans:</strong> <%= summary[:humans] %></p>
+          <p><strong>Bots:</strong> <%= summary[:bots] %></p>
+          <p><strong>Unique visitors:</strong> <%= summary[:unique_visitors] %></p>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+</div>
