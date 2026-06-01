@@ -1,19 +1,88 @@
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Install",
-    subtitle: "Host-app setup for the mounted Recording Studio Embeddable engine and migrations.",
+    subtitle: "Install Recording Studio Embeddable in a Rails host app and verify the mount, initializer, and migrations.",
     variant: :h1
   ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
-    title: "Step 1",
-    subtitle: "Provide one section title for each step",
+    title: "Step 1: Add the gem",
+    subtitle: "Include the gem in your host app Gemfile and install dependencies",
   ) %>
 
   <%= render FlatPack::CodeBlock::Component.new(
     language: :bash,
     code: <<~CODE
-      # Put the step instruction here.
+      # Gemfile
+      gem "recording_studio_embeddable"
+
+      bundle install
     CODE
   ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Step 2: Run the installer",
+    subtitle: "The installer mounts the engine, writes the initializer, and copies migrations",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :bash,
+    code: <<~CODE
+      # Default mount path: /recording_studio_embeddable
+      bin/rails generate recording_studio_embeddable:install
+
+      # Optional custom mount path
+      # bin/rails generate recording_studio_embeddable:install --mount_path=/embeds
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Step 3: Apply migrations",
+    subtitle: "Create the embed/view tables in the host application database",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :bash,
+    code: <<~CODE
+      bin/rails db:migrate
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Step 4: Review configuration",
+    subtitle: "Adjust defaults in the generated initializer for your environment",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      # config/initializers/recording_studio_embeddable.rb
+      RecordingStudioEmbeddable.configure do |config|
+        config.allowed_embedder_domains = []
+        config.blocked_embedder_domains = []
+        config.require_publishable = true
+        config.rate_limiter = :rails_cache
+      end
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Step 5: Verify routes",
+    subtitle: "Confirm the engine mount and key endpoints are reachable",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :bash,
+    code: <<~CODE
+      bin/rails routes | grep recording_studio_embeddable
+
+      # Expected base paths (default mount):
+      # /recording_studio_embeddable/management/embeds/:id/edit
+      # /recording_studio_embeddable/embeds/:token
+    CODE
+  ) %>
+
+  <p class="text-sm text-(--body-muted-content-color)">
+    The install generator can also create config/recording_studio_embeddable.yml if you choose yes during the prompt.
+  </p>
 </div>

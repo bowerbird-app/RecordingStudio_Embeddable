@@ -1,34 +1,94 @@
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Gem Views",
-    subtitle: "Preview the default embed template and inspect shipped engine views.",
+    subtitle: "How embed templates are resolved, where to place host-app views, and how engine view overrides work.",
     variant: :h1
   ) %>
 
-  <section class="space-y-4">
-    <h2 class="text-lg font-semibold">Default Embed Preview</h2>
-    <p class="text-sm text-slate-600">
-      Rendering <span class="font-mono"><%= @default_embed_template_path %></span> with preview data.
-    </p>
-    <div class="rounded-lg border border-slate-200 bg-white p-4">
-      <%= render template: "recording_studio_embeddable/embeds/default" %>
-    </div>
-  </section>
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Renderer resolution order",
+    subtitle: "The embeddable runtime checks candidates in order and uses the first template that exists",
+  ) %>
 
-  <section class="space-y-4">
-    <h2 class="text-lg font-semibold">Default Embed Source</h2>
-    <pre class="overflow-x-auto rounded-lg border border-slate-200 bg-slate-950 p-4 text-sm text-slate-100"><code><%= @default_embed_source %></code></pre>
-  </section>
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      # 1) Explicit renderer from recording_studio_embeddable options
+      # 2) embed_renderer_resolver / renderer_resolver callback result
+      # 3) Convention template: "<recordable_route_key>/embed"
+      # 4) Engine fallback: "recording_studio_embeddable/embeds/default"
+    CODE
+  ) %>
 
-  <section class="space-y-4">
-    <h2 class="text-lg font-semibold">All Engine View Templates</h2>
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Recordable declaration",
+    subtitle: "Define embeddable behavior on the recordable model",
+  ) %>
 
-    <%= render FlatPack::List::Component.new(divider: true) do %>
-      <% Array(@engine_views).each do |view_path| %>
-        <%= render FlatPack::List::Item.new(icon: :eye) do %>
-          <span><%= view_path %></span>
-        <% end %>
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      # app/models/page.rb
+      class Page < ApplicationRecord
+        recording_studio_embeddable renderer: "pages/embed", require_publishable: true
+      end
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Host-app view template",
+    subtitle: "Create the renderer template in your host app so embed output is fully app-controlled",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :erb,
+    code: <<~'CODE'
+      <!-- app/views/pages/embed.html.erb -->
+      <article class="page-embed">
+        <h1>&lt;%= @page.title %&gt;</h1>
+        <div>&lt;%= simple_format(@page.content) %&gt;</div>
+      </article>
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Fallback template",
+    subtitle: "Used when no explicit/convention template resolves",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :text,
+    code: @default_embed_template_path.to_s
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :erb,
+    code: @default_embed_source
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Engine view overrides",
+    subtitle: "Host app views with matching virtual paths override engine templates",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :bash,
+    code: <<~'CODE'
+      # Example override path in host app
+      app/views/recording_studio_embeddable/embeds/default.html.erb
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Shipped engine templates",
+    subtitle: "Reference list of embeddable engine .erb files available to override",
+  ) %>
+
+  <%= render FlatPack::List::Component.new(divider: true) do %>
+    <% Array(@engine_views).each do |view_path| %>
+      <%= render FlatPack::List::Item.new(icon: :eye) do %>
+        <span><%= view_path %></span>
       <% end %>
     <% end %>
-  </section>
+  <% end %>
 </div>

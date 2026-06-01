@@ -1,14 +1,170 @@
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Config",
-    subtitle: "Replace this placeholder with the configuration settings your generated gem exposes.",
+    subtitle: "Recording Studio Embeddable runtime configuration for domain policy, publishability, rate limiting, caching, and logging.",
     variant: :h1
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Initializer location",
+    subtitle: "All settings live in config/initializers/recording_studio_embeddable.rb",
   ) %>
 
   <%= render FlatPack::CodeBlock::Component.new(
     language: :ruby,
     code: <<~'CODE'
-      # Add the config settings for the gem here.
+      RecordingStudioEmbeddable.configure do |config|
+        # Base delivery controls
+        config.public_embeds_enabled = true
+        config.embed_url_strategy = :dedicated
+        config.allowed_embed_modes = %i[iframe oembed]
+        config.default_embed_mode = :iframe
+      end
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Domain policy",
+    subtitle: "Use allowlists/blocklists and strict domain checks for iframe hosts",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      RecordingStudioEmbeddable.configure do |config|
+        # Explicit allow/block lists (hostnames only, no protocol/path)
+        config.allowed_embedder_domains = [
+          "example.com",
+          "*.example.com"
+        ]
+        config.blocked_embedder_domains = ["bad.example"]
+
+        # If true, embeds require an allowlist match unless allow_any_domain is true
+        config.require_domain_allowlist = true
+
+        # Useful for local development; avoid enabling in production
+        config.allow_any_domain = false
+      end
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Publishability controls",
+    subtitle: "Require content to be published before public embedding",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      RecordingStudioEmbeddable.configure do |config|
+        # If true, embeds are denied unless the parent recording is publishable/currently published
+        config.require_publishable = true
+
+        # Optional fallback renderer integration when publishable renderer is unavailable
+        config.fallback_to_publishable_renderer = false
+      end
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Rate limiting",
+    subtitle: "Protect public embed endpoints from bursts and abuse",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      RecordingStudioEmbeddable.configure do |config|
+        config.rate_limiting_enabled = true
+
+        # :null, :rails_cache, :redis, or a custom object responding to #allow?
+        config.rate_limiter = :rails_cache
+
+        config.rate_limit = 120
+        config.rate_limit_window = 60
+
+        # If limiter backend fails, true blocks requests; false allows them
+        config.rate_limit_fail_closed = false
+      end
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Caching",
+    subtitle: "Control HTTP cache behavior for public embeds",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      RecordingStudioEmbeddable.configure do |config|
+        # :http_validation or other supported modes from your runtime
+        config.cache_mode = :http_validation
+
+        config.cache_policy = {
+          public: true,
+          max_age: 300,
+          stale_while_revalidate: 60
+        }
+      end
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "View logging and privacy",
+    subtitle: "Tune analytics sampling and raw field retention",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      RecordingStudioEmbeddable.configure do |config|
+        config.view_logging_enabled = true
+        config.async_view_logging = true
+
+        # Privacy defaults are strict (recommended)
+        config.view_log_raw_ip = false
+        config.view_log_raw_user_agent = false
+        config.view_log_raw_referer = false
+
+        # Optional sampling controls (0.0..1.0)
+        config.view_log_success_sample_rate = 1.0
+        config.view_log_blocked_sample_rate = 1.0
+        config.view_log_error_sample_rate = 1.0
+      end
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Management authorization",
+    subtitle: "Restrict access to /recording_studio_embeddable/management routes",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      RecordingStudioEmbeddable.configure do |config|
+        config.management_authorizer = lambda do |controller:|
+          controller.respond_to?(:current_user, true) && controller.send(:current_user).present?
+        end
+      end
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Local development profile",
+    subtitle: "A permissive setup for local previews and external iframe testing",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      RecordingStudioEmbeddable.configure do |config|
+        config.allow_any_domain = true
+        config.require_domain_allowlist = false
+        config.require_publishable = true
+        config.rate_limiter = :rails_cache
+      end
     CODE
   ) %>
 </div>
