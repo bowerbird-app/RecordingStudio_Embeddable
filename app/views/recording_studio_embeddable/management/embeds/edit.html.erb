@@ -2,7 +2,6 @@
 <% recordable = parent_recording&.recordable %>
 <% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
 <% embed_code = parent_recording&.embed_code(host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
-<% summary = RecordingStudioEmbeddable::View.summary_for(@embed) %>
 <% embed_options = RecordingStudioEmbeddable::Renderer.options_for(parent_recording) %>
 <% publishable_required = ActiveModel::Type::Boolean.new.cast(embed_options.fetch(:require_publishable, RecordingStudioEmbeddable.configuration.require_publishable)) %>
 <% publishable_ready = if parent_recording.respond_to?(:currently_published?)
@@ -15,10 +14,29 @@
      false
    end %>
 <% show_unpublished_warning = publishable_required && !publishable_ready %>
-<% disable_embed_form = show_unpublished_warning %>
+<% publish_page_url = parent_recording.present? ? recording_studio_publishable.edit_recording_publishable_path(recording_id: parent_recording.id) : nil %>
 
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
-  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) %>
+  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) do |component| %>
+    <% component.right_slot do %>
+      <div class="flex items-center gap-2">
+        <%= render FlatPack::Button::Component.new(
+          icon: "cog-6-tooth",
+          icon_only: true,
+          style: :secondary,
+          size: :md,
+          url: settings_management_embed_path(@embed),
+          aria: { label: "Settings" }
+        ) %>
+        <%= render FlatPack::Button::Component.new(
+          text: "Stats",
+          style: :secondary,
+          size: :md,
+          url: stats_management_embed_path(@embed)
+        ) %>
+      </div>
+    <% end %>
+  <% end %>
 
   <%= render FlatPack::PageTitle::Component.new(
     title: "Embed",
@@ -28,79 +46,36 @@
   ) %>
 
   <% if show_unpublished_warning %>
-    <%= render FlatPack::Alert::Component.new(
-      title: "This page is not published",
-      description: "Publish this page first before using its embed.",
-      style: :warning
-    ) %>
-  <% end %>
+    <%= render FlatPack::EmptyState::Component.new(
+      title: "Embeddable unavailable",
+      description: "You need to publish this page before you can enable embeddable."
+    ) do |empty| %>
+      <% empty.actions do %>
+        <% if publish_page_url.present? %>
+          <%= link_to publish_page_url, class: "inline-flex" do %>
+            <%= render FlatPack::Button::Component.new(text: "Publish Settings", style: :primary) %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% else %>
+    <div class="space-y-6">
+      <%= form_with model: @embed, url: management_embed_path(@embed), method: :patch, class: "embed-enabled-switch" do |_form| %>
+        <input type="hidden" name="embed[enabled]" value="0">
+        <%= render FlatPack::Switch::Component.new(
+          name: "embed[enabled]",
+          label: "Embeddable",
+          checked: @embed.enabled,
+          disabled: show_unpublished_warning,
+          data: { autosave_embed_enabled: true }
+        ) %>
+      <% end %>
 
-  <%= form_with model: @embed, url: management_embed_path(@embed), method: :patch, class: "space-y-6" do |_form| %>
-    <fieldset <%= "disabled" if disable_embed_form %> class="space-y-6 <%= "opacity-60" if disable_embed_form %>">
-    <div class="embed-enabled-switch">
-      <%= render FlatPack::Switch::Component.new(
-        name: "embed[enabled]",
-        label: "Enabled",
-        checked: @embed.enabled,
-        disabled: disable_embed_form
-      ) %>
-    </div>
-
-  <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
-    <% card.body do %>
       <div class="space-y-4">
         <h2 class="text-base font-semibold">Embed code</h2>
         <textarea readonly rows="6" class="w-full rounded-md border border-(--surface-border-color) bg-(--surface-raised-background-color) p-3 font-mono text-sm"><%= embed_code %></textarea>
-
-        <div class="space-y-3 pb-2">
-          <h2 class="text-base font-semibold">View summary</h2>
-          <div class="grid gap-2 text-sm sm:grid-cols-2">
-            <p><strong>Total:</strong> <%= summary[:total] %></p>
-            <p><strong>Humans:</strong> <%= summary[:humans] %></p>
-            <p><strong>Bots:</strong> <%= summary[:bots] %></p>
-            <p><strong>Unique visitors:</strong> <%= summary[:unique_visitors] %></p>
-          </div>
-        </div>
       </div>
-    <% end %>
-  <% end %>
-
-    <% if @embed.errors.any? %>
-      <p role="alert" class="text-sm text-red-700"><%= @embed.errors.full_messages.to_sentence %></p>
-    <% end %>
-
-    <%= render FlatPack::Accordion::Component.new do |accordion| %>
-      <% accordion.item(id: "embed-domain-controls", title: "Domain controls") do %>
-        <div class="space-y-4">
-          <%= render FlatPack::TextArea::Component.new(
-            name: "embed[allowed_embedder_domains_text]",
-            label: "Allowed domains (one per line)",
-            value: @embed.allowed_domains.join("\n"),
-            rows: 6,
-            placeholder: "example.com",
-            disabled: disable_embed_form
-          ) %>
-
-          <%= render FlatPack::TextArea::Component.new(
-            name: "embed[blocked_embedder_domains_text]",
-            label: "Blocked domains (one per line)",
-            value: @embed.blocked_domains.join("\n"),
-            rows: 6,
-            placeholder: "bad-domain.example",
-            disabled: disable_embed_form
-          ) %>
-        </div>
-      <% end %>
-    <% end %>
-
-    <%= render FlatPack::Button::Component.new(
-      text: "Save changes",
-      style: :primary,
-      size: :md,
-      type: "submit",
-      disabled: disable_embed_form
-    ) %>
-    </fieldset>
+    </div>
   <% end %>
 </div>
 
@@ -113,3 +88,21 @@
     background-color: var(--switch-track-checked-background-color) !important;
   }
 </style>
+
+<script>
+  const initializeEmbedToggleAutosave = () => {
+    document.querySelectorAll('input[data-autosave-embed-enabled="true"]').forEach((input) => {
+      if (input.dataset.autosaveBound === "true") {
+        return;
+      }
+
+      input.dataset.autosaveBound = "true";
+      input.addEventListener("change", () => {
+        input.form?.requestSubmit();
+      });
+    });
+  };
+
+  document.addEventListener("turbo:load", initializeEmbedToggleAutosave);
+  document.addEventListener("DOMContentLoaded", initializeEmbedToggleAutosave);
+</script>

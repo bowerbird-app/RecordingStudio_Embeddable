@@ -8,6 +8,10 @@ module RecordingStudioEmbeddable
 
       def edit; end
 
+      def settings; end
+
+      def stats; end
+
       def update
         apply_embed_params
         if @embed.save

@@ -3,7 +3,11 @@
 RecordingStudioEmbeddable::Engine.routes.draw do
   namespace :management do
     resources :embeds, only: %i[edit update] do
-      member { get :preview }
+      member do
+        get :preview
+        get :settings
+        get :stats
+      end
     end
   end
 

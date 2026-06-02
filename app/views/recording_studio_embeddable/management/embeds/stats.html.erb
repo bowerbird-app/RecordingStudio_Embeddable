@@ -1,0 +1,25 @@
+<% parent_recording = @embed.parent_recording %>
+<% recordable = parent_recording&.recordable %>
+<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
+<% summary = RecordingStudioEmbeddable::View.summary_for(@embed) %>
+
+<div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
+  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) %>
+
+  <%= render FlatPack::PageTitle::Component.new(
+    title: "Stats",
+    subtitle: recordable_title,
+    variant: :h1,
+    large_subtitle: true
+  ) %>
+
+  <div class="space-y-3 pb-2">
+    <h2 class="text-base font-semibold">View summary</h2>
+    <div class="grid gap-2 text-sm sm:grid-cols-2">
+      <p><strong>Total:</strong> <%= summary[:total] %></p>
+      <p><strong>Humans:</strong> <%= summary[:humans] %></p>
+      <p><strong>Bots:</strong> <%= summary[:bots] %></p>
+      <p><strong>Unique visitors:</strong> <%= summary[:unique_visitors] %></p>
+    </div>
+  </div>
+</div>

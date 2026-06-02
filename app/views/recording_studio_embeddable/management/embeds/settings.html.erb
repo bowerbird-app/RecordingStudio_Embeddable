@@ -1,0 +1,77 @@
+<% parent_recording = @embed.parent_recording %>
+<% recordable = parent_recording&.recordable %>
+<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
+<% embed_options = RecordingStudioEmbeddable::Renderer.options_for(parent_recording) %>
+<% publishable_required = ActiveModel::Type::Boolean.new.cast(embed_options.fetch(:require_publishable, RecordingStudioEmbeddable.configuration.require_publishable)) %>
+<% publishable_ready = if parent_recording.respond_to?(:currently_published?)
+     parent_recording.currently_published?
+   elsif parent_recording.respond_to?(:current_publishable)
+     parent_recording.current_publishable.present?
+   elsif parent_recording.respond_to?(:publishable_child_recording)
+     parent_recording.publishable_child_recording.present?
+   else
+     false
+   end %>
+<% show_unpublished_warning = publishable_required && !publishable_ready %>
+<% publish_page_url = parent_recording.present? ? recording_studio_publishable.edit_recording_publishable_path(recording_id: parent_recording.id) : nil %>
+
+<div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
+  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) %>
+
+  <%= render FlatPack::PageTitle::Component.new(
+    title: "Settings",
+    subtitle: recordable_title,
+    variant: :h1,
+    large_subtitle: true
+  ) %>
+
+  <% if show_unpublished_warning %>
+    <%= render FlatPack::EmptyState::Component.new(
+      title: "Embeddable unavailable",
+      description: "You need to publish this page before you can enable embeddable."
+    ) do |empty| %>
+      <% empty.actions do %>
+        <% if publish_page_url.present? %>
+          <%= link_to publish_page_url, class: "inline-flex" do %>
+            <%= render FlatPack::Button::Component.new(text: "Publish Settings", style: :primary) %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% else %>
+    <%= form_with model: @embed, url: management_embed_path(@embed), method: :patch, class: "space-y-6" do |_form| %>
+      <% if @embed.errors.any? %>
+        <p role="alert" class="text-sm text-red-700"><%= @embed.errors.full_messages.to_sentence %></p>
+      <% end %>
+
+      <%= render FlatPack::Accordion::Component.new do |accordion| %>
+        <% accordion.item(id: "embed-domain-controls", title: "Embed Settings") do %>
+          <div class="space-y-4">
+            <%= render FlatPack::TextArea::Component.new(
+              name: "embed[allowed_embedder_domains_text]",
+              label: "Allowed domains (one per line)",
+              value: @embed.allowed_domains.join("\n"),
+              rows: 6,
+              placeholder: "example.com"
+            ) %>
+
+            <%= render FlatPack::TextArea::Component.new(
+              name: "embed[blocked_embedder_domains_text]",
+              label: "Blocked domains (one per line)",
+              value: @embed.blocked_domains.join("\n"),
+              rows: 6,
+              placeholder: "bad-domain.example"
+            ) %>
+          </div>
+        <% end %>
+      <% end %>
+
+      <%= render FlatPack::Button::Component.new(
+        text: "Save changes",
+        style: :primary,
+        size: :md,
+        type: "submit"
+      ) %>
+    <% end %>
+  <% end %>
+</div>
