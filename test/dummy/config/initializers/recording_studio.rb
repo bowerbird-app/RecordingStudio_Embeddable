@@ -2,7 +2,11 @@
 
 RecordingStudio.configure do |config|
   # Registered delegated_type recordables (strings or classes)
-  config.recordable_types = [ "Workspace", "Folder", "Page" ]
+  config.recordable_types = [ "Workspace", "Folder", "Page", "Article", "Document" ]
+
+  # Keep legacy fallback enabled until all installed RecordingStudio addons
+  # declare their registered types with recording_studio_recordable.
+  config.require_recordable_declarations = false
 
   # Actor resolver for events when no actor is explicitly supplied
   config.actor = -> { Current.actor }
@@ -12,9 +16,6 @@ RecordingStudio.configure do |config|
 
   # Idempotency behavior for log_event!
   config.idempotency_mode = :return_existing # or :raise
-
-  # Include child recordings by default when trashing/restoring
-  config.include_children = false
 
   # Recordable duplication strategy for revisions
   config.recordable_dup_strategy = :dup

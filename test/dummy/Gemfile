@@ -4,7 +4,7 @@ source "https://rubygems.org"
 gem "recording_studio_embeddable", path: "../.."
 
 # RecordingStudio engine
-gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v0.1.0-alpha"
+gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "recording_studio/v2.0.0"
 gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable"
 gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible"
 gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable"

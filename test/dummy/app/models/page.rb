@@ -5,6 +5,8 @@ rescue LoadError
 end
 
 class Page < ApplicationRecord
+  recording_studio_recordable label: "Page", root: false, allowed_parent_types: [ "Workspace", "Folder" ]
+
   if defined?(RecordingStudioPublishable::ParentRecordable)
     include RecordingStudioPublishable::ParentRecordable
 
@@ -20,4 +22,18 @@ class Page < ApplicationRecord
     renderer: "pages/show",
     require_publishable: defined?(RecordingStudioPublishable)
   )
+
+  def self.recordable_type_label
+    "Page"
+  end
+
+  class << self
+    alias_method :recording_studio_type_label, :recordable_type_label
+  end
+
+  def recordable_name
+    title.to_s.squish.presence || self.class.recordable_type_label
+  end
+
+  alias_method :recording_studio_label, :recordable_name
 end
