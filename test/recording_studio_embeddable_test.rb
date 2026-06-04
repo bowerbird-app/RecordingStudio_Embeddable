@@ -62,10 +62,8 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     def self.recording_studio_embeddable_options
       {
         embed_theme: {
-          font_family: "Georgia, serif",
-          custom_properties: {
-            "--rse-embed-radius" => "12px"
-          }
+          font_family: "serif",
+          radius_scale: "lg"
         }
       }
     end
@@ -162,22 +160,89 @@ class RecordingStudioEmbeddableTest < Minitest::Test
                  RecordingStudioEmbeddable::Renderer.layout_for(recording, nil)
   end
 
-  def test_renderer_embed_theme_merges_global_and_recordable_overrides
+  def test_renderer_embed_theme_merges_global_recordable_and_embed_overrides
     RecordingStudioEmbeddable.configuration.embed_theme = {
-      font_family: "Inter, sans-serif",
+      font_family: "sans",
       text_color: "#111827",
-      custom_properties: {
-        "--rse-embed-shadow" => "0 1px 2px rgba(0, 0, 0, 0.15)"
-      }
+      radius_scale: "sm"
     }
     recording = FakeRecording.new(FakeThemeRecordable.new, Time.now)
+    embed = Struct.new(:appearance).new({ "text_color" => "#ff0000", "padding_scale" => "xl" })
 
-    theme = RecordingStudioEmbeddable::Renderer.embed_theme_for(recording)
+    theme = RecordingStudioEmbeddable::Renderer.embed_theme_for(recording, embed: embed)
 
-    assert_equal "Georgia, serif", theme[:font_family]
-    assert_equal "#111827", theme[:text_color]
-    assert_equal "12px", theme[:custom_properties]["--rse-embed-radius"]
-    assert_equal "0 1px 2px rgba(0, 0, 0, 0.15)", theme[:custom_properties]["--rse-embed-shadow"]
+    assert_equal "serif", theme[:font_family]
+    assert_equal "#ff0000", theme[:text_color]
+    assert_equal "lg", theme[:radius_scale]
+    assert_equal "xl", theme[:padding_scale]
+  end
+
+  def test_styling_validator_rejects_unknown_keys_and_normalizes_values
+    result = RecordingStudioEmbeddable::Styling::ValidateOverrides.call(
+      values: {
+        "text_color" => "#ABC",
+        "max_width" => "900",
+        "unknown_token" => "oops"
+      }
+    )
+
+    refute result.valid?
+    assert_equal "#aabbcc", result.cleaned["text_color"]
+    assert_equal 900, result.cleaned["max_width"]
+    assert_equal "is not an editable style option", result.errors["unknown_token"]
+  end
+
+  def test_styling_resolver_tracks_precedence_sources
+    RecordingStudioEmbeddable.configuration.embed_theme = {
+      text_color: "#111111",
+      padding_scale: "sm"
+    }
+
+    recordable = FakeThemeRecordable.new
+    recording = FakeRecording.new(recordable, Time.now)
+    embed = Struct.new(:appearance).new({ "padding_scale" => "xl" })
+
+    result = RecordingStudioEmbeddable::Styling::ResolveTheme.call(recording: recording, embed: embed)
+
+    assert_equal "#111111", result.values[:text_color]
+    assert_equal "xl", result.values[:padding_scale]
+    assert_equal "recordable", result.sources[:font_family]
+    assert_equal "embed", result.sources[:padding_scale]
+  end
+
+  def test_recordable_defaults_service_falls_back_to_recordable_options
+    recordable = FakeThemeRecordable.new
+    recording = FakeRecording.new(recordable, Time.now)
+
+    result = RecordingStudioEmbeddable::Styling::RecordableDefaults.call(recording: recording)
+
+    assert_equal "RecordingStudioEmbeddableTest::FakeThemeRecordable", result[:recordable_type]
+    assert_equal "serif", result[:defaults]["font_family"]
+    assert_equal "lg", result[:defaults]["radius_scale"]
+    assert_equal true, result[:allow_custom_styling]
+  end
+
+  def test_resolver_uses_recordable_defaults_service_layer
+    stubbed = lambda do |recording:|
+      {
+        recordable_type: recording.recordable.class.name,
+        defaults: { "font_family" => "mono", "text_color" => "#222222" },
+        allow_custom_styling: true,
+        profile: nil
+      }
+    end
+
+    RecordingStudioEmbeddable::Styling::RecordableDefaults.stub(:call, stubbed) do
+      recording = FakeRecording.new(FakeThemeRecordable.new, Time.now)
+      embed = Struct.new(:appearance).new({ "text_color" => "#ff0000" })
+
+      result = RecordingStudioEmbeddable::Styling::ResolveTheme.call(recording: recording, embed: embed)
+
+      assert_equal "mono", result.values[:font_family]
+      assert_equal "#ff0000", result.values[:text_color]
+      assert_equal "recordable", result.sources[:font_family]
+      assert_equal "embed", result.sources[:text_color]
+    end
   end
 
   def test_domain_policy_validates_and_matches_wildcards

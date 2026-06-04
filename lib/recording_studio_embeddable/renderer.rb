@@ -45,12 +45,8 @@ module RecordingStudioEmbeddable
       details(recording, embed)[:layout].presence || DEFAULT_LAYOUT
     end
 
-    def self.embed_theme_for(recording)
-      global_theme = normalize_theme_hash(RecordingStudioEmbeddable.configuration.embed_theme)
-      recordable_theme = normalize_theme_hash(options_for(recording)[:embed_theme])
-      custom_properties = global_theme.fetch(:custom_properties, {}).merge(recordable_theme.fetch(:custom_properties, {}))
-
-      global_theme.merge(recordable_theme).merge(custom_properties: custom_properties)
+    def self.embed_theme_for(recording, embed: nil)
+      Styling::ResolveTheme.call(recording: recording, embed: embed).values
     end
 
     def self.options_for(recording)
@@ -134,12 +130,5 @@ module RecordingStudioEmbeddable
       ActionView::LookupContext.new(ActionController::Base.view_paths).exists?(path, [], false)
     end
 
-    def self.normalize_theme_hash(theme)
-      return { custom_properties: {} } unless theme.respond_to?(:to_h)
-
-      normalized = theme.to_h.symbolize_keys
-      normalized[:custom_properties] = normalized.fetch(:custom_properties, {}).to_h.stringify_keys
-      normalized
-    end
   end
 end

@@ -69,6 +69,14 @@ module RecordingStudioEmbeddable
       (self[:sizing].presence || RecordingStudioEmbeddable.configuration.default_sizing).with_indifferent_access
     end
 
+    def appearance
+      (self[:appearance] || {}).with_indifferent_access
+    end
+
+    def appearance=(value)
+      self[:appearance] = (value || {}).to_h
+    end
+
     private
 
     def ensure_token

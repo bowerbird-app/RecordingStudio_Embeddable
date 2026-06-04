@@ -37,7 +37,7 @@ module RecordingStudioEmbeddable
       end
 
       capture_public_view(@embed, "rendered", 200)
-      @embed_theme = Renderer.embed_theme_for(@parent_recording)
+      @embed_theme = Renderer.embed_theme_for(@parent_recording, embed: @embed)
       render Renderer.resolve(@parent_recording, @embed),
          formats: [:html],
          layout: Renderer.layout_for(@parent_recording, @embed)

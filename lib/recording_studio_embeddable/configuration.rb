@@ -26,6 +26,8 @@ module RecordingStudioEmbeddable
       :cache_mode,
       :public_embed_cache_control,
       :embed_theme,
+      :allow_custom_styling,
+      :styling_tokens,
       :view_logging_enabled,
       :async_view_logging,
       :view_logging_mode,
@@ -69,14 +71,19 @@ module RecordingStudioEmbeddable
       @cache_mode = :http_validation
       @public_embed_cache_control = "public, max-age=300, stale-while-revalidate=60"
       @embed_theme = {
-        font_family: "ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif",
-        background_color: "transparent",
+        font_family: "sans",
+        background_color: "#ffffff",
         text_color: "#0f172a",
         muted_text_color: "#475569",
         accent_color: "#2563eb",
         border_color: "#e2e8f0",
-        custom_properties: {}
+        padding_scale: "md",
+        radius_scale: "md",
+        max_width: 1200,
+        min_height: 320
       }
+      @allow_custom_styling = true
+      @styling_tokens = RecordingStudioEmbeddable::Styling::Tokens.definitions
       @view_logging_enabled = true
       @async_view_logging = true
       @view_logging_mode = :async
@@ -127,6 +134,8 @@ module RecordingStudioEmbeddable
         cache_mode: cache_mode,
         cache_policy: cache_policy,
         embed_theme: embed_theme,
+        allow_custom_styling: allow_custom_styling,
+        styling_tokens: styling_tokens,
         view_logging_enabled: view_logging_enabled,
         async_view_logging: async_view_logging,
         token_bytes: token_bytes,
