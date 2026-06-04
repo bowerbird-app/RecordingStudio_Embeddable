@@ -8,7 +8,7 @@ module RecordingStudioEmbeddable
       cutoff = before || default_cutoff
       return unless cutoff
 
-      View.where(View.arel_table[:viewed_at].lt(cutoff)).delete_all
+      EmbeddableViewLog.where(EmbeddableViewLog.arel_table[:viewed_at].lt(cutoff)).delete_all
     end
 
     private

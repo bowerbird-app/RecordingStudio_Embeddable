@@ -8,7 +8,7 @@ module RecordingStudioEmbeddable
         normalized = payload.symbolize_keys
         parent_recording = embed&.parent_recording
         parent_recordable = parent_recording&.recordable if parent_recording.respond_to?(:recordable)
-        View.create!(
+        EmbeddableViewLog.create!(
           embed: embed,
           embed_recording_id: embed&.recording&.id,
           parent_recording_id: parent_recording&.id,

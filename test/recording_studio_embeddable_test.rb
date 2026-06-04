@@ -3,6 +3,7 @@
 require "test_helper"
 require "active_record"
 require_relative "../app/models/recording_studio_embeddable/application_record"
+require_relative "../app/models/recording_studio_embeddable/embeddable_view_log"
 require_relative "../app/models/recording_studio_embeddable/embed"
 
 class RecordingStudioEmbeddableTest < Minitest::Test
@@ -365,6 +366,62 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes migration, "index_recording_studio_embeddable_views_on_embed_id_and_viewed_at"
   end
 
+  def test_view_logs_rename_migration_updates_table_name
+    migration = File.read(
+      File.expand_path(
+        "../db/migrate/20260604040001_rename_recording_studio_embeddable_views_to_embeddable_view_logs.rb",
+        __dir__
+      )
+    )
+
+    assert_includes migration, "rename_table OLD_TABLE, NEW_TABLE"
+    assert_includes migration, "recording_studio_embeddable_embeddable_view_logs"
+  end
+
+  def test_embeddable_view_log_uses_legacy_table_when_new_table_missing
+    model = RecordingStudioEmbeddable::EmbeddableViewLog
+    connection = Class.new do
+      def initialize(mapping)
+        @mapping = mapping
+      end
+
+      def data_source_exists?(name)
+        @mapping.fetch(name, false)
+      end
+    end.new(
+      "recording_studio_embeddable_embeddable_view_logs" => false,
+      "recording_studio_embeddable_views" => true
+    )
+
+    with_temporary_singleton_method(model, :connected?, -> { true }) do
+      with_temporary_singleton_method(model, :connection, -> { connection }) do
+        assert_equal "recording_studio_embeddable_views", model.table_name
+      end
+    end
+  end
+
+  def test_embeddable_view_log_uses_new_table_when_available
+    model = RecordingStudioEmbeddable::EmbeddableViewLog
+    connection = Class.new do
+      def initialize(mapping)
+        @mapping = mapping
+      end
+
+      def data_source_exists?(name)
+        @mapping.fetch(name, false)
+      end
+    end.new(
+      "recording_studio_embeddable_embeddable_view_logs" => true,
+      "recording_studio_embeddable_views" => true
+    )
+
+    with_temporary_singleton_method(model, :connected?, -> { true }) do
+      with_temporary_singleton_method(model, :connection, -> { connection }) do
+        assert_equal "recording_studio_embeddable_embeddable_view_logs", model.table_name
+      end
+    end
+  end
+
   def test_recording_schema_detection_supports_recording_studio_versions_without_trashed_at
     with_stubbed_recording_class(column_names: %w[id parent_recording_id]) do
       refute RecordingStudioEmbeddable.recording_has_trashed_at?
@@ -378,6 +435,16 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   private
+
+  def with_temporary_singleton_method(object, method_name, implementation)
+    singleton = object.singleton_class
+    original = singleton.instance_method(method_name)
+    singleton.send(:define_method, method_name, implementation)
+    yield
+  ensure
+    singleton.send(:remove_method, method_name)
+    singleton.send(:define_method, method_name, original)
+  end
 
   def with_stubbed_recording_class(column_names:)
     previous = RecordingStudio.const_defined?(:Recording, false) ? RecordingStudio.const_get(:Recording) : nil

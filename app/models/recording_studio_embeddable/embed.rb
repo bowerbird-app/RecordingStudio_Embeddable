@@ -4,7 +4,13 @@ module RecordingStudioEmbeddable
   class Embed < ApplicationRecord
     self.table_name = "recording_studio_embeddable_embeds"
 
-    has_many :views, class_name: "RecordingStudioEmbeddable::View", dependent: :delete_all
+    has_many :embeddable_view_logs,
+             class_name: "RecordingStudioEmbeddable::EmbeddableViewLog",
+             dependent: :delete_all,
+             inverse_of: :embed
+    has_many :views,
+             class_name: "RecordingStudioEmbeddable::EmbeddableViewLog",
+             inverse_of: :embed
 
     before_validation :ensure_token
 

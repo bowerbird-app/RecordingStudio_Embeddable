@@ -86,7 +86,7 @@ Rate limiter adapters are `:null`, `:rails_cache`, and `:redis` (when a Redis-li
 
 Successful public responses use configurable public cache-control plus ETag/Last-Modified handling and support 304 responses. Failure responses are `no-store`.
 
-Public views are logged to `RecordingStudioEmbeddable::View` only, never as Recording Studio events. The capture pipeline normalizes payloads, detects common bots, stores privacy-safe HMAC digests for IP/user-agent data, and can run asynchronously through `LogViewJob`. `PruneViewsJob` removes old rows.
+Public views are logged to `RecordingStudioEmbeddable::EmbeddableViewLog` only, never as Recording Studio events. The capture pipeline normalizes payloads, detects common bots, stores privacy-safe HMAC digests for IP/user-agent data, and can run asynchronously through `LogViewJob`. `PruneViewsJob` removes old rows.
 
 ## Dummy app
 
