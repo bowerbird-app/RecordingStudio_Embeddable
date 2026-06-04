@@ -56,6 +56,21 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     end
   end
 
+  class FakeThemeRecordable
+    def self.model_name = ActiveModel::Name.new(self, nil, "FakePage")
+
+    def self.recording_studio_embeddable_options
+      {
+        embed_theme: {
+          font_family: "Georgia, serif",
+          custom_properties: {
+            "--rse-embed-radius" => "12px"
+          }
+        }
+      }
+    end
+  end
+
   def setup
     RecordingStudioEmbeddable.reset_configuration!
   end
@@ -115,6 +130,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_equal :show, details[:action]
     assert_equal "fake_articles/show", details[:template]
     assert_equal "fake_articles/embed", details[:fallback_template]
+    assert_equal "recording_studio_embeddable/embed", details[:layout]
   end
 
   def test_renderer_convention_uses_embed_for_non_publishable_recordables
@@ -125,6 +141,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_equal :embed, details[:action]
     assert_equal "fake_pages/embed", details[:template]
     assert_nil details[:fallback_template]
+    assert_equal "recording_studio_embeddable/embed", details[:layout]
   end
 
   def test_renderer_convention_prefers_explicit_public_route_options
@@ -135,6 +152,32 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_equal :show, details[:action]
     assert_equal "articles/show", details[:template]
     assert_equal "articles/embed", details[:fallback_template]
+    assert_equal "recording_studio_embeddable/embed", details[:layout]
+  end
+
+  def test_renderer_layout_for_uses_embed_layout_by_default
+    recording = FakeRecording.new(FakeRecordable.new(true), Time.now)
+
+    assert_equal "recording_studio_embeddable/embed",
+                 RecordingStudioEmbeddable::Renderer.layout_for(recording, nil)
+  end
+
+  def test_renderer_embed_theme_merges_global_and_recordable_overrides
+    RecordingStudioEmbeddable.configuration.embed_theme = {
+      font_family: "Inter, sans-serif",
+      text_color: "#111827",
+      custom_properties: {
+        "--rse-embed-shadow" => "0 1px 2px rgba(0, 0, 0, 0.15)"
+      }
+    }
+    recording = FakeRecording.new(FakeThemeRecordable.new, Time.now)
+
+    theme = RecordingStudioEmbeddable::Renderer.embed_theme_for(recording)
+
+    assert_equal "Georgia, serif", theme[:font_family]
+    assert_equal "#111827", theme[:text_color]
+    assert_equal "12px", theme[:custom_properties]["--rse-embed-radius"]
+    assert_equal "0 1px 2px rgba(0, 0, 0, 0.15)", theme[:custom_properties]["--rse-embed-shadow"]
   end
 
   def test_domain_policy_validates_and_matches_wildcards

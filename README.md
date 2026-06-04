@@ -54,6 +54,28 @@ Public embeds render at `/recording_studio_embeddable/embeds/:token` in a dedica
 
 The engine intentionally does **not** use a Publishable renderer by default. Publishable state is not duplicated; when `require_publishable` is true, public rendering uses parent recording Publishable helpers such as `currently_published?`, `current_publishable`, or `publishable_child_recording`. If helpers are unavailable, rendering fails closed.
 
+Use a dedicated embed template (for example `pages/embed`) so embedded output can differ from your public publishable page (`pages/show`).
+
+The default embed layout is `recording_studio_embeddable/embed`. It supports reusable theme variables so host apps can customize fonts and colors globally or per recordable:
+
+```ruby
+RecordingStudioEmbeddable.configure do |config|
+  config.embed_theme = {
+    font_family: "ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif",
+    background_color: "transparent",
+    text_color: "#0f172a",
+    muted_text_color: "#475569",
+    accent_color: "#2563eb",
+    border_color: "#e2e8f0",
+    custom_properties: {
+      "--rse-embed-radius" => "0.75rem"
+    }
+  }
+end
+```
+
+Any layout can reuse these variables with `embed_layout_body_attributes` from `RecordingStudioEmbeddable::EmbedLayoutHelper`.
+
 ## Security, domains, and rate limiting
 
 Configure global allowed/blocked domains, and optionally override per capability or per embed. Requests that fail token lookup, disabled embeds, and unpublished content return 404; confirmed disallowed domains return 403; rate-limit failures return 429. Successful public responses set iframe-focused security headers including `Content-Security-Policy: frame-ancestors ...`.

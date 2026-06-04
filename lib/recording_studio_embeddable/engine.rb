@@ -25,6 +25,10 @@ module RecordingStudioEmbeddable
         include RecordingStudioEmbeddable::Recordable
       end
 
+      ActiveSupport.on_load(:action_view) do
+        include RecordingStudioEmbeddable::EmbedLayoutHelper
+      end
+
       config.to_prepare do
         next unless defined?(ActiveRecord::Base)
 

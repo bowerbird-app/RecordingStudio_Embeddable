@@ -62,8 +62,8 @@
                         <%= link_to "/recording_studio_embeddable/management/embeds/#{embed.id}/edit", class: "inline-flex" do %>
                           <%= render FlatPack::Button::Component.new(text: "Embed", style: :secondary, size: :sm) %>
                         <% end %>
-                        <%= link_to "/recording_studio_embeddable/management/embeds/#{embed.id}/preview", class: "inline-flex" do %>
-                          <%= render FlatPack::Button::Component.new(text: "Preview", style: :ghost, size: :sm) %>
+                        <%= link_to "/recording_studio_embeddable/embeds/#{embed.token}", class: "inline-flex" do %>
+                          <%= render FlatPack::Button::Component.new(text: "Embed Preview", style: :ghost, size: :sm) %>
                         <% end %>
                       <% else %>
                         <span class="text-(--surface-muted-content-color)">No embed</span>

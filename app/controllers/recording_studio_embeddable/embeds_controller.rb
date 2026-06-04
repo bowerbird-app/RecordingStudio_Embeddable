@@ -2,7 +2,8 @@
 
 module RecordingStudioEmbeddable
   class EmbedsController < ActionController::Base
-    layout "recording_studio_embeddable/iframe"
+    layout "recording_studio_embeddable/embed"
+    helper RecordingStudioEmbeddable::EmbedLayoutHelper
 
     before_action :load_embed
 
@@ -36,7 +37,10 @@ module RecordingStudioEmbeddable
       end
 
       capture_public_view(@embed, "rendered", 200)
-      render Renderer.resolve(@parent_recording, @embed), formats: [:html]
+      @embed_theme = Renderer.embed_theme_for(@parent_recording)
+      render Renderer.resolve(@parent_recording, @embed),
+         formats: [:html],
+         layout: Renderer.layout_for(@parent_recording, @embed)
     end
 
     private

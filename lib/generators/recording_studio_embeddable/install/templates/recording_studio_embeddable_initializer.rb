@@ -18,6 +18,17 @@ RecordingStudioEmbeddable.configure do |config|
   config.rate_limit_fail_closed = false
   config.cache_mode = :http_validation
   config.cache_policy = { public: true, max_age: 300, stale_while_revalidate: 60 }
+  config.embed_theme = {
+    font_family: "ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif",
+    background_color: "transparent",
+    text_color: "#0f172a",
+    muted_text_color: "#475569",
+    accent_color: "#2563eb",
+    border_color: "#e2e8f0",
+    custom_properties: {
+      # "--rse-embed-radius" => "0.75rem"
+    }
+  }
   config.view_logging_enabled = true
   config.async_view_logging = true
   config.view_log_raw_ip = false

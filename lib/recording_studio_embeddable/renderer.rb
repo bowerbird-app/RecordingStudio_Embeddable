@@ -3,6 +3,7 @@
 module RecordingStudioEmbeddable
   class Renderer
     FALLBACK = "recording_studio_embeddable/embeds/default"
+    DEFAULT_LAYOUT = "recording_studio_embeddable/embed"
 
     def self.resolve(recording, _embed)
       options = options_for(recording)
@@ -37,7 +38,19 @@ module RecordingStudioEmbeddable
 
     def self.details(recording, _embed)
       normalize(options_for(recording)[:renderer]).presence ||
-        normalize(convention_for(recording)).merge(source: :convention, layout: "recording_studio_embeddable/embed")
+        normalize(convention_for(recording)).merge(source: :convention, layout: DEFAULT_LAYOUT)
+    end
+
+    def self.layout_for(recording, embed)
+      details(recording, embed)[:layout].presence || DEFAULT_LAYOUT
+    end
+
+    def self.embed_theme_for(recording)
+      global_theme = normalize_theme_hash(RecordingStudioEmbeddable.configuration.embed_theme)
+      recordable_theme = normalize_theme_hash(options_for(recording)[:embed_theme])
+      custom_properties = global_theme.fetch(:custom_properties, {}).merge(recordable_theme.fetch(:custom_properties, {}))
+
+      global_theme.merge(recordable_theme).merge(custom_properties: custom_properties)
     end
 
     def self.options_for(recording)
@@ -86,7 +99,7 @@ module RecordingStudioEmbeddable
           action: explicit_action.to_sym,
           template: "#{explicit_controller}/#{explicit_action}",
           fallback_template: "#{explicit_controller}/embed",
-          layout: "recording_studio_embeddable/embed"
+          layout: DEFAULT_LAYOUT
         }
       end
 
@@ -97,7 +110,7 @@ module RecordingStudioEmbeddable
           action: :show,
           template: "#{plural}/show",
           fallback_template: "#{plural}/embed",
-          layout: "recording_studio_embeddable/embed"
+          layout: DEFAULT_LAYOUT
         }
       end
 
@@ -105,7 +118,7 @@ module RecordingStudioEmbeddable
         controller: plural,
         action: :embed,
         template: "#{plural}/embed",
-        layout: "recording_studio_embeddable/embed"
+        layout: DEFAULT_LAYOUT
       }
     end
 
@@ -119,6 +132,14 @@ module RecordingStudioEmbeddable
       return false unless defined?(ActionController::Base)
 
       ActionView::LookupContext.new(ActionController::Base.view_paths).exists?(path, [], false)
+    end
+
+    def self.normalize_theme_hash(theme)
+      return { custom_properties: {} } unless theme.respond_to?(:to_h)
+
+      normalized = theme.to_h.symbolize_keys
+      normalized[:custom_properties] = normalized.fetch(:custom_properties, {}).to_h.stringify_keys
+      normalized
     end
   end
 end

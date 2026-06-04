@@ -26,7 +26,9 @@ module RecordingStudioEmbeddable
         @parent_recordable = @recording&.recordable if @recording.respond_to?(:recordable)
         @recordable = @parent_recordable
         assign_recordable_instance_variable
-        render Renderer.resolve(@recording, @embed), layout: "recording_studio_embeddable/iframe"
+        @embed_theme = Renderer.embed_theme_for(@recording)
+        render Renderer.resolve(@recording, @embed),
+               layout: Renderer.layout_for(@recording, @embed)
       end
 
       private

@@ -3,7 +3,7 @@ class Article < ApplicationRecord
 
   include RecordingStudio::Capabilities::Embeddable.to(
     embed_controller: "articles",
-    embed_action: :show,
+    embed_action: :embed,
     cache: { max_age: 600, stale_while_revalidate: 120 },
     require_publishable: true
   )
