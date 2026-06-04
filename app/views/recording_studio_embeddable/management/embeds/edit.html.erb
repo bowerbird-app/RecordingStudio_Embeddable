@@ -21,6 +21,12 @@
     <% component.right_slot do %>
       <div class="flex items-center gap-2">
         <%= render FlatPack::Button::Component.new(
+          text: "Styling",
+          style: :secondary,
+          size: :md,
+          url: styling_management_embed_path(@embed)
+        ) %>
+        <%= render FlatPack::Button::Component.new(
           icon: "cog-6-tooth",
           icon_only: true,
           style: :secondary,

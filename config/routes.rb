@@ -5,6 +5,8 @@ RecordingStudioEmbeddable::Engine.routes.draw do
     resources :embeds, only: %i[edit update] do
       member do
         get :preview
+        get :styling
+        patch :styling, action: :update_styling
         get :settings
         get :stats
       end

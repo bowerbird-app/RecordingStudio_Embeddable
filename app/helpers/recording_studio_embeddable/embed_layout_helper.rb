@@ -8,14 +8,17 @@ module RecordingStudioEmbeddable
       text_color: "--rse-embed-text-color",
       muted_text_color: "--rse-embed-muted-text-color",
       accent_color: "--rse-embed-accent-color",
-      border_color: "--rse-embed-border-color"
+      border_color: "--rse-embed-border-color",
+      padding_scale: "--rse-embed-padding",
+      radius_scale: "--rse-embed-radius",
+      max_width: "--rse-embed-max-width",
+      min_height: "--rse-embed-min-height"
     }.freeze
 
     def embed_layout_theme(overrides = nil)
-      base_theme = RecordingStudioEmbeddable.configuration.embed_theme
-      resolved = normalize_theme(base_theme)
-      resolved = merge_theme(resolved, normalize_theme(@embed_theme)) if defined?(@embed_theme)
-      resolved = merge_theme(resolved, normalize_theme(overrides)) if overrides
+      resolved = normalize_theme(RecordingStudioEmbeddable.configuration.embed_theme)
+      resolved = resolved.merge(normalize_theme(@embed_theme)) if defined?(@embed_theme)
+      resolved = resolved.merge(normalize_theme(overrides)) if overrides
       resolved
     end
 
@@ -24,14 +27,8 @@ module RecordingStudioEmbeddable
       variables = []
 
       THEME_VARIABLE_MAP.each do |key, variable_name|
-        value = theme[key]
+        value = RecordingStudioEmbeddable::Styling::Tokens.css_value_for(key, theme[key])
         variables << "#{variable_name}: #{value}" if value.present?
-      end
-
-      theme.fetch(:custom_properties, {}).each do |name, value|
-        next unless name.to_s.start_with?("--")
-
-        variables << "#{name}: #{value}"
       end
 
       variables.join("; ")
@@ -48,20 +45,27 @@ module RecordingStudioEmbeddable
       }
     end
 
+    def embed_layout_google_font_family(overrides = nil)
+      font_family = embed_layout_theme(overrides)[:font_family].to_s.strip
+      return nil if font_family.blank?
+      return nil if RecordingStudioEmbeddable::Styling::Tokens::FONT_STACKS.key?(font_family)
+
+      font_family
+    end
+
+    def embed_layout_google_font_stylesheet_url(font_family)
+      return nil if font_family.blank?
+
+      encoded_family = URI.encode_www_form_component(font_family)
+      "https://fonts.googleapis.com/css2?family=#{encoded_family}:wght@300;400;500;600;700&display=swap"
+    end
+
     private
 
     def normalize_theme(theme)
-      return { custom_properties: {} } unless theme.respond_to?(:to_h)
+      return {} unless theme.respond_to?(:to_h)
 
-      normalized = theme.to_h.symbolize_keys
-      normalized[:custom_properties] = normalized.fetch(:custom_properties, {}).to_h.stringify_keys
-      normalized
-    end
-
-    def merge_theme(base, overrides)
-      merged = base.merge(overrides)
-      merged[:custom_properties] = base.fetch(:custom_properties, {}).merge(overrides.fetch(:custom_properties, {}))
-      merged
+      theme.to_h.symbolize_keys
     end
   end
 end

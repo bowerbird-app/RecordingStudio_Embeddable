@@ -16,7 +16,30 @@
 <% publish_page_url = parent_recording.present? ? recording_studio_publishable.edit_recording_publishable_path(recording_id: parent_recording.id) : nil %>
 
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
-  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) %>
+  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) do |component| %>
+    <% component.right_slot do %>
+      <div class="flex items-center gap-2">
+        <%= render FlatPack::Button::Component.new(
+          text: "Embed",
+          style: :secondary,
+          size: :md,
+          url: edit_management_embed_path(@embed)
+        ) %>
+        <%= render FlatPack::Button::Component.new(
+          text: "Styling",
+          style: :secondary,
+          size: :md,
+          url: styling_management_embed_path(@embed)
+        ) %>
+        <%= render FlatPack::Button::Component.new(
+          text: "Stats",
+          style: :secondary,
+          size: :md,
+          url: stats_management_embed_path(@embed)
+        ) %>
+      </div>
+    <% end %>
+  <% end %>
 
   <%= render FlatPack::PageTitle::Component.new(
     title: "Settings",

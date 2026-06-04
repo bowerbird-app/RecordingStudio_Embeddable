@@ -4,7 +4,32 @@
 <% summary = RecordingStudioEmbeddable::View.summary_for(@embed) %>
 
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
-  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) %>
+  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) do |component| %>
+    <% component.right_slot do %>
+      <div class="flex items-center gap-2">
+        <%= render FlatPack::Button::Component.new(
+          text: "Embed",
+          style: :secondary,
+          size: :md,
+          url: edit_management_embed_path(@embed)
+        ) %>
+        <%= render FlatPack::Button::Component.new(
+          icon: "cog-6-tooth",
+          icon_only: true,
+          style: :secondary,
+          size: :md,
+          url: settings_management_embed_path(@embed),
+          aria: { label: "Settings" }
+        ) %>
+        <%= render FlatPack::Button::Component.new(
+          text: "Styling",
+          style: :secondary,
+          size: :md,
+          url: styling_management_embed_path(@embed)
+        ) %>
+      </div>
+    <% end %>
+  <% end %>
 
   <%= render FlatPack::PageTitle::Component.new(
     title: "Stats",
