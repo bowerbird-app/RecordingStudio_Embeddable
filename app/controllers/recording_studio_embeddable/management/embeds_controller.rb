@@ -14,7 +14,9 @@ module RecordingStudioEmbeddable
 
       def settings; end
 
-      def stats; end
+      def stats
+        build_stats_chart_state
+      end
 
       def update
         apply_embed_params
@@ -37,7 +39,7 @@ module RecordingStudioEmbeddable
 
       def update_styling
         build_styling_state
-        submitted = params.fetch(:embed, {}).fetch(:appearance, {})
+        submitted = styling_appearance_params
         validation_definitions = @styling_definitions.deep_dup
         if validation_definitions[:font_family]
           validation_definitions[:font_family][:options] = @font_options + Styling::Tokens::FONT_STACKS.keys
@@ -135,6 +137,97 @@ module RecordingStudioEmbeddable
           cache_settings: {},
           logging_settings: {}
         )
+      end
+
+      def styling_appearance_params
+        appearance = params.fetch(:embed, {}).fetch(:appearance, {})
+        return appearance.to_h unless appearance.is_a?(ActionController::Parameters)
+
+        # Styling::ValidateOverrides is the allowlist for accepted keys/values.
+        appearance.permit!.to_h
+      end
+
+      def build_stats_chart_state
+        @stats_range = stats_range
+        @stats_viewer_filter = stats_viewer_filter
+        @stats_range_options = {
+          "7d" => "Last 7 days",
+          "30d" => "Last 30 days",
+          "90d" => "Last 90 days"
+        }
+        @stats_viewer_options = {
+          "all" => "All views",
+          "humans" => "Humans only",
+          "bots" => "Bots only"
+        }
+
+        @stats_from_date = parse_stats_date(params[:from])
+        @stats_to_date = parse_stats_date(params[:to])
+
+        @stats_custom_range = @stats_from_date.present? && @stats_to_date.present?
+        if @stats_custom_range
+          if @stats_from_date > @stats_to_date
+            @stats_from_date, @stats_to_date = @stats_to_date, @stats_from_date
+          end
+          if (@stats_to_date - @stats_from_date).to_i > 365
+            @stats_from_date = @stats_to_date - 365
+          end
+
+          from_time = @stats_from_date.beginning_of_day
+          to_time = @stats_to_date.end_of_day
+        else
+          from_time = stats_from_time(@stats_range)
+          to_time = Time.current
+        end
+
+        relation = RecordingStudioEmbeddable::EmbeddableViewLog.where(embed: @embed)
+        relation = relation.where(viewed_at: from_time..to_time)
+        relation = relation.humans if @stats_viewer_filter == "humans"
+        relation = relation.bots if @stats_viewer_filter == "bots"
+
+        grouped_counts = relation.pluck(:viewed_at).group_by { |value| value.in_time_zone.to_date }.transform_values(&:size)
+        dates = (from_time.to_date..to_time.to_date).to_a
+
+        @stats_chart_categories = dates.map { |date| date.strftime("%b %-d") }
+        @stats_chart_points = dates.map { |date| grouped_counts.fetch(date, 0) }
+        @stats_chart_total = @stats_chart_points.sum
+        @stats_chart_series = [{ name: @stats_viewer_options.fetch(@stats_viewer_filter), data: @stats_chart_points }]
+        @stats_subtitle_range =
+          if @stats_custom_range
+            "#{@stats_from_date.strftime('%b %-d, %Y')} to #{@stats_to_date.strftime('%b %-d, %Y')}"
+          else
+            @stats_range_options.fetch(@stats_range).downcase
+          end
+      end
+
+      def stats_range
+        value = params[:range].to_s
+        return value if %w[7d 30d 90d].include?(value)
+
+        "30d"
+      end
+
+      def stats_viewer_filter
+        value = params[:viewer].to_s
+        return value if %w[all humans bots].include?(value)
+
+        "all"
+      end
+
+      def stats_from_time(range)
+        case range
+        when "7d" then 6.days.ago.beginning_of_day
+        when "90d" then 89.days.ago.beginning_of_day
+        else 29.days.ago.beginning_of_day
+        end
+      end
+
+      def parse_stats_date(raw_value)
+        return nil if raw_value.blank?
+
+        Date.iso8601(raw_value.to_s)
+      rescue ArgumentError
+        nil
       end
 
       def build_styling_state
