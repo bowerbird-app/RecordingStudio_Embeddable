@@ -15,7 +15,9 @@ class DummyPagesController < ApplicationController
       description: page_description_param
     )
     recording = RecordingStudio::Recording.create!(recordable: page, parent_recording: workspace_root_recording)
-    recording.ensure_embed!(enabled: true, allowed_embedder_domains: ["example.com"]) if recording.respond_to?(:ensure_embed!)
+    if recording.respond_to?(:ensure_embed!)
+      recording.ensure_embed!(enabled: true, allowed_embedder_domains: [request.host, "example.com"].uniq)
+    end
 
     redirect_to root_path, notice: "Added #{page.title}"
   end

@@ -15,6 +15,7 @@
    end %>
 <% show_unpublished_warning = publishable_required && !publishable_ready %>
 <% publish_page_url = parent_recording.present? ? recording_studio_publishable.edit_recording_publishable_path(recording_id: parent_recording.id) : nil %>
+<% disable_management_actions = show_unpublished_warning %>
 
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
   <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) do |component| %>
@@ -24,21 +25,29 @@
           text: "Styling",
           style: :secondary,
           size: :md,
-          url: styling_management_embed_path(@embed)
+          url: disable_management_actions ? nil : styling_management_embed_path(@embed),
+          type: "button",
+          class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
+          aria: (disable_management_actions ? { disabled: true } : {})
         ) %>
         <%= render FlatPack::Button::Component.new(
           icon: "cog-6-tooth",
           icon_only: true,
           style: :secondary,
           size: :md,
-          url: settings_management_embed_path(@embed),
-          aria: { label: "Settings" }
+          url: disable_management_actions ? nil : settings_management_embed_path(@embed),
+          type: "button",
+          class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
+          aria: (disable_management_actions ? { label: "Settings", disabled: true } : { label: "Settings" })
         ) %>
         <%= render FlatPack::Button::Component.new(
           text: "Stats",
           style: :secondary,
           size: :md,
-          url: stats_management_embed_path(@embed)
+          url: disable_management_actions ? nil : stats_management_embed_path(@embed),
+          type: "button",
+          class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
+          aria: (disable_management_actions ? { disabled: true } : {})
         ) %>
       </div>
     <% end %>

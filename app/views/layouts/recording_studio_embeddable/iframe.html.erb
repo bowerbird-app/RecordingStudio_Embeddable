@@ -9,6 +9,11 @@
 		<%= stylesheet_link_tag "flat_pack/variables", "data-turbo-track": "reload" %>
 		<%= stylesheet_link_tag "flat_pack/application", "data-turbo-track": "reload" %>
 		<%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+		<% if (google_font_family = embed_layout_google_font_family) %>
+		  <link rel="preconnect" href="https://fonts.googleapis.com">
+		  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		  <link rel="stylesheet" href="<%= embed_layout_google_font_stylesheet_url(google_font_family) %>">
+		<% end %>
 		<style>
 			.recording-studio-embed-layout {
 				margin: 0;
