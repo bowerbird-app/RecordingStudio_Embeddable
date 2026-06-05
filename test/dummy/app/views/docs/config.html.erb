@@ -1,7 +1,7 @@
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Config",
-    subtitle: "Recording Studio Embeddable runtime configuration for domain policy, publishability, rate limiting, caching, and logging.",
+    subtitle: "Complete Recording Studio Embeddable configuration reference with defaults and behavior notes.",
     variant: :h1
   ) %>
 
@@ -14,157 +14,157 @@
     language: :ruby,
     code: <<~'CODE'
       RecordingStudioEmbeddable.configure do |config|
-        # Base delivery controls
+        # Domain policy
+        config.allowed_embedder_domains = []
+        config.blocked_embedder_domains = []
+        config.require_domain_allowlist = true
+        config.allow_any_domain = false
+
+        # Embed delivery
         config.public_embeds_enabled = true
+        config.require_publishable = true
         config.embed_url_strategy = :dedicated
         config.allowed_embed_modes = %i[iframe oembed]
         config.default_embed_mode = :iframe
-      end
-    CODE
-  ) %>
-
-  <%= render FlatPack::SectionTitle::Component.new(
-    title: "Domain policy",
-    subtitle: "Use allowlists/blocklists and strict domain checks for iframe hosts",
-  ) %>
-
-  <%= render FlatPack::CodeBlock::Component.new(
-    language: :ruby,
-    code: <<~'CODE'
-      RecordingStudioEmbeddable.configure do |config|
-        # Explicit allow/block lists (hostnames only, no protocol/path)
-        config.allowed_embedder_domains = [
-          "example.com",
-          "*.example.com"
-        ]
-        config.blocked_embedder_domains = ["bad.example"]
-
-        # If true, embeds require an allowlist match unless allow_any_domain is true
-        config.require_domain_allowlist = true
-
-        # Useful for local development; avoid enabling in production
-        config.allow_any_domain = false
-      end
-    CODE
-  ) %>
-
-  <%= render FlatPack::SectionTitle::Component.new(
-    title: "Publishability controls",
-    subtitle: "Require content to be published before public embedding",
-  ) %>
-
-  <%= render FlatPack::CodeBlock::Component.new(
-    language: :ruby,
-    code: <<~'CODE'
-      RecordingStudioEmbeddable.configure do |config|
-        # If true, embeds are denied unless the parent recording is publishable/currently published
-        config.require_publishable = true
-
-        # Optional fallback renderer integration when publishable renderer is unavailable
         config.fallback_to_publishable_renderer = false
-      end
-    CODE
-  ) %>
+        config.default_sizing = {
+          "mode" => "responsive",
+          "aspect_ratio" => "16:9",
+          "max_width" => 1200,
+          "min_height" => 320
+        }
 
-  <%= render FlatPack::SectionTitle::Component.new(
-    title: "Rate limiting",
-    subtitle: "Protect public embed endpoints from bursts and abuse",
-  ) %>
+        # Rendering hooks/resolvers
+        config.renderer_resolver = nil
+        config.embed_renderer_resolver = nil
 
-  <%= render FlatPack::CodeBlock::Component.new(
-    language: :ruby,
-    code: <<~'CODE'
-      RecordingStudioEmbeddable.configure do |config|
+        # Rate limiting
         config.rate_limiting_enabled = true
-
-        # :null, :rails_cache, :redis, or a custom object responding to #allow?
-        config.rate_limiter = :rails_cache
-
+        config.rate_limiter = :null
+        config.redis = nil
         config.rate_limit = 120
         config.rate_limit_window = 60
-
-        # If limiter backend fails, true blocks requests; false allows them
         config.rate_limit_fail_closed = false
-      end
-    CODE
-  ) %>
 
-  <%= render FlatPack::SectionTitle::Component.new(
-    title: "Caching",
-    subtitle: "Control HTTP cache behavior for public embeds",
-  ) %>
-
-  <%= render FlatPack::CodeBlock::Component.new(
-    language: :ruby,
-    code: <<~'CODE'
-      RecordingStudioEmbeddable.configure do |config|
-        # :http_validation or other supported modes from your runtime
+        # Caching
         config.cache_mode = :http_validation
+        config.cache_policy = { public: true, max_age: 300, stale_while_revalidate: 60 }
+        config.public_embed_cache_control = "public, max-age=300, stale-while-revalidate=60"
 
-        config.cache_policy = {
-          public: true,
-          max_age: 300,
-          stale_while_revalidate: 60
+        # Styling/theme
+        config.embed_theme = {
+          font_family: "sans",
+          background_color: "#ffffff",
+          text_color: "#0f172a",
+          muted_text_color: "#475569",
+          accent_color: "#2563eb",
+          border_color: "#e2e8f0",
+          padding_scale: "md",
+          radius_scale: "md",
+          max_width: 1200,
+          min_height: 320
         }
-      end
-    CODE
-  ) %>
+        config.allow_custom_styling = true
+        config.styling_tokens = RecordingStudioEmbeddable::Styling::Tokens.definitions
 
-  <%= render FlatPack::SectionTitle::Component.new(
-    title: "View logging and privacy",
-    subtitle: "Tune analytics sampling and raw field retention",
-  ) %>
-
-  <%= render FlatPack::CodeBlock::Component.new(
-    language: :ruby,
-    code: <<~'CODE'
-      RecordingStudioEmbeddable.configure do |config|
+        # View logging + analytics privacy
         config.view_logging_enabled = true
         config.async_view_logging = true
-
-        # Privacy defaults are strict (recommended)
-        config.view_log_raw_ip = false
-        config.view_log_raw_user_agent = false
-        config.view_log_raw_referer = false
-
-        # Optional sampling controls (0.0..1.0)
+        config.view_logging_mode = :async
+        config.view_logging_queue = :low_priority
         config.view_log_success_sample_rate = 1.0
         config.view_log_blocked_sample_rate = 1.0
         config.view_log_error_sample_rate = 1.0
-      end
-    CODE
-  ) %>
+        config.view_log_raw_ip = false
+        config.view_log_raw_user_agent = false
+        config.view_log_raw_referer = false
+        config.view_log_salt = nil
+        config.view_summary_enabled = true
+        config.bot_detector = nil
 
-  <%= render FlatPack::SectionTitle::Component.new(
-    title: "Management authorization",
-    subtitle: "Restrict access to /recording_studio_embeddable/management routes",
-  ) %>
-
-  <%= render FlatPack::CodeBlock::Component.new(
-    language: :ruby,
-    code: <<~'CODE'
-      RecordingStudioEmbeddable.configure do |config|
-        config.management_authorizer = lambda do |controller:|
+        # Management and token lifecycle
+        config.management_authorizer = ->(controller:) {
           controller.respond_to?(:current_user, true) && controller.send(:current_user).present?
-        end
+        }
+        config.token_bytes = 24
+        config.prune_views_after = 90.days
+
+        # Hook registration object (read-only accessor)
+        # config.hooks.on(:event_name) { ... }
       end
     CODE
   ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
-    title: "Local development profile",
-    subtitle: "A permissive setup for local previews and external iframe testing",
+    title: "Config Reference",
+    subtitle: "Every configurable key, what it means, and the default",
   ) %>
 
-  <%= render FlatPack::CodeBlock::Component.new(
-    language: :ruby,
-    code: <<~'CODE'
-      RecordingStudioEmbeddable.configure do |config|
-        config.allow_any_domain = true
-        config.require_domain_allowlist = false
-        config.require_publishable = true
-        config.rate_limiter = :rails_cache
-      end
-    CODE
+  <div class="overflow-x-auto rounded-md border border-(--surface-border-color)">
+    <table class="w-full min-w-[980px] text-sm">
+      <thead>
+        <tr class="border-b border-(--surface-border-color) bg-(--surface-raised-background-color) text-left text-(--surface-muted-content-color)">
+          <th class="px-3 py-2 font-medium">Key</th>
+          <th class="px-3 py-2 font-medium">Default</th>
+          <th class="px-3 py-2 font-medium">What It Means</th>
+        </tr>
+      </thead>
+      <tbody class="align-top">
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">allowed_embedder_domains</td><td class="px-3 py-2 font-mono">[]</td><td class="px-3 py-2">Allowlist of hostnames/patterns that may embed.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">blocked_embedder_domains</td><td class="px-3 py-2 font-mono">[]</td><td class="px-3 py-2">Denylist of hostnames/patterns that are always blocked.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">public_embeds_enabled</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">Global on/off switch for public embed endpoints.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">renderer_resolver</td><td class="px-3 py-2 font-mono">nil</td><td class="px-3 py-2">Optional callable to resolve renderer/template for parent recording.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">embed_renderer_resolver</td><td class="px-3 py-2 font-mono">nil</td><td class="px-3 py-2">Optional callable specifically for embed rendering decisions.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">require_publishable</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">Requires publishable/published parent state before serving embed.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">embed_url_strategy</td><td class="px-3 py-2 font-mono">:dedicated</td><td class="px-3 py-2">URL mode used to build/embed links (engine-dependent strategies).</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">allowed_embed_modes</td><td class="px-3 py-2 font-mono">%i[iframe oembed]</td><td class="px-3 py-2">Allowed transport modes for embeds.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">default_embed_mode</td><td class="px-3 py-2 font-mono">:iframe</td><td class="px-3 py-2">Default mode when one is not explicitly requested.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">fallback_to_publishable_renderer</td><td class="px-3 py-2 font-mono">false</td><td class="px-3 py-2">Fallback behavior when primary embed renderer is unavailable.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">require_domain_allowlist</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">Enforces allowlist checks for embedding domains.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">allow_any_domain</td><td class="px-3 py-2 font-mono">false</td><td class="px-3 py-2">Bypasses domain restrictions when true (use carefully).</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">default_sizing</td><td class="px-3 py-2 font-mono">{"mode"=>"responsive", ...}</td><td class="px-3 py-2">Default size constraints/aspect ratio for generated embeds.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">rate_limiter</td><td class="px-3 py-2 font-mono">:null</td><td class="px-3 py-2">Rate limiter backend (:null, :rails_cache, :redis, custom object).</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">redis</td><td class="px-3 py-2 font-mono">nil</td><td class="px-3 py-2">Redis connection/client used by redis rate limiter backend.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">rate_limit</td><td class="px-3 py-2 font-mono">120</td><td class="px-3 py-2">Max allowed requests per limiter window.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">rate_limit_window</td><td class="px-3 py-2 font-mono">60</td><td class="px-3 py-2">Limiter window in seconds.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">rate_limit_fail_closed</td><td class="px-3 py-2 font-mono">false</td><td class="px-3 py-2">If limiter fails: true blocks request, false allows request.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">rate_limiting_enabled</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">Global on/off for embed endpoint rate limiting.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">cache_policy</td><td class="px-3 py-2 font-mono">{public: true, max_age: 300, ...}</td><td class="px-3 py-2">Structured cache-control policy values.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">cache_mode</td><td class="px-3 py-2 font-mono">:http_validation</td><td class="px-3 py-2">Caching strategy mode used by embed responses.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">public_embed_cache_control</td><td class="px-3 py-2 font-mono">"public, max-age=300, ..."</td><td class="px-3 py-2">Raw cache-control header string override.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">embed_theme</td><td class="px-3 py-2 font-mono">{font_family: "sans", ...}</td><td class="px-3 py-2">Global theme tokens for embed styling.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">allow_custom_styling</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">Allows management UI/custom overrides for styling tokens.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">styling_tokens</td><td class="px-3 py-2 font-mono">Styling::Tokens.definitions</td><td class="px-3 py-2">Definition registry used for validation/UI of style fields.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_logging_enabled</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">Enables/disables view log persistence for embeds.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">async_view_logging</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">When true, logs through background job instead of inline.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_logging_mode</td><td class="px-3 py-2 font-mono">:async</td><td class="px-3 py-2">Logging mode hint for runtime integrations/ops visibility.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_logging_queue</td><td class="px-3 py-2 font-mono">:low_priority</td><td class="px-3 py-2">ActiveJob queue used for async logging jobs.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_log_success_sample_rate</td><td class="px-3 py-2 font-mono">1.0</td><td class="px-3 py-2">Sampling rate (0.0..1.0) for successful view events.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_log_blocked_sample_rate</td><td class="px-3 py-2 font-mono">1.0</td><td class="px-3 py-2">Sampling rate (0.0..1.0) for blocked/denied view events.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_log_error_sample_rate</td><td class="px-3 py-2 font-mono">1.0</td><td class="px-3 py-2">Sampling rate (0.0..1.0) for errored view events.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_log_raw_ip</td><td class="px-3 py-2 font-mono">false</td><td class="px-3 py-2">Stores raw IP in logs when true; otherwise stores digest only.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_log_raw_user_agent</td><td class="px-3 py-2 font-mono">false</td><td class="px-3 py-2">Stores raw User-Agent when true; otherwise stores digest only.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_log_raw_referer</td><td class="px-3 py-2 font-mono">false</td><td class="px-3 py-2">Stores raw Referer when true; otherwise stores digest/host only.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_log_salt</td><td class="px-3 py-2 font-mono">nil</td><td class="px-3 py-2">HMAC salt used for deterministic digest fields in logs.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_summary_enabled</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">Enables summary-oriented analytics features for logs.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">bot_detector</td><td class="px-3 py-2 font-mono">nil</td><td class="px-3 py-2">Optional custom bot detector strategy/service.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">management_authorizer</td><td class="px-3 py-2 font-mono">lambda { current_user present }</td><td class="px-3 py-2">Authorization gate for management endpoints.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">token_bytes</td><td class="px-3 py-2 font-mono">24</td><td class="px-3 py-2">Byte length for generated embed/public tokens.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">prune_views_after</td><td class="px-3 py-2 font-mono">90.days</td><td class="px-3 py-2">Retention duration before old view logs are pruned.</td></tr>
+        <tr><td class="px-3 py-2 font-mono">hooks (reader)</td><td class="px-3 py-2 font-mono">Hooks.new</td><td class="px-3 py-2">Hook registry object for lifecycle/event integrations.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Practical Notes",
+    subtitle: "Quick guidance for safe defaults in production",
   ) %>
+
+  <ul class="list-disc space-y-1 pl-5 text-sm text-(--surface-content-color)">
+    <li>Keep <code>allow_any_domain</code> false in production; rely on allowlist + publishability.</li>
+    <li>Keep raw logging fields disabled unless you explicitly need them for debugging/compliance-approved analytics.</li>
+    <li>If using Redis limiter, set <code>redis</code> and consider <code>rate_limit_fail_closed</code> based on your risk tolerance.</li>
+    <li>Only include style keys in <code>embed_theme</code> that you want visible/editable in management styling UI.</li>
+  </ul>
 </div>
