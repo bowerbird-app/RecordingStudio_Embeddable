@@ -6,6 +6,7 @@ module RecordingStudioEmbeddable
       def self.call(request)
         {
           ip: request.remote_ip.to_s,
+          country: country_code(request),
           user_agent: request.user_agent.to_s[0, 512],
           referer: request.referer.to_s[0, 1024],
           origin: request.get_header("HTTP_ORIGIN").to_s[0, 1024],
@@ -24,6 +25,18 @@ module RecordingStudioEmbeddable
 
       def self.current_time
         Time.respond_to?(:current) ? Time.current : Time.now
+      end
+
+      def self.country_code(request)
+        raw = request.get_header("HTTP_CF_IPCOUNTRY") ||
+              request.get_header("HTTP_X_COUNTRY_CODE") ||
+              request.get_header("HTTP_X_GEO_COUNTRY") ||
+              request.get_header("GEOIP_COUNTRY_CODE")
+
+        value = raw.to_s.strip.upcase
+        return nil unless value.match?(/\A[A-Z]{2}\z/)
+
+        value
       end
     end
   end

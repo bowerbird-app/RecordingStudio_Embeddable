@@ -6,6 +6,8 @@ module RecordingStudioEmbeddable
       def self.call(embed:, payload:, status: "rendered", status_code: 200, cache_hit: false, rate_limited: false,
                     metadata: {})
         normalized = payload.symbolize_keys
+        log_metadata = (metadata || {}).to_h.stringify_keys
+        log_metadata["country"] = normalized[:country] if normalized[:country].present?
         parent_recording = embed&.parent_recording
         parent_recordable = parent_recording&.recordable if parent_recording.respond_to?(:recordable)
         EmbeddableViewLog.create!(
@@ -34,7 +36,7 @@ module RecordingStudioEmbeddable
           cache_hit: cache_hit,
           rate_limited: rate_limited,
           bot: BotDetector.bot?(normalized[:user_agent]),
-          metadata: metadata
+          metadata: log_metadata
         )
       rescue StandardError => e
         if defined?(Rails) && Rails.logger

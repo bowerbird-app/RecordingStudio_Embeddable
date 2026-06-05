@@ -16,33 +16,10 @@
 <% publish_page_url = parent_recording.present? ? recording_studio_publishable.edit_recording_publishable_path(recording_id: parent_recording.id) : nil %>
 
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
-  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) do |component| %>
-    <% component.right_slot do %>
-      <div class="flex items-center gap-2">
-        <%= render FlatPack::Button::Component.new(
-          text: "Embed",
-          style: :secondary,
-          size: :md,
-          url: edit_management_embed_path(@embed)
-        ) %>
-        <%= render FlatPack::Button::Component.new(
-          text: "Styling",
-          style: :secondary,
-          size: :md,
-          url: styling_management_embed_path(@embed)
-        ) %>
-        <%= render FlatPack::Button::Component.new(
-          text: "Stats",
-          style: :secondary,
-          size: :md,
-          url: stats_management_embed_path(@embed)
-        ) %>
-      </div>
-    <% end %>
-  <% end %>
+  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) %>
 
   <%= render FlatPack::PageTitle::Component.new(
-    title: "Settings",
+    title: "Embed Settings",
     subtitle: recordable_title,
     variant: :h1,
     large_subtitle: true
@@ -67,27 +44,23 @@
         <p role="alert" class="text-sm text-red-700"><%= @embed.errors.full_messages.to_sentence %></p>
       <% end %>
 
-      <%= render FlatPack::Accordion::Component.new do |accordion| %>
-        <% accordion.item(id: "embed-domain-controls", title: "Embed Settings") do %>
-          <div class="space-y-4">
-            <%= render FlatPack::TextArea::Component.new(
-              name: "embed[allowed_embedder_domains_text]",
-              label: "Allowed domains (one per line)",
-              value: @embed.allowed_domains.join("\n"),
-              rows: 6,
-              placeholder: "example.com"
-            ) %>
+      <div class="space-y-4">
+        <%= render FlatPack::TextArea::Component.new(
+          name: "embed[allowed_embedder_domains_text]",
+          label: "Allowed domains (one per line)",
+          value: @embed.allowed_domains.join("\n"),
+          rows: 6,
+          placeholder: "example.com"
+        ) %>
 
-            <%= render FlatPack::TextArea::Component.new(
-              name: "embed[blocked_embedder_domains_text]",
-              label: "Blocked domains (one per line)",
-              value: @embed.blocked_domains.join("\n"),
-              rows: 6,
-              placeholder: "bad-domain.example"
-            ) %>
-          </div>
-        <% end %>
-      <% end %>
+        <%= render FlatPack::TextArea::Component.new(
+          name: "embed[blocked_embedder_domains_text]",
+          label: "Blocked domains (one per line)",
+          value: @embed.blocked_domains.join("\n"),
+          rows: 6,
+          placeholder: "bad-domain.example"
+        ) %>
+      </div>
 
       <%= render FlatPack::Button::Component.new(
         text: "Save changes",

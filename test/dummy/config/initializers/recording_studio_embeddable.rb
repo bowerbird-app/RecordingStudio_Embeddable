@@ -5,7 +5,7 @@ RecordingStudioEmbeddable.configure do |config|
   config.blocked_embedder_domains = []
   config.allow_any_domain = true
   config.embed_theme = {
-    font_family: "sans",
+    font_family: "Inter",
     background_color: "#ffffff",
     text_color: "#0f172a",
     muted_text_color: "#475569",

@@ -148,15 +148,23 @@ module RecordingStudioEmbeddable
       end
 
       def build_stats_chart_state
+        @stats_range_picker = stats_range_picker
         @stats_range = stats_range
+        @stats_granularity = stats_granularity
         @stats_viewer_filter = stats_viewer_filter
         @stats_range_options = {
           "7d" => "Last 7 days",
           "30d" => "Last 30 days",
           "90d" => "Last 90 days"
         }
+        @stats_granularity_options = {
+          "day" => "Per day",
+          "week" => "Per week",
+          "month" => "Per month"
+        }
         @stats_viewer_options = {
           "all" => "All views",
+          "unique" => "Unique views",
           "humans" => "Humans only",
           "bots" => "Bots only"
         }
@@ -166,12 +174,8 @@ module RecordingStudioEmbeddable
 
         @stats_custom_range = @stats_from_date.present? && @stats_to_date.present?
         if @stats_custom_range
-          if @stats_from_date > @stats_to_date
-            @stats_from_date, @stats_to_date = @stats_to_date, @stats_from_date
-          end
-          if (@stats_to_date - @stats_from_date).to_i > 365
-            @stats_from_date = @stats_to_date - 365
-          end
+          @stats_from_date, @stats_to_date = @stats_to_date, @stats_from_date if @stats_from_date > @stats_to_date
+          @stats_from_date = @stats_to_date - 365 if (@stats_to_date - @stats_from_date).to_i > 365
 
           from_time = @stats_from_date.beginning_of_day
           to_time = @stats_to_date.end_of_day
@@ -185,13 +189,26 @@ module RecordingStudioEmbeddable
         relation = relation.humans if @stats_viewer_filter == "humans"
         relation = relation.bots if @stats_viewer_filter == "bots"
 
-        grouped_counts = relation.pluck(:viewed_at).group_by { |value| value.in_time_zone.to_date }.transform_values(&:size)
-        dates = (from_time.to_date..to_time.to_date).to_a
+        grouped_counts =
+          if @stats_viewer_filter == "unique"
+            relation
+              .where.not(viewer_digest: nil)
+              .pluck(:viewed_at, :viewer_digest)
+              .group_by { |viewed_at, _digest| stats_bucket_key(viewed_at.in_time_zone.to_date, @stats_granularity) }
+              .transform_values { |rows| rows.map { |_viewed_at, digest| digest }.uniq.size }
+          else
+            relation
+              .pluck(:viewed_at)
+              .group_by { |value| stats_bucket_key(value.in_time_zone.to_date, @stats_granularity) }
+              .transform_values(&:size)
+          end
+        periods = stats_periods(from_time.to_date, to_time.to_date, @stats_granularity)
 
-        @stats_chart_categories = dates.map { |date| date.strftime("%b %-d") }
-        @stats_chart_points = dates.map { |date| grouped_counts.fetch(date, 0) }
+        @stats_chart_categories = periods.map { |period| stats_bucket_label(period, @stats_granularity) }
+        @stats_chart_points = periods.map { |period| grouped_counts.fetch(period, 0) }
         @stats_chart_total = @stats_chart_points.sum
         @stats_chart_series = [{ name: @stats_viewer_options.fetch(@stats_viewer_filter), data: @stats_chart_points }]
+        @stats_geo_rows = build_geo_rows(relation)
         @stats_subtitle_range =
           if @stats_custom_range
             "#{@stats_from_date.strftime('%b %-d, %Y')} to #{@stats_to_date.strftime('%b %-d, %Y')}"
@@ -200,18 +217,103 @@ module RecordingStudioEmbeddable
           end
       end
 
-      def stats_range
+      def build_geo_rows(relation)
+        geo_counts = Hash.new { |hash, key| hash[key] = { views: 0, unique_digests: {}, human_views: 0, bot_views: 0 } }
+
+        relation.pluck(:metadata, :viewer_digest, :bot).each do |metadata, viewer_digest, bot|
+          country_code = metadata.is_a?(Hash) ? metadata["country"].presence : nil
+          country = country_code || "Unknown"
+          geo_counts[country][:views] += 1
+          geo_counts[country][:unique_digests][viewer_digest] = true if viewer_digest.present?
+          if bot
+            geo_counts[country][:bot_views] += 1
+          else
+            geo_counts[country][:human_views] += 1
+          end
+        end
+
+        geo_counts
+          .map do |country, data|
+            {
+              country: country,
+              views: data[:views],
+              unique_views: data[:unique_digests].size,
+              human_views: data[:human_views],
+              bot_views: data[:bot_views]
+            }
+          end
+          .sort_by { |row| [-row[:views], row[:country]] }
+          .first(15)
+      end
+
+      def stats_range_picker
         value = params[:range].to_s
-        return value if %w[7d 30d 90d].include?(value)
+        return value if %w[7d 30d 90d custom].include?(value)
 
         "30d"
       end
 
+      def stats_range
+        value = stats_range_picker
+        return "30d" if value == "custom"
+
+        value
+      end
+
       def stats_viewer_filter
         value = params[:viewer].to_s
-        return value if %w[all humans bots].include?(value)
+        return value if %w[all unique humans bots].include?(value)
 
         "all"
+      end
+
+      def stats_granularity
+        value = params[:granularity].to_s
+        return value if %w[day week month].include?(value)
+
+        "day"
+      end
+
+      def stats_periods(start_date, end_date, granularity)
+        case granularity
+        when "week"
+          periods = []
+          cursor = start_date.beginning_of_week
+          while cursor <= end_date
+            periods << cursor
+            cursor += 7.days
+          end
+          periods
+        when "month"
+          periods = []
+          cursor = start_date.beginning_of_month
+          while cursor <= end_date
+            periods << cursor
+            cursor = cursor.next_month.beginning_of_month
+          end
+          periods
+        else
+          (start_date..end_date).to_a
+        end
+      end
+
+      def stats_bucket_key(date, granularity)
+        case granularity
+        when "week" then date.beginning_of_week
+        when "month" then date.beginning_of_month
+        else date
+        end
+      end
+
+      def stats_bucket_label(bucket, granularity)
+        case granularity
+        when "week"
+          "Week of #{bucket.strftime('%b %-d')}"
+        when "month"
+          bucket.strftime("%b %Y")
+        else
+          bucket.strftime("%b %-d")
+        end
       end
 
       def stats_from_time(range)
@@ -238,14 +340,14 @@ module RecordingStudioEmbeddable
 
         recordable_defaults = Styling::RecordableDefaults.call(recording: @recording)
 
-        @styling_definitions = RecordingStudioEmbeddable.configuration.styling_tokens
+        @styling_definitions = visible_styling_definitions
         legacy_font_keys = Styling::Tokens::FONT_STACKS.keys.map(&:downcase)
         @font_options = Services::GoogleFonts.options
-          .map(&:to_s)
-          .map(&:strip)
-          .reject(&:blank?)
-          .reject { |font| legacy_font_keys.include?(font.downcase) }
-          .uniq
+                                             .map(&:to_s)
+                                             .map(&:strip)
+                                             .reject(&:blank?)
+                                             .reject { |font| legacy_font_keys.include?(font.downcase) }
+                                             .uniq
         @styling_overrides = @embed.appearance.to_h.stringify_keys
         @recordable_defaults = recordable_defaults[:defaults].stringify_keys
         @recordable_type = recordable_defaults[:recordable_type]
@@ -255,6 +357,22 @@ module RecordingStudioEmbeddable
         @theme_sources = resolved.sources.stringify_keys
         @styling_editable = styling_editable?
         @styling_errors ||= {}
+      end
+
+      def visible_styling_definitions
+        definitions = RecordingStudioEmbeddable.configuration.styling_tokens
+        configured_theme = RecordingStudioEmbeddable.configuration.embed_theme
+
+        configured_keys =
+          if configured_theme.respond_to?(:to_h)
+            configured_theme.to_h.keys.map(&:to_s)
+          else
+            []
+          end
+
+        return definitions if configured_keys.empty?
+
+        definitions.select { |key, _definition| configured_keys.include?(key.to_s) }
       end
 
       def styling_editable?
@@ -282,7 +400,8 @@ module RecordingStudioEmbeddable
       def persist_recordable_defaults(cleaned_values)
         profile = find_or_build_styling_profile
         unless profile
-          redirect_to styling_management_embed_path(@embed), alert: "Cannot save recordable defaults without a recordable type."
+          redirect_to styling_management_embed_path(@embed),
+                      alert: "Cannot save recordable defaults without a recordable type."
           return
         end
 

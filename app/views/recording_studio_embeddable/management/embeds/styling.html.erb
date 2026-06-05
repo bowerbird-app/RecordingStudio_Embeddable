@@ -3,32 +3,7 @@
 <% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
 
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
-  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) do |component| %>
-    <% component.right_slot do %>
-      <div class="flex items-center gap-2">
-        <%= render FlatPack::Button::Component.new(
-          text: "Embed",
-          style: :secondary,
-          size: :md,
-          url: edit_management_embed_path(@embed)
-        ) %>
-        <%= render FlatPack::Button::Component.new(
-          icon: "cog-6-tooth",
-          icon_only: true,
-          style: :secondary,
-          size: :md,
-          url: settings_management_embed_path(@embed),
-          aria: { label: "Settings" }
-        ) %>
-        <%= render FlatPack::Button::Component.new(
-          text: "Stats",
-          style: :secondary,
-          size: :md,
-          url: stats_management_embed_path(@embed)
-        ) %>
-      </div>
-    <% end %>
-  <% end %>
+  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) %>
 
   <%= render FlatPack::PageTitle::Component.new(
     title: "Styling",
@@ -36,6 +11,30 @@
     variant: :h1,
     large_subtitle: true
   ) %>
+
+  <div class="flex flex-wrap items-center gap-3">
+    <%= render FlatPack::Button::Component.new(
+      text: "Save styling",
+      style: :primary,
+      size: :md,
+      type: "submit",
+      disabled: !@styling_editable
+    ) %>
+    <%= render FlatPack::Button::Component.new(
+      text: "Reset all",
+      style: :secondary,
+      size: :md,
+      type: "button",
+      disabled: !@styling_editable,
+      data: { reset_styling_fields: true }
+    ) %>
+    <%= render FlatPack::Button::Component.new(
+      text: "Preview",
+      style: :secondary,
+      size: :md,
+      url: preview_management_embed_path(@embed)
+    ) %>
+  </div>
 
   <% unless @styling_editable %>
     <p class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
@@ -58,12 +57,10 @@
         <% field_name = key.to_s %>
         <% current_value = @styling_overrides[field_name] %>
         <% resolved_value = @resolved_theme[field_name] %>
-        <% source_label = @theme_sources[field_name].to_s.presence || "system" %>
 
-        <div class="space-y-2 border-b border-(--surface-border-color) pb-4 last:border-b-0 last:pb-0">
-          <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="space-y-2 pb-4 last:pb-0">
+          <div class="flex flex-wrap items-center gap-2">
             <label for="embed_appearance_<%= field_name %>" class="text-sm font-medium"><%= definition[:label] %></label>
-            <span class="text-xs text-(--text-muted-color)">Source: <%= source_label.humanize %></span>
           </div>
 
           <% case definition[:type] %>
@@ -71,11 +68,11 @@
             <% if field_name == "font_family" %>
               <%= render FlatPack::Select::Component.new(
                 name: "embed[appearance][#{field_name}]",
-                label: definition[:label],
+                label: "",
                 options: @font_options.map { |font| { label: "#{font}  Aa", value: font } },
                 value: current_value,
                 id: "embed_appearance_font_family",
-                placeholder: "Inherit",
+                placeholder: (resolved_value.present? ? "Inherit (#{resolved_value})" : "Inherit"),
                 searchable: true,
                 disabled: !@styling_editable
               ) %>
@@ -134,23 +131,6 @@
       <% end %>
     </div>
 
-    <div class="flex items-center gap-3">
-      <%= render FlatPack::Button::Component.new(
-        text: "Save styling",
-        style: :primary,
-        size: :md,
-        type: "submit",
-        disabled: !@styling_editable
-      ) %>
-      <%= render FlatPack::Button::Component.new(
-        text: "Reset all",
-        style: :secondary,
-        size: :md,
-        type: "button",
-        disabled: !@styling_editable,
-        data: { reset_styling_fields: true }
-      ) %>
-    </div>
   <% end %>
 
 </div>

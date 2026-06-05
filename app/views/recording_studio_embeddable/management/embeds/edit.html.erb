@@ -18,40 +18,7 @@
 <% disable_management_actions = show_unpublished_warning %>
 
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
-  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) do |component| %>
-    <% component.right_slot do %>
-      <div class="flex items-center gap-2">
-        <%= render FlatPack::Button::Component.new(
-          text: "Styling",
-          style: :secondary,
-          size: :md,
-          url: disable_management_actions ? nil : styling_management_embed_path(@embed),
-          type: "button",
-          class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
-          aria: (disable_management_actions ? { disabled: true } : {})
-        ) %>
-        <%= render FlatPack::Button::Component.new(
-          icon: "cog-6-tooth",
-          icon_only: true,
-          style: :secondary,
-          size: :md,
-          url: disable_management_actions ? nil : settings_management_embed_path(@embed),
-          type: "button",
-          class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
-          aria: (disable_management_actions ? { label: "Settings", disabled: true } : { label: "Settings" })
-        ) %>
-        <%= render FlatPack::Button::Component.new(
-          text: "Stats",
-          style: :secondary,
-          size: :md,
-          url: disable_management_actions ? nil : stats_management_embed_path(@embed),
-          type: "button",
-          class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
-          aria: (disable_management_actions ? { disabled: true } : {})
-        ) %>
-      </div>
-    <% end %>
-  <% end %>
+  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) %>
 
   <%= render FlatPack::PageTitle::Component.new(
     title: "Embed",
@@ -59,6 +26,42 @@
     variant: :h1,
     large_subtitle: true
   ) %>
+
+  <div class="flex flex-wrap items-center gap-2">
+    <%= render FlatPack::Button::Component.new(
+      text: "Preview",
+      style: :secondary,
+      size: :md,
+      url: preview_management_embed_path(@embed)
+    ) %>
+    <%= render FlatPack::Button::Component.new(
+      text: "Styling",
+      style: :secondary,
+      size: :md,
+      url: disable_management_actions ? nil : styling_management_embed_path(@embed),
+      type: "button",
+      class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
+      aria: (disable_management_actions ? { disabled: true } : {})
+    ) %>
+    <%= render FlatPack::Button::Component.new(
+      text: "Settings",
+      style: :secondary,
+      size: :md,
+      url: disable_management_actions ? nil : settings_management_embed_path(@embed),
+      type: "button",
+      class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
+      aria: (disable_management_actions ? { disabled: true } : {})
+    ) %>
+    <%= render FlatPack::Button::Component.new(
+      text: "Stats",
+      style: :secondary,
+      size: :md,
+      url: disable_management_actions ? nil : stats_management_embed_path(@embed),
+      type: "button",
+      class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
+      aria: (disable_management_actions ? { disabled: true } : {})
+    ) %>
+  </div>
 
   <% if show_unpublished_warning %>
     <%= render FlatPack::EmptyState::Component.new(
@@ -87,8 +90,33 @@
       <% end %>
 
       <div class="space-y-4">
-        <h2 class="text-base font-semibold">Embed code</h2>
-        <textarea readonly rows="6" class="w-full rounded-md border border-(--surface-border-color) bg-(--surface-raised-background-color) p-3 font-mono text-sm"><%= embed_code %></textarea>
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div class="space-y-1">
+            <h2 class="text-base font-semibold">Embed code</h2>
+            <p class="max-w-2xl text-sm text-(--text-muted-color)">
+              Copy the code below, then paste it into the page or editor on your site where you want the embed to appear.
+              Save that page after you paste it.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <%= render FlatPack::Button::Component.new(
+              text: "Copy code",
+              style: :secondary,
+              size: :sm,
+              type: "button",
+              data: { embed_code_copy_button: true }
+            ) %>
+          </div>
+        </div>
+
+        <textarea
+          id="embed-code"
+          readonly
+          rows="6"
+          class="w-full rounded-md border border-(--surface-border-color) bg-(--surface-raised-background-color) p-3 font-mono text-sm"
+          data-embed-code-target="code"
+        ><%= embed_code %></textarea>
       </div>
     </div>
   <% end %>
@@ -118,6 +146,38 @@
     });
   };
 
+  const initializeEmbedCodeCopy = () => {
+    document.querySelectorAll('button[data-embed-code-copy-button="true"]').forEach((button) => {
+      if (button.dataset.copyBound === "true") {
+        return;
+      }
+
+      button.dataset.copyBound = "true";
+
+      button.addEventListener("click", async () => {
+        const container = button.closest(".space-y-4") || document;
+        const code = container.querySelector('[data-embed-code-target="code"]');
+        if (!code) return;
+
+        const text = code.value || code.textContent || "";
+
+        try {
+          await navigator.clipboard.writeText(text);
+          const previousLabel = button.textContent;
+          button.textContent = "Copied!";
+          window.setTimeout(() => {
+            button.textContent = previousLabel;
+          }, 1500);
+        } catch (_error) {
+          code.focus();
+          code.select();
+        }
+      });
+    });
+  };
+
   document.addEventListener("turbo:load", initializeEmbedToggleAutosave);
   document.addEventListener("DOMContentLoaded", initializeEmbedToggleAutosave);
+  document.addEventListener("turbo:load", initializeEmbedCodeCopy);
+  document.addEventListener("DOMContentLoaded", initializeEmbedCodeCopy);
 </script>
