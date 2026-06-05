@@ -12,30 +12,6 @@
     large_subtitle: true
   ) %>
 
-  <div class="flex flex-wrap items-center gap-3">
-    <%= render FlatPack::Button::Component.new(
-      text: "Save styling",
-      style: :primary,
-      size: :md,
-      type: "submit",
-      disabled: !@styling_editable
-    ) %>
-    <%= render FlatPack::Button::Component.new(
-      text: "Reset all",
-      style: :secondary,
-      size: :md,
-      type: "button",
-      disabled: !@styling_editable,
-      data: { reset_styling_fields: true }
-    ) %>
-    <%= render FlatPack::Button::Component.new(
-      text: "Preview",
-      style: :secondary,
-      size: :md,
-      url: preview_management_embed_path(@embed)
-    ) %>
-  </div>
-
   <% unless @styling_editable %>
     <p class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
       Custom styling is currently disabled for this embed. You can still review the resolved values below.
@@ -49,6 +25,41 @@
   <% end %>
 
   <%= form_with model: @embed, url: styling_management_embed_path(@embed), method: :patch, class: "space-y-4" do |_form| %>
+    <div class="flex flex-wrap items-center gap-3">
+      <div data-styling-save-button-clean>
+        <%= render FlatPack::Button::Component.new(
+          text: "Save styling",
+          style: :secondary,
+          size: :md,
+          type: "submit",
+          disabled: !@styling_editable
+        ) %>
+      </div>
+      <div class="hidden" data-styling-save-button-dirty>
+        <%= render FlatPack::Button::Component.new(
+          text: "Save styling",
+          style: :primary,
+          size: :md,
+          type: "submit",
+          disabled: !@styling_editable
+        ) %>
+      </div>
+      <%= render FlatPack::Button::Component.new(
+        text: "Reset all",
+        style: :secondary,
+        size: :md,
+        type: "button",
+        disabled: !@styling_editable,
+        data: { reset_styling_fields: true }
+      ) %>
+      <%= render FlatPack::Button::Component.new(
+        text: "Preview",
+        style: :secondary,
+        size: :md,
+        url: preview_management_embed_path(@embed)
+      ) %>
+    </div>
+
     <input type="hidden" name="styling_scope" value="embed">
 
     <h2 class="text-base font-semibold">Embed overrides</h2>
@@ -173,6 +184,7 @@
       picker.addEventListener("input", () => {
         target.value = picker.value;
         applyPreview(picker.value);
+        target.dispatchEvent(new Event("input", { bubbles: true }));
       });
 
       if (trigger) {
@@ -204,6 +216,7 @@
 
         form.querySelectorAll('input[name^="embed[appearance]"]').forEach((input) => {
           input.value = "";
+          input.dispatchEvent(new Event("input", { bubbles: true }));
         });
 
         form.querySelectorAll('input[type="color"][data-default-color]').forEach((picker) => {
@@ -324,10 +337,40 @@
     applyPreview("embed_appearance_font_family");
   };
 
+  const initializeStylingSaveState = () => {
+    document.querySelectorAll('form[action$="/styling"]').forEach((form) => {
+      if (form.dataset.stylingSaveStateBound === "true") return;
+      form.dataset.stylingSaveStateBound = "true";
+
+      const cleanButton = form.querySelector('[data-styling-save-button-clean]');
+      const dirtyButton = form.querySelector('[data-styling-save-button-dirty]');
+      if (!cleanButton || !dirtyButton) return;
+
+      const trackedFields = () => Array.from(
+        form.querySelectorAll('input[name^="embed[appearance]"], textarea[name^="embed[appearance]"], select[name^="embed[appearance]"]')
+      );
+
+      const snapshot = () => trackedFields().map((field) => `${field.name}=__${field.value}`).join("||");
+      const initialSnapshot = snapshot();
+
+      const syncButtonState = () => {
+        const dirty = snapshot() !== initialSnapshot;
+        cleanButton.classList.toggle("hidden", dirty);
+        dirtyButton.classList.toggle("hidden", !dirty);
+      };
+
+      syncButtonState();
+      form.addEventListener("input", syncButtonState);
+      form.addEventListener("change", syncButtonState);
+    });
+  };
+
   document.addEventListener("turbo:load", initializeStylingColorPickers);
   document.addEventListener("DOMContentLoaded", initializeStylingColorPickers);
   document.addEventListener("turbo:load", initializeStylingReset);
   document.addEventListener("DOMContentLoaded", initializeStylingReset);
   document.addEventListener("turbo:load", initializeFontPreviewSelects);
   document.addEventListener("DOMContentLoaded", initializeFontPreviewSelects);
+  document.addEventListener("turbo:load", initializeStylingSaveState);
+  document.addEventListener("DOMContentLoaded", initializeStylingSaveState);
 </script>

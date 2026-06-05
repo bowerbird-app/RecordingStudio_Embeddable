@@ -1,5 +1,9 @@
-<article style="padding:var(--rse-embed-padding, 1rem);border:1px solid var(--rse-embed-border-color, #e2e8f0);border-radius:var(--rse-embed-radius, 0.375rem);background:var(--rse-embed-background-color, transparent);color:var(--rse-embed-text-color, inherit)">
-  <h1 style="margin:0 0 0.5rem;color:var(--rse-embed-accent-color, currentColor)"><%= @article.title %></h1>
-  <p style="margin:0 0 0.5rem;color:var(--rse-embed-text-color, inherit)">This text uses the main text color.</p>
-  <p style="margin:0;color:var(--rse-embed-muted-text-color, inherit)"><%= @article.description.presence || "No description provided." %></p>
-</article>
+<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem;">
+  <div style="width:100%;max-width:48rem;">
+    <article style="padding:var(--rse-embed-padding, 1rem);border:1px solid var(--rse-embed-border-color, #e2e8f0);border-radius:var(--rse-embed-radius, 0.375rem);background:var(--rse-embed-background-color, transparent);color:var(--rse-embed-text-color, inherit)">
+      <h1 style="margin:0 0 0.5rem;color:var(--rse-embed-accent-color, currentColor)"><%= @article.title %></h1>
+      <p style="margin:0 0 0.5rem;color:var(--rse-embed-text-color, inherit)">This text uses the main text color.</p>
+      <p style="margin:0;color:var(--rse-embed-muted-text-color, inherit)"><%= @article.description.presence || "No description provided." %></p>
+    </article>
+  </div>
+</div>

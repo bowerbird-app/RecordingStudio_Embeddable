@@ -21,7 +21,7 @@
                 <th class="px-4 py-3 font-medium">Type</th>
                 <th class="px-4 py-3 font-medium">Title</th>
                 <th class="px-4 py-3 font-medium">Parent</th>
-                <th class="px-4 py-3 font-medium">Publishable path</th>
+                <th class="px-4 py-3 font-medium">Embed preview path</th>
                 <th class="px-4 py-3 font-medium">Actions</th>
               </tr>
             </thead>
@@ -30,40 +30,23 @@
                 <% embeddable_recording = recording.respond_to?(:embeddable?) && recording.embeddable? %>
                 <% embed = recording.current_embed if recording.respond_to?(:current_embed) %>
                 <% embed ||= recording.ensure_embed!(enabled: true) if embeddable_recording && recording.respond_to?(:ensure_embed!) %>
-                <% publishable_path = recording.respond_to?(:publishable_public_path) ? recording.publishable_public_path : nil %>
+                <% embed_preview_path = embed.present? ? "/recording_studio_embeddable/management/embeds/#{embed.id}/preview" : nil %>
                 <tr>
                   <td class="px-4 py-3"><%= recording.recordable_type.to_s.demodulize %></td>
                   <td class="px-4 py-3 font-medium"><%= recording.recordable.try(:title).presence || recording.recordable.to_s %></td>
                   <td class="px-4 py-3"><%= recording.parent_recording&.recordable_type.to_s.demodulize.underscore.humanize.presence || "Root" %></td>
                   <td class="px-4 py-3">
-                    <% if publishable_path.present? %>
-                      <%= link_to publishable_path, publishable_path, class: "text-(--surface-primary-content-color) underline underline-offset-2" %>
+                    <% if embed_preview_path.present? %>
+                      <%= link_to embed_preview_path, embed_preview_path, class: "text-(--surface-primary-content-color) underline underline-offset-2" %>
                     <% else %>
-                      Publishable unavailable
+                      Embed preview unavailable
                     <% end %>
                   </td>
                   <td class="px-4 py-3">
                     <div class="flex flex-wrap items-center gap-2">
-                      <% if recording.recordable_type == "Page" %>
-                        <%= link_to edit_dummy_page_path(recording.recordable), class: "inline-flex" do %>
-                          <%= render FlatPack::Button::Component.new(text: "Edit Page", style: :ghost, size: :sm) %>
-                        <% end %>
-                      <% elsif recording.recordable_type == "Article" %>
-                        <%= link_to edit_dummy_article_path(recording.recordable), class: "inline-flex" do %>
-                          <%= render FlatPack::Button::Component.new(text: "Edit Article", style: :ghost, size: :sm) %>
-                        <% end %>
-                      <% elsif recording.recordable_type == "Document" %>
-                        <%= link_to edit_dummy_document_path(recording.recordable), class: "inline-flex" do %>
-                          <%= render FlatPack::Button::Component.new(text: "Edit Document", style: :ghost, size: :sm) %>
-                        <% end %>
-                      <% end %>
-
                       <% if embed.present? %>
                         <%= link_to "/recording_studio_embeddable/management/embeds/#{embed.id}/edit", class: "inline-flex" do %>
                           <%= render FlatPack::Button::Component.new(text: "Embed", style: :secondary, size: :sm) %>
-                        <% end %>
-                        <%= link_to "/recording_studio_embeddable/embeds/#{embed.token}", class: "inline-flex" do %>
-                          <%= render FlatPack::Button::Component.new(text: "Embed Preview", style: :ghost, size: :sm) %>
                         <% end %>
                       <% else %>
                         <span class="text-(--surface-muted-content-color)">No embed</span>

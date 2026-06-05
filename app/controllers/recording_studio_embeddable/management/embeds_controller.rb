@@ -19,11 +19,20 @@ module RecordingStudioEmbeddable
       end
 
       def update
+        form_context = params[:form_context].to_s
         apply_embed_params
         if @embed.save
-          redirect_to edit_management_embed_path(@embed), notice: "Embed settings updated."
+          if form_context == "settings"
+            redirect_to settings_management_embed_path(@embed), notice: "Embed settings updated."
+          else
+            redirect_to edit_management_embed_path(@embed), notice: "Embed settings updated."
+          end
         else
-          render :edit, status: :unprocessable_entity
+          if form_context == "settings"
+            render :settings, status: :unprocessable_entity
+          else
+            render :edit, status: :unprocessable_entity
+          end
         end
       end
 
@@ -442,9 +451,25 @@ module RecordingStudioEmbeddable
       def normalize_domain_lines(text)
         text.to_s
             .split(/\r?\n/)
-            .map(&:strip)
+            .map { |line| normalize_domain_entry(line) }
             .reject(&:blank?)
             .uniq
+      end
+
+      def normalize_domain_entry(value)
+        input = value.to_s.strip
+        return "" if input.blank?
+
+        host = begin
+          parsed = URI.parse(input)
+          parsed.host.presence || parsed.path.to_s
+        rescue URI::InvalidURIError
+          input
+        end
+
+        host.to_s.downcase.sub(%r{/.*\z}, "").strip
+      rescue URI::InvalidURIError
+        input
       end
 
       def assign_recordable_instance_variable
