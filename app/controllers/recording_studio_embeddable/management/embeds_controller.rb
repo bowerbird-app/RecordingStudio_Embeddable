@@ -27,12 +27,10 @@ module RecordingStudioEmbeddable
           else
             redirect_to edit_management_embed_path(@embed), notice: "Embed settings updated."
           end
+        elsif form_context == "settings"
+          render :settings, status: :unprocessable_entity
         else
-          if form_context == "settings"
-            render :settings, status: :unprocessable_entity
-          else
-            render :edit, status: :unprocessable_entity
-          end
+          render :edit, status: :unprocessable_entity
         end
       end
 
