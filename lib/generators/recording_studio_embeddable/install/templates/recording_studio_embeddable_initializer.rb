@@ -35,6 +35,9 @@ RecordingStudioEmbeddable.configure do |config|
   config.view_log_raw_user_agent = false
   config.view_log_raw_referer = false
   config.management_authorizer = lambda do |controller:|
-    controller.respond_to?(:current_user, true) && controller.send(:current_user).present?
+    next false unless controller.respond_to?(:current_user, true)
+
+    user = controller.send(:current_user)
+    user.present? && user.respond_to?(:RS_accessible, true) && user.public_send(:RS_accessible)
   end
 end

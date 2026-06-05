@@ -84,7 +84,10 @@
 
         # Management and token lifecycle
         config.management_authorizer = ->(controller:) {
-          controller.respond_to?(:current_user, true) && controller.send(:current_user).present?
+          next false unless controller.respond_to?(:current_user, true)
+
+          user = controller.send(:current_user)
+          user.present? && user.respond_to?(:RS_accessible, true) && user.public_send(:RS_accessible)
         }
         config.token_bytes = 24
         config.prune_views_after = 90.days
@@ -148,7 +151,7 @@
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_log_salt</td><td class="px-3 py-2 font-mono">nil</td><td class="px-3 py-2">HMAC salt used for deterministic digest fields in logs.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_summary_enabled</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">Enables summary-oriented analytics features for logs.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">bot_detector</td><td class="px-3 py-2 font-mono">nil</td><td class="px-3 py-2">Optional custom bot detector strategy/service.</td></tr>
-        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">management_authorizer</td><td class="px-3 py-2 font-mono">lambda { current_user present }</td><td class="px-3 py-2">Authorization gate for management endpoints.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">management_authorizer</td><td class="px-3 py-2 font-mono">lambda { current_user.RS_accessible }</td><td class="px-3 py-2">Authorization gate for management endpoints; expects an accessible user context.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">token_bytes</td><td class="px-3 py-2 font-mono">24</td><td class="px-3 py-2">Byte length for generated embed/public tokens.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">prune_views_after</td><td class="px-3 py-2 font-mono">90.days</td><td class="px-3 py-2">Retention duration before old view logs are pruned.</td></tr>
         <tr><td class="px-3 py-2 font-mono">hooks (reader)</td><td class="px-3 py-2 font-mono">Hooks.new</td><td class="px-3 py-2">Hook registry object for lifecycle/event integrations.</td></tr>

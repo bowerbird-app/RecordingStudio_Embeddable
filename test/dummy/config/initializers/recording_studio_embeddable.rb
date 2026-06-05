@@ -18,5 +18,10 @@ RecordingStudioEmbeddable.configure do |config|
   }
   config.require_publishable = true
   config.rate_limiter = :rails_cache
-  config.management_authorizer = ->(controller:) { controller.respond_to?(:current_user, true) && controller.send(:current_user).present? }
+  config.management_authorizer = lambda do |controller:|
+    next false unless controller.respond_to?(:current_user, true)
+
+    user = controller.send(:current_user)
+    user.present? && user.respond_to?(:RS_accessible, true) && user.public_send(:RS_accessible)
+  end
 end

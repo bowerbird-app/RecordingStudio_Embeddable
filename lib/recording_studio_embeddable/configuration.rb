@@ -98,7 +98,10 @@ module RecordingStudioEmbeddable
       @view_summary_enabled = true
       @bot_detector = nil
       @management_authorizer = lambda { |controller:|
-        controller.respond_to?(:current_user, true) && controller.send(:current_user).present?
+        next false unless controller.respond_to?(:current_user, true)
+
+        user = controller.send(:current_user)
+        user.present? && user.respond_to?(:RS_accessible, true) && user.public_send(:RS_accessible)
       }
       @token_bytes = 24
       @prune_views_after = 90.respond_to?(:days) ? 90.days : 90 * 24 * 60 * 60
