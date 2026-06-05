@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_01_020001) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_05_014227) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -92,7 +92,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_01_020001) do
     t.index ["token"], name: "index_recording_studio_embeddable_embeds_on_token", unique: true
   end
 
-  create_table "recording_studio_embeddable_views", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+  create_table "recording_studio_embeddable_styling_profiles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "allow_custom_styling", default: true, null: false
+    t.datetime "created_at", null: false
+    t.jsonb "defaults", default: {}, null: false
+    t.string "recordable_type", null: false
+    t.datetime "updated_at", null: false
+    t.integer "version", default: 0, null: false
+    t.index ["recordable_type"], name: "idx_rse_styling_profiles_recordable_type", unique: true
+  end
+
+  create_table "recording_studio_embeddable_view_logs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.boolean "bot", default: false, null: false
     t.boolean "cache_hit", default: false, null: false
     t.datetime "created_at", null: false
@@ -122,15 +132,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_01_020001) do
     t.string "user_agent_digest"
     t.datetime "viewed_at", null: false
     t.string "viewer_digest"
-    t.index ["bot"], name: "idx_rse_views_bot"
-    t.index ["embed_id", "viewed_at"], name: "idx_rse_views_embed_viewed_at"
-    t.index ["embed_id"], name: "index_recording_studio_embeddable_views_on_embed_id"
-    t.index ["parent_recording_id", "viewed_at"], name: "idx_rse_views_parent_recording_viewed_at"
-    t.index ["referer_host", "viewed_at"], name: "idx_rse_views_referer_viewed_at"
-    t.index ["status", "viewed_at"], name: "idx_rse_views_status_viewed_at"
-    t.index ["token_digest", "viewed_at"], name: "idx_rse_views_token_viewed_at"
-    t.index ["viewed_at"], name: "idx_rse_views_viewed_at"
-    t.index ["viewer_digest", "viewed_at"], name: "idx_rse_views_viewer_viewed_at"
+    t.index ["bot"], name: "idx_rse_view_logs_bot"
+    t.index ["embed_id", "viewed_at"], name: "idx_rse_view_logs_embed_viewed_at"
+    t.index ["embed_id"], name: "index_recording_studio_embeddable_view_logs_on_embed_id"
+    t.index ["parent_recording_id", "viewed_at"], name: "idx_rse_view_logs_parent_recording_viewed_at"
+    t.index ["referer_host", "viewed_at"], name: "idx_rse_view_logs_referer_viewed_at"
+    t.index ["status", "viewed_at"], name: "idx_rse_view_logs_status_viewed_at"
+    t.index ["token_digest", "viewed_at"], name: "idx_rse_view_logs_token_viewed_at"
+    t.index ["viewed_at"], name: "idx_rse_view_logs_viewed_at"
+    t.index ["viewer_digest", "viewed_at"], name: "idx_rse_view_logs_viewer_viewed_at"
   end
 
   create_table "recording_studio_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -211,7 +221,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_01_020001) do
   end
 
   add_foreign_key "recording_studio_device_sessions", "recording_studio_recordings", column: "root_recording_id"
-  add_foreign_key "recording_studio_embeddable_views", "recording_studio_embeddable_embeds", column: "embed_id"
+  add_foreign_key "recording_studio_embeddable_view_logs", "recording_studio_embeddable_embeds", column: "embed_id"
   add_foreign_key "recording_studio_events", "recording_studio_recordings", column: "recording_id"
   add_foreign_key "recording_studio_publishable_publishables", "recording_studio_recordings", column: "social_image_attachment_recording_id", name: "fk_rs_publishables_social_image_attachment_recording"
   add_foreign_key "recording_studio_recordings", "recording_studio_recordings", column: "parent_recording_id"

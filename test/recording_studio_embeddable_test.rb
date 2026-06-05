@@ -334,9 +334,11 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
   def test_dummy_app_surface_is_wired
     routes = File.read(File.expand_path("dummy/config/routes.rb", __dir__))
+    engine_routes = File.read(File.expand_path("../config/routes.rb", __dir__))
     page = File.read(File.expand_path("dummy/app/models/page.rb", __dir__))
 
     assert_includes routes, "mount RecordingStudioEmbeddable::Engine"
+    assert_includes engine_routes, "get :preview"
     assert_includes page, "RecordingStudio::Capabilities::Embeddable.to"
     assert File.exist?(File.expand_path("dummy/app/views/pages/embed.html.erb", __dir__))
   end
@@ -375,7 +377,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     )
 
     assert_includes migration, "rename_table OLD_TABLE, NEW_TABLE"
-    assert_includes migration, "recording_studio_embeddable_embeddable_view_logs"
+    assert_includes migration, "recording_studio_embeddable_view_logs"
   end
 
   def test_embeddable_view_log_uses_legacy_table_when_new_table_missing
@@ -389,7 +391,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
         @mapping.fetch(name, false)
       end
     end.new(
-      "recording_studio_embeddable_embeddable_view_logs" => false,
+      "recording_studio_embeddable_view_logs" => false,
       "recording_studio_embeddable_views" => true
     )
 
@@ -411,13 +413,13 @@ class RecordingStudioEmbeddableTest < Minitest::Test
         @mapping.fetch(name, false)
       end
     end.new(
-      "recording_studio_embeddable_embeddable_view_logs" => true,
+      "recording_studio_embeddable_view_logs" => true,
       "recording_studio_embeddable_views" => true
     )
 
     with_temporary_singleton_method(model, :connected?, -> { true }) do
       with_temporary_singleton_method(model, :connection, -> { connection }) do
-        assert_equal "recording_studio_embeddable_embeddable_view_logs", model.table_name
+        assert_equal "recording_studio_embeddable_view_logs", model.table_name
       end
     end
   end

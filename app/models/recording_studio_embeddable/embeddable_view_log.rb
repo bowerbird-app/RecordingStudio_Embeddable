@@ -2,7 +2,7 @@
 
 module RecordingStudioEmbeddable
   class EmbeddableViewLog < ApplicationRecord
-    NEW_TABLE_NAME = "recording_studio_embeddable_embeddable_view_logs"
+    NEW_TABLE_NAME = "recording_studio_embeddable_view_logs"
     LEGACY_TABLE_NAME = "recording_studio_embeddable_views"
 
     def self.table_name
