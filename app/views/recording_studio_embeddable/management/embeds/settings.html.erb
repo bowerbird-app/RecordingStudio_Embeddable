@@ -47,6 +47,29 @@
       <% end %>
 
       <div class="space-y-4">
+        <%= render FlatPack::SectionTitle::Component.new(
+          title: "Iframe sizing",
+          subtitle: "These values control the copied iframe element itself.",
+        ) %>
+
+        <%= render FlatPack::TextInput::Component.new(
+          name: "embed[sizing][width]",
+          label: "Iframe width",
+          value: @embed.sizing[:width].presence || RecordingStudioEmbeddable.configuration.default_sizing["width"],
+          placeholder: "100%",
+          description: "Controls the outer iframe width in the host page. This does not change the content width inside the embed."
+        ) %>
+
+        <%= render FlatPack::TextInput::Component.new(
+          name: "embed[sizing][height]",
+          label: "Iframe height",
+          value: @embed.sizing[:height].presence || RecordingStudioEmbeddable.configuration.default_sizing["height"],
+          placeholder: "320px",
+          description: "Controls the outer iframe height reserved by the host page. The embedded page still lays out its own content inside that frame."
+        ) %>
+      </div>
+
+      <div class="space-y-4">
         <%= render FlatPack::TextArea::Component.new(
           name: "embed[allowed_embedder_domains_text]",
           label: "Allowed domains (one per line)",

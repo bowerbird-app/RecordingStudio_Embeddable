@@ -58,7 +58,14 @@ module RecordingStudioEmbeddable
       @fallback_to_publishable_renderer = false
       @require_domain_allowlist = true
       @allow_any_domain = false
-      @default_sizing = { "mode" => "responsive", "aspect_ratio" => "16:9", "max_width" => 1200, "min_height" => 320 }
+      @default_sizing = {
+        "mode" => "responsive",
+        "aspect_ratio" => "16:9",
+        "width" => "100%",
+        "height" => "320px",
+        "max_width" => 1200,
+        "min_height" => 320
+      }
       @rate_limiter = :null
       @redis = nil
       @rate_limit = 120

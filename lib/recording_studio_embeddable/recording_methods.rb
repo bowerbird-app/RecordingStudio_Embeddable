@@ -65,11 +65,14 @@ module RecordingStudioEmbeddable
       title = ERB::Util.html_escape(html_options[:title] || "Embedded recording")
       src = ERB::Util.html_escape(public_url)
       sizing = embed&.sizing || {}
-      min_height = Integer(sizing[:min_height] || sizing["min_height"] || 320)
+      iframe_width = html_options[:width].presence || sizing[:width].presence || sizing["width"].presence ||
+                     sizing[:max_width].presence || sizing["max_width"].presence || "100%"
+      iframe_height = html_options[:height].presence || sizing[:height].presence || sizing["height"].presence ||
+                      sizing[:min_height].presence || sizing["min_height"].presence || "320px"
       [
         %(<iframe src="#{src}" title="#{title}" loading="lazy"),
         %(referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin"),
-        %(style="border:0;width:100%;min-height:#{min_height}px"></iframe>)
+        %(style="border:0;width:#{iframe_width};height:#{iframe_height};max-width:100%"></iframe>)
       ].join(" ")
     end
 

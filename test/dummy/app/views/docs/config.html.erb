@@ -27,9 +27,11 @@
         config.allowed_embed_modes = %i[iframe oembed] # Supported embed transports; valid values are :iframe and :oembed.
         config.default_embed_mode = :iframe # Default transport when mode is omitted; options are :iframe or :oembed.
         config.fallback_to_publishable_renderer = false # If true, fallback to publishable renderer when embed renderer is missing.
-        config.default_sizing = { # Default size rules applied to embeds when no per-embed overrides exist.
+        config.default_sizing = { # Default iframe sizing used when no per-embed overrides exist.
           "mode" => "responsive",
           "aspect_ratio" => "16:9",
+          "width" => "100%",
+          "height" => "320px",
           "max_width" => 1200,
           "min_height" => 320
         }
@@ -112,7 +114,7 @@
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">fallback_to_publishable_renderer</td><td class="px-3 py-2 font-mono">false</td><td class="px-3 py-2">Fallback behavior when primary embed renderer is unavailable.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">require_domain_allowlist</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">Enforces allowlist checks for embedding domains.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">allow_any_domain</td><td class="px-3 py-2 font-mono">false</td><td class="px-3 py-2">Bypasses domain restrictions when true (use carefully).</td></tr>
-        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">default_sizing</td><td class="px-3 py-2 font-mono">{"mode"=>"responsive", ...}</td><td class="px-3 py-2">Default size constraints/aspect ratio for generated embeds.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">default_sizing</td><td class="px-3 py-2 font-mono">{"mode"=>"responsive", ...}</td><td class="px-3 py-2">Default iframe width/height and legacy size constraints for generated embeds.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">rate_limiter</td><td class="px-3 py-2 font-mono">:null</td><td class="px-3 py-2">Rate limiter backend (:null, :rails_cache, :redis, custom object).</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">redis</td><td class="px-3 py-2 font-mono">nil</td><td class="px-3 py-2">Redis connection/client used by redis rate limiter backend.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">rate_limit</td><td class="px-3 py-2 font-mono">120</td><td class="px-3 py-2">Max allowed requests per limiter window.</td></tr>

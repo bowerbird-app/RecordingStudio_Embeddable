@@ -156,6 +156,21 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_match(/\A[A-Za-z0-9]{32}\z/, token)
   end
 
+  def test_embed_code_uses_embed_max_width_for_iframe_width
+    recording = Object.new
+    recording.extend(RecordingStudioEmbeddable::RecordingMethods)
+    recording.define_singleton_method(:embed_public_url) { |**| "https://example.com/embed" }
+    recording.define_singleton_method(:embed) do
+      Struct.new(:appearance, :sizing).new({}, { "width" => "100px", "height" => "480px" })
+    end
+
+    html = recording.embed_code(title: "Embedded recording")
+
+    assert_includes html, 'width:100px'
+    assert_includes html, 'height:480px'
+    assert_includes html, 'max-width:100%'
+  end
+
   def test_renderer_prefers_capability_over_macro
     recordable = FakeRecordable.new(true)
     def recordable.recording_studio_capabilities

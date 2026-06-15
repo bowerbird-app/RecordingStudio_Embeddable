@@ -201,6 +201,7 @@ class Page < ApplicationRecord
         css_property: "max-width",
         input: :select,
         choices: [
+          ["Smallest", "100px"],
           ["Small", "640px"],
           ["Medium", "960px"],
           ["Large", "1200px"]
