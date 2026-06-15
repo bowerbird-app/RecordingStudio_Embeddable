@@ -1,93 +1,104 @@
-# Recording Studio Embeddable
+# RecordingStudio Embeddable
 
-`recording_studio_embeddable` is a v0.1 Rails isolated engine that adds secure, opt-in public iframe embeds to Recording Studio recordings.
+RecordingStudio Embeddable is the v1 Rails engine for secure, public iframe embeds in Recording Studio. It lets host applications opt recordable models into embeddable pages, control which domains may embed them, and manage cache, rate limiting, styling, and view logging from one place.
+
+## What It Includes
+
+- Public embed routes for tokenized recordings.
+- A management UI for previewing, editing, styling, and reviewing stats for embeds.
+- Host-side configuration for access control, cache policy, rate limiting, and logging.
+- A Rails generator that mounts the engine, installs an initializer, and copies migrations.
+- Helper methods for generating embed URLs and iframe markup from a recordable model.
+
+## Requirements
+
+- Ruby 3.3 or newer.
+- Rails 8.1 or newer.
+- A host application that can mount the engine and run the supplied migrations.
 
 ## Install
+
+Add the gem to your host app's `Gemfile`, then run the install generator:
 
 ```ruby
 gem "recording_studio_embeddable"
 ```
+
+If you're developing against this repository directly, use a local path or git source instead.
 
 ```bash
 bin/rails generate recording_studio_embeddable:install
 bin/rails db:migrate
 ```
 
-The installer mounts the engine at `/recording_studio_embeddable`, creates `config/initializers/recording_studio_embeddable.rb`, and copies the UUID migrations.
+The install generator will:
 
-## Opting in
+- Mount `RecordingStudioEmbeddable::Engine` in your routes.
+- Create `config/initializers/recording_studio_embeddable.rb`.
+- Copy the engine migrations into your app.
+- Optionally create `config/recording_studio_embeddable.yml`.
 
-Embeds are off by default. Opt in per recordable class:
+If you prefer to install pieces manually, the default mount path is `/recording_studio_embeddable`.
+
+## Opt In a Model
+
+Declare the embeddable capability on any model you want to expose publicly:
 
 ```ruby
-class Page < ApplicationRecord
-  recording_studio_embeddable renderer: "pages/embed", require_publishable: true
+class Article < ApplicationRecord
+  recording_studio_embeddable renderer: "articles/embed"
 end
 ```
 
-The Recording Studio capability form is also available:
+Once the record is ready, create an embed and use the generated public URL or iframe helper:
 
 ```ruby
-RecordingStudio::Capabilities::Embeddable.to(
-  renderer: "pages/embed",
-  cache: { max_age: 600, stale_while_revalidate: 60 }
-)
+article.ensure_embed!
+article.embed_public_url(host: "example.com")
+article.embed_code(host: "example.com")
 ```
 
-`cache` supports per-model overrides for public embed caching.
-- If omitted, caching is disabled for that model.
-- `cache: false` disables HTTP caching for that recordable model.
-- `cache: true` keeps global defaults.
-- `cache: { ... }` customizes policy values for that model.
+The public embed route is token-based and lives under the mounted engine path:
 
-Recording methods added to `RecordingStudio::Recording` include `embed`, `current_embed`, `embed_child_recording`, `ensure_embed!`, `embeddable?`, `embed_enabled?`, `embed_public_path`, `embed_public_url`, `embed_code`, `update_embed!`, `disable_embed!`, and `enable_embed!`.
+`/recording_studio_embeddable/embeds/:token`
 
-## Rendering and publishability
+## Configuration
 
-Public embeds render at `/recording_studio_embeddable/embeds/:token` in a dedicated iframe layout without host app chrome. Renderer precedence is:
+The default configuration is intentionally locked down. At a minimum, you will usually want to set allowed embedder domains and any app-specific management authorization.
 
-1. capability options,
-2. `recording_studio_embeddable` macro options,
-3. global `renderer_resolver`,
-4. class-name convention,
-5. safe fallback.
+Common settings include:
 
-The engine intentionally does **not** use a Publishable renderer by default. Publishable state is not duplicated; when `require_publishable` is true, public rendering uses parent recording Publishable helpers such as `currently_published?`, `current_publishable`, or `publishable_child_recording`. If helpers are unavailable, rendering fails closed.
+- `allowed_embedder_domains` and `blocked_embedder_domains`
+- `require_domain_allowlist` and `allow_any_domain`
+- `require_publishable` and `fallback_to_publishable_renderer`
+- `rate_limiting_enabled`, `rate_limiter`, `rate_limit`, and `rate_limit_window`
+- `cache_mode` and `cache_policy`
+- `view_logging_enabled` and the related sampling/privacy flags
+- `management_authorizer`
 
-Use a dedicated embed template (for example `pages/embed`) so embedded output can differ from your public publishable page (`pages/show`).
+The initializer generator writes a working starting point at `config/initializers/recording_studio_embeddable.rb`.
 
-The default embed layout is `recording_studio_embeddable/embed`. It supports reusable theme variables so host apps can customize fonts and colors globally or per recordable:
+## Management UI
 
-```ruby
-RecordingStudioEmbeddable.configure do |config|
-  config.embed_theme = {
-    font_family: "ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif",
-    background_color: "transparent",
-    text_color: "#0f172a",
-    muted_text_color: "#475569",
-    accent_color: "#2563eb",
-    border_color: "#e2e8f0",
-    custom_properties: {
-      "--rse-embed-radius" => "0.75rem"
-    }
-  }
-end
+The engine also ships management routes for embed editors and operators. From there you can:
+
+- Edit embed settings.
+- Preview the rendered embed.
+- Adjust styling overrides.
+- Review summary and stats views.
+
+## Development
+
+For local development in this repository:
+
+```bash
+bundle install
+bundle exec rake test
+cd test/dummy && bin/dev
 ```
 
-Any layout can reuse these variables with `embed_layout_body_attributes` from `RecordingStudioEmbeddable::EmbedLayoutHelper`.
+The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine.
 
-## Security, domains, and rate limiting
+## License
 
-Configure global allowed/blocked domains, and optionally override per capability or per embed. Requests that fail token lookup, disabled embeds, and unpublished content return 404; confirmed disallowed domains return 403; rate-limit failures return 429. Successful public responses set iframe-focused security headers including `Content-Security-Policy: frame-ancestors ...`.
-
-Rate limiter adapters are `:null`, `:rails_cache`, and `:redis` (when a Redis-like object is configured). Adapter errors fail open by default; set `rate_limit_fail_closed = true` to fail closed.
-
-## Caching and logging
-
-Successful public responses use configurable public cache-control plus ETag/Last-Modified handling and support 304 responses. Failure responses are `no-store`.
-
-Public views are logged to `RecordingStudioEmbeddable::EmbeddableViewLog` only, never as Recording Studio events. The capture pipeline normalizes payloads, detects common bots, stores privacy-safe HMAC digests for IP/user-agent data, and can run asynchronously through `LogViewJob`. `PruneViewsJob` removes old rows.
-
-## Dummy app
-
-The dummy app mounts Recording Studio and this engine, opts `Page` into embeddable rendering, and includes a small `pages/embed` surface for manual validation.
+MIT
