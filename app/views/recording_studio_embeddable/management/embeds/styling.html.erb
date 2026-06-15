@@ -66,6 +66,7 @@
         <% field_name = key.to_s %>
         <% current_value = @styling_overrides[field_name] %>
         <% resolved_value = @resolved_theme[field_name] %>
+        <% default_value = @recordable_style_defaults[field_name] %>
         <% option_items = Array(definition[:option_items]) %>
         <% if field_name == "padding_scale" || field_name == "radius_scale" %>
           <% scale_values = field_name == "padding_scale" ? RecordingStudioEmbeddable::Styling::Tokens::SPACING_SCALE : RecordingStudioEmbeddable::Styling::Tokens::RADIUS_SCALE %>
@@ -80,9 +81,9 @@
                } %>
           <% end %>
         <% end %>
-        <% resolved_option = option_items.find { |option| option.to_h.symbolize_keys[:value].to_s == resolved_value.to_s } %>
-        <% resolved_display = resolved_option.present? ? resolved_option.to_h.symbolize_keys[:label] : resolved_value %>
-        <% default_placeholder = resolved_display.present? ? "Default - #{resolved_display}" : "Inherit from host theme" %>
+        <% default_option = option_items.find { |option| option.to_h.symbolize_keys[:value].to_s == default_value.to_s } %>
+        <% default_display = default_option.present? ? default_option.to_h.symbolize_keys[:label] : default_value %>
+        <% default_placeholder = default_display.present? ? "Default - #{default_display}" : "Inherit from host theme" %>
 
         <div class="space-y-2 pb-4 last:pb-0">
           <div class="flex flex-wrap items-center gap-2">
@@ -103,6 +104,7 @@
                 disabled: !@styling_editable
               ) %>
             <% else %>
+              <%= hidden_field_tag "embed[appearance][#{field_name}]", "" %>
               <%= render FlatPack::Select::Component.new(
                 name: "embed[appearance][#{field_name}]",
                 label: "",
@@ -241,9 +243,16 @@
         const form = button.closest("form");
         if (!form) return;
 
-        form.querySelectorAll('input[name^="embed[appearance]"]').forEach((input) => {
-          input.value = "";
-          input.dispatchEvent(new Event("input", { bubbles: true }));
+        form.querySelectorAll('[name^="embed[appearance]"]').forEach((field) => {
+          if (field.matches('input[type="color"]')) return;
+
+          if (field.tagName === "SELECT") {
+            field.selectedIndex = 0;
+          }
+
+          field.value = "";
+          field.dispatchEvent(new Event("input", { bubbles: true }));
+          field.dispatchEvent(new Event("change", { bubbles: true }));
         });
 
         form.querySelectorAll('input[type="color"][data-default-color]').forEach((picker) => {

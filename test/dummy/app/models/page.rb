@@ -24,7 +24,7 @@ class Page < ApplicationRecord
     require_publishable: defined?(RecordingStudioPublishable),
     customizable_embed_styles: {
       background_color: {
-        label: "Background color",
+        label: "Background Color",
         css_variable: "--surface-background-color",
         input: :color,
         default: "#ffffff"

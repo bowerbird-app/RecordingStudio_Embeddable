@@ -1,8 +1,6 @@
 # Embed Styling Reference
 
-This engine no longer uses custom `--rse-embed-*` variables.
-
-Embed styling now works in three layers:
+Embed styling works in three layers:
 
 1. The host app's FlatPack theme provides the baseline.
 2. A recordable can declare `customizable_embed_styles` with code defaults.

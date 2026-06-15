@@ -241,7 +241,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_equal "xl", theme[:padding_scale]
   end
 
-  def test_renderer_embed_theme_ignores_undeclared_legacy_overrides
+  def test_renderer_embed_theme_ignores_undeclared_overrides
     recording = FakeRecording.new(FakeRecordable.new(true), Time.now)
     embed = Struct.new(:appearance).new({ "text_color" => "#ff0000" })
 
@@ -476,68 +476,16 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes migration, "column_exists?(:recording_studio_recordings, :trashed_at)"
   end
 
-  def test_view_migration_uses_postgresql_safe_index_names
-    migration = File.read(File.expand_path("../db/migrate/20250101000002_create_recording_studio_embeddable_views.rb",
+  def test_view_log_migration_uses_postgresql_safe_index_names
+    migration = File.read(File.expand_path("../db/migrate/20250101000002_create_recording_studio_embeddable_view_logs.rb",
                                            __dir__))
 
-    assert_includes migration, "idx_rse_views_embed_viewed_at"
-    refute_includes migration, "index_recording_studio_embeddable_views_on_embed_id_and_viewed_at"
+    assert_includes migration, "idx_rse_view_logs_embed_viewed_at"
+    refute_includes migration, "index_recording_studio_embeddable_view_logs_on_embed_id_and_viewed_at"
   end
 
-  def test_view_logs_rename_migration_updates_table_name
-    migration = File.read(
-      File.expand_path(
-        "../db/migrate/20260604040001_rename_recording_studio_embeddable_views_to_embeddable_view_logs.rb",
-        __dir__
-      )
-    )
-
-    assert_includes migration, "rename_table OLD_TABLE, NEW_TABLE"
-    assert_includes migration, "recording_studio_embeddable_view_logs"
-  end
-
-  def test_embeddable_view_log_uses_legacy_table_when_new_table_missing
-    model = RecordingStudioEmbeddable::EmbeddableViewLog
-    connection = Class.new do
-      def initialize(mapping)
-        @mapping = mapping
-      end
-
-      def data_source_exists?(name)
-        @mapping.fetch(name, false)
-      end
-    end.new(
-      "recording_studio_embeddable_view_logs" => false,
-      "recording_studio_embeddable_views" => true
-    )
-
-    with_temporary_singleton_method(model, :connected?, -> { true }) do
-      with_temporary_singleton_method(model, :connection, -> { connection }) do
-        assert_equal "recording_studio_embeddable_views", model.table_name
-      end
-    end
-  end
-
-  def test_embeddable_view_log_uses_new_table_when_available
-    model = RecordingStudioEmbeddable::EmbeddableViewLog
-    connection = Class.new do
-      def initialize(mapping)
-        @mapping = mapping
-      end
-
-      def data_source_exists?(name)
-        @mapping.fetch(name, false)
-      end
-    end.new(
-      "recording_studio_embeddable_view_logs" => true,
-      "recording_studio_embeddable_views" => true
-    )
-
-    with_temporary_singleton_method(model, :connected?, -> { true }) do
-      with_temporary_singleton_method(model, :connection, -> { connection }) do
-        assert_equal "recording_studio_embeddable_view_logs", model.table_name
-      end
-    end
+  def test_embeddable_view_log_uses_canonical_table_name
+    assert_equal "recording_studio_embeddable_view_logs", RecordingStudioEmbeddable::EmbeddableViewLog.table_name
   end
 
   def test_recording_schema_detection_supports_recording_studio_versions_without_trashed_at
@@ -546,23 +494,13 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     end
   end
 
-  def test_recording_schema_detection_supports_legacy_recording_studio_versions_with_trashed_at
+  def test_recording_schema_detection_supports_recording_studio_versions_with_trashed_at
     with_stubbed_recording_class(column_names: %w[id parent_recording_id trashed_at]) do
       assert RecordingStudioEmbeddable.recording_has_trashed_at?
     end
   end
 
   private
-
-  def with_temporary_singleton_method(object, method_name, implementation)
-    singleton = object.singleton_class
-    original = singleton.instance_method(method_name)
-    singleton.send(:define_method, method_name, implementation)
-    yield
-  ensure
-    singleton.send(:remove_method, method_name)
-    singleton.send(:define_method, method_name, original)
-  end
 
   def with_stubbed_recording_class(column_names:)
     previous = RecordingStudio.const_defined?(:Recording, false) ? RecordingStudio.const_get(:Recording) : nil

@@ -341,14 +341,16 @@ module RecordingStudioEmbeddable
         assign_recordable_instance_variable
 
         @styling_definitions = visible_styling_definitions
-        legacy_font_keys = Styling::Tokens::FONT_STACKS.keys.map(&:downcase)
+        built_in_font_keys = Styling::Tokens::FONT_STACKS.keys.map(&:downcase)
         @font_options = Services::GoogleFonts.options
                                              .map(&:to_s)
                                              .map(&:strip)
                                              .reject(&:blank?)
-                                             .reject { |font| legacy_font_keys.include?(font.downcase) }
+                     .reject { |font| built_in_font_keys.include?(font.downcase) }
                                              .uniq
         @styling_overrides = @embed.appearance.to_h.stringify_keys
+        @recordable_style_defaults =
+          RecordingStudioEmbeddable::Styling::RecordableDefaults.call(recording: @recording)[:defaults].to_h.stringify_keys
         resolved = Styling::ResolveTheme.call(recording: @recording, embed: @embed)
         @resolved_theme = resolved.values.stringify_keys
         @theme_sources = resolved.sources.stringify_keys

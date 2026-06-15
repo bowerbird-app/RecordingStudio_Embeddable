@@ -2,26 +2,7 @@
 
 module RecordingStudioEmbeddable
   class EmbeddableViewLog < ApplicationRecord
-    NEW_TABLE_NAME = "recording_studio_embeddable_view_logs"
-    LEGACY_TABLE_NAME = "recording_studio_embeddable_views"
-
-    def self.table_name
-      resolve_table_name
-    end
-
-    def self.resolve_table_name
-      return NEW_TABLE_NAME unless connected?
-
-      if connection.data_source_exists?(NEW_TABLE_NAME)
-        NEW_TABLE_NAME
-      elsif connection.data_source_exists?(LEGACY_TABLE_NAME)
-        LEGACY_TABLE_NAME
-      else
-        NEW_TABLE_NAME
-      end
-    rescue ActiveRecord::NoDatabaseError, ActiveRecord::StatementInvalid
-      NEW_TABLE_NAME
-    end
+    self.table_name = "recording_studio_embeddable_view_logs"
 
     belongs_to :embed, class_name: "RecordingStudioEmbeddable::Embed", optional: true, inverse_of: :embeddable_view_logs
 

@@ -79,7 +79,7 @@
           user.present? && user.respond_to?(:RS_accessible, true) && user.public_send(:RS_accessible)
         }
         config.token_bytes = 24 # Random byte length used to generate embed/public tokens.
-        config.prune_views_after = 90.days # Retention period before old view logs are pruned.
+        config.prune_views_after = 90.days # Retention period before view logs are pruned.
 
         # Hook registration object (read-only accessor)
         # config.hooks.on(:event_name) { ... }
@@ -114,7 +114,7 @@
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">fallback_to_publishable_renderer</td><td class="px-3 py-2 font-mono">false</td><td class="px-3 py-2">Fallback behavior when primary embed renderer is unavailable.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">require_domain_allowlist</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">Enforces allowlist checks for embedding domains.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">allow_any_domain</td><td class="px-3 py-2 font-mono">false</td><td class="px-3 py-2">Bypasses domain restrictions when true (use carefully).</td></tr>
-        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">default_sizing</td><td class="px-3 py-2 font-mono">{"mode"=>"responsive", ...}</td><td class="px-3 py-2">Default iframe width/height and legacy size constraints for generated embeds.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">default_sizing</td><td class="px-3 py-2 font-mono">{"mode"=>"responsive", ...}</td><td class="px-3 py-2">Default iframe width/height constraints for generated embeds.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">rate_limiter</td><td class="px-3 py-2 font-mono">:null</td><td class="px-3 py-2">Rate limiter backend (:null, :rails_cache, :redis, custom object).</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">redis</td><td class="px-3 py-2 font-mono">nil</td><td class="px-3 py-2">Redis connection/client used by redis rate limiter backend.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">rate_limit</td><td class="px-3 py-2 font-mono">120</td><td class="px-3 py-2">Max allowed requests per limiter window.</td></tr>
@@ -140,7 +140,7 @@
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">bot_detector</td><td class="px-3 py-2 font-mono">nil</td><td class="px-3 py-2">Optional custom bot detector strategy/service.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">management_authorizer</td><td class="px-3 py-2 font-mono">lambda { current_user.RS_accessible }</td><td class="px-3 py-2">Authorization gate for management endpoints; expects an accessible user context.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">token_bytes</td><td class="px-3 py-2 font-mono">24</td><td class="px-3 py-2">Byte length for generated embed/public tokens.</td></tr>
-        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">prune_views_after</td><td class="px-3 py-2 font-mono">90.days</td><td class="px-3 py-2">Retention duration before old view logs are pruned.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">prune_views_after</td><td class="px-3 py-2 font-mono">90.days</td><td class="px-3 py-2">Retention duration before view logs are pruned.</td></tr>
         <tr><td class="px-3 py-2 font-mono">hooks (reader)</td><td class="px-3 py-2 font-mono">Hooks.new</td><td class="px-3 py-2">Hook registry object for lifecycle/event integrations.</td></tr>
       </tbody>
     </table>

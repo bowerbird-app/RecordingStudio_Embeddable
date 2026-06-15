@@ -7,7 +7,7 @@ module RecordingStudioEmbeddable
   module Services
     class GoogleFonts
       CACHE_KEY = "recording_studio_embeddable/google_fonts/families/v2"
-      LEGACY_FONT_KEYS = RecordingStudioEmbeddable::Styling::Tokens::FONT_STACKS.keys.map(&:downcase).freeze
+      BUILT_IN_FONT_KEYS = RecordingStudioEmbeddable::Styling::Tokens::FONT_STACKS.keys.map(&:downcase).freeze
 
       class << self
         def options
@@ -58,7 +58,7 @@ module RecordingStudioEmbeddable
             .map(&:to_s)
             .map(&:strip)
             .reject(&:blank?)
-            .reject { |font| LEGACY_FONT_KEYS.include?(font.downcase) }
+            .reject { |font| BUILT_IN_FONT_KEYS.include?(font.downcase) }
             .uniq
         end
 
