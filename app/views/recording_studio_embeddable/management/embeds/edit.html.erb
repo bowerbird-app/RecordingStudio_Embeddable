@@ -89,35 +89,42 @@
         ) %>
       <% end %>
 
-      <div class="space-y-4">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-          <div class="space-y-1">
-            <h2 class="text-base font-semibold">Embed code</h2>
-            <p class="max-w-2xl text-sm text-(--text-muted-color)">
-              Copy the code below, then paste it into the page or editor on your site where you want the embed to appear.
-              Save that page after you paste it.
-            </p>
+      <% if @embed.enabled %>
+        <div class="space-y-4">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="space-y-1">
+              <h2 class="text-base font-semibold">Embed code</h2>
+              <p class="max-w-2xl text-sm text-(--text-muted-color)">
+                Copy the code below, then paste it into the page or editor on your site where you want the embed to appear.
+                Save that page after you paste it.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <%= render FlatPack::Button::Component.new(
+                text: "Copy code",
+                style: :secondary,
+                size: :sm,
+                type: "button",
+                data: { embed_code_copy_button: true }
+              ) %>
+            </div>
           </div>
 
-          <div class="flex items-center gap-2">
-            <%= render FlatPack::Button::Component.new(
-              text: "Copy code",
-              style: :secondary,
-              size: :sm,
-              type: "button",
-              data: { embed_code_copy_button: true }
-            ) %>
-          </div>
+          <textarea
+            id="embed-code"
+            readonly
+            rows="6"
+            class="w-full rounded-md border border-(--surface-border-color) bg-(--surface-raised-background-color) p-3 font-mono text-sm"
+            data-embed-code-target="code"
+          ><%= embed_code %></textarea>
         </div>
-
-        <textarea
-          id="embed-code"
-          readonly
-          rows="6"
-          class="w-full rounded-md border border-(--surface-border-color) bg-(--surface-raised-background-color) p-3 font-mono text-sm"
-          data-embed-code-target="code"
-        ><%= embed_code %></textarea>
-      </div>
+      <% else %>
+        <%= render FlatPack::EmptyState::Component.new(
+          title: "Embeddable is off",
+          description: "Turn on Embeddable above to reveal the embed code."
+        ) %>
+      <% end %>
     </div>
   <% end %>
 </div>
