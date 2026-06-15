@@ -28,7 +28,7 @@
     <div class="flex flex-wrap items-center gap-3">
       <div data-styling-save-button-clean>
         <%= render FlatPack::Button::Component.new(
-          text: "Save styling",
+          text: "Save",
           style: :secondary,
           size: :md,
           type: "submit",
@@ -37,7 +37,7 @@
       </div>
       <div class="hidden" data-styling-save-button-dirty>
         <%= render FlatPack::Button::Component.new(
-          text: "Save styling",
+          text: "Save",
           style: :primary,
           size: :md,
           type: "submit",
@@ -45,7 +45,7 @@
         ) %>
       </div>
       <%= render FlatPack::Button::Component.new(
-        text: "Reset all",
+        text: "Reset",
         style: :secondary,
         size: :md,
         type: "button",
@@ -83,7 +83,7 @@
                 options: @font_options.map { |font| { label: "#{font}  Aa", value: font } },
                 value: current_value,
                 id: "embed_appearance_font_family",
-                placeholder: (resolved_value.present? ? "Inherit (#{resolved_value})" : "Inherit"),
+                placeholder: (resolved_value.present? ? "Default (#{resolved_value})" : "Default"),
                 searchable: true,
                 disabled: !@styling_editable
               ) %>
@@ -92,7 +92,7 @@
                 name: "embed[appearance][#{field_name}]",
                 label: "#{definition[:label]} (#{Array(definition[:options]).join(', ')})",
                 value: current_value,
-                placeholder: "Inherit (#{resolved_value})"
+                placeholder: "Default (#{resolved_value})"
               ) %>
             <% end %>
           <% when :color %>
@@ -114,7 +114,7 @@
                 type="text"
                 name="embed[appearance][<%= field_name %>]"
                 value="<%= current_value %>"
-                placeholder="Inherit (<%= resolved_value %>)"
+                placeholder="Default <%= resolved_value %>"
                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-(--surface-content-color) outline-none placeholder:text-(--surface-muted-content-color)"
                 <%= "disabled" unless @styling_editable %>
               >
@@ -135,7 +135,7 @@
               name: "embed[appearance][#{field_name}]",
               label: "#{definition[:label]} (#{definition[:min]}-#{definition[:max]})",
               value: current_value,
-              placeholder: "Inherit (#{resolved_value})"
+              placeholder: "Default (#{resolved_value})"
             ) %>
           <% end %>
         </div>
