@@ -92,16 +92,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_05_014227) do
     t.index ["token"], name: "index_recording_studio_embeddable_embeds_on_token", unique: true
   end
 
-  create_table "recording_studio_embeddable_styling_profiles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.boolean "allow_custom_styling", default: true, null: false
-    t.datetime "created_at", null: false
-    t.jsonb "defaults", default: {}, null: false
-    t.string "recordable_type", null: false
-    t.datetime "updated_at", null: false
-    t.integer "version", default: 0, null: false
-    t.index ["recordable_type"], name: "idx_rse_styling_profiles_recordable_type", unique: true
-  end
-
   create_table "recording_studio_embeddable_view_logs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.boolean "bot", default: false, null: false
     t.boolean "cache_hit", default: false, null: false

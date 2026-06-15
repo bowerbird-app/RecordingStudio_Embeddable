@@ -51,21 +51,8 @@
         config.cache_policy = { public: true, max_age: 300, stale_while_revalidate: 60 } # Structured cache policy hash used to derive headers.
         config.public_embed_cache_control = "public, max-age=300, stale-while-revalidate=60" # Direct Cache-Control header override string.
 
-        # Styling/theme
-        config.embed_theme = { # Global theme tokens (colors/spacing/typography) used by embeds.
-          font_family: "sans",
-          background_color: "#ffffff",
-          text_color: "#0f172a",
-          muted_text_color: "#475569",
-          accent_color: "#2563eb",
-          border_color: "#e2e8f0",
-          padding_scale: "md",
-          radius_scale: "md",
-          max_width: 1200,
-          min_height: 320
-        }
-        config.allow_custom_styling = true # Allow management UI to override styling tokens per embed/profile.
-        config.styling_tokens = RecordingStudioEmbeddable::Styling::Tokens.definitions # Source-of-truth token registry for style validation/UI.
+        # Styling
+        config.allow_custom_styling = true # Allow per-embed overrides for recordables that declare customizable styles.
 
         # View logging + analytics privacy
         config.view_logging_enabled = true # Enable persistence of view events for analytics/auditing.
@@ -135,9 +122,7 @@
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">cache_policy</td><td class="px-3 py-2 font-mono">{public: true, max_age: 300, ...}</td><td class="px-3 py-2">Structured cache-control policy values.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">cache_mode</td><td class="px-3 py-2 font-mono">:http_validation</td><td class="px-3 py-2">Caching strategy mode used by embed responses.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">public_embed_cache_control</td><td class="px-3 py-2 font-mono">"public, max-age=300, ..."</td><td class="px-3 py-2">Raw cache-control header string override.</td></tr>
-        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">embed_theme</td><td class="px-3 py-2 font-mono">{font_family: "sans", ...}</td><td class="px-3 py-2">Global theme tokens for embed styling.</td></tr>
-        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">allow_custom_styling</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">Allows management UI/custom overrides for styling tokens.</td></tr>
-        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">styling_tokens</td><td class="px-3 py-2 font-mono">Styling::Tokens.definitions</td><td class="px-3 py-2">Definition registry used for validation/UI of style fields.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">allow_custom_styling</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">Allows per-embed overrides when the recordable declares customizable styles.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_logging_enabled</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">Enables/disables view log persistence for embeds.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">async_view_logging</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">When true, logs through background job instead of inline.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_logging_mode</td><td class="px-3 py-2 font-mono">:async</td><td class="px-3 py-2">Logging mode hint for runtime integrations/ops visibility.</td></tr>
@@ -168,6 +153,6 @@
     <li>Keep <code>allow_any_domain</code> false in production; rely on allowlist + publishability.</li>
     <li>Keep raw logging fields disabled unless you explicitly need them for debugging/compliance-approved analytics.</li>
     <li>If using Redis limiter, set <code>redis</code> and consider <code>rate_limit_fail_closed</code> based on your risk tolerance.</li>
-    <li>Only include style keys in <code>embed_theme</code> that you want visible/editable in management styling UI.</li>
+    <li>Declare editable style fields on each embeddable recordable with <code>customizable_embed_styles</code>; the host FlatPack theme remains the baseline.</li>
   </ul>
 </div>

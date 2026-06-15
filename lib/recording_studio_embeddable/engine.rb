@@ -4,6 +4,10 @@ module RecordingStudioEmbeddable
   class Engine < ::Rails::Engine
     isolate_namespace RecordingStudioEmbeddable
 
+    # Ensure lib namespaced services are reloadable in development and available in eager load.
+    config.autoload_paths << root.join("lib")
+    config.eager_load_paths << root.join("lib")
+
     initializer "recording_studio_embeddable.load_config" do |app|
       if app.respond_to?(:config_for)
         begin

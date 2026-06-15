@@ -2,22 +2,18 @@
 
 module RecordingStudioEmbeddable
   module EmbedLayoutHelper
-    THEME_VARIABLE_MAP = {
-      font_family: "--rse-embed-font-family",
-      background_color: "--rse-embed-background-color",
-      text_color: "--rse-embed-text-color",
-      muted_text_color: "--rse-embed-muted-text-color",
-      accent_color: "--rse-embed-accent-color",
-      border_color: "--rse-embed-border-color",
-      padding_scale: "--rse-embed-padding",
-      radius_scale: "--rse-embed-radius",
-      max_width: "--rse-embed-max-width",
-      min_height: "--rse-embed-min-height"
-    }.freeze
+    BODY_STYLE_KEYS = %i[
+      font_family
+      background_color
+      text_color
+      muted_text_color
+      accent_color
+      border_color
+      min_height
+    ].freeze
 
     def embed_layout_theme(overrides = nil)
-      resolved = normalize_theme(RecordingStudioEmbeddable.configuration.embed_theme)
-      resolved = resolved.merge(normalize_theme(@embed_theme)) if defined?(@embed_theme)
+      resolved = defined?(@embed_theme) ? normalize_theme(@embed_theme) : {}
       resolved = resolved.merge(normalize_theme(overrides)) if overrides
       resolved
     end
@@ -26,12 +22,30 @@ module RecordingStudioEmbeddable
       theme = embed_layout_theme(overrides)
       variables = []
 
-      THEME_VARIABLE_MAP.each do |key, variable_name|
-        value = RecordingStudioEmbeddable::Styling::Tokens.css_value_for(key, theme[key])
-        variables << "#{variable_name}: #{value}" if value.present?
+      BODY_STYLE_KEYS.each do |key|
+        definition = embed_layout_definitions[key]
+        next unless definition
+
+        value = embed_layout_css_value(key, overrides: theme)
+        next if value.blank?
+
+        if definition[:css_variable].present?
+          variables << "#{definition[:css_variable]}: #{value}"
+        elsif definition[:css_property].present?
+          variables << "#{definition[:css_property]}: #{value}"
+        end
       end
 
       variables.join("; ")
+    end
+
+    def embed_layout_css_value(key, overrides: nil)
+      theme = overrides.is_a?(Hash) ? overrides.symbolize_keys : embed_layout_theme(overrides)
+      value = theme[key.to_sym]
+      return nil if value.nil?
+
+      definition = embed_layout_definitions[key.to_sym] || {}
+      RecordingStudioEmbeddable::Styling::Tokens.css_value_for(key, value, definition: definition)
     end
 
     def embed_layout_body_attributes(overrides: nil, extra_class: nil)
@@ -61,6 +75,14 @@ module RecordingStudioEmbeddable
     end
 
     private
+
+    def embed_layout_definitions
+      @embed_layout_definitions ||= RecordingStudioEmbeddable::Styling::Definitions.call(recording: embed_layout_recording)
+    end
+
+    def embed_layout_recording
+      @parent_recording || @recording
+    end
 
     def normalize_theme(theme)
       return {} unless theme.respond_to?(:to_h)

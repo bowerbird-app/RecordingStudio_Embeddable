@@ -60,14 +60,29 @@
       ) %>
     </div>
 
-    <input type="hidden" name="styling_scope" value="embed">
-
     <h2 class="text-base font-semibold">Embed overrides</h2>
     <div class="space-y-4">
       <% @styling_definitions.each do |key, definition| %>
         <% field_name = key.to_s %>
         <% current_value = @styling_overrides[field_name] %>
         <% resolved_value = @resolved_theme[field_name] %>
+        <% option_items = Array(definition[:option_items]) %>
+        <% if field_name == "padding_scale" || field_name == "radius_scale" %>
+          <% scale_values = field_name == "padding_scale" ? RecordingStudioEmbeddable::Styling::Tokens::SPACING_SCALE : RecordingStudioEmbeddable::Styling::Tokens::RADIUS_SCALE %>
+          <% option_items = option_items.map do |option| %>
+            <% normalized_option = option.to_h.symbolize_keys %>
+            <% option_value = normalized_option[:value].to_s %>
+            <% unit_value = scale_values[option_value] %>
+            <% option_label = normalized_option[:label].to_s %>
+            <% {
+                 label: unit_value.present? ? "#{option_label} (#{unit_value})" : option_label,
+                 value: normalized_option[:value]
+               } %>
+          <% end %>
+        <% end %>
+        <% resolved_option = option_items.find { |option| option.to_h.symbolize_keys[:value].to_s == resolved_value.to_s } %>
+        <% resolved_display = resolved_option.present? ? resolved_option.to_h.symbolize_keys[:label] : resolved_value %>
+        <% default_placeholder = resolved_display.present? ? "Default - #{resolved_display}" : "Inherit from host theme" %>
 
         <div class="space-y-2 pb-4 last:pb-0">
           <div class="flex flex-wrap items-center gap-2">
@@ -83,16 +98,19 @@
                 options: @font_options.map { |font| { label: "#{font}  Aa", value: font } },
                 value: current_value,
                 id: "embed_appearance_font_family",
-                placeholder: (resolved_value.present? ? "Default (#{resolved_value})" : "Default"),
+                placeholder: default_placeholder,
                 searchable: true,
                 disabled: !@styling_editable
               ) %>
             <% else %>
-              <%= render FlatPack::TextInput::Component.new(
+              <%= render FlatPack::Select::Component.new(
                 name: "embed[appearance][#{field_name}]",
-                label: "#{definition[:label]} (#{Array(definition[:options]).join(', ')})",
+                label: "",
+                options: option_items,
                 value: current_value,
-                placeholder: "Default (#{resolved_value})"
+                id: "embed_appearance_#{field_name}",
+                placeholder: default_placeholder,
+                disabled: !@styling_editable
               ) %>
             <% end %>
           <% when :color %>
@@ -114,7 +132,7 @@
                 type="text"
                 name="embed[appearance][<%= field_name %>]"
                 value="<%= current_value %>"
-                placeholder="Default <%= resolved_value %>"
+                placeholder="<%= default_placeholder %>"
                 class="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-(--surface-content-color) outline-none placeholder:text-(--surface-muted-content-color)"
                 <%= "disabled" unless @styling_editable %>
               >
@@ -135,7 +153,16 @@
               name: "embed[appearance][#{field_name}]",
               label: "#{definition[:label]} (#{definition[:min]}-#{definition[:max]})",
               value: current_value,
-              placeholder: "Default (#{resolved_value})"
+              placeholder: default_placeholder,
+              disabled: !@styling_editable
+            ) %>
+          <% when :length, :text %>
+            <%= render FlatPack::TextInput::Component.new(
+              name: "embed[appearance][#{field_name}]",
+              label: "",
+              value: current_value,
+              placeholder: default_placeholder,
+              disabled: !@styling_editable
             ) %>
           <% end %>
         </div>
@@ -238,6 +265,11 @@
     const loadedFonts = new Set();
     const fontCssBase = "https://fonts.googleapis.com/css2";
 
+    const firstFontFamilyName = (fontFamily) => {
+      const raw = (fontFamily || "").split(",")[0] || "";
+      return raw.trim().replace(/^['\"]|['\"]$/g, "");
+    };
+
     const ensureGoogleFontLoaded = (fontName) => {
       const family = (fontName || "").trim();
       if (!family) return;
@@ -268,8 +300,15 @@
         const selectedValue = (hiddenInput.value || "").trim();
         if (!triggerLabel) return;
 
-        triggerLabel.style.fontFamily = selectedValue || "inherit";
-        ensureGoogleFontLoaded(selectedValue);
+        if (selectedValue) {
+          triggerLabel.style.fontFamily = selectedValue;
+          ensureGoogleFontLoaded(selectedValue);
+          return;
+        }
+
+        const hostFontName = firstFontFamilyName(window.getComputedStyle(document.body).fontFamily) || "host font";
+        triggerLabel.textContent = `Default - ${hostFontName}`;
+        triggerLabel.style.fontFamily = "inherit";
       };
 
       selectRoot.querySelectorAll('[role="option"][data-value]').forEach((option) => {

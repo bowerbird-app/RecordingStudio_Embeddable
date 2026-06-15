@@ -9,19 +9,16 @@ module RecordingStudioEmbeddable
         new(...).call
       end
 
-      def initialize(recording:, embed: nil, global_theme: RecordingStudioEmbeddable.configuration.embed_theme,
-                     token_defaults: Tokens.default_values)
+      def initialize(recording:, embed: nil, definitions: Definitions.call(recording: recording))
         @recording = recording
         @embed = embed
-        @global_theme = normalize(global_theme)
-        @token_defaults = normalize(token_defaults)
+        @definitions = normalize_definitions(definitions)
       end
 
       def call
-        values = token_defaults.dup
-        sources = values.keys.index_with { "system" }
+        values = {}
+        sources = {}
 
-        apply_layer!(values, sources, global_theme, "global")
         apply_layer!(values, sources, recordable_theme, "recordable")
         apply_layer!(values, sources, embed_theme, "embed")
 
@@ -30,7 +27,7 @@ module RecordingStudioEmbeddable
 
       private
 
-      attr_reader :recording, :embed, :global_theme, :token_defaults
+      attr_reader :recording, :embed, :definitions
 
       def recordable_theme
         @recordable_theme ||= normalize(RecordableDefaults.call(recording: recording)[:defaults])
@@ -44,12 +41,18 @@ module RecordingStudioEmbeddable
 
       def apply_layer!(values, sources, layer, source)
         layer.each do |key, value|
-          next unless Tokens.definitions.key?(key.to_sym)
+          next unless definitions.key?(key.to_s)
           next if value.nil?
 
           values[key] = value
           sources[key] = source
         end
+      end
+
+      def normalize_definitions(definitions)
+        return {} unless definitions.respond_to?(:to_h)
+
+        definitions.to_h.transform_keys(&:to_s)
       end
 
       def normalize(theme)

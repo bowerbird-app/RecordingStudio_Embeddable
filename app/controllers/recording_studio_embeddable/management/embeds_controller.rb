@@ -58,12 +58,7 @@ module RecordingStudioEmbeddable
           return
         end
 
-        scope = params[:styling_scope].to_s
-        if scope == "recordable"
-          persist_recordable_defaults(validation.cleaned)
-        else
-          persist_embed_overrides(validation.cleaned)
-        end
+        persist_embed_overrides(validation.cleaned)
       end
 
       private
@@ -345,8 +340,6 @@ module RecordingStudioEmbeddable
         @recordable = @parent_recordable
         assign_recordable_instance_variable
 
-        recordable_defaults = Styling::RecordableDefaults.call(recording: @recording)
-
         @styling_definitions = visible_styling_definitions
         legacy_font_keys = Styling::Tokens::FONT_STACKS.keys.map(&:downcase)
         @font_options = Services::GoogleFonts.options
@@ -356,9 +349,6 @@ module RecordingStudioEmbeddable
                                              .reject { |font| legacy_font_keys.include?(font.downcase) }
                                              .uniq
         @styling_overrides = @embed.appearance.to_h.stringify_keys
-        @recordable_defaults = recordable_defaults[:defaults].stringify_keys
-        @recordable_type = recordable_defaults[:recordable_type]
-        @recordable_allow_custom_styling = recordable_defaults[:allow_custom_styling]
         resolved = Styling::ResolveTheme.call(recording: @recording, embed: @embed)
         @resolved_theme = resolved.values.stringify_keys
         @theme_sources = resolved.sources.stringify_keys
@@ -367,19 +357,7 @@ module RecordingStudioEmbeddable
       end
 
       def visible_styling_definitions
-        definitions = RecordingStudioEmbeddable.configuration.styling_tokens
-        configured_theme = RecordingStudioEmbeddable.configuration.embed_theme
-
-        configured_keys =
-          if configured_theme.respond_to?(:to_h)
-            configured_theme.to_h.keys.map(&:to_s)
-          else
-            []
-          end
-
-        return definitions if configured_keys.empty?
-
-        definitions.select { |key, _definition| configured_keys.include?(key.to_s) }
+        RecordingStudioEmbeddable::Styling::Definitions.call(recording: @recording)
       end
 
       def styling_editable?
@@ -404,26 +382,6 @@ module RecordingStudioEmbeddable
         end
       end
 
-      def persist_recordable_defaults(cleaned_values)
-        profile = find_or_build_styling_profile
-        unless profile
-          redirect_to styling_management_embed_path(@embed),
-                      alert: "Cannot save recordable defaults without a recordable type."
-          return
-        end
-
-        profile.defaults = merge_styling_hash(profile.defaults.to_h.stringify_keys, cleaned_values)
-        profile.allow_custom_styling = ActiveModel::Type::Boolean.new.cast(params[:recordable_allow_custom_styling])
-        profile.version = profile.version.to_i + 1
-
-        if profile.save
-          redirect_to styling_management_embed_path(@embed), notice: "Recordable styling defaults updated."
-        else
-          @styling_errors = profile.errors.to_hash
-          render :styling, status: :unprocessable_entity
-        end
-      end
-
       def merge_styling_hash(existing_values, incoming_values)
         merged = existing_values.stringify_keys
         incoming_values.each do |key, value|
@@ -434,16 +392,6 @@ module RecordingStudioEmbeddable
           end
         end
         merged
-      end
-
-      def find_or_build_styling_profile
-        return unless @recordable_type.present?
-        return unless defined?(RecordingStudioEmbeddable::StylingProfile)
-        return nil unless RecordingStudioEmbeddable::StylingProfile.table_exists?
-
-        RecordingStudioEmbeddable::StylingProfile.find_or_initialize_by(recordable_type: @recordable_type)
-      rescue ActiveRecord::NoDatabaseError, ActiveRecord::StatementInvalid
-        nil
       end
 
       def normalize_domain_lines(text)

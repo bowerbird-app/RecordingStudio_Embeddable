@@ -29,7 +29,7 @@
 
   <%= render FlatPack::SectionTitle::Component.new(
     title: "RecordingStudioEmbeddable::Renderer",
-    subtitle: "Resolve templates, layouts, and theme values for a recording",
+    subtitle: "Resolve templates, layouts, and inline style overrides for a recording",
   ) %>
 
   <%= render FlatPack::CodeBlock::Component.new(
@@ -45,7 +45,7 @@
       # => "recording_studio_embeddable/embed"
 
       theme = RecordingStudioEmbeddable::Renderer.embed_theme_for(recording, embed: embed)
-      # => { font_family: ..., text_color: ..., ... }
+      # => { background_color: ..., max_width: ..., ... }
 
       options = RecordingStudioEmbeddable::Renderer.options_for(recording)
       # => merged capability and macro options
@@ -67,12 +67,27 @@
         include RecordingStudio::Capabilities::Embeddable.to(
           renderer: "pages/embed",
           enabled: true,
-          require_publishable: true
+          require_publishable: true,
+          customizable_embed_styles: {
+            background_color: {
+              label: "Background color",
+              css_variable: "--surface-background-color",
+              input: :color,
+              default: "#ffffff"
+            },
+            max_width: {
+              label: "Max width",
+              css_property: "max-width",
+              input: :select,
+              choices: [["Reading", "720px"], ["Wide", "1200px"]],
+              default: "720px"
+            }
+          }
         )
       end
 
       options = Page.recording_studio_embeddable_options
-      # => { enabled: true, renderer: "pages/embed", require_publishable: true }
+      # => { enabled: true, renderer: "pages/embed", require_publishable: true, customizable_embed_styles: {...} }
     CODE
   ) %>
 

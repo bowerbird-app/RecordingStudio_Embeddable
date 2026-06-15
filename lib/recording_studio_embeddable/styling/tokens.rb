@@ -3,77 +3,6 @@
 module RecordingStudioEmbeddable
   module Styling
     module Tokens
-      REGISTRY = {
-        font_family: {
-          label: "Font",
-          type: :enum,
-          # Populated at runtime from Google Fonts in management flows.
-          options: [],
-          default: "sans",
-          css_variable: "--rse-embed-font-family"
-        },
-        background_color: {
-          label: "Background Color",
-          type: :color,
-          default: "#ffffff",
-          css_variable: "--rse-embed-background-color"
-        },
-        text_color: {
-          label: "Text Color",
-          type: :color,
-          default: "#0f172a",
-          css_variable: "--rse-embed-text-color"
-        },
-        muted_text_color: {
-          label: "Muted Text Color",
-          type: :color,
-          default: "#475569",
-          css_variable: "--rse-embed-muted-text-color"
-        },
-        accent_color: {
-          label: "Accent Color",
-          type: :color,
-          default: "#2563eb",
-          css_variable: "--rse-embed-accent-color"
-        },
-        border_color: {
-          label: "Border Color",
-          type: :color,
-          default: "#e2e8f0",
-          css_variable: "--rse-embed-border-color"
-        },
-        padding_scale: {
-          label: "Padding",
-          type: :enum,
-          options: %w[none xs sm md lg xl],
-          default: "md",
-          css_variable: "--rse-embed-padding"
-        },
-        radius_scale: {
-          label: "Corner Radius",
-          type: :enum,
-          options: %w[none sm md lg xl],
-          default: "md",
-          css_variable: "--rse-embed-radius"
-        },
-        max_width: {
-          label: "Max Width",
-          type: :integer,
-          min: 280,
-          max: 1600,
-          default: 1200,
-          css_variable: "--rse-embed-max-width"
-        },
-        min_height: {
-          label: "Min Height",
-          type: :integer,
-          min: 160,
-          max: 1600,
-          default: 320,
-          css_variable: "--rse-embed-min-height"
-        }
-      }.freeze
-
       SPACING_SCALE = {
         "none" => "0rem",
         "xs" => "0.25rem",
@@ -99,30 +28,30 @@ module RecordingStudioEmbeddable
 
       module_function
 
-      def definitions
-        REGISTRY
-      end
-
-      def editable_keys
-        REGISTRY.keys.map(&:to_s)
-      end
-
-      def default_values
-        REGISTRY.transform_values { |config| config[:default] }
-      end
-
-      def css_value_for(key, value)
+      def css_value_for(key, value, definition: nil)
         return if value.nil?
 
         case key.to_sym
         when :font_family
           font_key = value.to_s
           FONT_STACKS[font_key] || "\"#{font_key}\", #{FONT_STACKS["sans"]}"
-        when :padding_scale then SPACING_SCALE[value.to_s] || SPACING_SCALE["md"]
-        when :radius_scale then RADIUS_SCALE[value.to_s] || RADIUS_SCALE["md"]
-        when :max_width, :min_height then "#{value.to_i}px"
-        else value
+        when :padding_scale then SPACING_SCALE[value.to_s] || value.to_s
+        when :radius_scale then RADIUS_SCALE[value.to_s] || value.to_s
+        else
+          normalize_dimension_value(key, value, definition)
         end
+      end
+
+      def normalize_dimension_value(key, value, definition)
+        property = definition.to_h[:css_property].to_s
+        return value.to_s if value.is_a?(String) && value.match?(/\A-?\d+(?:\.\d+)?[a-z%]+\z/i)
+        return value.to_s if value.is_a?(String) && value.match?(/\A(?:auto|none|fit-content|max-content|min-content)\z/i)
+
+        if %i[max_width min_height].include?(key.to_sym) || %w[max-width min-height width height].include?(property)
+          return "#{value.to_i}px"
+        end
+
+        value
       end
     end
   end

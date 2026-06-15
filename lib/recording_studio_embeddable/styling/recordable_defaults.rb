@@ -13,20 +13,13 @@ module RecordingStudioEmbeddable
 
       def call
         options = RecordingStudioEmbeddable::Renderer.options_for(recording)
-        defaults = normalize(options[:embed_theme])
+        defaults = normalize(definitions_default_values)
         allow_custom_styling = options.key?(:allow_custom_styling) ? cast_boolean(options[:allow_custom_styling]) : true
-
-        profile = load_profile
-        if profile
-          defaults.merge!(normalize(profile.defaults))
-          allow_custom_styling = cast_boolean(profile.allow_custom_styling)
-        end
 
         {
           recordable_type: recordable_type,
           defaults: defaults,
-          allow_custom_styling: allow_custom_styling,
-          profile: profile
+          allow_custom_styling: allow_custom_styling
         }
       end
 
@@ -39,14 +32,13 @@ module RecordingStudioEmbeddable
         type_from_recording.presence || (recording.respond_to?(:recordable) ? recording.recordable&.class&.name : nil)
       end
 
-      def load_profile
-        return unless defined?(RecordingStudioEmbeddable::StylingProfile)
-        return if recordable_type.blank?
-        return unless RecordingStudioEmbeddable::StylingProfile.table_exists?
+      def definitions_default_values
+        Definitions.call(recording: recording).each_with_object({}) do |(key, definition), values|
+          next unless definition.respond_to?(:to_h)
 
-        RecordingStudioEmbeddable::StylingProfile.find_by(recordable_type: recordable_type)
-      rescue ActiveRecord::NoDatabaseError, ActiveRecord::StatementInvalid
-        nil
+          default = definition.to_h[:default]
+          values[key] = default unless default.nil?
+        end
       end
 
       def normalize(values)
