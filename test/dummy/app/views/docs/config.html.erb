@@ -15,19 +15,19 @@
     code: <<~'CODE'
       RecordingStudioEmbeddable.configure do |config|
         # Domain policy
-        config.allowed_embedder_domains = []
-        config.blocked_embedder_domains = []
-        config.require_domain_allowlist = true
-        config.allow_any_domain = false
+        config.allowed_embedder_domains = [] # Host/domain allowlist that can embed your content.
+        config.blocked_embedder_domains = [] # Host/domain denylist that is always blocked.
+        config.require_domain_allowlist = true # Require requests to match allowed_embedder_domains.
+        config.allow_any_domain = false # Emergency bypass for domain checks; keep false in production.
 
         # Embed delivery
-        config.public_embeds_enabled = true
-        config.require_publishable = true
-        config.embed_url_strategy = :dedicated
-        config.allowed_embed_modes = %i[iframe oembed]
-        config.default_embed_mode = :iframe
-        config.fallback_to_publishable_renderer = false
-        config.default_sizing = {
+        config.public_embeds_enabled = true # Global on/off switch for public embed endpoints.
+        config.require_publishable = true # Only serve embeds for publishable/published records.
+        config.embed_url_strategy = :dedicated # URL generation strategy for embed links (commonly :dedicated).
+        config.allowed_embed_modes = %i[iframe oembed] # Supported embed transports; valid values are :iframe and :oembed.
+        config.default_embed_mode = :iframe # Default transport when mode is omitted; options are :iframe or :oembed.
+        config.fallback_to_publishable_renderer = false # If true, fallback to publishable renderer when embed renderer is missing.
+        config.default_sizing = { # Default size rules applied to embeds when no per-embed overrides exist.
           "mode" => "responsive",
           "aspect_ratio" => "16:9",
           "max_width" => 1200,
@@ -35,24 +35,24 @@
         }
 
         # Rendering hooks/resolvers
-        config.renderer_resolver = nil
-        config.embed_renderer_resolver = nil
+        config.renderer_resolver = nil # Optional callable for resolving recording-level renderer/template.
+        config.embed_renderer_resolver = nil # Optional callable for resolving embed-specific renderer/template.
 
         # Rate limiting
-        config.rate_limiting_enabled = true
-        config.rate_limiter = :null
-        config.redis = nil
-        config.rate_limit = 120
-        config.rate_limit_window = 60
-        config.rate_limit_fail_closed = false
+        config.rate_limiting_enabled = true # Enable request throttling for public embed endpoints.
+        config.rate_limiter = :null # Backend adapter; common options: :null, :rails_cache, :redis, or custom object.
+        config.redis = nil # Redis client/connection used when rate_limiter is :redis.
+        config.rate_limit = 120 # Maximum requests allowed per rate_limit_window.
+        config.rate_limit_window = 60 # Window size in seconds for rate limiting.
+        config.rate_limit_fail_closed = false # On limiter failure: false allows traffic, true blocks traffic.
 
         # Caching
-        config.cache_mode = :http_validation
-        config.cache_policy = { public: true, max_age: 300, stale_while_revalidate: 60 }
-        config.public_embed_cache_control = "public, max-age=300, stale-while-revalidate=60"
+        config.cache_mode = :http_validation # Cache behavior mode; typically :http_validation for conditional requests.
+        config.cache_policy = { public: true, max_age: 300, stale_while_revalidate: 60 } # Structured cache policy hash used to derive headers.
+        config.public_embed_cache_control = "public, max-age=300, stale-while-revalidate=60" # Direct Cache-Control header override string.
 
         # Styling/theme
-        config.embed_theme = {
+        config.embed_theme = { # Global theme tokens (colors/spacing/typography) used by embeds.
           font_family: "sans",
           background_color: "#ffffff",
           text_color: "#0f172a",
@@ -64,33 +64,33 @@
           max_width: 1200,
           min_height: 320
         }
-        config.allow_custom_styling = true
-        config.styling_tokens = RecordingStudioEmbeddable::Styling::Tokens.definitions
+        config.allow_custom_styling = true # Allow management UI to override styling tokens per embed/profile.
+        config.styling_tokens = RecordingStudioEmbeddable::Styling::Tokens.definitions # Source-of-truth token registry for style validation/UI.
 
         # View logging + analytics privacy
-        config.view_logging_enabled = true
-        config.async_view_logging = true
-        config.view_logging_mode = :async
-        config.view_logging_queue = :low_priority
-        config.view_log_success_sample_rate = 1.0
-        config.view_log_blocked_sample_rate = 1.0
-        config.view_log_error_sample_rate = 1.0
-        config.view_log_raw_ip = false
-        config.view_log_raw_user_agent = false
-        config.view_log_raw_referer = false
-        config.view_log_salt = nil
-        config.view_summary_enabled = true
-        config.bot_detector = nil
+        config.view_logging_enabled = true # Enable persistence of view events for analytics/auditing.
+        config.async_view_logging = true # When true, log writes happen in background jobs.
+        config.view_logging_mode = :async # Logging mode selector; common values are :async or :inline.
+        config.view_logging_queue = :low_priority # ActiveJob queue name for async logging jobs.
+        config.view_log_success_sample_rate = 1.0 # Fraction of successful views to store (0.0 to 1.0).
+        config.view_log_blocked_sample_rate = 1.0 # Fraction of blocked views to store (0.0 to 1.0).
+        config.view_log_error_sample_rate = 1.0 # Fraction of errored views to store (0.0 to 1.0).
+        config.view_log_raw_ip = false # Store raw IP when true; otherwise store only anonymized/digested value.
+        config.view_log_raw_user_agent = false # Store raw user agent when true; otherwise store only digest.
+        config.view_log_raw_referer = false # Store raw referer when true; otherwise store normalized/digested value.
+        config.view_log_salt = nil # Optional salt used to build stable privacy-preserving digests.
+        config.view_summary_enabled = true # Enable summary rollups/aggregations for view analytics.
+        config.bot_detector = nil # Optional custom bot-detection strategy/callable.
 
         # Management and token lifecycle
-        config.management_authorizer = ->(controller:) {
+        config.management_authorizer = ->(controller:) { # Lambda that returns true/false for management area access.
           next false unless controller.respond_to?(:current_user, true)
 
           user = controller.send(:current_user)
           user.present? && user.respond_to?(:RS_accessible, true) && user.public_send(:RS_accessible)
         }
-        config.token_bytes = 24
-        config.prune_views_after = 90.days
+        config.token_bytes = 24 # Random byte length used to generate embed/public tokens.
+        config.prune_views_after = 90.days # Retention period before old view logs are pruned.
 
         # Hook registration object (read-only accessor)
         # config.hooks.on(:event_name) { ... }

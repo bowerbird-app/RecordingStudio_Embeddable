@@ -6,13 +6,15 @@
   ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
-    title: "RecordingStudioEmbeddable.configure",
-    subtitle: "Set global defaults in the host app initializer",
+    title: "Configuration entry points",
+    subtitle: "Read, reset, and update the global gem configuration",
   ) %>
 
   <%= render FlatPack::CodeBlock::Component.new(
     language: :ruby,
     code: <<~'CODE'
+      config = RecordingStudioEmbeddable.configuration
+
       RecordingStudioEmbeddable.configure do |config|
         config.public_embeds_enabled = true
         config.embed_url_strategy = :dedicated
@@ -20,12 +22,14 @@
         config.require_publishable = true
         config.rate_limiter = :rails_cache
       end
+
+      RecordingStudioEmbeddable.reset_configuration!
     CODE
   ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
-    title: "RecordingStudioEmbeddable::Renderer.resolve(recording, embed)",
-    subtitle: "Pick the template used to render a public embed",
+    title: "RecordingStudioEmbeddable::Renderer",
+    subtitle: "Resolve templates, layouts, and theme values for a recording",
   ) %>
 
   <%= render FlatPack::CodeBlock::Component.new(
@@ -36,6 +40,18 @@
 
       details = RecordingStudioEmbeddable::Renderer.details(recording, embed)
       # => { template: ..., layout: ..., source: ... }
+
+      layout = RecordingStudioEmbeddable::Renderer.layout_for(recording, embed)
+      # => "recording_studio_embeddable/embed"
+
+      theme = RecordingStudioEmbeddable::Renderer.embed_theme_for(recording, embed: embed)
+      # => { font_family: ..., text_color: ..., ... }
+
+      options = RecordingStudioEmbeddable::Renderer.options_for(recording)
+      # => merged capability and macro options
+
+      convention = RecordingStudioEmbeddable::Renderer.convention_for(recording)
+      # => inferred controller/action/template metadata
     CODE
   ) %>
 
@@ -50,6 +66,7 @@
       class Page < ApplicationRecord
         include RecordingStudio::Capabilities::Embeddable.to(
           renderer: "pages/embed",
+          enabled: true,
           require_publishable: true
         )
       end
@@ -67,13 +84,64 @@
   <%= render FlatPack::CodeBlock::Component.new(
     language: :ruby,
     code: <<~'CODE'
-      recording.ensure_embed!(enabled: true)
+      recording.embed
       recording.current_embed
-      recording.embed_code(host: "app.example.com", protocol: "https")
+
+      recording.embed_child_recording
+
+      recording.embeddable?
+      recording.embed_enabled?
+
+      recording.ensure_embed!(enabled: true)
+
       recording.embed_public_path
       recording.embed_public_url
+
+      recording.embed_code(host: "app.example.com", protocol: "https")
+
+      recording.update_embed!(enabled: false)
       recording.disable_embed!
       recording.enable_embed!
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "RecordingStudioEmbeddable::Hooks",
+    subtitle: "Register lifecycle and extension hooks from the host app",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      hooks = RecordingStudioEmbeddable.configuration.hooks
+
+      hooks.before_initialize { Rails.logger.info("before init") }
+      hooks.after_initialize { Rails.logger.info("after init") }
+      hooks.on_configuration { |config| config.view_logging_enabled = true }
+
+      hooks.before_service { |service_class, args| }
+      hooks.after_service { |service_class, result| }
+      hooks.around_service { |service, block| block.call }
+
+      hooks.on(:embeddable_created) { |payload| }
+      hooks.extend_model(:article) { include SomeExtension }
+      hooks.extend_controller(:embeds) { include SomeControllerExtension }
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Helper methods and guards",
+    subtitle: "Small public helpers that support integrations and safety checks",
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~'CODE'
+      RecordingStudioEmbeddable.recording_has_trashed_at?
+      # => true or false depending on the host app schema
+
+      RecordingStudioEmbeddable.configuration.hooks.model_extensions_for(:article)
+      RecordingStudioEmbeddable.configuration.hooks.controller_extensions_for(:embeds)
     CODE
   ) %>
 
