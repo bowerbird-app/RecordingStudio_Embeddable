@@ -1,18 +1,19 @@
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio.git
-  revision: 8a62762c6ed8e89e9785438fa6c595704e274ccf
-  tag: recording_studio/v2.0.0
+  revision: 7667687155bf05ab41b66dfccae330dc3834c39c
+  ref: 7667687155bf05ab41b66dfccae330dc3834c39c
   specs:
-    recording_studio (2.0.0)
+    recording_studio (3.0.0)
       rails (>= 8.1.0)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_accessible.git
-  revision: 442afc0d91ee42e59b201a9ce963931ed1faa2e6
+  revision: 7fb3e8ed73a3f5254cf686dc7111f47236c75711
+  ref: 7fb3e8ed73a3f5254cf686dc7111f47236c75711
   specs:
-    recording_studio_accessible (0.1.0)
+    recording_studio_accessible (0.3.1)
       rails (~> 8.1.0)
-      recording_studio (>= 0.1.0)
+      recording_studio (~> 3.0)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_attachable.git
@@ -31,10 +32,10 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/flatpack.git
-  revision: 07bc5d47732add845e666deb384f449c8926d104
-  tag: v0.1.71
+  revision: af4a11ec13ef103e9d99ff6be7726fc674acb963
+  ref: af4a11ec13ef103e9d99ff6be7726fc674acb963
   specs:
-    flat_pack (0.1.71)
+    flat_pack (0.1.90)
       pagy (~> 9.0)
       rails (>= 7.1, < 9)
       tailwind_merge (~> 0.13)
@@ -190,7 +191,7 @@ GEM
     jbuilder (2.14.1)
       actionview (>= 7.0.0)
       activesupport (>= 7.0.0)
-    json (2.19.7)
+    json (2.19.9)
     kamal (2.9.0)
       activesupport (>= 7.0)
       base64 (~> 0.2)
@@ -222,7 +223,7 @@ GEM
       drb (~> 2.0)
       prism (~> 1.5)
     msgpack (1.8.0)
-    net-imap (0.6.4)
+    net-imap (0.6.4.1)
       date
       net-protocol
     net-pop (0.1.2)
@@ -433,7 +434,7 @@ GEM
       activemodel (>= 6.0.0)
       bindex (>= 0.4.0)
       railties (>= 6.0.0)
-    websocket-driver (0.8.0)
+    websocket-driver (0.8.1)
       base64
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
@@ -526,7 +527,7 @@ CHECKSUMS
   ffi (1.17.2-x86_64-darwin) sha256=981f2d4e32ea03712beb26e55e972797c2c5a7b0257955d8667ba58f2da6440e
   ffi (1.17.2-x86_64-linux-gnu) sha256=05d2026fc9dbb7cfd21a5934559f16293815b7ce0314846fee2ac8efbdb823ea
   ffi (1.17.2-x86_64-linux-musl) sha256=97c0eb3981414309285a64dc4d466bd149e981c279a56371ef811395d68cb95c
-  flat_pack (0.1.71)
+  flat_pack (0.1.90)
   fugit (1.12.1) sha256=5898f478ede9b415f0804e42b8f3fd53f814bd85eebffceebdbc34e1107aaf68
   globalid (1.3.0) sha256=05c639ad6eb4594522a0b07983022f04aa7254626ab69445a0e493aa3786ff11
   i18n (1.14.8) sha256=285778639134865c5e0f6269e0b818256017e8cde89993fdfcbfb64d088824a5
@@ -535,7 +536,7 @@ CHECKSUMS
   io-console (0.8.2) sha256=d6e3ae7a7cc7574f4b8893b4fca2162e57a825b223a177b7afa236c5ef9814cc
   irb (1.18.0) sha256=de9454a0703a54704b9811a5ef31a60c86949fbf4013fcf244fabc7c775248e3
   jbuilder (2.14.1) sha256=4eb26376ff60ef100cb4fd6fd7533cd271f9998327e86adf20fd8c0e69fabb42
-  json (2.19.7) sha256=fe432c8639f6efff69f9d73b518a3705d9581ab93156f981ea72806e1e5bcc3e
+  json (2.19.9) sha256=9b9025b7cdddafa38d316eca0b2358488e42d417045c1b90d216a9fefe46b79a
   kamal (2.9.0) sha256=c94057c1834a2e365ccb4f3439da8153d6de9aa0e7a6e11bb4a2e3a557a36f99
   language_server-protocol (3.17.0.5) sha256=fd1e39a51a28bf3eec959379985a72e296e9f9acfce46f6a79d31ca8760803cc
   lint_roller (1.1.0) sha256=2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87
@@ -547,7 +548,7 @@ CHECKSUMS
   mini_mime (1.1.5) sha256=8681b7e2e4215f2a159f9400b5816d85e9d8c6c6b491e96a12797e798f8bccef
   minitest (6.0.6) sha256=153ea36d1d987a62942382b61075745042a2b3123b1cd48f4c3675af9cc7d6f1
   msgpack (1.8.0) sha256=e64ce0212000d016809f5048b48eb3a65ffb169db22238fb4b72472fecb2d732
-  net-imap (0.6.4) sha256=9a5598c67a3022c284d98430ef1d4948e7dbdb62596f61081ea8ca933270a02b
+  net-imap (0.6.4.1) sha256=29f0360d75a7efd3539f16ac1957dea5c0a51ddeceb348db4553c3120914ea0d
   net-pop (0.1.2) sha256=848b4e982013c15b2f0382792268763b748cce91c9e91e36b0f27ed26420dff3
   net-protocol (0.2.2) sha256=aa73e0cba6a125369de9837b8d8ef82a61849360eba0521900e2c3713aa162a8
   net-scp (4.1.0) sha256=a99b0b92a1e5d360b0de4ffbf2dc0c91531502d3d4f56c28b0139a7c093d1a5d
@@ -594,8 +595,8 @@ CHECKSUMS
   rainbow (3.1.1) sha256=039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a
   rake (13.4.2) sha256=cb825b2bd5f1f8e91ca37bddb4b9aaf345551b4731da62949be002fa89283701
   rdoc (7.2.0) sha256=8650f76cd4009c3b54955eb5d7e3a075c60a57276766ebf36f9085e8c9f23192
-  recording_studio (2.0.0)
-  recording_studio_accessible (0.1.0)
+  recording_studio (3.0.0)
+  recording_studio_accessible (0.3.1)
   recording_studio_attachable (0.1.0)
   recording_studio_embeddable (0.1.0)
   recording_studio_publishable (0.1.1)
@@ -643,7 +644,7 @@ CHECKSUMS
   view_component (4.9.0) sha256=f599f0831ed0148bb19625f914c43cc982746a2252b6ebe8492bd4eea0d7dbaf
   warden (1.2.9) sha256=46684f885d35a69dbb883deabf85a222c8e427a957804719e143005df7a1efd0
   web-console (4.2.1) sha256=e7bcf37a10ea2b4ec4281649d1cee461b32232d0a447e82c786e6841fd22fe20
-  websocket-driver (0.8.0) sha256=ed0dba4b943c22f17f9a734817e808bc84cdce6a7e22045f5315aa57676d4962
+  websocket-driver (0.8.1) sha256=5ab238238ce230e5d4b262d2be39624c867914eab99171dc4952b58b577c2d96
   websocket-extensions (0.1.5) sha256=1c6ba63092cda343eb53fc657110c71c754c56484aad42578495227d717a8241
   zeitwerk (2.8.2) sha256=7212a61311083c604184b1ea2574b9aa05cd14f855a0841c06985cabe9181d12
 
