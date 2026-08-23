@@ -80,13 +80,13 @@ class RecordingStudioEmbeddableTest < Minitest::Test
             label: "Padding",
             css_property: "padding",
             input: :select,
-            choices: [["Small", "sm"], ["Extra large", "xl"]]
+            choices: [%w[Small sm], ["Extra large", "xl"]]
           },
           radius_scale: {
             label: "Corner radius",
             css_property: "border-radius",
             input: :select,
-            choices: [["Small", "sm"], ["Large", "lg"]],
+            choices: [%w[Small sm], %w[Large lg]],
             default: "lg"
           }
         }
@@ -110,7 +110,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
             label: "Max width",
             css_property: "max-width",
             input: :select,
-            choices: [["Small", "640px"], { label: "Large", value: "960px" }],
+            choices: [%w[Small 640px], { label: "Large", value: "960px" }],
             default: "960px"
           },
           font_family: {
@@ -166,9 +166,9 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
     html = recording.embed_code(title: "Embedded recording")
 
-    assert_includes html, 'width:100px'
-    assert_includes html, 'height:480px'
-    assert_includes html, 'max-width:100%'
+    assert_includes html, "width:100px"
+    assert_includes html, "height:480px"
+    assert_includes html, "max-width:100%"
   end
 
   def test_renderer_prefers_capability_over_macro
@@ -278,8 +278,8 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
     result = RecordingStudioEmbeddable::Styling::ResolveTheme.call(recording: recording, embed: embed)
 
-    assert_equal "#111827", result.values[:text_color]
-    assert_equal "xl", result.values[:padding_scale]
+    assert_equal "#111827", result.tokens[:text_color]
+    assert_equal "xl", result.tokens[:padding_scale]
     assert_equal "recordable", result.sources[:font_family]
     assert_equal "embed", result.sources[:padding_scale]
   end
@@ -307,7 +307,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_equal "--surface-background-color", definitions[:background_color][:css_variable]
 
     assert_equal :enum, definitions[:max_width][:type]
-    assert_equal ["640px", "960px"], definitions[:max_width][:options]
+    assert_equal %w[640px 960px], definitions[:max_width][:options]
     assert_equal "max-width", definitions[:max_width][:css_property]
 
     assert_equal :enum, definitions[:font_family][:type]
@@ -326,7 +326,10 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     helper_host = Object.new
     helper_host.extend(RecordingStudioEmbeddable::EmbedLayoutHelper)
     helper_host.instance_variable_set(:@recording, FakeRecording.new(FakeCustomizableRecordable.new, Time.now))
-    helper_host.instance_variable_set(:@embed_theme, { background_color: "#fafafa", max_width: "960px", font_family: "serif" })
+    helper_host.instance_variable_set(
+      :@embed_theme,
+      { background_color: "#fafafa", max_width: "960px", font_family: "serif" }
+    )
 
     style = helper_host.embed_layout_body_attributes[:style]
 
@@ -353,8 +356,8 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
       result = RecordingStudioEmbeddable::Styling::ResolveTheme.call(recording: recording, embed: embed)
 
-      assert_equal "mono", result.values[:font_family]
-      assert_equal "#ff0000", result.values[:text_color]
+      assert_equal "mono", result.tokens[:font_family]
+      assert_equal "#ff0000", result.tokens[:text_color]
       assert_equal "recordable", result.sources[:font_family]
       assert_equal "embed", result.sources[:text_color]
     ensure
@@ -472,13 +475,14 @@ class RecordingStudioEmbeddableTest < Minitest::Test
                                            __dir__))
 
     assert_includes migration, "index_rs_unique_active_embed_per_parent"
-    assert_includes migration, "active_embed_recording_index_predicate"
-    assert_includes migration, "column_exists?(:recording_studio_recordings, :trashed_at)"
+    assert_includes migration, "AND trashed_at IS NULL"
+    refute_includes migration, "column_exists?(:recording_studio_recordings, :trashed_at)"
   end
 
   def test_view_log_migration_uses_postgresql_safe_index_names
-    migration = File.read(File.expand_path("../db/migrate/20250101000002_create_recording_studio_embeddable_view_logs.rb",
-                                           __dir__))
+    migration = File.read(
+      File.expand_path("../db/migrate/20250101000002_create_recording_studio_embeddable_view_logs.rb", __dir__)
+    )
 
     assert_includes migration, "idx_rse_view_logs_embed_viewed_at"
     refute_includes migration, "index_recording_studio_embeddable_view_logs_on_embed_id_and_viewed_at"
@@ -486,32 +490,5 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
   def test_embeddable_view_log_uses_canonical_table_name
     assert_equal "recording_studio_embeddable_view_logs", RecordingStudioEmbeddable::EmbeddableViewLog.table_name
-  end
-
-  def test_recording_schema_detection_supports_recording_studio_versions_without_trashed_at
-    with_stubbed_recording_class(column_names: %w[id parent_recording_id]) do
-      refute RecordingStudioEmbeddable.recording_has_trashed_at?
-    end
-  end
-
-  def test_recording_schema_detection_supports_recording_studio_versions_with_trashed_at
-    with_stubbed_recording_class(column_names: %w[id parent_recording_id trashed_at]) do
-      assert RecordingStudioEmbeddable.recording_has_trashed_at?
-    end
-  end
-
-  private
-
-  def with_stubbed_recording_class(column_names:)
-    previous = RecordingStudio.const_defined?(:Recording, false) ? RecordingStudio.const_get(:Recording) : nil
-    RecordingStudio.send(:remove_const, :Recording) if previous
-    recording_class = Class.new do
-      define_singleton_method(:column_names) { column_names }
-    end
-    RecordingStudio.const_set(:Recording, recording_class)
-    yield
-  ensure
-    RecordingStudio.send(:remove_const, :Recording) if RecordingStudio.const_defined?(:Recording, false)
-    RecordingStudio.const_set(:Recording, previous) if previous
   end
 end

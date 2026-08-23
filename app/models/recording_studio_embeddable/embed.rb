@@ -4,6 +4,14 @@ module RecordingStudioEmbeddable
   class Embed < ApplicationRecord
     self.table_name = "recording_studio_embeddable_embeds"
 
+    if respond_to?(:recording_studio_recordable)
+      recording_studio_recordable(
+        label: "Embed",
+        plural_label: "Embeds",
+        root: false
+      )
+    end
+
     has_many :embeddable_view_logs,
              class_name: "RecordingStudioEmbeddable::EmbeddableViewLog",
              dependent: :delete_all,
@@ -41,9 +49,11 @@ module RecordingStudioEmbeddable
     def recording
       return unless defined?(RecordingStudio::Recording)
 
-      scope = RecordingStudio::Recording.where(recordable_type: self.class.name, recordable_id: id)
-      scope = scope.where(trashed_at: nil) if RecordingStudioEmbeddable.recording_has_trashed_at?
-      scope.first
+      RecordingStudio::Recording.where(
+        recordable_type: self.class.name,
+        recordable_id: id,
+        trashed_at: nil
+      ).first
     end
 
     def parent_recording

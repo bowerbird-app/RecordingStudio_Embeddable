@@ -22,7 +22,10 @@ Metrics/ClassLength:
     - 'test/**/*'
     - 'lib/recording_studio_embeddable/hooks.rb'
     - 'lib/recording_studio_embeddable/configuration.rb'
+    - 'lib/recording_studio_embeddable/renderer.rb'
     - 'app/controllers/recording_studio_embeddable/embeds_controller.rb'
+    - 'app/controllers/recording_studio_embeddable/management/embeds_controller.rb'
+    - 'app/models/recording_studio_embeddable/**/*'
 
 Metrics/MethodLength:
   Exclude:
@@ -30,6 +33,7 @@ Metrics/MethodLength:
     - 'lib/generators/**/*'
     - 'db/migrate/**/*'
     - 'app/controllers/recording_studio_embeddable/**/*'
+    - 'app/helpers/recording_studio_embeddable/**/*'
     - 'app/jobs/recording_studio_embeddable/**/*'
     - 'app/models/recording_studio_embeddable/**/*'
     - 'lib/recording_studio_embeddable/**/*'
@@ -46,6 +50,7 @@ Metrics/AbcSize:
 Metrics/BlockLength:
   Exclude:
     - 'db/migrate/**/*'
+    - 'lib/generators/**/*'
 
 Metrics/CyclomaticComplexity:
   Exclude:

@@ -1,25 +1,16 @@
 Rails.application.routes.draw do
-  begin
-    require "recording_studio_attachable"
-  rescue LoadError
-    nil
-  end
+  require "recording_studio_attachable"
+  require "recording_studio_publishable"
 
-  begin
-    require "recording_studio_publishable"
-  rescue LoadError
-    nil
-  end
-
-  mount RecordingStudioAttachable::Engine, at: "/recording_studio_attachable" if defined?(RecordingStudioAttachable::Engine)
   devise_for :users
+  mount RecordingStudioAttachable::Engine, at: "/recording_studio_attachable"
 
   # RecordingStudio engine is data/API-focused and has no browser root route.
   # Redirect the base path to the app home.
   get "/recording_studio", to: redirect("/"), as: nil
   mount RecordingStudio::Engine, at: "/recording_studio"
   mount RecordingStudioEmbeddable::Engine, at: "/recording_studio_embeddable"
-  mount RecordingStudioPublishable::Engine, at: "/" if defined?(RecordingStudioPublishable::Engine)
+  mount RecordingStudioPublishable::Engine, at: "/"
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

@@ -10,6 +10,6 @@ RecordingStudioEmbeddable.configure do |config|
     next false unless controller.respond_to?(:current_user, true)
 
     user = controller.send(:current_user)
-    user.present? && user.respond_to?(:RS_accessible, true) && user.public_send(:RS_accessible)
+    user.present? && user.respond_to?(:RS_accessible, true) && user.RS_accessible
   end
 end

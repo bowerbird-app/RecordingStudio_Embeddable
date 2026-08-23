@@ -9,8 +9,10 @@ module RecordingStudioEmbeddable
         end
       end
 
-        HEX_COLOR = /\A#(?:[0-9a-f]{3}|[0-9a-f]{6})\z/.freeze
-        CSS_LENGTH = /\A(?:-?\d+(?:\.\d+)?(?:px|rem|em|vh|vw|%)|auto|none|fit-content|max-content|min-content)\z/i.freeze
+      HEX_COLOR = /\A#(?:[0-9a-f]{3}|[0-9a-f]{6})\z/
+      CSS_LENGTH = /
+        \A(?:-?\d+(?:\.\d+)?(?:px|rem|em|vh|vw|%)|auto|none|fit-content|max-content|min-content)\z
+      /ix
 
       def self.call(...)
         new(...).call

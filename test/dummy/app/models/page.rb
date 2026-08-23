@@ -1,27 +1,17 @@
-begin
-  require "recording_studio_publishable"
-rescue LoadError
-  nil
-end
-
 class Page < ApplicationRecord
   recording_studio_recordable label: "Page", root: false, allowed_parent_types: [ "Workspace", "Folder" ]
 
-  if defined?(RecordingStudioPublishable::ParentRecordable)
-    include RecordingStudioPublishable::ParentRecordable
-
-    recording_studio_publishable(
-      public_controller: "pages",
-      public_action: :show,
-      schedule: true,
-      seo: false
-    )
-  end
+  include RecordingStudio::Capabilities::Publishable.to(
+    public_controller: "pages",
+    public_action: :show,
+    schedule: true,
+    seo: false
+  )
 
   include RecordingStudio::Capabilities::Embeddable.to(
     embed_controller: "pages",
     embed_action: :embed,
-    require_publishable: defined?(RecordingStudioPublishable),
+    require_publishable: true,
     customizable_embed_styles: {
       background_color: {
         label: "Background Color",

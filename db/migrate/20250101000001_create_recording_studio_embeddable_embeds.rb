@@ -28,14 +28,6 @@ class CreateRecordingStudioEmbeddableEmbeds < ActiveRecord::Migration[8.1]
               :parent_recording_id,
               unique: true,
               name: "index_rs_unique_active_embed_per_parent",
-              where: active_embed_recording_index_predicate
-  end
-
-  private
-
-  def active_embed_recording_index_predicate
-    predicate = "recordable_type = 'RecordingStudioEmbeddable::Embed'"
-    predicate = "#{predicate} AND trashed_at IS NULL" if column_exists?(:recording_studio_recordings, :trashed_at)
-    predicate
+              where: "recordable_type = 'RecordingStudioEmbeddable::Embed' AND trashed_at IS NULL"
   end
 end

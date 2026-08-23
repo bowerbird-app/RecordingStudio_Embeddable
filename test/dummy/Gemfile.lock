@@ -1,51 +1,59 @@
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio.git
-  revision: 7667687155bf05ab41b66dfccae330dc3834c39c
-  ref: 7667687155bf05ab41b66dfccae330dc3834c39c
+  revision: fce33c603f8e57a2c0dd278ab901651f6d78c5d4
+  tag: v4.2.0
   specs:
-    recording_studio (3.0.0)
+    recording_studio (4.2.0)
       rails (>= 8.1.0)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_accessible.git
-  revision: 7fb3e8ed73a3f5254cf686dc7111f47236c75711
-  ref: 7fb3e8ed73a3f5254cf686dc7111f47236c75711
+  revision: b76a6932918985aee56ffbc1b5230522a3820406
+  tag: v0.7.0
   specs:
-    recording_studio_accessible (0.3.1)
+    recording_studio_accessible (0.7.0)
       rails (~> 8.1.0)
-      recording_studio (~> 3.0)
+      recording_studio (~> 4.2)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_attachable.git
-  revision: 6c81eccdfec05517974a479e501f11a366d14513
+  revision: d0a845eb1ad1fea8a562b81ecf3bd8f8b08676ef
+  tag: 0.4.0
   specs:
-    recording_studio_attachable (0.1.0)
+    recording_studio_attachable (0.4.0)
       rails (~> 8.1.0)
+      recording_studio (~> 4.2)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_publishable.git
-  revision: cdcb3bed093b39f8b9d38b72a3d4e7557b1bd019
+  revision: cba1087352609388549edaa24b15a0d2f8d19528
+  tag: v0.2.0
   specs:
-    recording_studio_publishable (0.1.1)
+    recording_studio_publishable (0.2.0)
       rails (~> 8.1.0)
+      recording_studio (~> 4.2)
       view_component (>= 3.0, < 5.0)
 
 GIT
   remote: https://github.com/bowerbird-app/flatpack.git
-  revision: af4a11ec13ef103e9d99ff6be7726fc674acb963
-  ref: af4a11ec13ef103e9d99ff6be7726fc674acb963
+  revision: 3152dbb1d91236ebb281d2366b48fe8f29691a0e
+  tag: v0.1.133
   specs:
-    flat_pack (0.1.90)
+    flat_pack (0.1.133)
       pagy (~> 9.0)
       rails (>= 7.1, < 9)
       tailwind_merge (~> 0.13)
-      view_component (~> 4.9.0)
+      view_component (~> 4.12.0)
 
 PATH
   remote: ../..
   specs:
     recording_studio_embeddable (0.1.0)
+      flat_pack (~> 0.1.133)
       rails (~> 8.1.0)
+      recording_studio (~> 4.2)
+      recording_studio_accessible (~> 0.7.0)
+      recording_studio_publishable (~> 0.2.0)
 
 GEM
   remote: https://rubygems.org/
@@ -423,7 +431,7 @@ GEM
     unicode-emoji (4.1.0)
     uri (1.1.1)
     useragent (0.16.11)
-    view_component (4.9.0)
+    view_component (4.12.0)
       actionview (>= 7.1.0)
       activesupport (>= 7.1.0)
       concurrent-ruby (~> 1)
@@ -527,7 +535,7 @@ CHECKSUMS
   ffi (1.17.2-x86_64-darwin) sha256=981f2d4e32ea03712beb26e55e972797c2c5a7b0257955d8667ba58f2da6440e
   ffi (1.17.2-x86_64-linux-gnu) sha256=05d2026fc9dbb7cfd21a5934559f16293815b7ce0314846fee2ac8efbdb823ea
   ffi (1.17.2-x86_64-linux-musl) sha256=97c0eb3981414309285a64dc4d466bd149e981c279a56371ef811395d68cb95c
-  flat_pack (0.1.90)
+  flat_pack (0.1.133)
   fugit (1.12.1) sha256=5898f478ede9b415f0804e42b8f3fd53f814bd85eebffceebdbc34e1107aaf68
   globalid (1.3.0) sha256=05c639ad6eb4594522a0b07983022f04aa7254626ab69445a0e493aa3786ff11
   i18n (1.14.8) sha256=285778639134865c5e0f6269e0b818256017e8cde89993fdfcbfb64d088824a5
@@ -595,11 +603,11 @@ CHECKSUMS
   rainbow (3.1.1) sha256=039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a
   rake (13.4.2) sha256=cb825b2bd5f1f8e91ca37bddb4b9aaf345551b4731da62949be002fa89283701
   rdoc (7.2.0) sha256=8650f76cd4009c3b54955eb5d7e3a075c60a57276766ebf36f9085e8c9f23192
-  recording_studio (3.0.0)
-  recording_studio_accessible (0.3.1)
-  recording_studio_attachable (0.1.0)
+  recording_studio (4.2.0)
+  recording_studio_accessible (0.7.0)
+  recording_studio_attachable (0.4.0)
   recording_studio_embeddable (0.1.0)
-  recording_studio_publishable (0.1.1)
+  recording_studio_publishable (0.2.0)
   regexp_parser (2.11.3) sha256=ca13f381a173b7a93450e53459075c9b76a10433caadcb2f1180f2c741fc55a4
   reline (0.6.3) sha256=1198b04973565b36ec0f11542ab3f5cfeeec34823f4e54cebde90968092b1835
   responders (3.2.0) sha256=89c2d6ac0ae16f6458a11524cae4a8efdceba1a3baea164d28ee9046bd3df55a
@@ -641,7 +649,7 @@ CHECKSUMS
   unicode-emoji (4.1.0) sha256=4997d2d5df1ed4252f4830a9b6e86f932e2013fbff2182a9ce9ccabda4f325a5
   uri (1.1.1) sha256=379fa58d27ffb1387eaada68c749d1426738bd0f654d812fcc07e7568f5c57c6
   useragent (0.16.11) sha256=700e6413ad4bb954bb63547fa098dddf7b0ebe75b40cc6f93b8d54255b173844
-  view_component (4.9.0) sha256=f599f0831ed0148bb19625f914c43cc982746a2252b6ebe8492bd4eea0d7dbaf
+  view_component (4.12.0) sha256=b9a5979d1c43eba2aa21a06a86f661aab3990104855f2909ef7c3779acdcdcb4
   warden (1.2.9) sha256=46684f885d35a69dbb883deabf85a222c8e427a957804719e143005df7a1efd0
   web-console (4.2.1) sha256=e7bcf37a10ea2b4ec4281649d1cee461b32232d0a447e82c786e6841fd22fe20
   websocket-driver (0.8.1) sha256=5ab238238ce230e5d4b262d2be39624c867914eab99171dc4952b58b577c2d96

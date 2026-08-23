@@ -234,18 +234,16 @@ module RecordingStudioEmbeddable
           end
         end
 
-        geo_counts
-          .map do |country, data|
-            {
-              country: country,
-              views: data[:views],
-              unique_views: data[:unique_digests].size,
-              human_views: data[:human_views],
-              bot_views: data[:bot_views]
-            }
-          end
-          .sort_by { |row| [-row[:views], row[:country]] }
-          .first(15)
+        rows = geo_counts.map do |country, data|
+          {
+            country: country,
+            views: data[:views],
+            unique_views: data[:unique_digests].size,
+            human_views: data[:human_views],
+            bot_views: data[:bot_views]
+          }
+        end
+        rows.sort_by { |row| [-row[:views], row[:country]] }.first(15)
       end
 
       def stats_range_picker
@@ -346,16 +344,16 @@ module RecordingStudioEmbeddable
                                              .map(&:to_s)
                                              .map(&:strip)
                                              .reject(&:blank?)
-                     .reject { |font| built_in_font_keys.include?(font.downcase) }
+                                             .reject { |font| built_in_font_keys.include?(font.downcase) }
                                              .uniq
         @styling_overrides = @embed.appearance.to_h.stringify_keys
-        @recordable_style_defaults =
-          RecordingStudioEmbeddable::Styling::RecordableDefaults.call(recording: @recording)[:defaults].to_h.stringify_keys
+        defaults = RecordingStudioEmbeddable::Styling::RecordableDefaults.call(recording: @recording)
+        @recordable_style_defaults = defaults[:defaults].to_h.stringify_keys
         resolved = Styling::ResolveTheme.call(recording: @recording, embed: @embed)
-        @resolved_theme = resolved.values.stringify_keys
+        @resolved_theme = resolved.tokens.stringify_keys
         @theme_sources = resolved.sources.stringify_keys
         @styling_editable = styling_editable?
-        @styling_errors ||= {}
+        @styling_errors = {} if @styling_errors.nil?
       end
 
       def visible_styling_definitions

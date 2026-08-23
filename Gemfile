@@ -3,8 +3,15 @@
 source "https://rubygems.org"
 
 # Specify your gem's dependencies in recording_studio_embeddable.gemspec
-gem "devise"
 gemspec
+
+# These gems are not published to RubyGems; resolve the gemspec pins from GitHub.
+gem "flat_pack", "~> 0.1.133", github: "bowerbird-app/flatpack", tag: "v0.1.133"
+gem "recording_studio", "~> 4.2", github: "bowerbird-app/RecordingStudio", tag: "v4.2.0"
+gem "recording_studio_accessible", "~> 0.7.0", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.7.0"
+gem "recording_studio_publishable", "~> 0.2.0", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.2.0"
+
+gem "devise"
 
 gem "puma"
 gem "sprockets-rails"

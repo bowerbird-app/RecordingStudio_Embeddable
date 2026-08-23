@@ -2,7 +2,16 @@
 
 RecordingStudio.configure do |config|
   # Registered delegated_type recordables (strings or classes)
-  config.recordable_types = [ "Workspace", "Folder", "Page", "Article", "Document" ]
+  config.recordable_types = [
+    "Workspace",
+    "Folder",
+    "Page",
+    "Article",
+    "Document",
+    "RecordingStudioEmbeddable::Embed",
+    "RecordingStudioPublishable::Publishable",
+    "RecordingStudioAttachable::Attachment"
+  ]
 
   # Keep fallback enabled unless all installed RecordingStudio addons
   # declare their registered types with recording_studio_recordable.

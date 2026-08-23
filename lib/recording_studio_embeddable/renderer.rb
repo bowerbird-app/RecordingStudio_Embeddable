@@ -9,11 +9,10 @@ module RecordingStudioEmbeddable
       options = options_for(recording)
       configured = normalize(options[:renderer])
       return configured[:template] if configured[:template].present?
+
       explicit_controller = options[:embed_controller].presence || options[:public_controller].presence
       explicit_action = options[:embed_action].presence || options[:public_action].presence
-      if explicit_controller && explicit_action
-        return "#{explicit_controller}/#{explicit_action}"
-      end
+      return "#{explicit_controller}/#{explicit_action}" if explicit_controller && explicit_action
 
       resolver = RecordingStudioEmbeddable.configuration.embed_renderer_resolver ||
                  RecordingStudioEmbeddable.configuration.renderer_resolver
@@ -46,7 +45,7 @@ module RecordingStudioEmbeddable
     end
 
     def self.embed_theme_for(recording, embed: nil)
-      Styling::ResolveTheme.call(recording: recording, embed: embed).values
+      Styling::ResolveTheme.call(recording: recording, embed: embed).tokens
     end
 
     def self.options_for(recording)
@@ -84,7 +83,7 @@ module RecordingStudioEmbeddable
     def self.convention_for(recording)
       recordable = recording&.recordable
       klass = recordable&.class
-      return {} unless klass&.respond_to?(:model_name)
+      return {} unless klass.respond_to?(:model_name)
 
       options = options_for(recording)
       explicit_controller = options[:embed_controller].presence || options[:public_controller].presence
@@ -120,8 +119,12 @@ module RecordingStudioEmbeddable
 
     def self.publishable_recordable?(recordable)
       klass = recordable.class
-      klass.respond_to?(:recording_studio_publishable_options) ||
-        recordable.respond_to?(:recording_studio_publishable_options)
+      return true if klass.respond_to?(:recording_studio_publishable_options) ||
+                     recordable.respond_to?(:recording_studio_publishable_options)
+      return true if defined?(RecordingStudio::Capabilities::Publishable::RecordableMethods) &&
+                     klass < RecordingStudio::Capabilities::Publishable::RecordableMethods
+
+      false
     end
 
     def self.template_exists?(path)
@@ -129,6 +132,5 @@ module RecordingStudioEmbeddable
 
       ActionView::LookupContext.new(ActionController::Base.view_paths).exists?(path, [], false)
     end
-
   end
 end

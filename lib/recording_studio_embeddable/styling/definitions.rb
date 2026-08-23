@@ -6,6 +6,7 @@ module RecordingStudioEmbeddable
       def self.call(...)
         new(...).call
       end
+
       def initialize(recording:)
         @recording = recording
       end
@@ -46,8 +47,6 @@ module RecordingStudioEmbeddable
         when :integer then :integer
         when :length then :length
         when :text then :text
-        else
-          nil
         end
       end
 
@@ -92,4 +91,3 @@ module RecordingStudioEmbeddable
     end
   end
 end
- 

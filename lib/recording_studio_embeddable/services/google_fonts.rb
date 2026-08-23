@@ -27,11 +27,10 @@ module RecordingStudioEmbeddable
         def fetch_families
           response = perform_request
           parsed = JSON.parse(response.body)
-          families = Array(parsed["items"]).filter_map do |item|
+          Array(parsed["items"]).filter_map do |item|
             family = item["family"].to_s.strip
             family if family.present?
           end
-          families
         rescue JSON::ParserError
           fallback_options
         end

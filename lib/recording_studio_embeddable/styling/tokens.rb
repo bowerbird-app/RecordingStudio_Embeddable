@@ -34,7 +34,7 @@ module RecordingStudioEmbeddable
         case key.to_sym
         when :font_family
           font_key = value.to_s
-          FONT_STACKS[font_key] || "\"#{font_key}\", #{FONT_STACKS["sans"]}"
+          FONT_STACKS[font_key] || "\"#{font_key}\", #{FONT_STACKS['sans']}"
         when :padding_scale then SPACING_SCALE[value.to_s] || value.to_s
         when :radius_scale then RADIUS_SCALE[value.to_s] || value.to_s
         else
@@ -45,7 +45,9 @@ module RecordingStudioEmbeddable
       def normalize_dimension_value(key, value, definition)
         property = definition.to_h[:css_property].to_s
         return value.to_s if value.is_a?(String) && value.match?(/\A-?\d+(?:\.\d+)?[a-z%]+\z/i)
-        return value.to_s if value.is_a?(String) && value.match?(/\A(?:auto|none|fit-content|max-content|min-content)\z/i)
+
+        keyword_length = /\A(?:auto|none|fit-content|max-content|min-content)\z/i
+        return value.to_s if value.is_a?(String) && value.match?(keyword_length)
 
         if %i[max_width min_height].include?(key.to_sym) || %w[max-width min-height width height].include?(property)
           return "#{value.to_i}px"

@@ -77,7 +77,9 @@ module RecordingStudioEmbeddable
     private
 
     def embed_layout_definitions
-      @embed_layout_definitions ||= RecordingStudioEmbeddable::Styling::Definitions.call(recording: embed_layout_recording)
+      @embed_layout_definitions ||= RecordingStudioEmbeddable::Styling::Definitions.call(
+        recording: embed_layout_recording
+      )
     end
 
     def embed_layout_recording

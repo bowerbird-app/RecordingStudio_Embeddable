@@ -8,6 +8,20 @@ module RecordingStudioEmbeddable
     config.autoload_paths << root.join("lib")
     config.eager_load_paths << root.join("lib")
 
+    initializer "recording_studio_embeddable.require_family", before: :load_config_initializers do
+      require "recording_studio"
+      require "recording_studio_accessible"
+      require "recording_studio_publishable"
+      require "flat_pack"
+
+      RecordingStudio.register_capability(
+        :embeddable,
+        recording_methods: RecordingStudioEmbeddable::RecordingMethods,
+        source: "recording_studio_embeddable",
+        child_recordables: ["RecordingStudioEmbeddable::Embed"]
+      )
+    end
+
     initializer "recording_studio_embeddable.load_config" do |app|
       if app.respond_to?(:config_for)
         begin

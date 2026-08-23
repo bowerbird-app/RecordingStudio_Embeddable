@@ -68,17 +68,12 @@ class Article < ApplicationRecord
     }
   )
 
-  # Uncomment this block if you want Article to use RecordingStudioPublishable.
-  if defined?(RecordingStudioPublishable::ParentRecordable)
-    include RecordingStudioPublishable::ParentRecordable
-  
-    recording_studio_publishable(
-      public_controller: "articles",
-      public_action: :show,
-      schedule: true,
-      seo: false
-    )
-  end
+  include RecordingStudio::Capabilities::Publishable.to(
+    public_controller: "articles",
+    public_action: :show,
+    schedule: true,
+    seo: false
+  )
 
   def self.recordable_type_label
     "Article"

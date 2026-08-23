@@ -40,6 +40,6 @@ Then open the app and sign in with:
 
 Use this app to verify the generated addon experience before renaming the gem or copying patterns into another host app. If a layout, route, asset source, or Recording Studio initializer change breaks here, the template likely needs adjustment before reuse.
 
-The authenticated layout in `app/views/layouts/flat_pack_sidebar.html.erb` and sidebar menu in `app/views/layouts/flat_pack/_sidebar.html.erb` are a styled skeleton, not the final information architecture for every addon. Replace the sidebar items and docs page content so they match the gem's actual concepts and workflows.
+Authenticated dummy pages use `RecordingStudio::UsesDefaultLayout` and `recording_studio/default_layout`. Docs navigation lives in `app/views/application/_app_nav.html.erb`.
 
-Likewise, the home page in `app/views/home/index.html.erb` should stay a minimal demo surface for the gem's core feature. Do not turn it into a wall of documentation; the dedicated sidebar pages exist so deeper explanations can live in focused sections.
+Likewise, the home page in `app/views/home/index.html.erb` should stay a minimal demo surface for the gem's core feature. Do not turn it into a wall of documentation; the dedicated docs pages exist so deeper explanations can live in focused sections.

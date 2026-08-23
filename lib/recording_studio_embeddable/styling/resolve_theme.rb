@@ -3,7 +3,7 @@
 module RecordingStudioEmbeddable
   module Styling
     class ResolveTheme
-      Result = Struct.new(:values, :sources, keyword_init: true)
+      Result = Struct.new(:tokens, :sources, keyword_init: true)
 
       def self.call(...)
         new(...).call
@@ -22,7 +22,7 @@ module RecordingStudioEmbeddable
         apply_layer!(values, sources, recordable_theme, "recordable")
         apply_layer!(values, sources, embed_theme, "embed")
 
-        Result.new(values: values.symbolize_keys, sources: sources.symbolize_keys)
+        Result.new(tokens: values.symbolize_keys, sources: sources.symbolize_keys)
       end
 
       private

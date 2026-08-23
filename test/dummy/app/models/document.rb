@@ -1,22 +1,12 @@
-begin
-  require "recording_studio_publishable"
-rescue LoadError
-  nil
-end
-
 class Document < ApplicationRecord
   recording_studio_recordable label: "Document", root: false, allowed_parent_types: [ "Workspace", "Folder" ]
 
-  if defined?(RecordingStudioPublishable::ParentRecordable)
-    include RecordingStudioPublishable::ParentRecordable
-
-    recording_studio_publishable(
-      public_controller: "documents",
-      public_action: :show,
-      schedule: true,
-      seo: false
-    )
-  end
+  include RecordingStudio::Capabilities::Publishable.to(
+    public_controller: "documents",
+    public_action: :show,
+    schedule: true,
+    seo: false
+  )
 
   def self.recordable_type_label
     "Document"
