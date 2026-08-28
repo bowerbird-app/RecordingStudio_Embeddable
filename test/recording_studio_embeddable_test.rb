@@ -563,14 +563,17 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     )
 
     assert_includes source, "FlatPack::Grid::Component.new(cols: 2)"
+    assert_includes source, "FlatPack::TextArea::Component.new("
     assert_includes source, "Paste this into your page."
     refute_includes source, "Copy the code below"
+    refute_includes source, "FlatPack::TextInput::Component"
     assert_includes source, 'title: "Embed"'
+    assert_includes source, "subtitle: recordable_title"
     assert_includes source, "section_nav"
   end
 
   def test_linking_embed_screens_drop_repeated_chrome
-    %w[settings styling stats].each do |action|
+    %w[styling stats].each do |action|
       source = File.read(
         File.expand_path("../app/views/recording_studio_embeddable/management/embeds/#{action}.html.erb", __dir__)
       )
@@ -591,9 +594,22 @@ class RecordingStudioEmbeddableTest < Minitest::Test
       File.expand_path("../app/views/recording_studio_embeddable/management/embeds/stats.html.erb", __dir__)
     )
 
-    assert_includes settings, 'title: "Settings"'
-    refute_includes settings, "Embed Settings"
+    refute_includes settings, "section_nav"
+    assert_includes settings, 'title: "Embed settings"'
+    assert_includes settings, "subtitle: recordable_title"
+    assert_includes settings, "large_subtitle: true"
+    assert_includes settings, "FlatPack::Grid::Component.new(cols: 2)"
+    assert_includes settings, 'label: "Width"'
+    assert_includes settings, 'label: "Height"'
+    refute_includes settings, "Iframe sizing"
+    refute_includes settings, "These values control the copied iframe element itself."
+    refute_includes settings, "Iframe width"
+    refute_includes settings, "Iframe height"
+
     assert_includes styling, 'title: "Styling"'
+    assert_includes styling, "FlatPack::Grid::Component.new(cols: 2)"
+    refute_includes styling, "Embed overrides"
+
     assert_includes stats, 'title: "Stats"'
     refute_includes stats, "Embed Stats"
   end

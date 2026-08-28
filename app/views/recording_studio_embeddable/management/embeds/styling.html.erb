@@ -12,6 +12,8 @@
     variant: :h1
   ) %>
 
+  <%= render FlatPack::Grid::Component.new(cols: 2) do %>
+    <div class="space-y-4">
   <% unless @styling_editable %>
     <p class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
       Custom styling is currently disabled for this embed. You can still review the resolved values below.
@@ -49,7 +51,6 @@
       ) %>
     </div>
 
-    <h2 class="text-base font-semibold">Embed overrides</h2>
     <div class="space-y-4">
       <% @styling_definitions.each do |key, definition| %>
         <% field_name = key.to_s %>
@@ -159,9 +160,9 @@
         </div>
       <% end %>
     </div>
-
   <% end %>
-
+    </div>
+  <% end %>
 </div>
 
 <script>

@@ -65,10 +65,12 @@
               <p class="text-sm text-(--text-muted-color)">Paste this into your page.</p>
             </div>
 
-            <%= render FlatPack::TextInput::Component.new(
+            <%= render FlatPack::TextArea::Component.new(
               name: "embed_code",
               id: "embed_code",
               value: embed_code,
+              rows: 5,
+              autogrow: true,
               quick_copy: true
             ) %>
           </div>

@@ -1,4 +1,6 @@
 <% parent_recording = @embed.parent_recording %>
+<% recordable = parent_recording&.recordable %>
+<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
 <% embed_options = RecordingStudioEmbeddable::Renderer.options_for(parent_recording) %>
 <% publishable_required = ActiveModel::Type::Boolean.new.cast(embed_options.fetch(:require_publishable, RecordingStudioEmbeddable.configuration.require_publishable)) %>
 <% publishable_ready = if parent_recording.respond_to?(:currently_published?)
@@ -14,7 +16,7 @@
 <% publish_page_url = parent_recording.present? ? recording_studio_publishable.edit_recording_publishable_path(recording_id: parent_recording.id) : nil %>
 
 <% recording_studio_page_nav(
-  title: "Settings",
+  title: "Embed settings",
   page_nav_back_url: edit_management_embed_path(@embed),
   page_nav_back_label: "Embed",
   page_nav_anchor_url: main_app.root_path,
@@ -23,8 +25,10 @@
 
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
-    title: "Settings",
-    variant: :h1
+    title: "Embed settings",
+    subtitle: recordable_title,
+    variant: :h1,
+    large_subtitle: true
   ) %>
 
   <% if show_unpublished_warning %>
@@ -39,37 +43,29 @@
       <% end %>
     <% end %>
   <% else %>
-    <%= form_with model: @embed, url: management_embed_path(@embed), method: :patch, class: "space-y-6" do |_form| %>
-      <%= hidden_field_tag :form_context, "settings" %>
+    <%= render FlatPack::Grid::Component.new(cols: 2) do %>
+      <div>
+      <%= form_with model: @embed, url: management_embed_path(@embed), method: :patch, class: "space-y-6" do |_form| %>
+        <%= hidden_field_tag :form_context, "settings" %>
 
-      <% if @embed.errors.any? %>
-        <p role="alert" class="text-sm text-red-700"><%= @embed.errors.full_messages.to_sentence %></p>
-      <% end %>
-
-      <div class="space-y-4">
-        <%= render FlatPack::SectionTitle::Component.new(
-          title: "Iframe sizing",
-          subtitle: "These values control the copied iframe element itself.",
-        ) %>
+        <% if @embed.errors.any? %>
+          <p role="alert" class="text-sm text-red-700"><%= @embed.errors.full_messages.to_sentence %></p>
+        <% end %>
 
         <%= render FlatPack::TextInput::Component.new(
           name: "embed[sizing][width]",
-          label: "Iframe width",
+          label: "Width",
           value: @embed.sizing[:width].presence || RecordingStudioEmbeddable.configuration.default_sizing["width"],
-          placeholder: "100%",
-          description: "Controls the outer iframe width in the host page. This does not change the content width inside the embed."
+          placeholder: "100%"
         ) %>
 
         <%= render FlatPack::TextInput::Component.new(
           name: "embed[sizing][height]",
-          label: "Iframe height",
+          label: "Height",
           value: @embed.sizing[:height].presence || RecordingStudioEmbeddable.configuration.default_sizing["height"],
-          placeholder: "320px",
-          description: "Controls the outer iframe height reserved by the host page. The embedded page still lays out its own content inside that frame."
+          placeholder: "320px"
         ) %>
-      </div>
 
-      <div class="space-y-4">
         <%= render FlatPack::TextArea::Component.new(
           name: "embed[allowed_embedder_domains_text]",
           label: "Allowed domains (one per line)",
@@ -85,14 +81,15 @@
           rows: 6,
           placeholder: "bad-domain.example"
         ) %>
-      </div>
 
-      <%= render FlatPack::Button::Component.new(
-        text: "Save changes",
-        style: :primary,
-        size: :md,
-        type: "submit"
-      ) %>
+        <%= render FlatPack::Button::Component.new(
+          text: "Save changes",
+          style: :primary,
+          size: :md,
+          type: "submit"
+        ) %>
+      <% end %>
+      </div>
     <% end %>
   <% end %>
 </div>
