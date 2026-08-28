@@ -87,6 +87,8 @@ The engine also ships management routes for embed editors and operators. From th
 - Adjust styling overrides.
 - Review summary and stats views.
 
+Studio/management screens use core `recording_studio/default_layout` via `RecordingStudio::UsesDefaultLayout`. Do not wrap them in a second application shell. Core still puts `data-theme` on `<body>`; this gem copies FlatPack `rounded` onto `<html>` through `app/views/recording_studio/_default_layout_head.html.erb`. Hosts that already provide that partial should keep it. The public iframe at `/recording_studio_embeddable/embeds/:token` stays on the chrome-free embed layout.
+
 ## Development
 
 For local development in this repository:

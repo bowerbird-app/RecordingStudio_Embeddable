@@ -20,9 +20,9 @@ page = Page.find_or_create_by!(title: "Getting Started")
 article = Article.find_or_create_by!(title: "Article Requires Publishable")
 document = Document.find_or_create_by!(title: "Document Publishable Only")
 
-Page.where(id: page.id).update_all(description: "Page description used by both publishable and embeddable rendering.")
-Article.where(id: article.id).update_all(description: "Article description for embeddable behavior testing.")
-Document.where(id: document.id).update_all(description: "Document description for publishable-only behavior testing.")
+Page.where(id: page.id).update_all(description: "Walk through workspace setup, embed codes, and how guests see a published page.")
+Article.where(id: article.id).update_all(description: "What changed in the spring workspace release, including embed codes and guest publish flow.")
+Document.where(id: document.id).update_all(description: "Brand colors, type, and asset rules for published pages.")
 
 # Create the root recording
 root_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(

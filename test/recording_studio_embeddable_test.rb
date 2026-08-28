@@ -491,4 +491,48 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   def test_embeddable_view_log_uses_canonical_table_name
     assert_equal "recording_studio_embeddable_view_logs", RecordingStudioEmbeddable::EmbeddableViewLog.table_name
   end
+
+  def test_management_application_controller_uses_core_default_layout
+    source = File.read(File.expand_path("../app/controllers/recording_studio_embeddable/application_controller.rb",
+                                        __dir__))
+
+    assert_includes source, "RecordingStudio::UsesDefaultLayout"
+    assert_includes source, 'layout "recording_studio/default_layout"'
+    refute_includes source, 'layout "recording_studio_embeddable/application"'
+  end
+
+  def test_default_layout_head_copies_rounded_theme_onto_html
+    source = File.read(File.expand_path("../app/views/recording_studio/_default_layout_head.html.erb", __dir__))
+
+    assert_includes source, 'document.documentElement.setAttribute("data-theme", "rounded")'
+  end
+
+  def test_public_embed_layout_stays_chrome_free_with_rounded_theme
+    source = File.read(File.expand_path("../app/views/layouts/recording_studio_embeddable/embed.html.erb", __dir__))
+
+    assert_includes source, '<html data-theme="rounded">'
+    refute_includes source, "recording_studio/default_layout"
+  end
+
+  def test_dummy_home_uses_flatpack_dropdown_actions
+    source = File.read(File.expand_path("dummy/app/views/home/index.html.erb", __dir__))
+
+    assert_includes source, "FlatPack::Button::Dropdown::Component"
+    assert_includes source, "show_chevron: false"
+    assert_includes source, 'icon: "ellipsis-vertical"'
+    refute_includes source, "No embed"
+    refute_includes source, "app_nav"
+  end
+
+  def test_dummy_embed_cards_drop_placeholder_copy
+    %w[
+      dummy/app/views/pages/_embed.html.erb
+      dummy/app/views/articles/embed.html.erb
+      dummy/app/views/documents/show.html.erb
+    ].each do |relative_path|
+      source = File.read(File.expand_path(relative_path, __dir__))
+
+      refute_includes source, "This text uses the main text color."
+    end
+  end
 end

@@ -1,0 +1,6 @@
+<%# Core default_layout puts data-theme on body. FlatPack named themes
+    must live on html/:root so --button-primary-* aliases inherit charcoal,
+    not :root's default blue. This hook does not fork the layout. %>
+<%= javascript_tag nonce: true do %>
+  document.documentElement.setAttribute("data-theme", "rounded");
+<% end %>

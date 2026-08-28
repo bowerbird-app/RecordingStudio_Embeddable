@@ -15,15 +15,23 @@
 <% show_unpublished_warning = publishable_required && !publishable_ready %>
 <% publish_page_url = parent_recording.present? ? recording_studio_publishable.edit_recording_publishable_path(recording_id: parent_recording.id) : nil %>
 
-<div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
-  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) %>
+<% recording_studio_page_nav(
+  title: "Embed Settings",
+  page_nav_back_url: edit_management_embed_path(@embed),
+  page_nav_back_label: "Embed",
+  page_nav_anchor_url: main_app.root_path,
+  page_nav_anchor_label: "Close"
+) %>
 
+<div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Embed Settings",
     subtitle: recordable_title,
     variant: :h1,
     large_subtitle: true
   ) %>
+
+  <%= render "section_nav", disable_management_actions: show_unpublished_warning %>
 
   <% if show_unpublished_warning %>
     <%= render FlatPack::EmptyState::Component.new(
@@ -32,9 +40,7 @@
     ) do |empty| %>
       <% empty.actions do %>
         <% if publish_page_url.present? %>
-          <%= link_to publish_page_url, class: "inline-flex" do %>
-            <%= render FlatPack::Button::Component.new(text: "Publish Settings", style: :primary) %>
-          <% end %>
+          <%= render FlatPack::Button::Component.new(text: "Publish Settings", style: :primary, href: publish_page_url) %>
         <% end %>
       <% end %>
     <% end %>

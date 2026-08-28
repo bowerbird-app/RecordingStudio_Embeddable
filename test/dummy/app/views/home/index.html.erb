@@ -1,15 +1,23 @@
-<div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
-  <%= render "app_nav" %>
+<% recording_studio_page_nav(
+  title: "Dummy embeddables",
+  page_nav_anchor_url: root_path,
+  page_nav_anchor_label: "Close"
+) %>
+
+<div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Dummy embeddables",
     subtitle: "Review demo recordings, open embed management, and jump to publishable edit.",
     variant: :h1
   ) %>
 
-  <div class="flex flex-wrap items-center gap-3">
-    <%= link_to new_dummy_page_path, class: "inline-flex" do %>
-      <%= render FlatPack::Button::Component.new(text: "Add Page", style: :primary, size: :md) %>
-    <% end %>
+  <div>
+    <%= render FlatPack::Button::Component.new(
+      text: "Add Page",
+      style: :primary,
+      size: :md,
+      href: new_dummy_page_path
+    ) %>
   </div>
 
   <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
@@ -31,7 +39,8 @@
                 <% embeddable_recording = recording.respond_to?(:embeddable?) && recording.embeddable? %>
                 <% embed = recording.current_embed if recording.respond_to?(:current_embed) %>
                 <% embed ||= recording.ensure_embed!(enabled: true) if embeddable_recording && recording.respond_to?(:ensure_embed!) %>
-                <% embed_preview_path = embed.present? ? "/recording_studio_embeddable/management/embeds/#{embed.id}/preview" : nil %>
+                <% embed_preview_path = embed.present? ? recording_studio_embeddable.preview_management_embed_path(embed) : nil %>
+                <% row_actions = dummy_recording_row_actions(recording, embed: embed) %>
                 <tr>
                   <td class="px-4 py-3"><%= recording.recordable_type.to_s.demodulize %></td>
                   <td class="px-4 py-3 font-medium"><%= recording.recordable.try(:title).presence || recording.recordable.to_s %></td>
@@ -44,19 +53,21 @@
                     <% end %>
                   </td>
                   <td class="px-4 py-3">
-                    <div class="flex flex-wrap items-center gap-2">
-                      <% if embed.present? %>
-                        <%= link_to "/recording_studio_embeddable/management/embeds/#{embed.id}/edit", class: "inline-flex" do %>
-                          <%= render FlatPack::Button::Component.new(text: "Embed", style: :secondary, size: :sm) %>
+                    <% if row_actions.any? %>
+                      <%= render FlatPack::Button::Dropdown::Component.new(
+                        text: "",
+                        icon: "ellipsis-vertical",
+                        show_chevron: false,
+                        style: :secondary,
+                        size: :sm,
+                        placement: :bottom_right,
+                        trigger_attributes: { aria: { label: "Actions" } }
+                      ) do |dropdown| %>
+                        <% row_actions.each do |action| %>
+                          <% dropdown.menu_item(text: action[:text], href: action[:href]) %>
                         <% end %>
-                      <% else %>
-                        <span class="text-(--surface-muted-content-color)">No embed</span>
                       <% end %>
-
-                      <% if defined?(RecordingStudioPublishable::EditButtonComponent) %>
-                        <%= render RecordingStudioPublishable::EditButtonComponent.new(recording: recording, show_tooltip: true) %>
-                      <% end %>
-                    </div>
+                    <% end %>
                   </td>
                 </tr>
               <% end %>

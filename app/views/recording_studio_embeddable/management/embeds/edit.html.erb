@@ -17,9 +17,13 @@
 <% publish_page_url = parent_recording.present? ? recording_studio_publishable.edit_recording_publishable_path(recording_id: parent_recording.id) : nil %>
 <% disable_management_actions = show_unpublished_warning %>
 
-<div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
-  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) %>
+<% recording_studio_page_nav(
+  title: "Embed",
+  page_nav_anchor_url: main_app.root_path,
+  page_nav_anchor_label: "Close"
+) %>
 
+<div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Embed",
     subtitle: recordable_title,
@@ -27,41 +31,7 @@
     large_subtitle: true
   ) %>
 
-  <div class="flex flex-wrap items-center gap-2">
-    <%= render FlatPack::Button::Component.new(
-      text: "Preview",
-      style: :secondary,
-      size: :md,
-      url: preview_management_embed_path(@embed)
-    ) %>
-    <%= render FlatPack::Button::Component.new(
-      text: "Styling",
-      style: :secondary,
-      size: :md,
-      url: disable_management_actions ? nil : styling_management_embed_path(@embed),
-      type: "button",
-      class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
-      aria: (disable_management_actions ? { disabled: true } : {})
-    ) %>
-    <%= render FlatPack::Button::Component.new(
-      text: "Settings",
-      style: :secondary,
-      size: :md,
-      url: disable_management_actions ? nil : settings_management_embed_path(@embed),
-      type: "button",
-      class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
-      aria: (disable_management_actions ? { disabled: true } : {})
-    ) %>
-    <%= render FlatPack::Button::Component.new(
-      text: "Stats",
-      style: :secondary,
-      size: :md,
-      url: disable_management_actions ? nil : stats_management_embed_path(@embed),
-      type: "button",
-      class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
-      aria: (disable_management_actions ? { disabled: true } : {})
-    ) %>
-  </div>
+  <%= render "section_nav", disable_management_actions: disable_management_actions %>
 
   <% if show_unpublished_warning %>
     <%= render FlatPack::EmptyState::Component.new(
@@ -70,9 +40,7 @@
     ) do |empty| %>
       <% empty.actions do %>
         <% if publish_page_url.present? %>
-          <%= link_to publish_page_url, class: "inline-flex" do %>
-            <%= render FlatPack::Button::Component.new(text: "Publish Settings", style: :primary) %>
-          <% end %>
+          <%= render FlatPack::Button::Component.new(text: "Publish Settings", style: :primary, href: publish_page_url) %>
         <% end %>
       <% end %>
     <% end %>

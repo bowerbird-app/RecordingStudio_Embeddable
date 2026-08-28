@@ -2,15 +2,23 @@
 <% recordable = parent_recording&.recordable %>
 <% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
 
-<div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
-  <%= render FlatPack::PageNav::Component.new(anchor_url: main_app.root_path) %>
+<% recording_studio_page_nav(
+  title: "Embed Stats",
+  page_nav_back_url: edit_management_embed_path(@embed),
+  page_nav_back_label: "Embed",
+  page_nav_anchor_url: main_app.root_path,
+  page_nav_anchor_label: "Close"
+) %>
 
+<div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Embed Stats",
     subtitle: recordable_title,
     variant: :h1,
     large_subtitle: true
   ) %>
+
+  <%= render "section_nav" %>
 
   <%= render FlatPack::Chart::Component.new(
     title: "Views",
@@ -88,21 +96,21 @@
       <% end %>
 
       <% if @stats_range_picker == "custom" %>
-        <%= form_with url: stats_management_embed_path(@embed), method: :get, local: true, class: "mt-2 flex flex-wrap items-end gap-2" do %>
+        <%= form_with url: stats_management_embed_path(@embed), method: :get, local: true, class: "mt-2 flex flex-col items-start gap-3" do %>
           <%= hidden_field_tag :viewer, @stats_viewer_filter %>
           <%= hidden_field_tag :range, "custom" %>
           <%= hidden_field_tag :granularity, @stats_granularity %>
           <%= render FlatPack::DateInput::Component.new(
             name: :from,
+            label: "From",
             value: @stats_from_date&.iso8601,
-            max: @stats_to_date&.iso8601,
-            class: "w-36 h-8 py-1 text-xs"
+            max: @stats_to_date&.iso8601
           ) %>
           <%= render FlatPack::DateInput::Component.new(
             name: :to,
+            label: "To",
             value: @stats_to_date&.iso8601,
-            min: @stats_from_date&.iso8601,
-            class: "w-36 h-8 py-1 text-xs"
+            min: @stats_from_date&.iso8601
           ) %>
           <%= render FlatPack::Button::Component.new(text: "Apply", style: :secondary, size: :sm, type: "submit") %>
           <% if @stats_custom_range %>
@@ -110,7 +118,7 @@
               text: "Clear",
               style: :secondary,
               size: :sm,
-              url: stats_management_embed_path(@embed, range: "custom", viewer: @stats_viewer_filter,
+              href: stats_management_embed_path(@embed, range: "custom", viewer: @stats_viewer_filter,
                                                        granularity: @stats_granularity)
             ) %>
           <% end %>

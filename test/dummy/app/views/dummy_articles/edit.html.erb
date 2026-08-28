@@ -1,4 +1,12 @@
-<div class="mx-auto flex w-full max-w-4xl flex-col gap-6">
+<% recording_studio_page_nav(
+  title: "Edit Article",
+  page_nav_back_url: root_path,
+  page_nav_back_label: "Dummy embeddables",
+  page_nav_anchor_url: root_path,
+  page_nav_anchor_label: "Close"
+) %>
+
+<div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Edit Article",
     subtitle: "Update article fields and compare embeddable output behavior.",
@@ -21,11 +29,7 @@
       placeholder: "Enter article description"
     ) %>
 
-    <div class="flex items-center gap-3">
-      <%= render FlatPack::Button::Component.new(text: "Save article", style: :primary, size: :md, type: "submit") %>
-      <%= link_to root_path, class: "inline-flex" do %>
-        <%= render FlatPack::Button::Component.new(text: "Cancel", style: :ghost, size: :md) %>
-      <% end %>
-    </div>
+    <%= render FlatPack::Button::Component.new(text: "Save article", style: :primary, size: :md, type: "submit") %>
+    <%= render FlatPack::Button::Component.new(text: "Cancel", style: :ghost, size: :md, href: root_path) %>
   <% end %>
 </div>

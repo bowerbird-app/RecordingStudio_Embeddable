@@ -1,0 +1,37 @@
+<% disable_management_actions = local_assigns.fetch(:disable_management_actions, false) %>
+
+<div class="flex flex-wrap items-center gap-2">
+  <%= render FlatPack::Button::Component.new(
+    text: "Preview",
+    style: :secondary,
+    size: :md,
+    href: preview_management_embed_path(@embed)
+  ) %>
+  <%= render FlatPack::Button::Component.new(
+    text: "Styling",
+    style: :secondary,
+    size: :md,
+    href: disable_management_actions ? nil : styling_management_embed_path(@embed),
+    type: "button",
+    class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
+    aria: (disable_management_actions ? { disabled: true } : {})
+  ) %>
+  <%= render FlatPack::Button::Component.new(
+    text: "Settings",
+    style: :secondary,
+    size: :md,
+    href: disable_management_actions ? nil : settings_management_embed_path(@embed),
+    type: "button",
+    class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
+    aria: (disable_management_actions ? { disabled: true } : {})
+  ) %>
+  <%= render FlatPack::Button::Component.new(
+    text: "Stats",
+    style: :secondary,
+    size: :md,
+    href: disable_management_actions ? nil : stats_management_embed_path(@embed),
+    type: "button",
+    class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
+    aria: (disable_management_actions ? { disabled: true } : {})
+  ) %>
+</div>
