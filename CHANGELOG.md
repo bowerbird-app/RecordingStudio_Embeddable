@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replace dummy table action stacks with FlatPack `Button::Dropdown` (icon `ellipsis-vertical`, `show_chevron: false`).
 - Keep the embed enablement control as a FlatPack `Switch` labeled Embeddable.
 - Remove placeholder dummy copy (`This text uses the main text color.`).
+- Cap the embed-code form with FlatPack `Grid` `cols: 2` (width cap only; fields stay one per row).
+- Shorten embed-code help to “Paste this into your page.”
+- Keep Embed title, recordable subtitle, and Preview/Styling/Settings/Stats nav on the embed-code screen only. Settings, Styling, and Stats titles are the action name.
+- Put Styling Save, Reset, and Preview in one row of separate FlatPack Buttons (Save primary).
 
 ## [0.1.1] - 2026-04-28
 

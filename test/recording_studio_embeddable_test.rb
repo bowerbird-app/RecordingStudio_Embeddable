@@ -556,4 +556,60 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes source, "/usr/local/bundle"
     refute_includes source, "vendor/bundle/**/flatpack"
   end
+
+  def test_embed_code_screen_caps_form_width_and_shortens_help
+    source = File.read(
+      File.expand_path("../app/views/recording_studio_embeddable/management/embeds/edit.html.erb", __dir__)
+    )
+
+    assert_includes source, "FlatPack::Grid::Component.new(cols: 2)"
+    assert_includes source, "Paste this into your page."
+    refute_includes source, "Copy the code below"
+    assert_includes source, 'title: "Embed"'
+    assert_includes source, "section_nav"
+  end
+
+  def test_linking_embed_screens_drop_repeated_chrome
+    %w[settings styling stats].each do |action|
+      source = File.read(
+        File.expand_path("../app/views/recording_studio_embeddable/management/embeds/#{action}.html.erb", __dir__)
+      )
+
+      refute_includes source, "section_nav"
+      refute_includes source, "large_subtitle"
+      refute_includes source, "Getting Started"
+      refute_includes source, "subtitle: recordable_title"
+    end
+
+    settings = File.read(
+      File.expand_path("../app/views/recording_studio_embeddable/management/embeds/settings.html.erb", __dir__)
+    )
+    styling = File.read(
+      File.expand_path("../app/views/recording_studio_embeddable/management/embeds/styling.html.erb", __dir__)
+    )
+    stats = File.read(
+      File.expand_path("../app/views/recording_studio_embeddable/management/embeds/stats.html.erb", __dir__)
+    )
+
+    assert_includes settings, 'title: "Settings"'
+    refute_includes settings, "Embed Settings"
+    assert_includes styling, 'title: "Styling"'
+    assert_includes stats, 'title: "Stats"'
+    refute_includes stats, "Embed Stats"
+  end
+
+  def test_styling_actions_are_one_row_of_separate_buttons
+    source = File.read(
+      File.expand_path("../app/views/recording_studio_embeddable/management/embeds/styling.html.erb", __dir__)
+    )
+
+    assert_includes source, 'class="flex flex-wrap items-center gap-3"'
+    assert_includes source, 'text: "Save"'
+    assert_includes source, "style: :primary"
+    assert_includes source, 'text: "Reset"'
+    assert_includes source, 'text: "Preview"'
+    refute_includes source, "ButtonGroup"
+    refute_includes source, "flex-col items-start"
+    refute_includes source, "styling-save-button"
+  end
 end

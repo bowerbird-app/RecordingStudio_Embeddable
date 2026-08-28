@@ -45,42 +45,41 @@
       <% end %>
     <% end %>
   <% else %>
-    <div class="space-y-6">
-      <%= form_with model: @embed, url: management_embed_path(@embed), method: :patch, class: "embed-enabled-switch" do |_form| %>
-        <input type="hidden" name="embed[enabled]" value="0">
-        <%= render FlatPack::Switch::Component.new(
-          name: "embed[enabled]",
-          label: "Embeddable",
-          checked: @embed.enabled,
-          disabled: show_unpublished_warning,
-          data: { autosave_embed_enabled: true }
-        ) %>
-      <% end %>
-
-      <% if @embed.enabled %>
-        <div class="space-y-4">
-          <div class="space-y-1">
-            <h2 class="text-base font-semibold">Embed code</h2>
-            <p class="max-w-2xl text-sm text-(--text-muted-color)">
-              Copy the code below, then paste it into the page or editor on your site where you want the embed to appear.
-              Save that page after you paste it.
-            </p>
-          </div>
-
-          <%= render FlatPack::TextInput::Component.new(
-            name: "embed_code",
-            id: "embed_code",
-            value: embed_code,
-            quick_copy: true
+    <%= render FlatPack::Grid::Component.new(cols: 2) do %>
+      <div class="space-y-6">
+        <%= form_with model: @embed, url: management_embed_path(@embed), method: :patch, class: "embed-enabled-switch" do |_form| %>
+          <input type="hidden" name="embed[enabled]" value="0">
+          <%= render FlatPack::Switch::Component.new(
+            name: "embed[enabled]",
+            label: "Embeddable",
+            checked: @embed.enabled,
+            disabled: show_unpublished_warning,
+            data: { autosave_embed_enabled: true }
           ) %>
-        </div>
-      <% else %>
-        <%= render FlatPack::EmptyState::Component.new(
-          title: "Embeddable is off",
-          description: "Turn on Embeddable above to reveal the embed code."
-        ) %>
-      <% end %>
-    </div>
+        <% end %>
+
+        <% if @embed.enabled %>
+          <div class="space-y-4">
+            <div class="space-y-1">
+              <h2 class="text-base font-semibold">Embed code</h2>
+              <p class="text-sm text-(--text-muted-color)">Paste this into your page.</p>
+            </div>
+
+            <%= render FlatPack::TextInput::Component.new(
+              name: "embed_code",
+              id: "embed_code",
+              value: embed_code,
+              quick_copy: true
+            ) %>
+          </div>
+        <% else %>
+          <%= render FlatPack::EmptyState::Component.new(
+            title: "Embeddable is off",
+            description: "Turn on Embeddable above to reveal the embed code."
+          ) %>
+        <% end %>
+      </div>
+    <% end %>
   <% end %>
 </div>
 

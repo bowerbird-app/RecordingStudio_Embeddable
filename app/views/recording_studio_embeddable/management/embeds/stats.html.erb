@@ -1,9 +1,5 @@
-<% parent_recording = @embed.parent_recording %>
-<% recordable = parent_recording&.recordable %>
-<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
-
 <% recording_studio_page_nav(
-  title: "Embed Stats",
+  title: "Stats",
   page_nav_back_url: edit_management_embed_path(@embed),
   page_nav_back_label: "Embed",
   page_nav_anchor_url: main_app.root_path,
@@ -12,13 +8,9 @@
 
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
-    title: "Embed Stats",
-    subtitle: recordable_title,
-    variant: :h1,
-    large_subtitle: true
+    title: "Stats",
+    variant: :h1
   ) %>
-
-  <%= render "section_nav" %>
 
   <%= render FlatPack::Chart::Component.new(
     title: "Views",
