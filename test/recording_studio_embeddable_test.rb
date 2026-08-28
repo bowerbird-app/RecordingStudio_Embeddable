@@ -535,4 +535,25 @@ class RecordingStudioEmbeddableTest < Minitest::Test
       refute_includes source, "This text uses the main text color."
     end
   end
+
+  def test_dummy_tailwind_sources_resolve_loaded_gems
+    require_relative "dummy/lib/dummy/tailwind_gem_sources"
+
+    directories = Dummy::TailwindGemSources.source_directories
+    css = Dummy::TailwindGemSources.css
+
+    assert(directories.any? { |path| path.include?("flatpack") || path.include?("flat_pack") })
+    assert(directories.any? { |path| path.include?("RecordingStudio") || path.include?("recording_studio") })
+    assert_includes css, "@source"
+    assert_includes css, "app/components"
+    assert_includes css, "app/views"
+  end
+
+  def test_dummy_tailwind_entry_imports_generated_gem_sources
+    source = File.read(File.expand_path("dummy/app/assets/tailwind/application.css", __dir__))
+
+    assert_includes source, '@import "./gem_sources.css"'
+    refute_includes source, "/usr/local/bundle"
+    refute_includes source, "vendor/bundle/**/flatpack"
+  end
 end

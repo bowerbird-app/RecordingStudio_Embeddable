@@ -42,4 +42,6 @@ Use this app to verify the generated addon experience before renaming the gem or
 
 Authenticated dummy pages use `RecordingStudio::UsesDefaultLayout` and `recording_studio/default_layout`. Core PageNav owns back/close. Dummy copies FlatPack `rounded` onto `<html>` via `app/views/recording_studio/_default_layout_head.html.erb`. Docs navigation lives in `app/views/application/_app_nav.html.erb` as in-page dummy docs links, not as the product frame.
 
+Tailwind scans FlatPack and Recording Studio from Bundler’s loaded gem paths. `bin/rails tailwindcss:build` and `tailwindcss:watch` write `app/assets/tailwind/gem_sources.css` from `Gem.loaded_specs` and `Bundler.bundle_path` before compiling, so Switch and icon size utilities work under vendor, CI, mise, and local `BUNDLE_PATH`.
+
 Likewise, the home page in `app/views/home/index.html.erb` should stay a minimal demo surface for the gem's core feature. Do not turn it into a wall of documentation; the dedicated docs pages exist so deeper explanations can live in focused sections.

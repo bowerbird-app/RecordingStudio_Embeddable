@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Management screens use core `recording_studio/default_layout` via `RecordingStudio::UsesDefaultLayout`. The customer-facing iframe keeps the chrome-free embed layout.
 - Copy FlatPack `rounded` onto `<html>` through `recording_studio/_default_layout_head` so primaries are charcoal, not `:root` blue.
+- Dummy Tailwind `@source` now resolves FlatPack and Recording Studio from `Gem.loaded_specs` / `Bundler.bundle_path` before each CSS build, so Switch and icon size utilities compile under vendor, CI, and local `BUNDLE_PATH`.
 - Replace dummy table action stacks with FlatPack `Button::Dropdown` (icon `ellipsis-vertical`, `show_chevron: false`).
 - Keep the embed enablement control as a FlatPack `Switch` labeled Embeddable.
 - Remove placeholder dummy copy (`This text uses the main text color.`).
