@@ -569,6 +569,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes source, "FlatPack::TextInput::Component"
     assert_includes source, 'title: "Embed"'
     assert_includes source, "subtitle: recordable_title"
+    refute_includes source, "large_subtitle"
     assert_includes source, "section_nav"
   end
 
@@ -597,7 +598,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes settings, "section_nav"
     assert_includes settings, 'title: "Embed settings"'
     assert_includes settings, "subtitle: recordable_title"
-    assert_includes settings, "large_subtitle: true"
+    refute_includes settings, "large_subtitle"
     assert_includes settings, "FlatPack::Grid::Component.new(cols: 2)"
     assert_includes settings, 'label: "Width"'
     assert_includes settings, 'label: "Height"'

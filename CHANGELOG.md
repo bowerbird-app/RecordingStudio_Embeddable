@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Show the embed snippet in a wrapping FlatPack `TextArea` with short help “Paste this into your page.”
 - Keep Embed title, recordable subtitle, and Preview/Styling/Settings/Stats nav on the embed-code screen.
 - Title Settings as “Embed settings” with the recordable name as subtitle. Labels are Width and Height.
+- Use default FlatPack PageTitle subtitle size (no `large_subtitle`) on management screens.
 - Put Styling Save, Reset, and Preview in one row of separate FlatPack Buttons (Save primary).
 
 ## [0.1.1] - 2026-04-28
