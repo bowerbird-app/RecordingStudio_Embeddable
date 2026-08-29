@@ -99,7 +99,8 @@ If a recordable does not declare a field default and an embed does not override 
 
 On the Styling screen:
 
-- Colour fields and Font share one wrapping flex row of FlatPack circles (`ColorSwatch` + `FontSwatch`) using `--stack-gap-md`.
+- Colour fields and Font share one FlatPack `OverflowRow` (`gap: :md`) of `ColorSwatch` + `FontSwatch` circles.
+- The row never wraps. When swatches overflow, OverflowRow scrolls sideways with a hidden scrollbar and a soft trailing fade while more remains to the right (fade clears at the end).
 - Colour names and the font name are tooltip-only (no label under the circle).
 - Clicking a colour circle opens the native colour picker; clicking FontSwatch opens its FlatPack Popover menu (tooltip hides while open).
 - Save posts ColorSwatch colour inputs and FontSwatch’s hidden `name` with the form (`embed[appearance][...]`).
@@ -108,22 +109,30 @@ On the Styling screen:
 - Save and Reset are separate FlatPack Buttons in one row (Save primary).
 - Reset restores each ColorSwatch colour and the FontSwatch font to resolved/default values and refreshes the live preview.
 
-Require FlatPack `~> 0.1.138` (GitHub tag `v0.1.138`) for `FlatPack::ColorSwatch::Component` and `FlatPack::FontSwatch::Component`.
+Require FlatPack `~> 0.1.141` (GitHub tag `v0.1.141`) for `FlatPack::ColorSwatch::Component`, `FlatPack::FontSwatch::Component`, and `FlatPack::OverflowRow::Component`.
 
-Example FontSwatch composition:
+Example composition:
 
 ```erb
-<%= render FlatPack::FontSwatch::Component.new(
-  font: current_css_family,
-  options: [
-    ["Sans", "ui-sans-serif, system-ui, sans-serif"],
-    ["Serif", "ui-serif, Georgia, serif"],
-    ["Mono", "ui-monospace, SFMono-Regular, monospace"]
-  ],
-  name: "embed[appearance][font_family]",
-  text: "Sans",
-  size: :lg
-) %>
+<%= render FlatPack::OverflowRow::Component.new(gap: :md) do %>
+  <%= render FlatPack::ColorSwatch::Component.new(
+    color: "#ffffff",
+    text: "Background",
+    name: "embed[appearance][background_color]",
+    size: :lg
+  ) %>
+  <%= render FlatPack::FontSwatch::Component.new(
+    font: current_css_family,
+    options: [
+      ["Sans", "ui-sans-serif, system-ui, sans-serif"],
+      ["Serif", "ui-serif, Georgia, serif"],
+      ["Mono", "ui-monospace, SFMono-Regular, monospace"]
+    ],
+    name: "embed[appearance][font_family]",
+    text: "Sans",
+    size: :lg
+  ) %>
+<% end %>
 ```
 
 ## Practical Guidance

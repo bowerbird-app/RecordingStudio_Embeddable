@@ -10,10 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.2] - 2026-08-29
 
 ### Changed
-- Pin `flat_pack` to `~> 0.1.138` (GitHub tag `v0.1.138`) in the gemspec, root Gemfile, and dummy Gemfile/locks.
-- Replace the long Styling colour form with a wrapping row of FlatPack `ColorSwatch` circles plus one FlatPack `FontSwatch` (tooltip names only; no under-labels). Padding/radius and other non-font fields are no longer rendered on Styling.
+- Pin `flat_pack` to `~> 0.1.141` (GitHub tag `v0.1.141`) in the gemspec, root Gemfile, and dummy Gemfile/locks.
+- Replace the long Styling colour form with FlatPack `ColorSwatch` circles plus one FlatPack `FontSwatch` inside one FlatPack `OverflowRow` (`gap: :md`). Tooltip names only; no under-labels. Padding/radius and other non-font fields are no longer rendered on Styling.
+- OverflowRow owns the one-row strip: hidden scrollbar, trailing fade only while more content remains to the right, fade clears at the end. No Embeddable overflow/fade CSS.
 - Font posts a curated CSS `font-family` stack through FontSwatch’s hidden input (`embed[appearance][font_family]`). Legacy stack keys (`sans` / `serif` / `mono`) still resolve.
-- Show a live embed preview (management preview iframe) below the colour + font controls on Styling. Drop the separate Preview button from that screen.
+- Show a live embed preview (management preview iframe) below the swatch row on Styling. Drop the separate Preview button from that screen.
 - Reset restores ColorSwatch native colour inputs and the FontSwatch hidden input to resolved/default values and repaints the live preview.
 - Show the recordable name as the default-size FlatPack PageTitle subtitle on Settings, Styling, and Stats (no `large_subtitle`).
 
@@ -32,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Put Styling Save and Reset in one row of separate FlatPack Buttons (Save primary).
 
 ### Upgrade notes
-- Require FlatPack `~> 0.1.138` (tag `v0.1.138`) for `FlatPack::ColorSwatch::Component` and `FlatPack::FontSwatch::Component` on the Styling screen.
+- Require FlatPack `~> 0.1.141` (tag `v0.1.141`) for `FlatPack::ColorSwatch::Component`, `FlatPack::FontSwatch::Component`, and `FlatPack::OverflowRow::Component` on the Styling screen.
 - No host migration is required for existing embed appearance data. Colour values still post from ColorSwatch native inputs. Font may now save as a CSS stack string from FontSwatch; stack keys continue to work when resolving themes.
 
 ## [0.1.1] - 2026-04-28

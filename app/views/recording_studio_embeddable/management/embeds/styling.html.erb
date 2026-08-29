@@ -61,7 +61,7 @@
         </div>
 
         <% if color_definitions.any? || font_definition.present? %>
-          <div class="flex flex-wrap items-start gap-[var(--stack-gap-md)]">
+          <%= render FlatPack::OverflowRow::Component.new(gap: :md) do %>
             <% color_definitions.each do |key, definition| %>
               <% field_name = key.to_s %>
               <% current_value = @styling_overrides[field_name].to_s.strip %>
@@ -100,7 +100,7 @@
                 }
               ) %>
             <% end %>
-          </div>
+          <% end %>
         <% end %>
       <% end %>
 
