@@ -76,7 +76,8 @@ class Page < ApplicationRecord
       font_family: {
         label: "Font",
         css_property: "font-family",
-        input: :font_select
+        input: :font_select,
+        default: "sans",
       },
       padding_scale: {
         label: "Padding",

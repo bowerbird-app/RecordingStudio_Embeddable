@@ -8,8 +8,8 @@
 <% resolved_font = @resolved_theme["font_family"].to_s.strip %>
 <% default_font = @recordable_style_defaults["font_family"].to_s.strip %>
 <% font_source = current_font_override.presence || resolved_font.presence || default_font.presence || "sans" %>
-<% current_font_css = RecordingStudioEmbeddable::Styling::Tokens.resolve_font_family_css(font_source) || font_swatch_options.first[1] %>
-<% reset_font_css = RecordingStudioEmbeddable::Styling::Tokens.resolve_font_family_css(resolved_font.presence || default_font.presence || "sans") || font_swatch_options.first[1] %>
+<% current_font_css = RecordingStudioEmbeddable::Styling::Tokens.font_swatch_css_for(font_source) %>
+<% reset_font_css = RecordingStudioEmbeddable::Styling::Tokens.font_swatch_css_for(resolved_font.presence || default_font.presence || "sans") %>
 <% font_tooltip = RecordingStudioEmbeddable::Styling::Tokens.font_swatch_label_for(font_source) %>
 
 <% recording_studio_page_nav(
@@ -84,7 +84,7 @@
               ) %>
             <% end %>
 
-            <% if font_definition.present? %>
+            <% if font_definition.present? && current_font_css.present? %>
               <%= render FlatPack::FontSwatch::Component.new(
                 font: current_font_css,
                 options: font_swatch_options,

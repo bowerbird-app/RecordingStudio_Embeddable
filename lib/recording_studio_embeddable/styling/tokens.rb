@@ -59,9 +59,26 @@ module RecordingStudioEmbeddable
         "\"#{font_value}\", #{FONT_STACKS['sans']}"
       end
 
+      # CSS font-family safe for FlatPack::FontSwatch (AttributeSanitizer).
+      def font_swatch_css_for(value)
+        font_value = value.to_s.strip
+        return FONT_SWATCH_OPTIONS.first[1] if font_value.blank?
+
+        match = FONT_SWATCH_OPTIONS.find { |_label, css| css == font_value }
+        return match[1] if match
+
+        case font_value
+        when "sans" then FONT_SWATCH_OPTIONS[0][1]
+        when "serif" then FONT_SWATCH_OPTIONS[1][1]
+        when "mono" then FONT_SWATCH_OPTIONS[2][1]
+        else
+          FONT_SWATCH_OPTIONS.first[1]
+        end
+      end
+
       def font_swatch_label_for(value)
-        font_css = resolve_font_family_css(value).to_s
-        match = FONT_SWATCH_OPTIONS.find { |_label, css| css == font_css || css == value.to_s.strip }
+        font_css = font_swatch_css_for(value)
+        match = FONT_SWATCH_OPTIONS.find { |_label, css| css == font_css }
         return match[0] if match
 
         key = value.to_s.strip

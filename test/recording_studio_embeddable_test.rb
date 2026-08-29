@@ -685,6 +685,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     stack = "ui-serif, Georgia, serif"
 
     assert_equal stack, RecordingStudioEmbeddable::Styling::Tokens.resolve_font_family_css(stack)
+    assert_equal stack, RecordingStudioEmbeddable::Styling::Tokens.font_swatch_css_for("serif")
     assert_equal "Sans", RecordingStudioEmbeddable::Styling::Tokens.font_swatch_label_for("sans")
     assert_equal "Serif", RecordingStudioEmbeddable::Styling::Tokens.font_swatch_label_for(stack)
   end
