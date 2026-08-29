@@ -681,18 +681,20 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, "FlatPack::FontSwatch::Component"
     assert_includes styling, "FlatPack::OverflowRow::Component.new(gap: :md)"
     assert_includes styling, "FlatPack::Popover::Component.new(trigger_id: \"embed-width-trigger\""
+    assert_includes styling, 'FlatPack::Tooltip::Component.new(text: "Width"'
     assert_includes styling, 'id: "embed-width-trigger"'
     assert_includes styling, 'icon: "arrows-right-left"'
     assert_includes styling, "icon_only: true"
     assert_includes styling, 'class: "rounded-full"'
+    assert_includes styling, '<h3 class="text-sm font-semibold">Width</h3>'
     assert_includes styling, 'text: "Auto"'
     assert_includes styling, 'text: "Custom"'
     assert_includes styling, 'style_width_mode: "auto"'
     assert_includes styling, 'style_width_mode: "custom"'
+    assert_includes styling, 'placeholder: "40rem or 720px"'
     assert_includes styling, 'name="embed[sizing][width]"'
     assert_includes styling, 'name="embed[sizing][height]"'
     assert_includes styling, 'value="auto"'
-    assert_includes styling, 'label: "Width"'
     assert_includes styling, "default_color: reset_color"
     assert_includes styling, "default_font: reset_font_css"
     assert_includes styling, 'data-controller~="flat-pack--color-swatch"'
@@ -702,6 +704,8 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, "preview_management_embed_path(@embed)"
     assert_includes styling, 'style="width: <%= @preview_width %>; height: auto; min-height: 20rem; max-width: 100%;"'
     assert_includes styling, "selectStyleWidthMode"
+    refute_includes styling, "data-style-width-controls"
+    refute_includes styling, "data-style-custom-width="
     refute_includes styling, "FlatPack::ChipGroup"
     refute_includes styling, "FlatPack::Chip::"
     refute_includes styling, 'text: "Full"'
@@ -728,11 +732,19 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     font_swatch_index = styling.index("FlatPack::FontSwatch::Component")
     color_swatch_index = styling.index("FlatPack::ColorSwatch::Component")
     width_trigger_index = styling.index('id: "embed-width-trigger"')
+    popover_index = styling.index("data-style-width-popover")
+    field_index = styling.index("style_custom_width_input")
+    preview_index = styling.index('id="embed-styling-preview"')
     assert font_swatch_index, "expected FontSwatch on Style screen"
     assert color_swatch_index, "expected ColorSwatch on Style screen"
     assert width_trigger_index, "expected width Button on Style screen"
-    assert_operator font_swatch_index, :<, color_swatch_index
-    assert_operator color_swatch_index, :<, width_trigger_index
+    assert popover_index, "expected width popover on Style screen"
+    assert field_index, "expected CSS width field on Style screen"
+    assert preview_index, "expected live preview on Style screen"
+    assert_operator font_swatch_index, :<, width_trigger_index
+    assert_operator width_trigger_index, :<, color_swatch_index
+    assert_operator popover_index, :<, field_index
+    assert_operator field_index, :<, preview_index
 
     assert_includes stats, 'title: "Stats"'
     refute_includes stats, "Embed Stats"

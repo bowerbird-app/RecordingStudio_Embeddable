@@ -101,13 +101,13 @@ If a recordable does not declare a field default and an embed does not override 
 
 Style owns fonts, colours, and embed width (not domains).
 
-- Font, colour, and width share one FlatPack `OverflowRow` (`gap: :md`): `FontSwatch` first, then `ColorSwatch` circles, then a round FlatPack `Button` for width.
+- Font, colour, and width share one FlatPack `OverflowRow` (`gap: :md`): `FontSwatch` first, then a round FlatPack `Button` for width, then `ColorSwatch` circles.
 - The row never wraps. When swatches overflow, OverflowRow scrolls sideways with a hidden scrollbar and a soft trailing fade while more remains to the right (fade clears at the end).
-- Colour names and the font name are tooltip-only (no label under the circle).
+- Colour names, the font name, and Width are tooltip-only (no label under the circle). The width Button composes `FlatPack::Tooltip::Component` (`text: "Width"`).
 - Clicking a colour circle opens the native colour picker; clicking FontSwatch opens its FlatPack Popover menu (tooltip hides while open).
 - Save posts ColorSwatch colour inputs and FontSwatch’s hidden `name` with the form (`embed[appearance][...]`).
 - A live embed preview iframe sits below the swatch row (management preview). There is no separate Preview button on this screen.
-- Width is a round FlatPack `Button` in the OverflowRow. It opens a FlatPack `Popover` with Auto (`100%` fill) and Custom. Custom reveals one full-width FlatPack `TextInput` for a typed CSS width. Height is always `auto` (no height field). Style save posts `embed[sizing][width]` and `embed[sizing][height]=auto`. The snippet and live preview use `style="width:…"` with `max-width: 100%`.
+- Width is a round FlatPack `Button` in the OverflowRow. It opens a FlatPack `Popover` titled Width (heading in the popover content) with Auto (`100%` fill), Custom, and one CSS width `TextInput` inside the popover on both modes. Typing the field is Custom. There is no Width field under the preview. Height is always `auto` (no height field). Style save posts `embed[sizing][width]` and `embed[sizing][height]=auto`. The snippet and live preview use `style="width:…"` with `max-width: 100%`.
 - Padding, radius, and other non-font fields are not shown on this screen.
 - Save and Reset are separate FlatPack Buttons in one row (Save primary).
 - Reset restores each ColorSwatch colour and the FontSwatch font to resolved/default values, resets width to Auto (`100%`), and refreshes the live preview.
@@ -133,21 +133,23 @@ Example composition:
     text: "Sans",
     size: :lg
   ) %>
+  <%= render FlatPack::Tooltip::Component.new(text: "Width", placement: :top) do %>
+    <%= render FlatPack::Button::Component.new(
+      icon: "arrows-right-left",
+      icon_only: true,
+      style: :secondary,
+      size: :lg,
+      type: "button",
+      class: "rounded-full",
+      id: "embed-width-trigger",
+      aria: { label: "Width" }
+    ) %>
+  <% end %>
   <%= render FlatPack::ColorSwatch::Component.new(
     color: "#ffffff",
     text: "Background",
     name: "embed[appearance][background_color]",
     size: :lg
-  ) %>
-  <%= render FlatPack::Button::Component.new(
-    icon: "arrows-right-left",
-    icon_only: true,
-    style: :secondary,
-    size: :lg,
-    type: "button",
-    class: "rounded-full",
-    id: "embed-width-trigger",
-    aria: { label: "Width" }
   ) %>
 <% end %>
 ```

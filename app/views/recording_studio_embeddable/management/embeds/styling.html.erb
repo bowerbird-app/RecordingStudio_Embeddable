@@ -78,6 +78,21 @@
             ) %>
           <% end %>
 
+          <%= render FlatPack::Tooltip::Component.new(text: "Width", placement: :top) do %>
+            <%= render FlatPack::Button::Component.new(
+              icon: "arrows-right-left",
+              icon_only: true,
+              style: :secondary,
+              size: :lg,
+              type: "button",
+              class: "rounded-full",
+              id: "embed-width-trigger",
+              disabled: !@styling_editable,
+              aria: { label: "Width", expanded: false, haspopup: "dialog" },
+              data: { role: "width-trigger" }
+            ) %>
+          <% end %>
+
           <% color_definitions.each do |key, definition| %>
             <% field_name = key.to_s %>
             <% current_value = @styling_overrides[field_name].to_s.strip %>
@@ -99,41 +114,39 @@
               }
             ) %>
           <% end %>
-
-          <%= render FlatPack::Button::Component.new(
-            icon: "arrows-right-left",
-            icon_only: true,
-            style: :secondary,
-            size: :lg,
-            type: "button",
-            class: "rounded-full",
-            id: "embed-width-trigger",
-            disabled: !@styling_editable,
-            aria: { label: "Width", expanded: false, haspopup: "dialog" },
-            data: { role: "width-trigger" }
-          ) %>
         <% end %>
 
         <%= render FlatPack::Popover::Component.new(trigger_id: "embed-width-trigger", placement: :bottom) do |popover| %>
           <% popover.popover_content do %>
-            <div class="space-y-2" data-style-width-popover="true">
-              <%= render FlatPack::Button::Component.new(
-                text: "Auto",
-                style: (@width_mode == "auto" ? :primary : :ghost),
-                size: :sm,
-                type: "button",
+            <div class="space-y-3" data-style-width-popover="true">
+              <h3 class="text-sm font-semibold">Width</h3>
+              <div class="flex flex-wrap items-center gap-2">
+                <%= render FlatPack::Button::Component.new(
+                  text: "Auto",
+                  style: (@width_mode == "auto" ? :primary : :ghost),
+                  size: :sm,
+                  type: "button",
+                  disabled: !@styling_editable,
+                  aria: { pressed: @width_mode == "auto" },
+                  data: { style_width_mode: "auto" }
+                ) %>
+                <%= render FlatPack::Button::Component.new(
+                  text: "Custom",
+                  style: (@width_mode == "custom" ? :primary : :ghost),
+                  size: :sm,
+                  type: "button",
+                  disabled: !@styling_editable,
+                  aria: { pressed: @width_mode == "custom" },
+                  data: { style_width_mode: "custom" }
+                ) %>
+              </div>
+              <%= render FlatPack::TextInput::Component.new(
+                name: "custom_width_display",
+                id: "embed_custom_width_display",
+                value: @custom_width_value,
+                placeholder: "40rem or 720px",
                 disabled: !@styling_editable,
-                aria: { pressed: @width_mode == "auto" },
-                data: { style_width_mode: "auto" }
-              ) %>
-              <%= render FlatPack::Button::Component.new(
-                text: "Custom",
-                style: (@width_mode == "custom" ? :primary : :ghost),
-                size: :sm,
-                type: "button",
-                disabled: !@styling_editable,
-                aria: { pressed: @width_mode == "custom" },
-                data: { style_width_mode: "custom" }
+                data: { style_custom_width_input: true }
               ) %>
             </div>
           <% end %>
@@ -159,20 +172,6 @@
           value="<%= @preview_width %>"
           data-default-width="100%"
         >
-
-        <div data-style-width-controls="true">
-          <div data-style-custom-width="true" class="<%= @width_mode == "custom" ? "" : "hidden" %>">
-            <%= render FlatPack::TextInput::Component.new(
-              name: "custom_width_display",
-              id: "embed_custom_width_display",
-              label: "Width",
-              value: @custom_width_value,
-              placeholder: "e.g. 40rem or 720px",
-              disabled: !@styling_editable,
-              data: { style_custom_width_input: true }
-            ) %>
-          </div>
-        </div>
       <% end %>
     </div>
   <% end %>
@@ -186,7 +185,6 @@
   const AUTO_WIDTH = "100%";
 
   const styleWidthHiddenInput = () => document.getElementById("embed_sizing_width");
-  const styleCustomWidthWrap = () => document.querySelector("[data-style-custom-width='true']");
   const styleCustomWidthInput = () => document.querySelector("[data-style-custom-width-input='true']");
   const styleWidthModeButtons = () => Array.from(document.querySelectorAll("[data-style-width-mode]"));
 
@@ -217,7 +215,6 @@
 
   const selectStyleWidthMode = (mode) => {
     const hidden = styleWidthHiddenInput();
-    const customWrap = styleCustomWidthWrap();
     const customInput = styleCustomWidthInput();
 
     styleWidthModeButtons().forEach((button) => {
@@ -228,7 +225,6 @@
     });
 
     if (mode === "custom") {
-      customWrap?.classList.remove("hidden");
       if (customInput && !(customInput.value || "").trim() && hidden?.value && hidden.value !== AUTO_WIDTH) {
         customInput.value = hidden.value;
       }
@@ -238,7 +234,6 @@
       return;
     }
 
-    customWrap?.classList.add("hidden");
     if (hidden) hidden.value = AUTO_WIDTH;
     applyPreviewFrameWidth(AUTO_WIDTH);
   };
@@ -259,10 +254,7 @@
 
     const customInput = styleCustomWidthInput();
     customInput?.addEventListener("input", () => {
-      const hidden = styleWidthHiddenInput();
-      const value = (customInput.value || "").trim();
-      if (hidden) hidden.value = value;
-      applyPreviewFrameWidth(value || AUTO_WIDTH);
+      selectStyleWidthMode("custom");
     });
 
     applyPreviewFrameWidth(styleWidthHiddenInput()?.value || AUTO_WIDTH);

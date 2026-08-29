@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Pin `flat_pack` to `~> 0.1.143` (GitHub tag `v0.1.143`).
-- Replace Style width chips (Full / Readable / Compact) with a round FlatPack Button in the OverflowRow. The button opens a FlatPack Popover with Auto (`100%`) and Custom (one typed CSS width field). Height stays `auto`.
+- Replace Style width chips (Full / Readable / Compact) with a round FlatPack Button in the OverflowRow. Order is FontSwatch, width Button (tooltip-only “Width”), ColorSwatches. The popover has a Width heading, Auto (`100%`), Custom, and the typed CSS width field inside the popover on both modes. Height stays `auto`.
 - Replace `Styling::WidthPresets` with `Styling::WidthMode` (`auto` vs `custom`). Legacy Readable/Compact values load as Custom.
 
 ## [0.1.2] - 2026-08-29
