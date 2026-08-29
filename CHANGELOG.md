@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Show a live embed preview (management preview iframe) below the swatch row on Style. Drop the separate Preview button from that screen.
 - Title the Style screen “Style” (PageTitle and page nav). Subtitle remains the recordable name.
 - OverflowRow order is FontSwatch first, then ColorSwatch circles.
+- Reset restores ColorSwatch native colour inputs and the FontSwatch hidden input to resolved/default values and repaints the live preview.
 - Show the recordable name as the default-size FlatPack PageTitle subtitle on Settings, Style, and Stats (no `large_subtitle`). Dummy Article/Document seed titles are human names (“Spring release”, “Workspace notes”), not capability notes.
 
 ### Fixed
