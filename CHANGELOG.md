@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Calling `recording_studio_embeddable` now enables the `:embeddable` RecordingStudio capability on the recordable, so `RecordingStudioEmbeddable::Embed` can be recorded under embeddable parents such as Page.
 - Management screens use core `recording_studio/default_layout` via `RecordingStudio::UsesDefaultLayout`. The customer-facing iframe keeps the chrome-free embed layout.
-- Copy FlatPack `rounded` onto `<html>` through `recording_studio/_default_layout_head` so primaries are charcoal, not `:root` blue.
+- Copy FlatPack `rounded` onto `<html>` and load `flat_pack/application` through `recording_studio/_default_layout_head` so OverflowRow fade/scrollbar chrome and charcoal primaries work under default_layout.
 - Dummy Tailwind `@source` now resolves FlatPack and Recording Studio from `Gem.loaded_specs` / `Bundler.bundle_path` before each CSS build, so Switch and icon size utilities compile under vendor, CI, and local `BUNDLE_PATH`.
 - Replace dummy table action stacks with FlatPack `Button::Dropdown` (icon `ellipsis-vertical`, `show_chevron: false`).
 - Keep the embed enablement control as a FlatPack `Switch` labeled Embeddable.
@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Upgrade notes
 - Require FlatPack `~> 0.1.141` (tag `v0.1.141`) for `FlatPack::ColorSwatch::Component`, `FlatPack::FontSwatch::Component`, and `FlatPack::OverflowRow::Component` on the Styling screen.
+- Hosts using `recording_studio/default_layout` for management screens must load `flat_pack/application` (core layout only ships variables + rich_text). This gem’s `recording_studio/_default_layout_head` does that when the host does not override the partial.
 - No host migration is required for existing embed appearance data. Colour values still post from ColorSwatch native inputs. Font may now save as a CSS stack string from FontSwatch; stack keys continue to work when resolving themes.
 
 ## [0.1.1] - 2026-04-28

@@ -539,6 +539,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   def test_default_layout_head_copies_rounded_theme_onto_html
     source = File.read(File.expand_path("../app/views/recording_studio/_default_layout_head.html.erb", __dir__))
 
+    assert_includes source, 'stylesheet_link_tag "flat_pack/application"'
     assert_includes source, 'document.documentElement.setAttribute("data-theme", "rounded")'
   end
 
