@@ -646,7 +646,13 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, "FlatPack::Grid::Component.new(cols: 2)"
     assert_includes styling, "FlatPack::ColorSwatch::Component"
     assert_includes styling, "flex flex-wrap items-start gap-[var(--stack-gap-md)]"
+    assert_includes styling, "data: { default_color: reset_color }"
+    assert_includes styling, 'data-controller~="flat-pack--color-swatch"'
+    assert_includes styling, 'id: "embed_appearance_font_family"'
+    refute_includes styling, "data-styling-color-swatch"
     refute_includes styling, "data-color-picker-trigger-name"
+    refute_includes styling, "padding_scale"
+    refute_includes styling, "radius_scale"
     refute_includes styling, "Embed overrides"
 
     assert_includes stats, 'title: "Stats"'

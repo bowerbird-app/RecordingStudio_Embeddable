@@ -97,13 +97,16 @@ If a recordable does not declare a field default and an embed does not override 
 
 ## Management UI
 
-On the Styling screen, colour fields render as a wrapping row of FlatPack `ColorSwatch` circles:
+On the Styling screen:
 
+- Colour fields render as a wrapping row of FlatPack `ColorSwatch` circles.
 - The colour name is tooltip-only (no label under the circle).
 - Clicking a circle opens the native colour picker.
 - Save posts the native colour input’s `name` with the form (`embed[appearance][...]`).
-- Font and other non-colour fields stay as their own FlatPack controls.
+- Font stays as its own FlatPack Select.
+- Padding, radius, and other non-font fields are not shown on this screen.
 - Save, Reset, and Preview are separate FlatPack Buttons in one row (Save primary).
+- Reset restores each ColorSwatch’s native colour input to the resolved/default hex and dispatches `input`/`change`.
 
 Require FlatPack `~> 0.1.136` (GitHub tag `v0.1.136`) for `FlatPack::ColorSwatch::Component`.
 

@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Pin `flat_pack` to `~> 0.1.136` (GitHub tag `v0.1.136`) in the gemspec, root Gemfile, and dummy Gemfile/locks.
-- Replace the long Styling colour form with a wrapping row of FlatPack `ColorSwatch` circles. Colour names are tooltip-only; Save posts the native colour input `name` with the form. Font and other non-colour fields stay as their own controls.
+- Replace the long Styling colour form with a wrapping row of FlatPack `ColorSwatch` circles. Colour names are tooltip-only; Save posts the native colour input `name` with the form. Font stays as its own FlatPack Select; padding/radius and other non-font fields are no longer rendered on Styling.
+- Reset restores ColorSwatch native colour inputs to resolved/default hex via `data-default-color` on the ColorSwatch root and dispatches `input`/`change` so Stimulus repaints.
 - Show the recordable name as the default-size FlatPack PageTitle subtitle on Settings, Styling, and Stats (no `large_subtitle`).
 
 ### Fixed
