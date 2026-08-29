@@ -14,6 +14,14 @@ module RecordingStudioEmbeddable
       def recording_studio_embeddable(**options)
         current = recording_studio_embeddable_options || {}
         self.recording_studio_embeddable_options = current.merge(options).reverse_merge(enabled: true)
+
+        # Register this recordable as an embeddable parent so Embed children are allowed.
+        if defined?(RecordingStudio) && RecordingStudio.respond_to?(:enable_capability)
+          RecordingStudio.enable_capability(:embeddable, on: self)
+          if RecordingStudio.respond_to?(:set_capability_options)
+            RecordingStudio.set_capability_options(:embeddable, on: self, **recording_studio_embeddable_options)
+          end
+        end
       end
     end
   end

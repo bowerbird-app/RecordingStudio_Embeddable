@@ -7,7 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-08-29
+
+### Changed
+- Pin `flat_pack` to `~> 0.1.136` (GitHub tag `v0.1.136`) in the gemspec, root Gemfile, and dummy Gemfile/locks.
+- Replace the long Styling colour form with a wrapping row of FlatPack `ColorSwatch` circles. Colour names are tooltip-only; Save posts the native colour input `name` with the form. Font and other non-colour fields stay as their own controls.
+- Show the recordable name as the default-size FlatPack PageTitle subtitle on Settings, Styling, and Stats (no `large_subtitle`).
+
 ### Fixed
+- Calling `recording_studio_embeddable` now enables the `:embeddable` RecordingStudio capability on the recordable, so `RecordingStudioEmbeddable::Embed` can be recorded under embeddable parents such as Page.
 - Management screens use core `recording_studio/default_layout` via `RecordingStudio::UsesDefaultLayout`. The customer-facing iframe keeps the chrome-free embed layout.
 - Copy FlatPack `rounded` onto `<html>` through `recording_studio/_default_layout_head` so primaries are charcoal, not `:root` blue.
 - Dummy Tailwind `@source` now resolves FlatPack and Recording Studio from `Gem.loaded_specs` / `Bundler.bundle_path` before each CSS build, so Switch and icon size utilities compile under vendor, CI, and local `BUNDLE_PATH`.
@@ -18,8 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Show the embed snippet in a wrapping FlatPack `TextArea` with short help “Paste this into your page.”
 - Keep Embed title, recordable subtitle, and Preview/Styling/Settings/Stats nav on the embed-code screen.
 - Title Settings as “Embed settings” with the recordable name as subtitle. Labels are Width and Height.
-- Use default FlatPack PageTitle subtitle size (no `large_subtitle`) on management screens.
 - Put Styling Save, Reset, and Preview in one row of separate FlatPack Buttons (Save primary).
+
+### Upgrade notes
+- Require FlatPack `~> 0.1.136` (tag `v0.1.136`) so `FlatPack::ColorSwatch::Component` is available for the Styling screen.
+- No host migration is required for existing embed appearance data. Styling Save now posts colour values from native colour inputs via ColorSwatch `name:`.
 
 ## [0.1.1] - 2026-04-28
 
@@ -39,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.1.2
 [0.1.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.1.1
 [0.1.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.1.0

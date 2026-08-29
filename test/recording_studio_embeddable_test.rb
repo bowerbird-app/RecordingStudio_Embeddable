@@ -128,7 +128,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.1.0", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.1.2", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -148,6 +148,41 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_equal true, capability.options[:enabled]
     assert_equal "pages", capability.options[:embed_controller]
     assert_equal :show, capability.options[:embed_action]
+  end
+
+  def test_recording_studio_embeddable_enables_embeddable_capability
+    klass = Class.new do
+      def self.name = "CapabilityProbePage"
+
+      include RecordingStudioEmbeddable::Recordable
+    end
+
+    enabled = []
+    fake_studio = Module.new do
+      define_singleton_method(:enable_capability) do |capability, on:|
+        enabled << [capability, on]
+      end
+
+      define_singleton_method(:set_capability_options) do |_capability, on:, **_opts|
+        on
+      end
+    end
+
+    original = Object.const_get(:RecordingStudio) if Object.const_defined?(:RecordingStudio)
+    Object.send(:remove_const, :RecordingStudio) if Object.const_defined?(:RecordingStudio)
+    Object.const_set(:RecordingStudio, fake_studio)
+
+    begin
+      klass.recording_studio_embeddable(embed_controller: "pages", embed_action: :embed)
+    ensure
+      Object.send(:remove_const, :RecordingStudio)
+      Object.const_set(:RecordingStudio, original) if original
+    end
+
+    assert_includes enabled, [:embeddable, klass]
+    assert_equal true, klass.recording_studio_embeddable_options[:enabled]
+    assert_equal "pages", klass.recording_studio_embeddable_options[:embed_controller]
+    assert_equal :embed, klass.recording_studio_embeddable_options[:embed_action]
   end
 
   def test_token_generation_is_url_safe_and_stable_length
@@ -582,7 +617,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
       refute_includes source, "section_nav"
       refute_includes source, "large_subtitle"
       refute_includes source, "Getting Started"
-      refute_includes source, "subtitle: recordable_title"
+      assert_includes source, "subtitle: recordable_title"
     end
 
     settings = File.read(
@@ -609,6 +644,9 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
     assert_includes styling, 'title: "Styling"'
     assert_includes styling, "FlatPack::Grid::Component.new(cols: 2)"
+    assert_includes styling, "FlatPack::ColorSwatch::Component"
+    assert_includes styling, "flex flex-wrap items-start gap-[var(--stack-gap-md)]"
+    refute_includes styling, "data-color-picker-trigger-name"
     refute_includes styling, "Embed overrides"
 
     assert_includes stats, 'title: "Stats"'

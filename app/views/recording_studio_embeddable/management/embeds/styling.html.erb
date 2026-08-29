@@ -1,3 +1,9 @@
+<% parent_recording = @embed.parent_recording %>
+<% recordable = parent_recording&.recordable %>
+<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
+<% color_definitions = @styling_definitions.select { |_key, definition| definition[:type] == :color } %>
+<% other_definitions = @styling_definitions.reject { |_key, definition| definition[:type] == :color } %>
+
 <% recording_studio_page_nav(
   title: "Styling",
   page_nav_back_url: edit_management_embed_path(@embed),
@@ -9,222 +15,152 @@
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
     title: "Styling",
+    subtitle: recordable_title,
     variant: :h1
   ) %>
 
   <%= render FlatPack::Grid::Component.new(cols: 2) do %>
     <div class="space-y-4">
-  <% unless @styling_editable %>
-    <p class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-      Custom styling is currently disabled for this embed. You can still review the resolved values below.
-    </p>
-  <% end %>
+      <% unless @styling_editable %>
+        <p class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          Custom styling is currently disabled for this embed. You can still review the resolved values below.
+        </p>
+      <% end %>
 
-  <% if @styling_errors.present? %>
-    <p role="alert" class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-      <%= @styling_errors.map { |field, message| "#{field.to_s.humanize} #{message}" }.join(", ") %>
-    </p>
-  <% end %>
+      <% if @styling_errors.present? %>
+        <p role="alert" class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <%= @styling_errors.map { |field, message| "#{field.to_s.humanize} #{message}" }.join(", ") %>
+        </p>
+      <% end %>
 
-  <%= form_with model: @embed, url: styling_management_embed_path(@embed), method: :patch, class: "space-y-4" do |_form| %>
-    <div class="flex flex-wrap items-center gap-3">
-      <%= render FlatPack::Button::Component.new(
-        text: "Save",
-        style: :primary,
-        size: :md,
-        type: "submit",
-        disabled: !@styling_editable
-      ) %>
-      <%= render FlatPack::Button::Component.new(
-        text: "Reset",
-        style: :secondary,
-        size: :md,
-        type: "button",
-        disabled: !@styling_editable,
-        data: { reset_styling_fields: true }
-      ) %>
-      <%= render FlatPack::Button::Component.new(
-        text: "Preview",
-        style: :secondary,
-        size: :md,
-        href: preview_management_embed_path(@embed)
-      ) %>
-    </div>
+      <%= form_with model: @embed, url: styling_management_embed_path(@embed), method: :patch, class: "space-y-4" do |_form| %>
+        <div class="flex flex-wrap items-center gap-3">
+          <%= render FlatPack::Button::Component.new(
+            text: "Save",
+            style: :primary,
+            size: :md,
+            type: "submit",
+            disabled: !@styling_editable
+          ) %>
+          <%= render FlatPack::Button::Component.new(
+            text: "Reset",
+            style: :secondary,
+            size: :md,
+            type: "button",
+            disabled: !@styling_editable,
+            data: { reset_styling_fields: true }
+          ) %>
+          <%= render FlatPack::Button::Component.new(
+            text: "Preview",
+            style: :secondary,
+            size: :md,
+            href: preview_management_embed_path(@embed)
+          ) %>
+        </div>
 
-    <div class="space-y-4">
-      <% @styling_definitions.each do |key, definition| %>
-        <% field_name = key.to_s %>
-        <% current_value = @styling_overrides[field_name] %>
-        <% resolved_value = @resolved_theme[field_name] %>
-        <% default_value = @recordable_style_defaults[field_name] %>
-        <% option_items = Array(definition[:option_items]) %>
-        <% if field_name == "padding_scale" || field_name == "radius_scale" %>
-          <% scale_values = field_name == "padding_scale" ? RecordingStudioEmbeddable::Styling::Tokens::SPACING_SCALE : RecordingStudioEmbeddable::Styling::Tokens::RADIUS_SCALE %>
-          <% option_items = option_items.map do |option| %>
-            <% normalized_option = option.to_h.symbolize_keys %>
-            <% option_value = normalized_option[:value].to_s %>
-            <% unit_value = scale_values[option_value] %>
-            <% option_label = normalized_option[:label].to_s %>
-            <% {
-                 label: unit_value.present? ? "#{option_label} (#{unit_value})" : option_label,
-                 value: normalized_option[:value]
-               } %>
-          <% end %>
-        <% end %>
-        <% default_option = option_items.find { |option| option.to_h.symbolize_keys[:value].to_s == default_value.to_s } %>
-        <% default_display = default_option.present? ? default_option.to_h.symbolize_keys[:label] : default_value %>
-        <% default_placeholder = default_display.present? ? "Default - #{default_display}" : "Inherit from host theme" %>
-
-        <div class="space-y-2 pb-4 last:pb-0">
-          <div class="flex flex-wrap items-center gap-2">
-            <label for="embed_appearance_<%= field_name %>" class="text-sm font-medium"><%= definition[:label] %></label>
-          </div>
-
-          <% case definition[:type] %>
-          <% when :enum %>
-            <% if field_name == "font_family" %>
-              <%= render FlatPack::Select::Component.new(
-                name: "embed[appearance][#{field_name}]",
-                label: "",
-                options: @font_options.map { |font| { label: "#{font}  Aa", value: font } },
-                value: current_value,
-                id: "embed_appearance_font_family",
-                placeholder: default_placeholder,
-                searchable: true,
-                disabled: !@styling_editable
-              ) %>
-            <% else %>
-              <%= hidden_field_tag "embed[appearance][#{field_name}]", "" %>
-              <%= render FlatPack::Select::Component.new(
-                name: "embed[appearance][#{field_name}]",
-                label: "",
-                options: option_items,
-                value: current_value,
-                id: "embed_appearance_#{field_name}",
-                placeholder: default_placeholder,
-                disabled: !@styling_editable
-              ) %>
+        <% if color_definitions.any? %>
+          <div class="flex flex-wrap items-start gap-[var(--stack-gap-md)]">
+            <% color_definitions.each do |key, definition| %>
+              <% field_name = key.to_s %>
+              <% current_value = @styling_overrides[field_name].to_s.strip %>
+              <% resolved_value = @resolved_theme[field_name].to_s.strip %>
+              <% default_value = @recordable_style_defaults[field_name].to_s.strip %>
+              <% display_color = current_value.presence || resolved_value.presence || default_value.presence || "#000000" %>
+              <% reset_color = resolved_value.presence || default_value.presence || display_color %>
+              <div data-styling-color-swatch data-default-color="<%= reset_color %>">
+                <%= render FlatPack::ColorSwatch::Component.new(
+                  color: display_color,
+                  text: definition[:label],
+                  name: "embed[appearance][#{field_name}]",
+                  value: display_color,
+                  selected: current_value.present?,
+                  size: :lg,
+                  disabled: !@styling_editable
+                ) %>
+              </div>
             <% end %>
-          <% when :color %>
-            <div class="flex items-center gap-3 rounded-md border border-(--surface-border-color) bg-(--surface-background-color) px-3 py-2">
-              <button
-                type="button"
-                class="flex h-10 w-12 items-center justify-center rounded-md"
-                data-color-picker-trigger-name="embed[appearance][<%= field_name %>]"
-                <%= "disabled" unless @styling_editable %>
-              >
-                <div
-                  class="h-8 w-8 shrink-0 rounded-md border border-(--surface-border-color)"
-                  data-color-preview-name="embed[appearance][<%= field_name %>]"
-                  style="background-color: <%= current_value.presence || resolved_value %>"
-                ></div>
-              </button>
+          </div>
+        <% end %>
 
-              <input
-                type="text"
-                name="embed[appearance][<%= field_name %>]"
-                value="<%= current_value %>"
-                placeholder="<%= default_placeholder %>"
-                class="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-(--surface-content-color) outline-none placeholder:text-(--surface-muted-content-color)"
-                <%= "disabled" unless @styling_editable %>
-              >
+        <div class="space-y-4">
+          <% other_definitions.each do |key, definition| %>
+            <% field_name = key.to_s %>
+            <% current_value = @styling_overrides[field_name] %>
+            <% default_value = @recordable_style_defaults[field_name] %>
+            <% option_items = Array(definition[:option_items]) %>
+            <% if field_name == "padding_scale" || field_name == "radius_scale" %>
+              <% scale_values = field_name == "padding_scale" ? RecordingStudioEmbeddable::Styling::Tokens::SPACING_SCALE : RecordingStudioEmbeddable::Styling::Tokens::RADIUS_SCALE %>
+              <% option_items = option_items.map do |option| %>
+                <% normalized_option = option.to_h.symbolize_keys %>
+                <% option_value = normalized_option[:value].to_s %>
+                <% unit_value = scale_values[option_value] %>
+                <% option_label = normalized_option[:label].to_s %>
+                <% {
+                     label: unit_value.present? ? "#{option_label} (#{unit_value})" : option_label,
+                     value: normalized_option[:value]
+                   } %>
+              <% end %>
+            <% end %>
+            <% default_option = option_items.find { |option| option.to_h.symbolize_keys[:value].to_s == default_value.to_s } %>
+            <% default_display = default_option.present? ? default_option.to_h.symbolize_keys[:label] : default_value %>
+            <% default_placeholder = default_display.present? ? "Default - #{default_display}" : "Inherit from host theme" %>
 
-              <input
-                type="color"
-                value="<%= current_value.presence || resolved_value %>"
-                data-color-sync-name="embed[appearance][<%= field_name %>]"
-                data-default-color="<%= resolved_value %>"
-                class="sr-only"
-                tabindex="-1"
-                aria-hidden="true"
-                <%= "disabled" unless @styling_editable %>
-              >
+            <div class="space-y-2 pb-4 last:pb-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <label for="embed_appearance_<%= field_name %>" class="text-sm font-medium"><%= definition[:label] %></label>
+              </div>
+
+              <% case definition[:type] %>
+              <% when :enum %>
+                <% if field_name == "font_family" %>
+                  <%= render FlatPack::Select::Component.new(
+                    name: "embed[appearance][#{field_name}]",
+                    label: "",
+                    options: @font_options.map { |font| { label: "#{font}  Aa", value: font } },
+                    value: current_value,
+                    id: "embed_appearance_font_family",
+                    placeholder: default_placeholder,
+                    searchable: true,
+                    disabled: !@styling_editable
+                  ) %>
+                <% else %>
+                  <%= hidden_field_tag "embed[appearance][#{field_name}]", "" %>
+                  <%= render FlatPack::Select::Component.new(
+                    name: "embed[appearance][#{field_name}]",
+                    label: "",
+                    options: option_items,
+                    value: current_value,
+                    id: "embed_appearance_#{field_name}",
+                    placeholder: default_placeholder,
+                    disabled: !@styling_editable
+                  ) %>
+                <% end %>
+              <% when :integer %>
+                <%= render FlatPack::TextInput::Component.new(
+                  name: "embed[appearance][#{field_name}]",
+                  label: "#{definition[:label]} (#{definition[:min]}-#{definition[:max]})",
+                  value: current_value,
+                  placeholder: default_placeholder,
+                  disabled: !@styling_editable
+                ) %>
+              <% when :length, :text %>
+                <%= render FlatPack::TextInput::Component.new(
+                  name: "embed[appearance][#{field_name}]",
+                  label: "",
+                  value: current_value,
+                  placeholder: default_placeholder,
+                  disabled: !@styling_editable
+                ) %>
+              <% end %>
             </div>
-          <% when :integer %>
-            <%= render FlatPack::TextInput::Component.new(
-              name: "embed[appearance][#{field_name}]",
-              label: "#{definition[:label]} (#{definition[:min]}-#{definition[:max]})",
-              value: current_value,
-              placeholder: default_placeholder,
-              disabled: !@styling_editable
-            ) %>
-          <% when :length, :text %>
-            <%= render FlatPack::TextInput::Component.new(
-              name: "embed[appearance][#{field_name}]",
-              label: "",
-              value: current_value,
-              placeholder: default_placeholder,
-              disabled: !@styling_editable
-            ) %>
           <% end %>
         </div>
       <% end %>
     </div>
   <% end %>
-    </div>
-  <% end %>
 </div>
 
 <script>
-  const initializeStylingColorPickers = () => {
-    const normalizeHex = (value) => {
-      const trimmed = (value || "").trim();
-      if (!/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed)) return null;
-
-      if (trimmed.length === 4) {
-        return `#${trimmed[1]}${trimmed[1]}${trimmed[2]}${trimmed[2]}${trimmed[3]}${trimmed[3]}`.toLowerCase();
-      }
-
-      return trimmed.toLowerCase();
-    };
-
-    document.querySelectorAll('input[type="color"][data-color-sync-name]').forEach((picker) => {
-      if (picker.dataset.colorSyncBound === "true") return;
-      picker.dataset.colorSyncBound = "true";
-
-      const syncName = picker.dataset.colorSyncName;
-      const form = picker.closest("form");
-      if (!form) return;
-
-      const target = form.querySelector(`input[name="${syncName}"]`);
-      if (!target) return;
-      const trigger = form.querySelector(`[data-color-picker-trigger-name="${syncName}"]`);
-
-      const preview = form.querySelector(`[data-color-preview-name="${syncName}"]`);
-      const applyPreview = (value) => {
-        if (!preview) return;
-
-        const normalized = normalizeHex(value) || normalizeHex(picker.value);
-        if (normalized) preview.style.backgroundColor = normalized;
-      };
-
-      applyPreview(target.value);
-
-      picker.addEventListener("input", () => {
-        target.value = picker.value;
-        applyPreview(picker.value);
-        target.dispatchEvent(new Event("input", { bubbles: true }));
-      });
-
-      if (trigger) {
-        trigger.addEventListener("click", (event) => {
-          event.preventDefault();
-          if (picker.disabled) return;
-
-          picker.click();
-        });
-      }
-
-      target.addEventListener("input", () => {
-        const normalized = normalizeHex(target.value);
-        if (!normalized) return;
-
-        picker.value = normalized;
-        applyPreview(normalized);
-      });
-    });
-  };
-
   const initializeStylingReset = () => {
     document.querySelectorAll('button[data-reset-styling-fields="true"]').forEach((button) => {
       if (button.dataset.resetBound === "true") return;
@@ -245,16 +181,17 @@
           field.dispatchEvent(new Event("change", { bubbles: true }));
         });
 
-        form.querySelectorAll('input[type="color"][data-default-color]').forEach((picker) => {
-          picker.value = picker.dataset.defaultColor;
+        form.querySelectorAll("[data-styling-color-swatch]").forEach((wrapper) => {
+          const defaultColor = wrapper.dataset.defaultColor;
+          if (!defaultColor) return;
 
-          const syncName = picker.dataset.colorSyncName;
-          if (!syncName) return;
+          const picker = wrapper.querySelector('input[type="color"]');
+          if (!picker) return;
 
-          const preview = form.querySelector(`[data-color-preview-name="${syncName}"]`);
-          if (preview) {
-            preview.style.backgroundColor = picker.dataset.defaultColor;
-          }
+          picker.value = defaultColor;
+          picker.setAttribute("value", defaultColor);
+          picker.dispatchEvent(new Event("input", { bubbles: true }));
+          picker.dispatchEvent(new Event("change", { bubbles: true }));
         });
       });
     });
@@ -291,7 +228,7 @@
       if (!selectRoot) return;
 
       const trigger = selectRoot.querySelector('[data-flat-pack--select-target="trigger"]');
-      const triggerLabel = trigger?.querySelector('span');
+      const triggerLabel = trigger?.querySelector("span");
       const optionsList = selectRoot.querySelector('[data-flat-pack--select-target="optionsList"]');
       const dropdown = selectRoot.querySelector('[data-flat-pack--select-target="dropdown"]');
 
@@ -375,8 +312,6 @@
     applyPreview("embed_appearance_font_family");
   };
 
-  document.addEventListener("turbo:load", initializeStylingColorPickers);
-  document.addEventListener("DOMContentLoaded", initializeStylingColorPickers);
   document.addEventListener("turbo:load", initializeStylingReset);
   document.addEventListener("DOMContentLoaded", initializeStylingReset);
   document.addEventListener("turbo:load", initializeFontPreviewSelects);

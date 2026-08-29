@@ -58,22 +58,10 @@ document_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
 )
 
 # Grant root-level admin access to the admin user
-Current.actor = user
-access = RecordingStudio::Access.find_or_create_by!(actor: user, role: :admin)
-RecordingStudio::Recording.unscoped.find_or_create_by!(
-  root_recording_id: root_recording.id,
-  parent_recording_id: root_recording.id,
-  recordable: access
-)
+RecordingStudioAccessible.grant_access(recording: root_recording, actor: user, role: :admin)
 
 # Grant root-level view access to the viewer user
-Current.actor = viewer
-viewer_access = RecordingStudio::Access.find_or_create_by!(actor: viewer, role: :view)
-RecordingStudio::Recording.unscoped.find_or_create_by!(
-  root_recording_id: root_recording.id,
-  parent_recording_id: root_recording.id,
-  recordable: viewer_access
-)
+RecordingStudioAccessible.grant_access(recording: root_recording, actor: viewer, role: :view)
 
 puts "Seeded: admin@admin.com / Password"
 puts "Seeded: viewer@admin.com / Password"

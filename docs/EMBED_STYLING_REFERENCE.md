@@ -95,6 +95,18 @@ The engine's helper converts common token values automatically:
 
 If a recordable does not declare a field default and an embed does not override it, the helper writes nothing for that field. That keeps the host app's FlatPack theme in control.
 
+## Management UI
+
+On the Styling screen, colour fields render as a wrapping row of FlatPack `ColorSwatch` circles:
+
+- The colour name is tooltip-only (no label under the circle).
+- Clicking a circle opens the native colour picker.
+- Save posts the native colour input’s `name` with the form (`embed[appearance][...]`).
+- Font and other non-colour fields stay as their own FlatPack controls.
+- Save, Reset, and Preview are separate FlatPack Buttons in one row (Save primary).
+
+Require FlatPack `~> 0.1.136` (GitHub tag `v0.1.136`) for `FlatPack::ColorSwatch::Component`.
+
 ## Practical Guidance
 
 - Prefer FlatPack variables for colors and component-surface theming.
