@@ -120,34 +120,25 @@
           <% popover.popover_content do %>
             <div class="space-y-3" data-style-width-popover="true">
               <h3 class="text-sm font-semibold">Width</h3>
-              <div class="flex flex-wrap items-center gap-2">
-                <%= render FlatPack::Button::Component.new(
-                  text: "Auto",
-                  style: (@width_mode == "auto" ? :primary : :ghost),
-                  size: :sm,
-                  type: "button",
-                  disabled: !@styling_editable,
-                  aria: { pressed: @width_mode == "auto" },
-                  data: { style_width_mode: "auto" }
-                ) %>
-                <%= render FlatPack::Button::Component.new(
-                  text: "Custom",
-                  style: (@width_mode == "custom" ? :primary : :ghost),
-                  size: :sm,
-                  type: "button",
-                  disabled: !@styling_editable,
-                  aria: { pressed: @width_mode == "custom" },
-                  data: { style_width_mode: "custom" }
-                ) %>
-              </div>
-              <%= render FlatPack::TextInput::Component.new(
-                name: "custom_width_display",
-                id: "embed_custom_width_display",
-                value: @custom_width_value,
-                placeholder: "40rem or 720px",
-                disabled: !@styling_editable,
-                data: { style_custom_width_input: true }
-              ) %>
+              <%= render FlatPack::Tabs::Component.new(
+                default_tab: (@width_mode == "custom" ? 1 : 0),
+                variant: :underline,
+                data: { style_width_tabs: true }
+              ) do |tabs| %>
+                <% tabs.tab(label: "Auto", id: "style-width-auto") do %>
+                  <%= tag.div %>
+                <% end %>
+                <% tabs.tab(label: "Custom", id: "style-width-custom") do %>
+                  <%= render FlatPack::TextInput::Component.new(
+                    name: "custom_width_display",
+                    id: "embed_custom_width_display",
+                    value: @custom_width_value,
+                    help_text: "% or px",
+                    disabled: !@styling_editable,
+                    data: { style_custom_width_input: true }
+                  ) %>
+                <% end %>
+              <% end %>
             </div>
           <% end %>
         <% end %>
@@ -186,7 +177,7 @@
 
   const styleWidthHiddenInput = () => document.getElementById("embed_sizing_width");
   const styleCustomWidthInput = () => document.querySelector("[data-style-custom-width-input='true']");
-  const styleWidthModeButtons = () => Array.from(document.querySelectorAll("[data-style-width-mode]"));
+  const styleWidthPopover = () => document.querySelector("[data-style-width-popover='true']");
 
   const applyPreviewFrameWidth = (width) => {
     const iframe = document.getElementById("embed-styling-preview") ||
@@ -199,30 +190,14 @@
     iframe.style.height = "auto";
   };
 
-  const PRIMARY_WIDTH_CLASSES = [
-    "bg-[var(--button-primary-background-color)]",
-    "hover:bg-[var(--button-primary-hover-background-color)]",
-    "text-[var(--button-primary-text-color)]",
-    "border-[var(--button-primary-border-color)]",
-    "shadow-[var(--button-shadow)]"
-  ];
-  const GHOST_WIDTH_CLASSES = [
-    "bg-[var(--button-ghost-background-color)]",
-    "hover:bg-[var(--button-ghost-hover-background-color)]",
-    "text-[var(--button-ghost-text-color)]",
-    "border-[var(--button-ghost-border-color)]"
-  ];
+  const currentStyleWidthMode = () => {
+    const selected = styleWidthPopover()?.querySelector("[role='tab'][aria-selected='true']");
+    return selected?.id === "style-width-custom-tab" ? "custom" : "auto";
+  };
 
   const selectStyleWidthMode = (mode) => {
     const hidden = styleWidthHiddenInput();
     const customInput = styleCustomWidthInput();
-
-    styleWidthModeButtons().forEach((button) => {
-      const selected = button.dataset.styleWidthMode === mode;
-      button.setAttribute("aria-pressed", selected ? "true" : "false");
-      PRIMARY_WIDTH_CLASSES.forEach((className) => button.classList.toggle(className, selected));
-      GHOST_WIDTH_CLASSES.forEach((className) => button.classList.toggle(className, !selected));
-    });
 
     if (mode === "custom") {
       if (customInput && !(customInput.value || "").trim() && hidden?.value && hidden.value !== AUTO_WIDTH) {
@@ -238,19 +213,22 @@
     applyPreviewFrameWidth(AUTO_WIDTH);
   };
 
+  const activateStyleWidthTab = (mode) => {
+    const tabId = mode === "custom" ? "style-width-custom-tab" : "style-width-auto-tab";
+    document.getElementById(tabId)?.click();
+    selectStyleWidthMode(mode);
+  };
+
   const initializeStyleWidthControls = () => {
-    const popover = document.querySelector("[data-style-width-popover='true']");
+    const popover = styleWidthPopover();
     if (!popover || popover.dataset.widthBound === "true") return;
     popover.dataset.widthBound = "true";
 
-    styleWidthModeButtons().forEach((button) => {
-      button.addEventListener("click", (event) => {
-        event.preventDefault();
-        if (button.disabled) return;
-
-        selectStyleWidthMode(button.dataset.styleWidthMode);
-      });
-    });
+    const tabsRoot = popover.querySelector("[data-style-width-tabs='true']") ||
+      popover.querySelector("[data-controller='flat-pack--tabs']");
+    const syncFromTabs = () => selectStyleWidthMode(currentStyleWidthMode());
+    tabsRoot?.addEventListener("click", () => requestAnimationFrame(syncFromTabs));
+    tabsRoot?.addEventListener("keydown", () => requestAnimationFrame(syncFromTabs));
 
     const customInput = styleCustomWidthInput();
     customInput?.addEventListener("input", () => {
@@ -313,7 +291,7 @@
 
         const customInput = styleCustomWidthInput();
         if (customInput) customInput.value = "";
-        selectStyleWidthMode("auto");
+        activateStyleWidthTab("auto");
         applyStylingPreviewFromForm(form);
       });
     });

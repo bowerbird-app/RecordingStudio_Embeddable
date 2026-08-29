@@ -107,7 +107,7 @@ Style owns fonts, colours, and embed width (not domains).
 - Clicking a colour circle opens the native colour picker; clicking FontSwatch opens its FlatPack Popover menu (tooltip hides while open).
 - Save posts ColorSwatch colour inputs and FontSwatch’s hidden `name` with the form (`embed[appearance][...]`).
 - A live embed preview iframe sits below the swatch row (management preview). There is no separate Preview button on this screen.
-- Width is a round FlatPack `Button` in the OverflowRow. It opens a FlatPack `Popover` titled Width (heading in the popover content) with Auto (`100%` fill), Custom, and one CSS width `TextInput` inside the popover on both modes. Typing the field is Custom. There is no Width field under the preview. Height is always `auto` (no height field). Style save posts `embed[sizing][width]` and `embed[sizing][height]=auto`. The snippet and live preview use `style="width:…"` with `max-width: 100%`.
+- Width is a round FlatPack `Button` in the OverflowRow. It opens a FlatPack `Popover` titled Width (heading in the popover content) with FlatPack `Tabs` (`variant: :underline`) for Auto (`100%` fill, no field) and Custom (one `TextInput` with help_text `% or px`). There is no Width field under the preview. Height is always `auto` (no height field). Style save posts `embed[sizing][width]` and `embed[sizing][height]=auto`. The snippet and live preview use `style="width:…"` with `max-width: 100%`.
 - Padding, radius, and other non-font fields are not shown on this screen.
 - Save and Reset are separate FlatPack Buttons in one row (Save primary).
 - Reset restores each ColorSwatch colour and the FontSwatch font to resolved/default values, resets width to Auto (`100%`), and refreshes the live preview.

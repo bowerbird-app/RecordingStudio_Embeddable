@@ -687,11 +687,13 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, "icon_only: true"
     assert_includes styling, 'class: "rounded-full"'
     assert_includes styling, '<h3 class="text-sm font-semibold">Width</h3>'
-    assert_includes styling, 'text: "Auto"'
-    assert_includes styling, 'text: "Custom"'
-    assert_includes styling, 'style_width_mode: "auto"'
-    assert_includes styling, 'style_width_mode: "custom"'
-    assert_includes styling, 'placeholder: "40rem or 720px"'
+    assert_includes styling, "FlatPack::Tabs::Component.new("
+    assert_includes styling, "variant: :underline"
+    assert_includes styling, 'label: "Auto"'
+    assert_includes styling, 'label: "Custom"'
+    assert_includes styling, 'id: "style-width-auto"'
+    assert_includes styling, 'id: "style-width-custom"'
+    assert_includes styling, 'help_text: "% or px"'
     assert_includes styling, 'name="embed[sizing][width]"'
     assert_includes styling, 'name="embed[sizing][height]"'
     assert_includes styling, 'value="auto"'
@@ -706,7 +708,11 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, "selectStyleWidthMode"
     refute_includes styling, "data-style-width-controls"
     refute_includes styling, "data-style-custom-width="
-    refute_includes styling, "FlatPack::ChipGroup"
+    refute_includes styling, "variant: :pills"
+    refute_includes styling, "ChipGroup"
+    refute_includes styling, "ButtonGroup"
+    refute_includes styling, "SegmentedButtons"
+    refute_includes styling, "style_width_mode"
     refute_includes styling, "FlatPack::Chip::"
     refute_includes styling, 'text: "Full"'
     refute_includes styling, 'text: "Readable"'
@@ -733,18 +739,27 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     color_swatch_index = styling.index("FlatPack::ColorSwatch::Component")
     width_trigger_index = styling.index('id: "embed-width-trigger"')
     popover_index = styling.index("data-style-width-popover")
+    auto_tab_index = styling.index('id: "style-width-auto"')
+    custom_tab_index = styling.index('id: "style-width-custom"')
     field_index = styling.index("style_custom_width_input")
     preview_index = styling.index('id="embed-styling-preview"')
     assert font_swatch_index, "expected FontSwatch on Style screen"
     assert color_swatch_index, "expected ColorSwatch on Style screen"
     assert width_trigger_index, "expected width Button on Style screen"
     assert popover_index, "expected width popover on Style screen"
+    assert auto_tab_index, "expected Auto tab on Style screen"
+    assert custom_tab_index, "expected Custom tab on Style screen"
     assert field_index, "expected CSS width field on Style screen"
     assert preview_index, "expected live preview on Style screen"
     assert_operator font_swatch_index, :<, width_trigger_index
     assert_operator width_trigger_index, :<, color_swatch_index
-    assert_operator popover_index, :<, field_index
+    assert_operator popover_index, :<, auto_tab_index
+    assert_operator auto_tab_index, :<, custom_tab_index
+    assert_operator custom_tab_index, :<, field_index
     assert_operator field_index, :<, preview_index
+    auto_panel = styling[auto_tab_index...custom_tab_index]
+    refute_includes auto_panel, "TextInput"
+    refute_includes auto_panel, "help_text"
 
     assert_includes stats, 'title: "Stats"'
     refute_includes stats, "Embed Stats"
