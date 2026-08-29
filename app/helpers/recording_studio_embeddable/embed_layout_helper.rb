@@ -63,6 +63,13 @@ module RecordingStudioEmbeddable
       font_family = embed_layout_theme(overrides)[:font_family].to_s.strip
       return nil if font_family.blank?
       return nil if RecordingStudioEmbeddable::Styling::Tokens::FONT_STACKS.key?(font_family)
+      return nil if RecordingStudioEmbeddable::Styling::Tokens::FONT_STACKS.value?(font_family)
+
+      font_swatch_match = RecordingStudioEmbeddable::Styling::Tokens::FONT_SWATCH_OPTIONS.any? do |_label, css|
+        css == font_family
+      end
+      return nil if font_swatch_match
+      return nil if font_family.include?(",")
 
       font_family
     end

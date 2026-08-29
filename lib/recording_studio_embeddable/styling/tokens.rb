@@ -26,6 +26,13 @@ module RecordingStudioEmbeddable
         "mono" => "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
       }.freeze
 
+      # Curated FlatPack FontSwatch options (label + CSS font-family). Hosts own this list.
+      FONT_SWATCH_OPTIONS = [
+        ["Sans", "ui-sans-serif, system-ui, sans-serif"],
+        ["Serif", "ui-serif, Georgia, serif"],
+        ["Mono", "ui-monospace, SFMono-Regular, monospace"]
+      ].freeze
+
       module_function
 
       def css_value_for(key, value, definition: nil)
@@ -33,13 +40,34 @@ module RecordingStudioEmbeddable
 
         case key.to_sym
         when :font_family
-          font_key = value.to_s
-          FONT_STACKS[font_key] || "\"#{font_key}\", #{FONT_STACKS['sans']}"
+          resolve_font_family_css(value)
         when :padding_scale then SPACING_SCALE[value.to_s] || value.to_s
         when :radius_scale then RADIUS_SCALE[value.to_s] || value.to_s
         else
           normalize_dimension_value(key, value, definition)
         end
+      end
+
+      def resolve_font_family_css(value)
+        font_value = value.to_s.strip
+        return if font_value.blank?
+        return FONT_STACKS[font_value] if FONT_STACKS.key?(font_value)
+        return font_value if FONT_STACKS.value?(font_value)
+        return font_value if FONT_SWATCH_OPTIONS.any? { |_label, css| css == font_value }
+        return font_value if font_value.include?(",")
+
+        "\"#{font_value}\", #{FONT_STACKS['sans']}"
+      end
+
+      def font_swatch_label_for(value)
+        font_css = resolve_font_family_css(value).to_s
+        match = FONT_SWATCH_OPTIONS.find { |_label, css| css == font_css || css == value.to_s.strip }
+        return match[0] if match
+
+        key = value.to_s.strip
+        return key.capitalize if FONT_STACKS.key?(key)
+
+        key.presence || "Sans"
       end
 
       def normalize_dimension_value(key, value, definition)

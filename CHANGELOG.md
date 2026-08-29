@@ -10,9 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.2] - 2026-08-29
 
 ### Changed
-- Pin `flat_pack` to `~> 0.1.136` (GitHub tag `v0.1.136`) in the gemspec, root Gemfile, and dummy Gemfile/locks.
-- Replace the long Styling colour form with a wrapping row of FlatPack `ColorSwatch` circles. Colour names are tooltip-only; Save posts the native colour input `name` with the form. Font stays as its own FlatPack Select; padding/radius and other non-font fields are no longer rendered on Styling.
-- Reset restores ColorSwatch native colour inputs to resolved/default hex via `data-default-color` on the ColorSwatch root and dispatches `input`/`change` so Stimulus repaints.
+- Pin `flat_pack` to `~> 0.1.138` (GitHub tag `v0.1.138`) in the gemspec, root Gemfile, and dummy Gemfile/locks.
+- Replace the long Styling colour form with a wrapping row of FlatPack `ColorSwatch` circles plus one FlatPack `FontSwatch` (tooltip names only; no under-labels). Padding/radius and other non-font fields are no longer rendered on Styling.
+- Font posts a curated CSS `font-family` stack through FontSwatch’s hidden input (`embed[appearance][font_family]`). Legacy stack keys (`sans` / `serif` / `mono`) still resolve.
+- Show a live embed preview (management preview iframe) below the colour + font controls on Styling. Drop the separate Preview button from that screen.
+- Reset restores ColorSwatch native colour inputs and the FontSwatch hidden input to resolved/default values and repaints the live preview.
 - Show the recordable name as the default-size FlatPack PageTitle subtitle on Settings, Styling, and Stats (no `large_subtitle`).
 
 ### Fixed
@@ -27,11 +29,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Show the embed snippet in a wrapping FlatPack `TextArea` with short help “Paste this into your page.”
 - Keep Embed title, recordable subtitle, and Preview/Styling/Settings/Stats nav on the embed-code screen.
 - Title Settings as “Embed settings” with the recordable name as subtitle. Labels are Width and Height.
-- Put Styling Save, Reset, and Preview in one row of separate FlatPack Buttons (Save primary).
+- Put Styling Save and Reset in one row of separate FlatPack Buttons (Save primary).
 
 ### Upgrade notes
-- Require FlatPack `~> 0.1.136` (tag `v0.1.136`) so `FlatPack::ColorSwatch::Component` is available for the Styling screen.
-- No host migration is required for existing embed appearance data. Styling Save now posts colour values from native colour inputs via ColorSwatch `name:`.
+- Require FlatPack `~> 0.1.138` (tag `v0.1.138`) for `FlatPack::ColorSwatch::Component` and `FlatPack::FontSwatch::Component` on the Styling screen.
+- No host migration is required for existing embed appearance data. Colour values still post from ColorSwatch native inputs. Font may now save as a CSS stack string from FontSwatch; stack keys continue to work when resolving themes.
 
 ## [0.1.1] - 2026-04-28
 

@@ -645,15 +645,22 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, 'title: "Styling"'
     assert_includes styling, "FlatPack::Grid::Component.new(cols: 2)"
     assert_includes styling, "FlatPack::ColorSwatch::Component"
+    assert_includes styling, "FlatPack::FontSwatch::Component"
     assert_includes styling, "flex flex-wrap items-start gap-[var(--stack-gap-md)]"
-    assert_includes styling, "data: { default_color: reset_color }"
+    assert_includes styling, "default_color: reset_color"
+    assert_includes styling, "default_font: reset_font_css"
     assert_includes styling, 'data-controller~="flat-pack--color-swatch"'
+    assert_includes styling, 'data-controller~="flat-pack--font-swatch"'
     assert_includes styling, 'id: "embed_appearance_font_family"'
+    assert_includes styling, 'id="embed-styling-preview"'
+    assert_includes styling, "preview_management_embed_path(@embed)"
+    refute_includes styling, "FlatPack::Select::Component"
     refute_includes styling, "data-styling-color-swatch"
     refute_includes styling, "data-color-picker-trigger-name"
     refute_includes styling, "padding_scale"
     refute_includes styling, "radius_scale"
     refute_includes styling, "Embed overrides"
+    refute_includes styling, 'text: "Preview"'
 
     assert_includes stats, 'title: "Stats"'
     refute_includes stats, "Embed Stats"
@@ -668,9 +675,17 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes source, 'text: "Save"'
     assert_includes source, "style: :primary"
     assert_includes source, 'text: "Reset"'
-    assert_includes source, 'text: "Preview"'
+    refute_includes source, 'text: "Preview"'
     refute_includes source, "ButtonGroup"
     refute_includes source, "flex-col items-start"
     refute_includes source, "styling-save-button"
+  end
+
+  def test_font_family_token_passes_through_css_stacks
+    stack = "ui-serif, Georgia, serif"
+
+    assert_equal stack, RecordingStudioEmbeddable::Styling::Tokens.resolve_font_family_css(stack)
+    assert_equal "Sans", RecordingStudioEmbeddable::Styling::Tokens.font_swatch_label_for("sans")
+    assert_equal "Serif", RecordingStudioEmbeddable::Styling::Tokens.font_swatch_label_for(stack)
   end
 end

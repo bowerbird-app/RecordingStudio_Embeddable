@@ -3,6 +3,14 @@
 <% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
 <% color_definitions = @styling_definitions.select { |_key, definition| definition[:type] == :color } %>
 <% font_definition = @styling_definitions[:font_family] || @styling_definitions["font_family"] %>
+<% font_swatch_options = @font_swatch_options.presence || RecordingStudioEmbeddable::Styling::Tokens::FONT_SWATCH_OPTIONS %>
+<% current_font_override = @styling_overrides["font_family"].to_s.strip %>
+<% resolved_font = @resolved_theme["font_family"].to_s.strip %>
+<% default_font = @recordable_style_defaults["font_family"].to_s.strip %>
+<% font_source = current_font_override.presence || resolved_font.presence || default_font.presence || "sans" %>
+<% current_font_css = RecordingStudioEmbeddable::Styling::Tokens.resolve_font_family_css(font_source) || font_swatch_options.first[1] %>
+<% reset_font_css = RecordingStudioEmbeddable::Styling::Tokens.resolve_font_family_css(resolved_font.presence || default_font.presence || "sans") || font_swatch_options.first[1] %>
+<% font_tooltip = RecordingStudioEmbeddable::Styling::Tokens.font_swatch_label_for(font_source) %>
 
 <% recording_studio_page_nav(
   title: "Styling",
@@ -50,15 +58,9 @@
             disabled: !@styling_editable,
             data: { reset_styling_fields: true }
           ) %>
-          <%= render FlatPack::Button::Component.new(
-            text: "Preview",
-            style: :secondary,
-            size: :md,
-            href: preview_management_embed_path(@embed)
-          ) %>
         </div>
 
-        <% if color_definitions.any? %>
+        <% if color_definitions.any? || font_definition.present? %>
           <div class="flex flex-wrap items-start gap-[var(--stack-gap-md)]">
             <% color_definitions.each do |key, definition| %>
               <% field_name = key.to_s %>
@@ -75,39 +77,50 @@
                 selected: current_value.present?,
                 size: :lg,
                 disabled: !@styling_editable,
-                data: { default_color: reset_color }
+                data: {
+                  default_color: reset_color,
+                  styling_field: field_name
+                }
+              ) %>
+            <% end %>
+
+            <% if font_definition.present? %>
+              <%= render FlatPack::FontSwatch::Component.new(
+                font: current_font_css,
+                options: font_swatch_options,
+                name: "embed[appearance][font_family]",
+                text: font_tooltip,
+                selected: current_font_override.present?,
+                size: :lg,
+                disabled: !@styling_editable,
+                id: "embed_appearance_font_family",
+                data: {
+                  default_font: reset_font_css,
+                  styling_field: "font_family"
+                }
               ) %>
             <% end %>
           </div>
         <% end %>
-
-        <% if font_definition.present? %>
-          <% field_name = "font_family" %>
-          <% current_value = @styling_overrides[field_name] %>
-          <% default_value = @recordable_style_defaults[field_name] %>
-          <% default_placeholder = default_value.present? ? "Default - #{default_value}" : "Inherit from host theme" %>
-
-          <div class="space-y-2">
-            <div class="flex flex-wrap items-center gap-2">
-              <label for="embed_appearance_font_family" class="text-sm font-medium"><%= font_definition[:label] || "Font" %></label>
-            </div>
-
-            <%= render FlatPack::Select::Component.new(
-              name: "embed[appearance][#{field_name}]",
-              label: "",
-              options: @font_options.map { |font| { label: "#{font}  Aa", value: font } },
-              value: current_value,
-              id: "embed_appearance_font_family",
-              placeholder: default_placeholder,
-              searchable: true,
-              disabled: !@styling_editable
-            ) %>
-          </div>
-        <% end %>
       <% end %>
+
+      <iframe
+        id="embed-styling-preview"
+        src="<%= preview_management_embed_path(@embed) %>"
+        title="Embed preview"
+        loading="lazy"
+        referrerpolicy="strict-origin-when-cross-origin"
+        class="w-full border-0"
+        style="height: <%= @preview_height %>; min-height: 320px; max-width: 100%;"
+        data-styling-preview="true"
+      ></iframe>
     </div>
   <% end %>
 </div>
+
+<script type="application/json" id="styling-preview-css-map">
+  <%= raw(@styling_preview_css_map.to_json) %>
+</script>
 
 <script>
   const initializeStylingReset = () => {
@@ -117,18 +130,6 @@
       button.addEventListener("click", () => {
         const form = button.closest("form");
         if (!form) return;
-
-        form.querySelectorAll('[name^="embed[appearance]"]').forEach((field) => {
-          if (field.matches('input[type="color"]')) return;
-
-          if (field.tagName === "SELECT") {
-            field.selectedIndex = 0;
-          }
-
-          field.value = "";
-          field.dispatchEvent(new Event("input", { bubbles: true }));
-          field.dispatchEvent(new Event("change", { bubbles: true }));
-        });
 
         form.querySelectorAll('[data-controller~="flat-pack--color-swatch"]').forEach((root) => {
           const defaultColor = root.dataset.defaultColor;
@@ -142,127 +143,111 @@
           picker.dispatchEvent(new Event("input", { bubbles: true }));
           picker.dispatchEvent(new Event("change", { bubbles: true }));
         });
+
+        form.querySelectorAll('[data-controller~="flat-pack--font-swatch"]').forEach((root) => {
+          const defaultFont = root.dataset.defaultFont;
+          if (!defaultFont) return;
+
+          const input = root.querySelector('[data-flat-pack--font-swatch-target="input"]');
+          const swatch = root.querySelector('[data-flat-pack--font-swatch-target="swatch"]');
+          if (input) {
+            input.value = defaultFont;
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+          if (swatch) {
+            swatch.style.fontFamily = defaultFont;
+          }
+
+          root.querySelectorAll('[data-flat-pack--font-swatch-target="option"]').forEach((option) => {
+            option.setAttribute("aria-selected", (option.dataset.value === defaultFont).toString());
+          });
+
+          const label = (root.querySelector(`[data-flat-pack--font-swatch-target="option"][data-value="${CSS.escape(defaultFont)}"]`)?.dataset.label) || "Font";
+          const trigger = root.querySelector('[data-flat-pack--font-swatch-target="trigger"]');
+          if (trigger) trigger.setAttribute("aria-label", label);
+          const tooltip = root.querySelector('[role="tooltip"]');
+          if (tooltip) tooltip.textContent = label;
+
+          root.dispatchEvent(new CustomEvent("font-swatch:change", {
+            detail: { value: defaultFont, label },
+            bubbles: true
+          }));
+        });
+
+        applyStylingPreviewFromForm(form);
       });
     });
   };
 
-  const initializeFontPreviewSelects = () => {
-    const loadedFonts = new Set();
-    const fontCssBase = "https://fonts.googleapis.com/css2";
+  const stylingPreviewCssMap = () => {
+    const node = document.getElementById("styling-preview-css-map");
+    if (!node) return {};
 
-    const firstFontFamilyName = (fontFamily) => {
-      const raw = (fontFamily || "").split(",")[0] || "";
-      return raw.trim().replace(/^['\"]|['\"]$/g, "");
-    };
+    try {
+      return JSON.parse(node.textContent || "{}");
+    } catch (_error) {
+      return {};
+    }
+  };
 
-    const ensureGoogleFontLoaded = (fontName) => {
-      const family = (fontName || "").trim();
-      if (!family) return;
+  const applyStylingPreviewFromForm = (form) => {
+    const iframe = document.getElementById("embed-styling-preview");
+    if (!iframe) return;
 
-      const key = family.toLowerCase();
-      if (loadedFonts.has(key)) return;
-      loadedFonts.add(key);
+    const apply = () => {
+      const doc = iframe.contentDocument;
+      if (!doc?.documentElement) return;
 
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = `${fontCssBase}?family=${encodeURIComponent(family)}:wght@400;500;600&display=swap`;
-      document.head.appendChild(link);
-    };
+      const map = stylingPreviewCssMap();
+      const root = doc.documentElement;
+      const body = doc.body;
 
-    const applyPreview = (hiddenInputId) => {
-      const hiddenInput = document.getElementById(hiddenInputId);
-      if (!hiddenInput) return;
+      Object.entries(map).forEach(([field, cssTarget]) => {
+        if (!cssTarget) return;
 
-      const selectRoot = hiddenInput.closest('[data-controller="flat-pack--select"]');
-      if (!selectRoot) return;
-
-      const trigger = selectRoot.querySelector('[data-flat-pack--select-target="trigger"]');
-      const triggerLabel = trigger?.querySelector("span");
-      const optionsList = selectRoot.querySelector('[data-flat-pack--select-target="optionsList"]');
-      const dropdown = selectRoot.querySelector('[data-flat-pack--select-target="dropdown"]');
-
-      const applyCurrentValueToTrigger = () => {
-        const selectedValue = (hiddenInput.value || "").trim();
-        if (!triggerLabel) return;
-
-        if (selectedValue) {
-          triggerLabel.style.fontFamily = selectedValue;
-          ensureGoogleFontLoaded(selectedValue);
+        if (field === "font_family") {
+          const fontInput = form.querySelector('[name="embed[appearance][font_family]"]');
+          const fontValue = (fontInput?.value || "").trim();
+          if (fontValue) {
+            if (body) body.style.fontFamily = fontValue;
+            root.style.setProperty("font-family", fontValue);
+          }
           return;
         }
 
-        const hostFontName = firstFontFamilyName(window.getComputedStyle(document.body).fontFamily) || "host font";
-        triggerLabel.textContent = `Default - ${hostFontName}`;
-        triggerLabel.style.fontFamily = "inherit";
-      };
+        const colorInput = form.querySelector(`[name="embed[appearance][${field}]"]`);
+        const colorValue = (colorInput?.value || "").trim();
+        if (!colorValue) return;
 
-      selectRoot.querySelectorAll('[role="option"][data-value]').forEach((option) => {
-        const fontValue = (option.dataset.value || "").trim();
-        if (!fontValue) return;
-
-        option.style.fontFamily = fontValue;
-      });
-
-      const loadVisibleOptionFonts = () => {
-        if (!optionsList) return;
-
-        optionsList.querySelectorAll('[role="option"][data-value]').forEach((option) => {
-          const fontValue = (option.dataset.value || "").trim();
-          if (!fontValue || option.style.display === "none") return;
-
-          const optionTop = option.offsetTop;
-          const optionBottom = optionTop + option.offsetHeight;
-          const viewTop = optionsList.scrollTop;
-          const viewBottom = viewTop + optionsList.clientHeight;
-          const inView = optionBottom >= viewTop - 20 && optionTop <= viewBottom + 20;
-
-          if (inView) ensureGoogleFontLoaded(fontValue);
-        });
-      };
-
-      applyCurrentValueToTrigger();
-      loadVisibleOptionFonts();
-
-      if (selectRoot.dataset.fontPreviewBound !== "true") {
-        selectRoot.dataset.fontPreviewBound = "true";
-
-        selectRoot.addEventListener("click", () => {
-          setTimeout(() => {
-            applyCurrentValueToTrigger();
-            loadVisibleOptionFonts();
-          }, 0);
-        });
-
-        hiddenInput.addEventListener("change", () => {
-          applyCurrentValueToTrigger();
-        });
-
-        optionsList?.addEventListener("scroll", () => {
-          loadVisibleOptionFonts();
-        });
-
-        const searchInput = selectRoot.querySelector('[data-flat-pack--select-target="searchInput"]');
-        searchInput?.addEventListener("input", () => {
-          setTimeout(loadVisibleOptionFonts, 0);
-        });
-
-        const dropdownObserver = new MutationObserver(() => {
-          if (dropdown && !dropdown.classList.contains("hidden")) {
-            setTimeout(loadVisibleOptionFonts, 0);
-          }
-        });
-
-        if (dropdown) {
-          dropdownObserver.observe(dropdown, { attributes: true, attributeFilter: ["class"] });
+        if (cssTarget.startsWith("--")) {
+          root.style.setProperty(cssTarget, colorValue);
+          if (body) body.style.setProperty(cssTarget, colorValue);
         }
-      }
+      });
     };
 
-    applyPreview("embed_appearance_font_family");
+    if (iframe.dataset.previewBound !== "true") {
+      iframe.dataset.previewBound = "true";
+      iframe.addEventListener("load", apply);
+    }
+
+    apply();
+  };
+
+  const initializeStylingLivePreview = () => {
+    const form = document.querySelector('form[action*="styling"]') || document.querySelector("form");
+    if (!form || form.dataset.livePreviewBound === "true") return;
+
+    form.dataset.livePreviewBound = "true";
+    applyStylingPreviewFromForm(form);
+
+    form.addEventListener("input", () => applyStylingPreviewFromForm(form));
+    form.addEventListener("change", () => applyStylingPreviewFromForm(form));
+    form.addEventListener("font-swatch:change", () => applyStylingPreviewFromForm(form));
   };
 
   document.addEventListener("turbo:load", initializeStylingReset);
   document.addEventListener("DOMContentLoaded", initializeStylingReset);
-  document.addEventListener("turbo:load", initializeFontPreviewSelects);
-  document.addEventListener("DOMContentLoaded", initializeFontPreviewSelects);
+  document.addEventListener("turbo:load", initializeStylingLivePreview);
+  document.addEventListener("DOMContentLoaded", initializeStylingLivePreview);
 </script>

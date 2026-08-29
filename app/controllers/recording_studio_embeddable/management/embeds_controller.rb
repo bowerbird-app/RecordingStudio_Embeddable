@@ -49,7 +49,9 @@ module RecordingStudioEmbeddable
         submitted = styling_appearance_params
         validation_definitions = @styling_definitions.deep_dup
         if validation_definitions[:font_family]
-          validation_definitions[:font_family][:options] = @font_options + Styling::Tokens::FONT_STACKS.keys
+          font_swatch_values = Styling::Tokens::FONT_SWATCH_OPTIONS.map { |_label, css| css }
+          validation_definitions[:font_family][:options] =
+            font_swatch_values + Styling::Tokens::FONT_STACKS.keys + Styling::Tokens::FONT_STACKS.values
         end
         validation = Styling::ValidateOverrides.call(values: submitted, definitions: validation_definitions)
         unless validation.valid?
@@ -339,13 +341,7 @@ module RecordingStudioEmbeddable
         assign_recordable_instance_variable
 
         @styling_definitions = visible_styling_definitions
-        built_in_font_keys = Styling::Tokens::FONT_STACKS.keys.map(&:downcase)
-        @font_options = Services::GoogleFonts.options
-                                             .map(&:to_s)
-                                             .map(&:strip)
-                                             .reject(&:blank?)
-                                             .reject { |font| built_in_font_keys.include?(font.downcase) }
-                                             .uniq
+        @font_swatch_options = Styling::Tokens::FONT_SWATCH_OPTIONS
         @styling_overrides = @embed.appearance.to_h.stringify_keys
         defaults = RecordingStudioEmbeddable::Styling::RecordableDefaults.call(recording: @recording)
         @recordable_style_defaults = defaults[:defaults].to_h.stringify_keys
@@ -354,6 +350,20 @@ module RecordingStudioEmbeddable
         @theme_sources = resolved.sources.stringify_keys
         @styling_editable = styling_editable?
         @styling_errors = {} if @styling_errors.nil?
+        @preview_height = @embed.sizing.to_h.with_indifferent_access[:height].presence || "320px"
+        @styling_preview_css_map = styling_preview_css_map
+      end
+
+      def styling_preview_css_map
+        map = {}
+        visible_styling_definitions.each do |key, definition|
+          next unless definition[:type] == :color
+
+          css_variable = definition[:css_variable].presence
+          map[key.to_s] = css_variable if css_variable.present?
+        end
+        map["font_family"] = "font-family" if visible_styling_definitions.key?(:font_family)
+        map
       end
 
       def visible_styling_definitions

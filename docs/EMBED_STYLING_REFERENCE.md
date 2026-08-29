@@ -89,7 +89,7 @@ The engine's helper converts common token values automatically:
 
 - `padding_scale`: `none`, `xs`, `sm`, `md`, `lg`, `xl`
 - `radius_scale`: `none`, `sm`, `md`, `lg`, `xl`
-- `font_family`: FlatPack stack keys (`sans`, `serif`, `mono`) or Google fonts
+- `font_family`: curated CSS stacks from FlatPack FontSwatch, legacy stack keys (`sans`, `serif`, `mono`), or a Google font name
 
 ## Host Theme Inheritance
 
@@ -99,16 +99,32 @@ If a recordable does not declare a field default and an embed does not override 
 
 On the Styling screen:
 
-- Colour fields render as a wrapping row of FlatPack `ColorSwatch` circles.
-- The colour name is tooltip-only (no label under the circle).
-- Clicking a circle opens the native colour picker.
-- Save posts the native colour input’s `name` with the form (`embed[appearance][...]`).
-- Font stays as its own FlatPack Select.
+- Colour fields and Font share one wrapping flex row of FlatPack circles (`ColorSwatch` + `FontSwatch`) using `--stack-gap-md`.
+- Colour names and the font name are tooltip-only (no label under the circle).
+- Clicking a colour circle opens the native colour picker; clicking FontSwatch opens its FlatPack Popover menu (tooltip hides while open).
+- Save posts ColorSwatch colour inputs and FontSwatch’s hidden `name` with the form (`embed[appearance][...]`).
+- A live embed preview iframe sits below the swatch row (management preview). There is no separate Preview button on this screen.
 - Padding, radius, and other non-font fields are not shown on this screen.
-- Save, Reset, and Preview are separate FlatPack Buttons in one row (Save primary).
-- Reset restores each ColorSwatch’s native colour input to the resolved/default hex and dispatches `input`/`change`.
+- Save and Reset are separate FlatPack Buttons in one row (Save primary).
+- Reset restores each ColorSwatch colour and the FontSwatch font to resolved/default values and refreshes the live preview.
 
-Require FlatPack `~> 0.1.136` (GitHub tag `v0.1.136`) for `FlatPack::ColorSwatch::Component`.
+Require FlatPack `~> 0.1.138` (GitHub tag `v0.1.138`) for `FlatPack::ColorSwatch::Component` and `FlatPack::FontSwatch::Component`.
+
+Example FontSwatch composition:
+
+```erb
+<%= render FlatPack::FontSwatch::Component.new(
+  font: current_css_family,
+  options: [
+    ["Sans", "ui-sans-serif, system-ui, sans-serif"],
+    ["Serif", "ui-serif, Georgia, serif"],
+    ["Mono", "ui-monospace, SFMono-Regular, monospace"]
+  ],
+  name: "embed[appearance][font_family]",
+  text: "Sans",
+  size: :lg
+) %>
+```
 
 ## Practical Guidance
 
