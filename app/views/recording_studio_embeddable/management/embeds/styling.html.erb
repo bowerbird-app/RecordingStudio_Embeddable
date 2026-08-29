@@ -13,7 +13,7 @@
 <% font_tooltip = RecordingStudioEmbeddable::Styling::Tokens.font_swatch_label_for(font_source) %>
 
 <% recording_studio_page_nav(
-  title: "Styling",
+  title: "Style",
   page_nav_back_url: edit_management_embed_path(@embed),
   page_nav_back_label: "Embed",
   page_nav_anchor_url: main_app.root_path,
@@ -22,7 +22,7 @@
 
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
-    title: "Styling",
+    title: "Style",
     subtitle: recordable_title,
     variant: :h1
   ) %>
@@ -62,6 +62,23 @@
 
         <% if color_definitions.any? || font_definition.present? %>
           <%= render FlatPack::OverflowRow::Component.new(gap: :md) do %>
+            <% if font_definition.present? && current_font_css.present? %>
+              <%= render FlatPack::FontSwatch::Component.new(
+                font: current_font_css,
+                options: font_swatch_options,
+                name: "embed[appearance][font_family]",
+                text: font_tooltip,
+                selected: current_font_override.present?,
+                size: :lg,
+                disabled: !@styling_editable,
+                id: "embed_appearance_font_family",
+                data: {
+                  default_font: reset_font_css,
+                  styling_field: "font_family"
+                }
+              ) %>
+            <% end %>
+
             <% color_definitions.each do |key, definition| %>
               <% field_name = key.to_s %>
               <% current_value = @styling_overrides[field_name].to_s.strip %>
@@ -80,23 +97,6 @@
                 data: {
                   default_color: reset_color,
                   styling_field: field_name
-                }
-              ) %>
-            <% end %>
-
-            <% if font_definition.present? && current_font_css.present? %>
-              <%= render FlatPack::FontSwatch::Component.new(
-                font: current_font_css,
-                options: font_swatch_options,
-                name: "embed[appearance][font_family]",
-                text: font_tooltip,
-                selected: current_font_override.present?,
-                size: :lg,
-                disabled: !@styling_editable,
-                id: "embed_appearance_font_family",
-                data: {
-                  default_font: reset_font_css,
-                  styling_field: "font_family"
                 }
               ) %>
             <% end %>

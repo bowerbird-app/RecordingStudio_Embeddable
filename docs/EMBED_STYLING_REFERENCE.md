@@ -97,9 +97,9 @@ If a recordable does not declare a field default and an embed does not override 
 
 ## Management UI
 
-On the Styling screen:
+On the Style screen:
 
-- Colour fields and Font share one FlatPack `OverflowRow` (`gap: :md`) of `ColorSwatch` + `FontSwatch` circles.
+- Font and colour fields share one FlatPack `OverflowRow` (`gap: :md`): `FontSwatch` first, then `ColorSwatch` circles.
 - The row never wraps. When swatches overflow, OverflowRow scrolls sideways with a hidden scrollbar and a soft trailing fade while more remains to the right (fade clears at the end).
 - Colour names and the font name are tooltip-only (no label under the circle).
 - Clicking a colour circle opens the native colour picker; clicking FontSwatch opens its FlatPack Popover menu (tooltip hides while open).
@@ -115,12 +115,6 @@ Example composition:
 
 ```erb
 <%= render FlatPack::OverflowRow::Component.new(gap: :md) do %>
-  <%= render FlatPack::ColorSwatch::Component.new(
-    color: "#ffffff",
-    text: "Background",
-    name: "embed[appearance][background_color]",
-    size: :lg
-  ) %>
   <%= render FlatPack::FontSwatch::Component.new(
     font: current_css_family,
     options: [
@@ -130,6 +124,12 @@ Example composition:
     ],
     name: "embed[appearance][font_family]",
     text: "Sans",
+    size: :lg
+  ) %>
+  <%= render FlatPack::ColorSwatch::Component.new(
+    color: "#ffffff",
+    text: "Background",
+    name: "embed[appearance][background_color]",
     size: :lg
   ) %>
 <% end %>

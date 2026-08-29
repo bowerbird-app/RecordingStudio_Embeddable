@@ -17,8 +17,16 @@ end
 workspace = Workspace.find_or_create_by!(name: "Studio Workspace")
 folder = Folder.find_or_create_by!(name: "Product Docs")
 page = Page.find_or_create_by!(title: "Getting Started")
-article = Article.find_or_create_by!(title: "Article Requires Publishable")
-document = Document.find_or_create_by!(title: "Document Publishable Only")
+article = Article.find_by(title: "Spring release") ||
+          Article.find_by(title: "Article Requires Publishable") ||
+          Article.new
+article.title = "Spring release"
+article.save!
+document = Document.find_by(title: "Workspace notes") ||
+           Document.find_by(title: "Document Publishable Only") ||
+           Document.new
+document.title = "Workspace notes"
+document.save!
 
 Page.where(id: page.id).update_all(description: "Walk through workspace setup, embed codes, and how guests see a published page.")
 Article.where(id: article.id).update_all(description: "What changed in the spring workspace release, including embed codes and guest publish flow.")
@@ -67,7 +75,7 @@ puts "Seeded: admin@admin.com / Password"
 puts "Seeded: viewer@admin.com / Password"
 puts "Seeded: Workspace '#{workspace.name}' with root recording ##{root_recording.id}"
 puts "Seeded: Folder '#{folder.name}' and page '#{page.title}'"
-puts "Seeded: Article '#{article.title}' (embeddable requires publishable, no publishable configured)"
+puts "Seeded: Article '#{article.title}' (embeddable; publishable not configured in this dummy)"
 puts "Seeded: Document '#{document.title}' (publishable enabled, embeddable not configured)"
 puts "Seeded: Page public embed at /recording_studio_embeddable/embeds/#{page_recording.embed&.token}" if page_recording.respond_to?(:embed)
 puts "Seeded: Article public embed at /recording_studio_embeddable/embeds/#{article_recording.embed&.token}" if

@@ -14,9 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replace the long Styling colour form with FlatPack `ColorSwatch` circles plus one FlatPack `FontSwatch` inside one FlatPack `OverflowRow` (`gap: :md`). Tooltip names only; no under-labels. Padding/radius and other non-font fields are no longer rendered on Styling.
 - OverflowRow owns the one-row strip: hidden scrollbar, trailing fade only while more content remains to the right, fade clears at the end. No Embeddable overflow/fade CSS.
 - Font posts a curated CSS `font-family` stack through FontSwatch’s hidden input (`embed[appearance][font_family]`). Legacy stack keys (`sans` / `serif` / `mono`) still resolve.
-- Show a live embed preview (management preview iframe) below the swatch row on Styling. Drop the separate Preview button from that screen.
-- Reset restores ColorSwatch native colour inputs and the FontSwatch hidden input to resolved/default values and repaints the live preview.
-- Show the recordable name as the default-size FlatPack PageTitle subtitle on Settings, Styling, and Stats (no `large_subtitle`).
+- Show a live embed preview (management preview iframe) below the swatch row on Style. Drop the separate Preview button from that screen.
+- Title the Style screen “Style” (PageTitle and page nav). Subtitle remains the recordable name.
+- OverflowRow order is FontSwatch first, then ColorSwatch circles.
+- Show the recordable name as the default-size FlatPack PageTitle subtitle on Settings, Style, and Stats (no `large_subtitle`). Dummy Article/Document seed titles are human names (“Spring release”, “Workspace notes”), not capability notes.
 
 ### Fixed
 - Calling `recording_studio_embeddable` now enables the `:embeddable` RecordingStudio capability on the recordable, so `RecordingStudioEmbeddable::Embed` can be recorded under embeddable parents such as Page.

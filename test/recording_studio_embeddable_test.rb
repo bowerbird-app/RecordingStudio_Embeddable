@@ -643,7 +643,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes settings, "Iframe width"
     refute_includes settings, "Iframe height"
 
-    assert_includes styling, 'title: "Styling"'
+    assert_includes styling, 'title: "Style"'
     assert_includes styling, "FlatPack::Grid::Component.new(cols: 2)"
     assert_includes styling, "FlatPack::ColorSwatch::Component"
     assert_includes styling, "FlatPack::FontSwatch::Component"
@@ -655,6 +655,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, 'id: "embed_appearance_font_family"'
     assert_includes styling, 'id="embed-styling-preview"'
     assert_includes styling, "preview_management_embed_path(@embed)"
+    refute_includes styling, 'title: "Styling"'
     refute_includes styling, "FlatPack::Select::Component"
     refute_includes styling, "ChipGroup"
     refute_includes styling, "flex flex-wrap items-start gap-[var(--stack-gap-md)]"
@@ -665,6 +666,12 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes styling, "radius_scale"
     refute_includes styling, "Embed overrides"
     refute_includes styling, 'text: "Preview"'
+
+    font_swatch_index = styling.index("FlatPack::FontSwatch::Component")
+    color_swatch_index = styling.index("FlatPack::ColorSwatch::Component")
+    assert font_swatch_index, "expected FontSwatch on Style screen"
+    assert color_swatch_index, "expected ColorSwatch on Style screen"
+    assert_operator font_swatch_index, :<, color_swatch_index
 
     assert_includes stats, 'title: "Stats"'
     refute_includes stats, "Embed Stats"
