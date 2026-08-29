@@ -1,0 +1,113 @@
+<% parent_recording = @embed.parent_recording %>
+<% recordable = parent_recording&.recordable %>
+<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
+<% embed_code = parent_recording&.embed_code(host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
+<% embed_options = RecordingStudioEmbeddable::Renderer.options_for(parent_recording) %>
+<% publishable_required = ActiveModel::Type::Boolean.new.cast(embed_options.fetch(:require_publishable, RecordingStudioEmbeddable.configuration.require_publishable)) %>
+<% publishable_ready = if parent_recording.respond_to?(:currently_published?)
+     parent_recording.currently_published?
+   elsif parent_recording.respond_to?(:current_publishable)
+     parent_recording.current_publishable.present?
+   elsif parent_recording.respond_to?(:publishable_child_recording)
+     parent_recording.publishable_child_recording.present?
+   else
+     false
+   end %>
+<% show_unpublished_warning = publishable_required && !publishable_ready %>
+<% publish_page_url = parent_recording.present? ? recording_studio_publishable.edit_recording_publishable_path(recording_id: parent_recording.id) : nil %>
+<% disable_management_actions = show_unpublished_warning %>
+
+<% recording_studio_page_nav(
+  title: "Embed",
+  page_nav_anchor_url: main_app.root_path,
+  page_nav_anchor_label: "Close"
+) %>
+
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: "Embed",
+    subtitle: recordable_title,
+    variant: :h1
+  ) %>
+
+  <%= render "section_nav", disable_management_actions: disable_management_actions %>
+
+  <% if show_unpublished_warning %>
+    <%= render FlatPack::EmptyState::Component.new(
+      title: "Embeddable unavailable",
+      description: "You need to publish this page before you can enable embeddable."
+    ) do |empty| %>
+      <% empty.actions do %>
+        <% if publish_page_url.present? %>
+          <%= render FlatPack::Button::Component.new(text: "Publish Settings", style: :primary, href: publish_page_url) %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% else %>
+    <%= render FlatPack::Grid::Component.new(cols: 2) do %>
+      <div class="space-y-6">
+        <%= form_with model: @embed, url: management_embed_path(@embed), method: :patch, class: "embed-enabled-switch" do |_form| %>
+          <input type="hidden" name="embed[enabled]" value="0">
+          <%= render FlatPack::Switch::Component.new(
+            name: "embed[enabled]",
+            label: "Embeddable",
+            checked: @embed.enabled,
+            disabled: show_unpublished_warning,
+            data: { autosave_embed_enabled: true }
+          ) %>
+        <% end %>
+
+        <% if @embed.enabled %>
+          <div class="space-y-4">
+            <div class="space-y-1">
+              <h2 class="text-base font-semibold">Embed code</h2>
+              <p class="text-sm text-(--text-muted-color)">Paste this into your page.</p>
+            </div>
+
+            <%= render FlatPack::TextArea::Component.new(
+              name: "embed_code",
+              id: "embed_code",
+              value: embed_code,
+              rows: 5,
+              autogrow: true,
+              quick_copy: true
+            ) %>
+          </div>
+        <% else %>
+          <%= render FlatPack::EmptyState::Component.new(
+            title: "Embeddable is off",
+            description: "Turn on Embeddable above to reveal the embed code."
+          ) %>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+</div>
+
+<style>
+  .embed-enabled-switch input.peer:not(:checked) + [role="switch"] {
+    background-color: var(--switch-track-background-color) !important;
+  }
+
+  .embed-enabled-switch input.peer:checked + [role="switch"] {
+    background-color: var(--switch-track-checked-background-color) !important;
+  }
+</style>
+
+<script>
+  const initializeEmbedToggleAutosave = () => {
+    document.querySelectorAll('input[data-autosave-embed-enabled="true"]').forEach((input) => {
+      if (input.dataset.autosaveBound === "true") {
+        return;
+      }
+
+      input.dataset.autosaveBound = "true";
+      input.addEventListener("change", () => {
+        input.form?.requestSubmit();
+      });
+    });
+  };
+
+  document.addEventListener("turbo:load", initializeEmbedToggleAutosave);
+  document.addEventListener("DOMContentLoaded", initializeEmbedToggleAutosave);
+</script>

@@ -1,0 +1,165 @@
+<% parent_recording = @embed.parent_recording %>
+<% recordable = parent_recording&.recordable %>
+<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
+
+<% recording_studio_page_nav(
+  title: "Stats",
+  page_nav_back_url: edit_management_embed_path(@embed),
+  page_nav_back_label: "Embed",
+  page_nav_anchor_url: main_app.root_path,
+  page_nav_anchor_label: "Close"
+) %>
+
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: "Stats",
+    subtitle: recordable_title,
+    variant: :h1
+  ) %>
+
+  <%= render FlatPack::Chart::Component.new(
+    title: "Views",
+    type: :line,
+    height: 320,
+    series: @stats_chart_series,
+    options: {
+      xaxis: {
+        categories: @stats_chart_categories
+      },
+      yaxis: {
+        min: 0,
+        forceNiceScale: true
+      }
+    }
+  ) do |chart| %>
+    <% chart.actions do %>
+      <%= render FlatPack::ChartButtons::Component.new do |controls| %>
+        <% controls.dropdown(
+          text: (@stats_range_picker == "custom" ? "Range" : @stats_range_options.fetch(@stats_range)),
+          options: @stats_range_options.map do |key, label|
+            {
+              text: label,
+              url: stats_management_embed_path(@embed, range: key, viewer: @stats_viewer_filter,
+                                                       granularity: @stats_granularity),
+              selected: @stats_range_picker == key
+            }
+          end + [
+            {
+              text: "Range",
+              url: stats_management_embed_path(@embed, range: "custom", viewer: @stats_viewer_filter,
+                                                       granularity: @stats_granularity),
+              selected: @stats_range_picker == "custom"
+            }
+          ]
+        ) %>
+
+        <% controls.dropdown(
+          text: @stats_viewer_options.fetch(@stats_viewer_filter),
+          options: @stats_viewer_options.map do |key, label|
+            query = if @stats_custom_range
+                      { from: @stats_from_date, to: @stats_to_date, viewer: key, range: "custom",
+                        granularity: @stats_granularity }
+                    elsif @stats_range_picker == "custom"
+                      { range: "custom", viewer: key, granularity: @stats_granularity }
+                    else
+                      { range: @stats_range, viewer: key, granularity: @stats_granularity }
+                    end
+            {
+              text: label,
+              url: stats_management_embed_path(@embed, query),
+              selected: @stats_viewer_filter == key
+            }
+          end
+        ) %>
+
+        <% controls.dropdown(
+          text: @stats_granularity_options.fetch(@stats_granularity),
+          options: @stats_granularity_options.map do |key, label|
+            query = if @stats_custom_range
+                      { from: @stats_from_date, to: @stats_to_date, viewer: @stats_viewer_filter, range: "custom",
+                        granularity: key }
+                    elsif @stats_range_picker == "custom"
+                      { range: "custom", viewer: @stats_viewer_filter, granularity: key }
+                    else
+                      { range: @stats_range, viewer: @stats_viewer_filter, granularity: key }
+                    end
+            {
+              text: label,
+              url: stats_management_embed_path(@embed, query),
+              selected: @stats_granularity == key
+            }
+          end
+        ) %>
+      <% end %>
+
+      <% if @stats_range_picker == "custom" %>
+        <%= form_with url: stats_management_embed_path(@embed), method: :get, local: true, class: "mt-2 flex flex-col items-start gap-3" do %>
+          <%= hidden_field_tag :viewer, @stats_viewer_filter %>
+          <%= hidden_field_tag :range, "custom" %>
+          <%= hidden_field_tag :granularity, @stats_granularity %>
+          <%= render FlatPack::DateInput::Component.new(
+            name: :from,
+            label: "From",
+            value: @stats_from_date&.iso8601,
+            max: @stats_to_date&.iso8601
+          ) %>
+          <%= render FlatPack::DateInput::Component.new(
+            name: :to,
+            label: "To",
+            value: @stats_to_date&.iso8601,
+            min: @stats_from_date&.iso8601
+          ) %>
+          <%= render FlatPack::Button::Component.new(text: "Apply", style: :secondary, size: :sm, type: "submit") %>
+          <% if @stats_custom_range %>
+            <%= render FlatPack::Button::Component.new(
+              text: "Clear",
+              style: :secondary,
+              size: :sm,
+              href: stats_management_embed_path(@embed, range: "custom", viewer: @stats_viewer_filter,
+                                                       granularity: @stats_granularity)
+            ) %>
+          <% end %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <section class="overflow-hidden rounded-lg border border-(--surface-border-color) bg-(--surface-background-color)">
+    <div class="border-b border-(--surface-border-color) px-4 py-3">
+      <h2 class="text-sm font-semibold text-(--surface-content-color)">Countries</h2>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-(--surface-border-color) text-left text-(--surface-muted-content-color)">
+            <th class="px-4 py-2 font-medium">Country</th>
+            <th class="px-4 py-2 font-medium">Views</th>
+            <th class="px-4 py-2 font-medium">Unique views</th>
+            <th class="px-4 py-2 font-medium">Human views</th>
+            <th class="px-4 py-2 font-medium">Bot views</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @stats_geo_rows.present? %>
+            <% @stats_geo_rows.each do |row| %>
+              <tr class="border-b border-(--surface-border-color) last:border-b-0">
+                <td class="px-4 py-2 text-(--surface-content-color)"><%= row[:country] %></td>
+                <td class="px-4 py-2 text-(--surface-content-color)"><%= row[:views] %></td>
+                <td class="px-4 py-2 text-(--surface-content-color)"><%= row[:unique_views] %></td>
+                <td class="px-4 py-2 text-(--surface-content-color)"><%= row[:human_views] %></td>
+                <td class="px-4 py-2 text-(--surface-content-color)"><%= row[:bot_views] %></td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="5" class="px-4 py-4 text-(--surface-muted-content-color)">
+                No geo access data for this filter and date range.
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

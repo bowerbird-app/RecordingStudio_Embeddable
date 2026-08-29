@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html data-theme="rounded">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Embedded recording</title>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "flat_pack/variables", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "flat_pack/application", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <% if (google_font_family = embed_layout_google_font_family) %>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link rel="stylesheet" href="<%= embed_layout_google_font_stylesheet_url(google_font_family) %>">
+    <% end %>
+    <style>
+      .recording-studio-embed-layout {
+        margin: 0;
+        min-height: 100%;
+        background: var(--surface-background-color, transparent);
+        color: var(--surface-content-color, inherit);
+      }
+
+      .recording-studio-embed-layout a {
+        color: var(--color-primary, currentColor);
+      }
+
+      .recording-studio-embed-layout [data-recording-studio-embeddable="fallback"] {
+        color: var(--surface-content-color, inherit);
+      }
+
+      .recording-studio-embed-layout [data-recording-studio-embeddable="fallback"] p {
+        color: var(--surface-muted-content-color, inherit);
+      }
+    </style>
+  </head>
+  <body <%= tag.attributes(embed_layout_body_attributes) %>>
+    <%= yield %>
+  </body>
+</html>

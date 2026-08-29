@@ -1,4 +1,5 @@
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
+  <%= render "app_nav" %>
   <%= render FlatPack::PageTitle::Component.new(
     title: "Recordings tree",
     subtitle: "Active dummy-app recordings shown as a nested parent/child outline.",
@@ -6,10 +7,14 @@
   ) %>
 
   <% if @recording_tree.any? %>
-    <ul class="list-disc pl-5 text-sm text-[var(--surface-content-color)]">
-      <%= render partial: "recording_tree_node", collection: @recording_tree, as: :node %>
-    </ul>
+    <%= render FlatPack::Tree::Component.new(compact: true, class: "w-full") do |tree| %>
+      <%= render_recording_tree_nodes(tree, @recording_tree) %>
+    <% end %>
   <% else %>
-    <p class="text-sm text-[var(--surface-muted-content-color)]">No active recordings found.</p>
+    <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
+      <% card.body do %>
+        <p class="text-sm text-(--surface-muted-content-color)">No active recordings found.</p>
+      <% end %>
+    <% end %>
   <% end %>
 </div>

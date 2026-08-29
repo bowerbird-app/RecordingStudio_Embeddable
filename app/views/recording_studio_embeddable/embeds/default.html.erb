@@ -1,0 +1,4 @@
+<article data-recording-studio-embeddable="fallback" style="padding:1rem;border:1px solid var(--surface-border-color, #e2e8f0)">
+  <h1 style="font-size:1.25rem;margin:0 0 .5rem"><%= ERB::Util.html_escape(@parent_recordable.try(:to_s).presence || "Embedded recording") %></h1>
+  <p style="margin:0">This recording does not define a custom embeddable renderer yet.</p>
+</article>

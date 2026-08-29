@@ -1,0 +1,4 @@
+<article style="padding:<%= embed_layout_css_value(:padding_scale) || '1rem' %>;border:1px solid var(--surface-border-color, #e2e8f0);border-radius:<%= embed_layout_css_value(:radius_scale) || '0.375rem' %>;background:var(--surface-background-color, transparent);color:var(--surface-content-color, inherit)">
+  <h1 style="margin:0 0 0.5rem;color:var(--color-primary, currentColor)"><%= @document.title %></h1>
+  <p style="margin:0;color:var(--surface-muted-content-color, inherit)"><%= @document.description.presence || "No description provided." %></p>
+</article>

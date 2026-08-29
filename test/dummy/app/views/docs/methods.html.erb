@@ -1,30 +1,376 @@
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
+  <%= render "app_nav" %>
   <%= render FlatPack::PageTitle::Component.new(
     title: "Methods",
-    subtitle: "Document the public methods your addon exposes.",
+    subtitle: "Core public methods used by host apps to configure embeds, resolve templates, and manage recording state.",
     variant: :h1
   ) %>
 
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "RecordingStudio::Capabilities::Embeddable.to(...)",
+      subtitle: "Declare the model-level embed API used to opt a recordable into embeddable behavior",
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "embed_controller:",
+      subtitle: "Points the embed renderer at the host controller that serves the public embed page",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        include RecordingStudio::Capabilities::Embeddable.to(
+          # `pages` is the controller that serves the public embed page.
+          embed_controller: "pages"
+        )
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "embed_action:",
+      subtitle: "Sets the public action on the embed controller that renders the embed markup",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        include RecordingStudio::Capabilities::Embeddable.to(
+          embed_action: :embed
+        )
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "require_publishable:",
+      subtitle: "Locks embed behavior to recordables that also have a publishable parent when you need that constraint",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        include RecordingStudio::Capabilities::Embeddable.to(
+          require_publishable: true
+        )
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "customizable_embed_styles:",
+      subtitle: "Define editable tokens with colors, typography, spacing, sizing, and select choices",
+    ) %>
+
+    <p class="text-sm text-(--body-muted-content-color)">
+      Each entry controls one editable styling field on the styling page. Use <code>label</code> for the UI name the editor sees, <code>css_variable</code> or <code>css_property</code> for the value that gets written into the embed theme, and <code>default</code> for the initial value. Use <code>input: :select</code> when the editor should choose from a fixed list, and provide <code>choices:</code> as <code>[label, value]</code> pairs.
+    </p>
+
+    <p class="text-sm text-(--body-muted-content-color)">
+      Use <code>input: :color</code> for color pickers, <code>input: :font_select</code> for the shared font picker, and <code>input: :select</code> when you want explicit choices. Each select choice should be declared as <code>[label, value]</code>, and the <code>default</code> should match one of the values.
+    </p>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "--surface-background-color",
+      subtitle: "Background color token shown on the styling page as the editable background swatch",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        background_color: {
+          label: "Background color",
+          css_variable: "--surface-background-color",
+          input: :color,
+          default: "#ffffff"
+        }
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "--color-primary",
+      subtitle: "Accent token that maps the primary action color in the styling UI",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        accent_color: {
+          label: "Accent color",
+          css_variable: "--color-primary",
+          input: :color,
+          default: "#2563eb"
+        }
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "font_family",
+      subtitle: "Uses the shared font picker so the styling page can render a font menu instead of a freeform input",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        font_family: {
+          label: "Font",
+          css_property: "font-family",
+          input: :font_select
+        }
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "padding_scale",
+      subtitle: "Uses select choices for spacing tokens so the styling page can offer named spacing presets",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        padding_scale: {
+          label: "Padding",
+          css_property: "padding",
+          input: :select,
+          choices: [
+            ["None", "0rem"],
+            ["Extra small", "0.25rem"],
+            ["Small", "0.5rem"],
+            ["Medium", "0.75rem"],
+            ["Large", "1rem"],
+            ["Extra large", "1.5rem"]
+          ],
+          default: "0.75rem"
+        }
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "max_width",
+      subtitle: "Controls the maximum inline size and demonstrates how select labels map to the stored width value",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        max_width: {
+          label: "Max width",
+          css_property: "max-width",
+          input: :select,
+          choices: [
+            ["Smallest", "100px"],
+            ["Small", "640px"],
+            ["Medium", "960px"],
+            ["Large", "1200px"]
+          ],
+          default: "1200px"
+        }
+      CODE
+    ) %>
+  </div>
+
   <%= render FlatPack::SectionTitle::Component.new(
-    title: "Example method",
-    subtitle: "recordingstudio_addon.example_method",
+    title: "RecordingStudioEmbeddable::RecordingMethods",
+    subtitle: "Helpers available on recording instances for embed URLs and lifecycle actions",
   ) %>
 
-  <%= render FlatPack::CodeBlock::Component.new(
-    language: :ruby,
-    code: <<~'CODE'
-      # Explain what this method does before the example.
-      result = RecordingstudioAddon.example_method(
-        # Replace with the real arguments this method accepts.
-        input: "demo value"
-      )
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "recording.embed",
+      subtitle: "Returns the active embed record for the parent recording",
+    ) %>
 
-      # Show what the method returns or what side effect it creates.
-      puts result
-    CODE
-  ) %>
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        recording.embed
+        # => #<RecordingStudioEmbeddable::Embed ...>
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "recording.current_embed",
+      subtitle: "Alias for the current embed record when you need the latest version",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        recording.current_embed
+        # => #<RecordingStudioEmbeddable::Embed ...>
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "recording.embed_child_recording",
+      subtitle: "Finds the child recording used to render the public embed page",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        recording.embed_child_recording
+        # => #<RecordingStudio::Recording ...>
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "recording.embeddable?",
+      subtitle: "Checks whether the recording exposes embed behavior",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        recording.embeddable?
+        # => true or false
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "recording.embed_enabled?",
+      subtitle: "Returns whether embedding is currently enabled for the recording",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        recording.embed_enabled?
+        # => true or false
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "recording.ensure_embed!(enabled: true)",
+      subtitle: "Creates or updates the embed record and can toggle enabled state",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        recording.ensure_embed!(enabled: true)
+        # => creates or updates the embed record
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "recording.embed_public_path",
+      subtitle: "Builds the relative public URL path for the embed",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        recording.embed_public_path
+        # => "/recording_studio_embeddable/embeds/..."
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "recording.embed_public_url",
+      subtitle: "Builds the absolute public URL for the embed",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        recording.embed_public_url
+        # => "https://app.example.com/recording_studio_embeddable/embeds/..."
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "recording.embed_code(host:, protocol:)",
+      subtitle: "Returns the iframe snippet host apps copy into their pages",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        recording.embed_code(host: "app.example.com", protocol: "https")
+        # => "<iframe ...>"
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "recording.update_embed!(...)",
+      subtitle: "Updates embed attributes in a single call",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        recording.update_embed!(enabled: false)
+        # => updates the embed record
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "recording.disable_embed!",
+      subtitle: "Disables embedding for the recording",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        recording.disable_embed!
+        # => disables embedding
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "recording.enable_embed!",
+      subtitle: "Re-enables embedding for the recording",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        recording.enable_embed!
+        # => enables embedding
+      CODE
+    ) %>
+  </div>
 
   <p class="text-sm text-(--body-muted-content-color)">
-    Provide one section title and codeblock for each method
+    These are the methods most host apps call directly when integrating the gem.
   </p>
 </div>

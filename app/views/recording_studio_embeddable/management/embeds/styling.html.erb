@@ -1,0 +1,376 @@
+<% parent_recording = @embed.parent_recording %>
+<% recordable = parent_recording&.recordable %>
+<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
+<% color_definitions = @styling_definitions.select { |_key, definition| definition[:type] == :color } %>
+<% font_definition = @styling_definitions[:font_family] || @styling_definitions["font_family"] %>
+<% font_swatch_options = @font_swatch_options.presence || RecordingStudioEmbeddable::Styling::Tokens::FONT_SWATCH_OPTIONS %>
+<% current_font_override = @styling_overrides["font_family"].to_s.strip %>
+<% resolved_font = @resolved_theme["font_family"].to_s.strip %>
+<% default_font = @recordable_style_defaults["font_family"].to_s.strip %>
+<% font_source = current_font_override.presence || resolved_font.presence || default_font.presence || "sans" %>
+<% current_font_css = RecordingStudioEmbeddable::Styling::Tokens.font_swatch_css_for(font_source) %>
+<% reset_font_css = RecordingStudioEmbeddable::Styling::Tokens.font_swatch_css_for(resolved_font.presence || default_font.presence || "sans") %>
+<% font_tooltip = RecordingStudioEmbeddable::Styling::Tokens.font_swatch_label_for(font_source) %>
+
+<% recording_studio_page_nav(
+  title: "Style",
+  page_nav_back_url: edit_management_embed_path(@embed),
+  page_nav_back_label: "Embed",
+  page_nav_anchor_url: main_app.root_path,
+  page_nav_anchor_label: "Close"
+) %>
+
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: "Style",
+    subtitle: recordable_title,
+    variant: :h1
+  ) %>
+
+  <%= render FlatPack::Grid::Component.new(cols: 2) do %>
+    <div class="space-y-4">
+      <% unless @styling_editable %>
+        <p class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          Custom styling is currently disabled for this embed. You can still review the resolved values below.
+        </p>
+      <% end %>
+
+      <% if @styling_errors.present? %>
+        <p role="alert" class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <%= @styling_errors.map { |field, message| "#{field.to_s.humanize} #{message}" }.join(", ") %>
+        </p>
+      <% end %>
+
+      <%= form_with model: @embed, url: styling_management_embed_path(@embed), method: :patch, class: "space-y-4", data: { styling_form: true } do |_form| %>
+        <div class="flex flex-wrap items-center gap-3">
+          <%= render FlatPack::Button::Component.new(
+            text: "Save",
+            style: :primary,
+            size: :md,
+            type: "submit",
+            disabled: !@styling_editable
+          ) %>
+          <%= render FlatPack::Button::Component.new(
+            text: "Reset",
+            style: :secondary,
+            size: :md,
+            type: "button",
+            disabled: !@styling_editable,
+            data: { reset_styling_fields: true }
+          ) %>
+        </div>
+
+        <%= render FlatPack::OverflowRow::Component.new(gap: :md) do %>
+          <% if font_definition.present? && current_font_css.present? %>
+            <%= render FlatPack::FontSwatch::Component.new(
+              font: current_font_css,
+              options: font_swatch_options,
+              name: "embed[appearance][font_family]",
+              text: font_tooltip,
+              selected: current_font_override.present?,
+              size: :lg,
+              disabled: !@styling_editable,
+              id: "embed_appearance_font_family",
+              data: {
+                default_font: reset_font_css,
+                styling_field: "font_family"
+              }
+            ) %>
+          <% end %>
+
+          <%= render FlatPack::Tooltip::Component.new(text: "Width", placement: :top) do %>
+            <%= render FlatPack::Button::Component.new(
+              icon: "arrows-right-left",
+              icon_only: true,
+              style: :secondary,
+              size: :lg,
+              type: "button",
+              class: "rounded-full",
+              id: "embed-width-trigger",
+              disabled: !@styling_editable,
+              aria: { label: "Width", expanded: false, haspopup: "dialog" },
+              data: { role: "width-trigger" }
+            ) %>
+          <% end %>
+
+          <% color_definitions.each do |key, definition| %>
+            <% field_name = key.to_s %>
+            <% current_value = @styling_overrides[field_name].to_s.strip %>
+            <% resolved_value = @resolved_theme[field_name].to_s.strip %>
+            <% default_value = @recordable_style_defaults[field_name].to_s.strip %>
+            <% display_color = current_value.presence || resolved_value.presence || default_value.presence || "#000000" %>
+            <% reset_color = resolved_value.presence || default_value.presence || display_color %>
+            <%= render FlatPack::ColorSwatch::Component.new(
+              color: display_color,
+              text: definition[:label],
+              name: "embed[appearance][#{field_name}]",
+              value: display_color,
+              selected: current_value.present?,
+              size: :lg,
+              disabled: !@styling_editable,
+              data: {
+                default_color: reset_color,
+                styling_field: field_name
+              }
+            ) %>
+          <% end %>
+        <% end %>
+
+        <%= render FlatPack::Popover::Component.new(trigger_id: "embed-width-trigger", placement: :bottom) do |popover| %>
+          <% popover.popover_content do %>
+            <div class="space-y-3" data-style-width-popover="true">
+              <h3 class="text-sm font-semibold">Width</h3>
+              <%= render FlatPack::Tabs::Component.new(
+                default_tab: (@width_mode == "custom" ? 1 : 0),
+                variant: :underline,
+                data: { style_width_tabs: true }
+              ) do |tabs| %>
+                <% tabs.tab(label: "Auto", id: "style-width-auto") do %>
+                  <%= tag.div %>
+                <% end %>
+                <% tabs.tab(label: "Custom", id: "style-width-custom") do %>
+                  <%= render FlatPack::TextInput::Component.new(
+                    name: "custom_width_display",
+                    id: "embed_custom_width_display",
+                    value: @custom_width_value,
+                    help_text: "% or px",
+                    disabled: !@styling_editable,
+                    data: { style_custom_width_input: true }
+                  ) %>
+                <% end %>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+
+        <iframe
+          id="embed-styling-preview"
+          src="<%= preview_management_embed_path(@embed) %>"
+          title="Embed preview"
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+          class="border-0"
+          style="width: <%= @preview_width %>; height: auto; min-height: 20rem; max-width: 100%;"
+          data-styling-preview="true"
+          data-role="style-preview-frame"
+        ></iframe>
+
+        <input type="hidden" name="embed[sizing][height]" value="auto" id="embed_sizing_height">
+        <input
+          type="hidden"
+          name="embed[sizing][width]"
+          id="embed_sizing_width"
+          value="<%= @preview_width %>"
+          data-default-width="100%"
+        >
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<script type="application/json" id="styling-preview-css-map">
+  <%= raw(@styling_preview_css_map.to_json) %>
+</script>
+
+<script>
+  const AUTO_WIDTH = "100%";
+
+  const styleWidthHiddenInput = () => document.getElementById("embed_sizing_width");
+  const styleCustomWidthInput = () => document.querySelector("[data-style-custom-width-input='true']");
+  const styleWidthPopover = () => document.querySelector("[data-style-width-popover='true']");
+
+  const applyPreviewFrameWidth = (width) => {
+    const iframe = document.getElementById("embed-styling-preview") ||
+      document.querySelector("[data-role='style-preview-frame']");
+    if (!iframe) return;
+
+    const nextWidth = (width || AUTO_WIDTH).toString().trim() || AUTO_WIDTH;
+    iframe.style.width = nextWidth;
+    iframe.style.maxWidth = "100%";
+    iframe.style.height = "auto";
+  };
+
+  const currentStyleWidthMode = () => {
+    const selected = styleWidthPopover()?.querySelector("[role='tab'][aria-selected='true']");
+    return selected?.id === "style-width-custom-tab" ? "custom" : "auto";
+  };
+
+  const selectStyleWidthMode = (mode) => {
+    const hidden = styleWidthHiddenInput();
+    const customInput = styleCustomWidthInput();
+
+    if (mode === "custom") {
+      if (customInput && !(customInput.value || "").trim() && hidden?.value && hidden.value !== AUTO_WIDTH) {
+        customInput.value = hidden.value;
+      }
+      const widthValue = (customInput?.value || "").toString().trim();
+      if (hidden) hidden.value = widthValue;
+      applyPreviewFrameWidth(widthValue || AUTO_WIDTH);
+      return;
+    }
+
+    if (hidden) hidden.value = AUTO_WIDTH;
+    applyPreviewFrameWidth(AUTO_WIDTH);
+  };
+
+  const activateStyleWidthTab = (mode) => {
+    const tabId = mode === "custom" ? "style-width-custom-tab" : "style-width-auto-tab";
+    document.getElementById(tabId)?.click();
+    selectStyleWidthMode(mode);
+  };
+
+  const initializeStyleWidthControls = () => {
+    const popover = styleWidthPopover();
+    if (!popover || popover.dataset.widthBound === "true") return;
+    popover.dataset.widthBound = "true";
+
+    const tabsRoot = popover.querySelector("[data-style-width-tabs='true']") ||
+      popover.querySelector("[data-controller='flat-pack--tabs']");
+    const syncFromTabs = () => selectStyleWidthMode(currentStyleWidthMode());
+    tabsRoot?.addEventListener("click", () => requestAnimationFrame(syncFromTabs));
+    tabsRoot?.addEventListener("keydown", () => requestAnimationFrame(syncFromTabs));
+
+    const customInput = styleCustomWidthInput();
+    customInput?.addEventListener("input", () => {
+      selectStyleWidthMode("custom");
+    });
+
+    applyPreviewFrameWidth(styleWidthHiddenInput()?.value || AUTO_WIDTH);
+  };
+
+  const initializeStylingReset = () => {
+    document.querySelectorAll('button[data-reset-styling-fields="true"]').forEach((button) => {
+      if (button.dataset.resetBound === "true") return;
+      button.dataset.resetBound = "true";
+      button.addEventListener("click", () => {
+        const form = button.closest("form");
+        if (!form) return;
+
+        form.querySelectorAll('[data-controller~="flat-pack--color-swatch"]').forEach((root) => {
+          const defaultColor = root.dataset.defaultColor;
+          if (!defaultColor) return;
+
+          const picker = root.querySelector('input[type="color"]');
+          if (!picker) return;
+
+          picker.value = defaultColor;
+          picker.setAttribute("value", defaultColor);
+          picker.dispatchEvent(new Event("input", { bubbles: true }));
+          picker.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+
+        form.querySelectorAll('[data-controller~="flat-pack--font-swatch"]').forEach((root) => {
+          const defaultFont = root.dataset.defaultFont;
+          if (!defaultFont) return;
+
+          const input = root.querySelector('[data-flat-pack--font-swatch-target="input"]');
+          const swatch = root.querySelector('[data-flat-pack--font-swatch-target="swatch"]');
+          if (input) {
+            input.value = defaultFont;
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+          if (swatch) {
+            swatch.style.fontFamily = defaultFont;
+          }
+
+          root.querySelectorAll('[data-flat-pack--font-swatch-target="option"]').forEach((option) => {
+            option.setAttribute("aria-selected", (option.dataset.value === defaultFont).toString());
+          });
+
+          const label = (root.querySelector(`[data-flat-pack--font-swatch-target="option"][data-value="${CSS.escape(defaultFont)}"]`)?.dataset.label) || "Font";
+          const trigger = root.querySelector('[data-flat-pack--font-swatch-target="trigger"]');
+          if (trigger) trigger.setAttribute("aria-label", label);
+          const tooltip = root.querySelector('[role="tooltip"]');
+          if (tooltip) tooltip.textContent = label;
+
+          root.dispatchEvent(new CustomEvent("font-swatch:change", {
+            detail: { value: defaultFont, label },
+            bubbles: true
+          }));
+        });
+
+        const customInput = styleCustomWidthInput();
+        if (customInput) customInput.value = "";
+        activateStyleWidthTab("auto");
+        applyStylingPreviewFromForm(form);
+      });
+    });
+  };
+
+  const stylingPreviewCssMap = () => {
+    const node = document.getElementById("styling-preview-css-map");
+    if (!node) return {};
+
+    try {
+      return JSON.parse(node.textContent || "{}");
+    } catch (_error) {
+      return {};
+    }
+  };
+
+  const applyStylingPreviewFromForm = (form) => {
+    const iframe = document.getElementById("embed-styling-preview");
+    if (!iframe) return;
+
+    const apply = () => {
+      const doc = iframe.contentDocument;
+      if (!doc?.documentElement) return;
+
+      const map = stylingPreviewCssMap();
+      const root = doc.documentElement;
+      const body = doc.body;
+
+      Object.entries(map).forEach(([field, cssTarget]) => {
+        if (!cssTarget) return;
+
+        if (field === "font_family") {
+          const fontInput = form.querySelector('[name="embed[appearance][font_family]"]');
+          const fontValue = (fontInput?.value || "").trim();
+          if (fontValue) {
+            if (body) body.style.fontFamily = fontValue;
+            root.style.setProperty("font-family", fontValue);
+          }
+          return;
+        }
+
+        const colorInput = form.querySelector(`[name="embed[appearance][${field}]"]`);
+        const colorValue = (colorInput?.value || "").trim();
+        if (!colorValue) return;
+
+        if (cssTarget.startsWith("--")) {
+          root.style.setProperty(cssTarget, colorValue);
+          if (body) body.style.setProperty(cssTarget, colorValue);
+        }
+      });
+    };
+
+    if (iframe.dataset.previewBound !== "true") {
+      iframe.dataset.previewBound = "true";
+      iframe.addEventListener("load", apply);
+    }
+
+    applyPreviewFrameWidth(styleWidthHiddenInput()?.value || "100%");
+    apply();
+  };
+
+  const initializeStylingLivePreview = () => {
+    const form = document.querySelector("[data-styling-form='true']") ||
+      document.querySelector('form[action*="styling"]') ||
+      document.querySelector("form");
+    if (!form || form.dataset.livePreviewBound === "true") return;
+
+    form.dataset.livePreviewBound = "true";
+    applyStylingPreviewFromForm(form);
+
+    form.addEventListener("input", () => applyStylingPreviewFromForm(form));
+    form.addEventListener("change", () => applyStylingPreviewFromForm(form));
+    form.addEventListener("font-swatch:change", () => applyStylingPreviewFromForm(form));
+  };
+
+  document.addEventListener("turbo:load", initializeStylingReset);
+  document.addEventListener("DOMContentLoaded", initializeStylingReset);
+  document.addEventListener("turbo:load", initializeStyleWidthControls);
+  document.addEventListener("DOMContentLoaded", initializeStyleWidthControls);
+  document.addEventListener("turbo:load", initializeStylingLivePreview);
+  document.addEventListener("DOMContentLoaded", initializeStylingLivePreview);
+</script>

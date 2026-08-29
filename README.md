@@ -1,148 +1,106 @@
-# GemTemplate
+# RecordingStudio Embeddable
 
-Internal template for building Rails engine addons on top of RecordingStudio.
+RecordingStudio Embeddable is the v1 Rails engine for secure, public iframe embeds in Recording Studio. It lets host applications opt recordable models into embeddable pages, control which domains may embed them, and manage cache, rate limiting, styling, and view logging from one place.
 
-## What's Included
+## What It Includes
 
-- **RecordingStudio** gem installed and configured
-- **Devise** authentication with a pre-seeded admin user
-- **Workspace**, **Folder**, and **Page** recordables seeded into the dummy host app
-- **FlatPack** UI component library for all views
-- **Dummy app** (`test/dummy/`) with a FlatPack-based sign-in screen, a simple home page, mounted RecordingStudio routes, and FlatPack's built-in rounded theme enabled by default
+- Public embed routes for tokenized recordings.
+- A management UI for previewing, editing, styling, and reviewing stats for embeds.
+- Host-side configuration for access control, cache policy, rate limiting, and logging.
+- A Rails generator that mounts the engine, installs an initializer, and copies migrations.
+- Helper methods for generating embed URLs and iframe markup from a recordable model.
 
-The dummy app ships with a starter sidebar documentation shell for authenticated pages. The menu entries in `test/dummy/app/views/layouts/flat_pack/_sidebar.html.erb` and the linked docs pages are intended to be rewritten to suit the addon you are building; the template provides the structure and styling, not final product copy. By default, that starter shell uses FlatPack's built-in rounded theme via the root layout attribute rather than custom Tailwind theme recreation.
+## Requirements
 
-## Quick Start
+- Ruby 3.3 or newer.
+- Rails 8.1 or newer.
+- A host application that can mount the engine and run the supplied migrations.
 
-### GitHub Codespaces (Recommended)
+## Install
 
-1. Click **Code** → **Codespaces** → **Create codespace**
-2. Wait for setup to complete
-3. Run:
-   ```bash
-   cd test/dummy
-   bin/rails db:setup
-   bin/dev
-   ```
-4. Open port 3000 — you'll land on the dummy app home page and can sign in at `/users/sign_in`
-
-The dummy app is intended as a host-app validation surface for authentication, FlatPack rendering, Tailwind source scanning, and RecordingStudio route wiring.
-
-### Login Credentials
-
-| Field    | Value             |
-|----------|-------------------|
-| Email    | admin@admin.com   |
-| Password | Password          |
-
-The login form is prefilled with these credentials for fast access.
-
-### Useful Routes
-
-- `/` — dummy app home page
-- `/users/sign_in` — Devise sign-in page
-- `/recording_studio` — redirect to `/` while the mounted RecordingStudio engine remains data/API-focused
-- `/docs/install` — install guide rendered inside the dummy app
-- `/docs/config`, `/docs/recordable_types`, `/docs/recordings_tree`, `/docs/gem_views`, `/docs/methods` — starter sidebar pages to customize for your gem
-
-The home page in `test/dummy/app/views/home/index.html.erb` is also a deliberate starting point. Keep it focused on a minimal demo of the gem's primary behavior; use the sidebar pages for deeper explanations and supporting reference material.
-
-## Architecture
-
-### Root Recording Pattern
-
-This template follows RecordingStudio's root recording pattern:
-
-- **Workspace** is the top-level recordable
-- **Folder** and **Page** demonstrate nested recordables under the workspace root
-- A root `RecordingStudio::Recording` wraps the Workspace
-- The admin user has root-level admin access via `RecordingStudio::Access`
-- `Current.actor` is set from `current_user` (Devise) in `ApplicationController`
-
-### Extending RecordingStudio
-
-To add new recordable types:
-
-1. Create your model (e.g., `Page`, `Comment`)
-2. Register it in `config/initializers/recording_studio.rb`:
-   ```ruby
-   RecordingStudio.configure do |config|
-     config.recordable_types = ["Workspace", "YourNewType"]
-   end
-   ```
-3. Leave optional behavior off by default, then opt into capabilities on the specific recordable models that need them:
-   ```ruby
-   class YourNewType < ApplicationRecord
-     include RecordingStudio::Capabilities::Movable.to("Workspace")
-     include RecordingStudio::Capabilities::Copyable.to("Workspace")
-   end
-   ```
-4. If you want per-device root persistence, wire it explicitly in your controller layer:
-   ```ruby
-   class ApplicationController < ActionController::Base
-     include RecordingStudio::Concerns::DeviceSessionConcern
-   end
-   ```
-5. Create recordings under the root:
-   ```ruby
-   root_recording.record(YourNewType) do |record|
-     record.title = "Example"
-   end
-   ```
-
-### Capabilities
-
-This template uses the current RecordingStudio approach: built-in capabilities are off by default and are enabled per recordable type by including the relevant module on the model.
-
-- `movable`
-- `copyable`
-
-Device session persistence is separate from capabilities. It is enabled only when you include `RecordingStudio::Concerns::DeviceSessionConcern` in your controller layer.
-
-Enable behavior intentionally where it belongs:
+Add the gem to your host app's `Gemfile`, then run the install generator:
 
 ```ruby
-class RecordingStudioPage < ApplicationRecord
-  include RecordingStudio::Capabilities::Movable.to("Workspace")
-  include RecordingStudio::Capabilities::Copyable.to("Workspace")
-end
+gem "recording_studio_embeddable"
+```
 
-class ApplicationController < ActionController::Base
-  include RecordingStudio::Concerns::DeviceSessionConcern
+If you're developing against this repository directly, use a local path or git source instead.
+
+```bash
+bin/rails generate recording_studio_embeddable:install
+bin/rails db:migrate
+```
+
+The install generator will:
+
+- Mount `RecordingStudioEmbeddable::Engine` in your routes.
+- Create `config/initializers/recording_studio_embeddable.rb`.
+- Copy the engine migrations into your app.
+- Optionally create `config/recording_studio_embeddable.yml`.
+
+If you prefer to install pieces manually, the default mount path is `/recording_studio_embeddable`.
+
+## Opt In a Model
+
+Declare the embeddable capability on any model you want to expose publicly:
+
+```ruby
+class Article < ApplicationRecord
+  recording_studio_embeddable renderer: "articles/embed"
 end
 ```
 
-### FlatPack UI Components
+Once the record is ready, create an embed and use the generated public URL or iframe helper:
 
-All views use FlatPack ViewComponents. Available components include:
+```ruby
+article.ensure_embed!
+article.embed_public_url(host: "example.com")
+article.embed_code(host: "example.com")
+```
 
-- `FlatPack::Button::Component` — Buttons (`:primary`, `:secondary`, `:ghost`)
-- `FlatPack::Card::Component` — Cards (`:default`, `:elevated`, `:outlined`)
-- `FlatPack::Alert::Component` — Alerts (`:success`, `:error`, `:warning`, `:info`)
-- `FlatPack::Badge::Component` — Status badges
-- `FlatPack::Table::Component` — Data tables
-- `FlatPack::TextInput::Component`, `EmailInput`, `PasswordInput` — Form inputs
-- `FlatPack::Breadcrumb::Component` — Navigation breadcrumbs
-- `FlatPack::Navbar::Component` — Navigation sidebar
+The public embed route is token-based and lives under the mounted engine path:
 
-Use the live FlatPack demo app at [flatpack-c6p8f.ondigitalocean.app](https://flatpack-c6p8f.ondigitalocean.app/) as the approved UI reference for current shared patterns. Its component table is the fastest way to discover available FlatPack components before introducing new custom UI, and user-provided FlatPack demo URLs should be treated as task context.
+`/recording_studio_embeddable/embeds/:token`
 
-In GitHub Codespaces or other restricted environments, you may need to enable access to that URL before the agent can inspect the app. If access is unavailable, provide sanitized screenshots, copied markup, or component details so the agent can stay aligned with the shared UI.
+## Configuration
 
-See the [FlatPack README](https://github.com/bowerbird-app/flatpack) for full documentation.
+The default configuration is intentionally locked down. At a minimum, you will usually want to set allowed embedder domains and any app-specific management authorization.
 
-## Tech Stack
+Common settings include:
 
-| Component       | Version |
-|-----------------|---------|
-| Ruby            | 3.3+    |
-| Rails           | 8.1+    |
-| PostgreSQL      | 16      |
-| TailwindCSS     | 4       |
-| RecordingStudio | v0.1.0-alpha (pinned in `test/dummy/Gemfile`) |
-| FlatPack        | v0.1.33 (pinned in `test/dummy/Gemfile`) |
-| Devise          | latest  |
+- `allowed_embedder_domains` and `blocked_embedder_domains`
+- `require_domain_allowlist` and `allow_any_domain`
+- `require_publishable` and `fallback_to_publishable_renderer`
+- `rate_limiting_enabled`, `rate_limiter`, `rate_limit`, and `rate_limit_window`
+- `cache_mode` and `cache_policy`
+- `view_logging_enabled` and the related sampling/privacy flags
+- `management_authorizer`
 
-## Documentation
+The initializer generator writes a working starting point at `config/initializers/recording_studio_embeddable.rb`.
 
-The original gem template documentation is preserved in `docs/gem_template/` as architectural reference material. Use it as background on the engine conventions; the README and dummy app are the source of truth for the Recording Studio addon workflow.
+## Management UI
+
+The engine also ships management routes for embed editors and operators. From there you can:
+
+- Edit embed settings.
+- Preview the rendered embed.
+- Adjust styling overrides.
+- Review summary and stats views.
+
+Studio/management screens use core `recording_studio/default_layout` via `RecordingStudio::UsesDefaultLayout`. Do not wrap them in a second application shell. Core still puts `data-theme` on `<body>`; this gem copies FlatPack `rounded` onto `<html>` through `app/views/recording_studio/_default_layout_head.html.erb`. Hosts that already provide that partial should keep it. The public iframe at `/recording_studio_embeddable/embeds/:token` stays on the chrome-free embed layout.
+
+## Development
+
+For local development in this repository:
+
+```bash
+bundle install
+bundle exec rake test
+cd test/dummy && bin/dev
+```
+
+The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine.
+
+## License
+
+MIT

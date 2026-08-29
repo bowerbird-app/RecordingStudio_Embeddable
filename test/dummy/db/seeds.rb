@@ -8,10 +8,29 @@ user = User.find_or_create_by!(email: "admin@admin.com") do |u|
   u.password_confirmation = "Password"
 end
 
+viewer = User.find_or_create_by!(email: "viewer@admin.com") do |u|
+  u.password = "Password"
+  u.password_confirmation = "Password"
+end
+
 # Create the workspace recordable
 workspace = Workspace.find_or_create_by!(name: "Studio Workspace")
 folder = Folder.find_or_create_by!(name: "Product Docs")
 page = Page.find_or_create_by!(title: "Getting Started")
+article = Article.find_by(title: "Spring release") ||
+          Article.find_by(title: "Article Requires Publishable") ||
+          Article.new
+article.title = "Spring release"
+article.save!
+document = Document.find_by(title: "Workspace notes") ||
+           Document.find_by(title: "Document Publishable Only") ||
+           Document.new
+document.title = "Workspace notes"
+document.save!
+
+Page.where(id: page.id).update_all(description: "Walk through workspace setup, embed codes, and how guests see a published page.")
+Article.where(id: article.id).update_all(description: "What changed in the spring workspace release, including embed codes and guest publish flow.")
+Document.where(id: document.id).update_all(description: "Brand colors, type, and asset rules for published pages.")
 
 # Create the root recording
 root_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
@@ -25,21 +44,39 @@ folder_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
   recordable: folder
 )
 
-RecordingStudio::Recording.unscoped.find_or_create_by!(
+page_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
   root_recording_id: root_recording.id,
   parent_recording_id: folder_recording.id,
   recordable: page
 )
+page_recording.ensure_embed!(enabled: true, allowed_embedder_domains: ["example.com"]) if page_recording.respond_to?(:ensure_embed!)
 
-# Grant root-level admin access to the admin user
-Current.actor = user
-access = RecordingStudio::Access.find_or_create_by!(actor: user, role: :admin)
-RecordingStudio::Recording.unscoped.find_or_create_by!(
+article_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
   root_recording_id: root_recording.id,
-  parent_recording_id: root_recording.id,
-  recordable: access
+  parent_recording_id: folder_recording.id,
+  recordable: article
+)
+article_recording.ensure_embed!(enabled: true, allowed_embedder_domains: ["example.com"]) if
+  article_recording.respond_to?(:ensure_embed!) && article_recording.embeddable?
+
+document_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
+  root_recording_id: root_recording.id,
+  parent_recording_id: folder_recording.id,
+  recordable: document
 )
 
+# Grant root-level admin access to the admin user
+RecordingStudioAccessible.grant_access(recording: root_recording, actor: user, role: :admin)
+
+# Grant root-level view access to the viewer user
+RecordingStudioAccessible.grant_access(recording: root_recording, actor: viewer, role: :view)
+
 puts "Seeded: admin@admin.com / Password"
+puts "Seeded: viewer@admin.com / Password"
 puts "Seeded: Workspace '#{workspace.name}' with root recording ##{root_recording.id}"
 puts "Seeded: Folder '#{folder.name}' and page '#{page.title}'"
+puts "Seeded: Article '#{article.title}' (embeddable; publishable not configured in this dummy)"
+puts "Seeded: Document '#{document.title}' (publishable enabled, embeddable not configured)"
+puts "Seeded: Page public embed at /recording_studio_embeddable/embeds/#{page_recording.embed&.token}" if page_recording.respond_to?(:embed)
+puts "Seeded: Article public embed at /recording_studio_embeddable/embeds/#{article_recording.embed&.token}" if
+  article_recording.respond_to?(:embed)

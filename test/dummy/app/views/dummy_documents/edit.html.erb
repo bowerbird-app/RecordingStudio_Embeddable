@@ -1,0 +1,35 @@
+<% recording_studio_page_nav(
+  title: "Edit Document",
+  page_nav_back_url: root_path,
+  page_nav_back_label: "Dummy embeddables",
+  page_nav_anchor_url: root_path,
+  page_nav_anchor_label: "Close"
+) %>
+
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: "Edit Document",
+    subtitle: "Update document fields and compare publishable output behavior.",
+    variant: :h1
+  ) %>
+
+  <%= form_with url: dummy_document_path(@document), method: :patch, class: "space-y-4" do %>
+    <%= render FlatPack::TextInput::Component.new(
+      name: "title",
+      label: "Document name",
+      value: @document.title,
+      placeholder: "Enter a document name"
+    ) %>
+
+    <%= render FlatPack::TextArea::Component.new(
+      name: "description",
+      label: "Description",
+      value: @document.description,
+      rows: 6,
+      placeholder: "Enter document description"
+    ) %>
+
+    <%= render FlatPack::Button::Component.new(text: "Save document", style: :primary, size: :md, type: "submit") %>
+    <%= render FlatPack::Button::Component.new(text: "Cancel", style: :ghost, size: :md, href: root_path) %>
+  <% end %>
+</div>

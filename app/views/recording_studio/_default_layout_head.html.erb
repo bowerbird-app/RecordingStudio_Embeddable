@@ -1,0 +1,9 @@
+<%# Core default_layout links FlatPack variables + rich_text only.
+    OverflowRow (and other FlatPack chrome) lives in flat_pack/application.
+    Named themes must live on html/:root so --button-primary-* aliases
+    inherit charcoal, not :root's default blue. This hook does not fork
+    the layout or invent Embeddable overflow/fade CSS. %>
+<%= stylesheet_link_tag "flat_pack/application", "data-turbo-track": "reload" %>
+<%= javascript_tag nonce: true do %>
+  document.documentElement.setAttribute("data-theme", "rounded");
+<% end %>

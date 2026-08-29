@@ -10,10 +10,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_05_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_05_014227) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
+
+  create_table "articles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "title"
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "title"
+    t.datetime "updated_at", null: false
+  end
 
   create_table "folders", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -23,6 +37,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_000001) do
 
   create_table "pages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.text "description"
     t.string "title"
     t.datetime "updated_at", null: false
   end
@@ -55,6 +70,69 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_000001) do
     t.index ["root_recording_id"], name: "index_rs_device_sessions_on_root_recording"
   end
 
+  create_table "recording_studio_embeddable_embeds", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.jsonb "allowed_embed_modes", default: ["iframe"], null: false
+    t.jsonb "allowed_embedder_domains", default: [], null: false
+    t.jsonb "appearance", default: {}, null: false
+    t.jsonb "blocked_embedder_domains", default: [], null: false
+    t.jsonb "cache_settings", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.string "default_embed_mode", default: "iframe", null: false
+    t.string "embed_url_strategy", default: "dedicated", null: false
+    t.boolean "enabled", default: false, null: false
+    t.boolean "inherit_capability_domains", default: true, null: false
+    t.boolean "inherit_global_domains", default: true, null: false
+    t.jsonb "logging_settings", default: {}, null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.jsonb "security", default: {}, null: false
+    t.jsonb "sizing", default: {}, null: false
+    t.string "token", null: false
+    t.datetime "updated_at", null: false
+    t.index ["enabled"], name: "index_recording_studio_embeddable_embeds_on_enabled"
+    t.index ["token"], name: "index_recording_studio_embeddable_embeds_on_token", unique: true
+  end
+
+  create_table "recording_studio_embeddable_view_logs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "bot", default: false, null: false
+    t.boolean "cache_hit", default: false, null: false
+    t.datetime "created_at", null: false
+    t.integer "duration_ms"
+    t.uuid "embed_id"
+    t.string "embed_mode"
+    t.uuid "embed_recording_id"
+    t.jsonb "metadata", default: {}, null: false
+    t.uuid "parent_recordable_id"
+    t.string "parent_recordable_type"
+    t.uuid "parent_recording_id"
+    t.boolean "rate_limited", default: false, null: false
+    t.text "referer"
+    t.string "referer_digest"
+    t.string "referer_host"
+    t.string "remote_ip"
+    t.string "remote_ip_digest"
+    t.string "request_host"
+    t.string "request_method"
+    t.string "request_path"
+    t.string "status", default: "rendered", null: false
+    t.integer "status_code"
+    t.string "token_digest"
+    t.datetime "updated_at", null: false
+    t.string "url_strategy"
+    t.text "user_agent"
+    t.string "user_agent_digest"
+    t.datetime "viewed_at", null: false
+    t.string "viewer_digest"
+    t.index ["bot"], name: "idx_rse_view_logs_bot"
+    t.index ["embed_id", "viewed_at"], name: "idx_rse_view_logs_embed_viewed_at"
+    t.index ["embed_id"], name: "index_recording_studio_embeddable_view_logs_on_embed_id"
+    t.index ["parent_recording_id", "viewed_at"], name: "idx_rse_view_logs_parent_recording_viewed_at"
+    t.index ["referer_host", "viewed_at"], name: "idx_rse_view_logs_referer_viewed_at"
+    t.index ["status", "viewed_at"], name: "idx_rse_view_logs_status_viewed_at"
+    t.index ["token_digest", "viewed_at"], name: "idx_rse_view_logs_token_viewed_at"
+    t.index ["viewed_at"], name: "idx_rse_view_logs_viewed_at"
+    t.index ["viewer_digest", "viewed_at"], name: "idx_rse_view_logs_viewer_viewed_at"
+  end
+
   create_table "recording_studio_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "action", null: false
     t.uuid "actor_id"
@@ -74,6 +152,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_000001) do
     t.index ["recording_id"], name: "index_recording_studio_events_on_recording_id"
   end
 
+  create_table "recording_studio_publishable_publishables", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "canonical_url"
+    t.datetime "created_at", null: false
+    t.string "meta_robots"
+    t.datetime "publish_at"
+    t.text "seo_description"
+    t.string "seo_title"
+    t.string "slug", null: false
+    t.text "social_description"
+    t.uuid "social_image_attachment_recording_id"
+    t.string "social_title"
+    t.string "status", default: "draft", null: false
+    t.string "time_zone"
+    t.datetime "unpublish_at"
+    t.datetime "updated_at", null: false
+    t.index ["canonical_url"], name: "index_rs_publishables_on_canonical_url"
+    t.index ["slug"], name: "index_rs_publishables_on_slug"
+    t.index ["social_image_attachment_recording_id"], name: "index_rs_publishables_on_social_image_attachment_recording_id"
+    t.index ["status", "publish_at", "unpublish_at"], name: "index_publishables_on_status_and_publish_times"
+    t.index ["status", "publish_at", "unpublish_at"], name: "index_rs_publishables_on_state_window"
+  end
+
   create_table "recording_studio_recordings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.uuid "parent_recording_id"
@@ -83,7 +183,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_000001) do
     t.datetime "trashed_at"
     t.datetime "updated_at", null: false
     t.index ["parent_recording_id"], name: "index_recording_studio_recordings_on_parent_recording_id"
+    t.index ["parent_recording_id"], name: "index_rs_publishable_child_per_parent", unique: true, where: "(((recordable_type)::text = 'RecordingStudioPublishable::Publishable'::text) AND (trashed_at IS NULL))"
     t.index ["parent_recording_id"], name: "index_rs_unique_active_access_boundary_per_parent", unique: true, where: "(((recordable_type)::text = 'RecordingStudio::AccessBoundary'::text) AND (trashed_at IS NULL))"
+    t.index ["parent_recording_id"], name: "index_rs_unique_active_embed_per_parent", unique: true, where: "(((recordable_type)::text = 'RecordingStudioEmbeddable::Embed'::text) AND (trashed_at IS NULL))"
     t.index ["recordable_id", "root_recording_id"], name: "idx_rs_recordings_root_access", where: "(((recordable_type)::text = 'RecordingStudio::Access'::text) AND (parent_recording_id IS NOT NULL) AND (trashed_at IS NULL))"
     t.index ["recordable_type", "recordable_id", "parent_recording_id", "trashed_at"], name: "index_recording_studio_recordings_on_recordable_parent_trashed"
     t.index ["recordable_type", "recordable_id"], name: "index_recording_studio_recordings_on_recordable"
@@ -109,7 +211,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_05_000001) do
   end
 
   add_foreign_key "recording_studio_device_sessions", "recording_studio_recordings", column: "root_recording_id"
+  add_foreign_key "recording_studio_embeddable_view_logs", "recording_studio_embeddable_embeds", column: "embed_id"
   add_foreign_key "recording_studio_events", "recording_studio_recordings", column: "recording_id"
+  add_foreign_key "recording_studio_publishable_publishables", "recording_studio_recordings", column: "social_image_attachment_recording_id", name: "fk_rs_publishables_social_image_attachment_recording"
   add_foreign_key "recording_studio_recordings", "recording_studio_recordings", column: "parent_recording_id"
   add_foreign_key "recording_studio_recordings", "recording_studio_recordings", column: "root_recording_id"
 end

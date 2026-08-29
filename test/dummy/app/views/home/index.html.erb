@@ -1,7 +1,82 @@
-<div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
+<% recording_studio_page_nav(
+  title: "Dummy embeddables",
+  page_nav_anchor_url: root_path,
+  page_nav_anchor_label: "Close"
+) %>
+
+<div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
-    title: "Demo",
-    subtitle: "Provide a simple demo below",
+    title: "Dummy embeddables",
+    subtitle: "Review demo recordings, open embed management, and jump to publishable edit.",
     variant: :h1
   ) %>
+
+  <div>
+    <%= render FlatPack::Button::Component.new(
+      text: "Add Page",
+      style: :primary,
+      size: :md,
+      href: new_dummy_page_path
+    ) %>
+  </div>
+
+  <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
+    <% card.body do %>
+      <% if @recordings.any? %>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-(--surface-border-color) text-left text-sm">
+            <thead>
+              <tr class="text-(--surface-muted-content-color)">
+                <th class="px-4 py-3 font-medium">Type</th>
+                <th class="px-4 py-3 font-medium">Title</th>
+                <th class="px-4 py-3 font-medium">Parent</th>
+                <th class="px-4 py-3 font-medium">Embed preview path</th>
+                <th class="px-4 py-3 font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-(--surface-border-color)">
+              <% @recordings.each do |recording| %>
+                <% embeddable_recording = recording.respond_to?(:embeddable?) && recording.embeddable? %>
+                <% embed = recording.current_embed if recording.respond_to?(:current_embed) %>
+                <% embed ||= recording.ensure_embed!(enabled: true) if embeddable_recording && recording.respond_to?(:ensure_embed!) %>
+                <% embed_preview_path = embed.present? ? recording_studio_embeddable.preview_management_embed_path(embed) : nil %>
+                <% row_actions = dummy_recording_row_actions(recording, embed: embed) %>
+                <tr>
+                  <td class="px-4 py-3"><%= recording.recordable_type.to_s.demodulize %></td>
+                  <td class="px-4 py-3 font-medium"><%= recording.recordable.try(:title).presence || recording.recordable.to_s %></td>
+                  <td class="px-4 py-3"><%= recording.parent_recording&.recordable_type.to_s.demodulize.underscore.humanize.presence || "Root" %></td>
+                  <td class="px-4 py-3">
+                    <% if embed_preview_path.present? %>
+                      <%= link_to embed_preview_path, embed_preview_path, class: "text-(--surface-primary-content-color) underline underline-offset-2" %>
+                    <% else %>
+                      Embed preview unavailable
+                    <% end %>
+                  </td>
+                  <td class="px-4 py-3">
+                    <% if row_actions.any? %>
+                      <%= render FlatPack::Button::Dropdown::Component.new(
+                        text: "",
+                        icon: "ellipsis-vertical",
+                        show_chevron: false,
+                        style: :secondary,
+                        size: :sm,
+                        placement: :bottom_right,
+                        trigger_attributes: { aria: { label: "Actions" } }
+                      ) do |dropdown| %>
+                        <% row_actions.each do |action| %>
+                          <% dropdown.menu_item(text: action[:text], href: action[:href]) %>
+                        <% end %>
+                      <% end %>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <p class="text-sm text-(--surface-muted-content-color)">No demo recordings exist yet.</p>
+      <% end %>
+    <% end %>
+  <% end %>
 </div>
