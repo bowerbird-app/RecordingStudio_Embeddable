@@ -60,46 +60,82 @@
           ) %>
         </div>
 
-        <% if color_definitions.any? || font_definition.present? %>
-          <%= render FlatPack::OverflowRow::Component.new(gap: :md) do %>
-            <% if font_definition.present? && current_font_css.present? %>
-              <%= render FlatPack::FontSwatch::Component.new(
-                font: current_font_css,
-                options: font_swatch_options,
-                name: "embed[appearance][font_family]",
-                text: font_tooltip,
-                selected: current_font_override.present?,
-                size: :lg,
-                disabled: !@styling_editable,
-                id: "embed_appearance_font_family",
-                data: {
-                  default_font: reset_font_css,
-                  styling_field: "font_family"
-                }
-              ) %>
-            <% end %>
+        <%= render FlatPack::OverflowRow::Component.new(gap: :md) do %>
+          <% if font_definition.present? && current_font_css.present? %>
+            <%= render FlatPack::FontSwatch::Component.new(
+              font: current_font_css,
+              options: font_swatch_options,
+              name: "embed[appearance][font_family]",
+              text: font_tooltip,
+              selected: current_font_override.present?,
+              size: :lg,
+              disabled: !@styling_editable,
+              id: "embed_appearance_font_family",
+              data: {
+                default_font: reset_font_css,
+                styling_field: "font_family"
+              }
+            ) %>
+          <% end %>
 
-            <% color_definitions.each do |key, definition| %>
-              <% field_name = key.to_s %>
-              <% current_value = @styling_overrides[field_name].to_s.strip %>
-              <% resolved_value = @resolved_theme[field_name].to_s.strip %>
-              <% default_value = @recordable_style_defaults[field_name].to_s.strip %>
-              <% display_color = current_value.presence || resolved_value.presence || default_value.presence || "#000000" %>
-              <% reset_color = resolved_value.presence || default_value.presence || display_color %>
-              <%= render FlatPack::ColorSwatch::Component.new(
-                color: display_color,
-                text: definition[:label],
-                name: "embed[appearance][#{field_name}]",
-                value: display_color,
-                selected: current_value.present?,
-                size: :lg,
+          <% color_definitions.each do |key, definition| %>
+            <% field_name = key.to_s %>
+            <% current_value = @styling_overrides[field_name].to_s.strip %>
+            <% resolved_value = @resolved_theme[field_name].to_s.strip %>
+            <% default_value = @recordable_style_defaults[field_name].to_s.strip %>
+            <% display_color = current_value.presence || resolved_value.presence || default_value.presence || "#000000" %>
+            <% reset_color = resolved_value.presence || default_value.presence || display_color %>
+            <%= render FlatPack::ColorSwatch::Component.new(
+              color: display_color,
+              text: definition[:label],
+              name: "embed[appearance][#{field_name}]",
+              value: display_color,
+              selected: current_value.present?,
+              size: :lg,
+              disabled: !@styling_editable,
+              data: {
+                default_color: reset_color,
+                styling_field: field_name
+              }
+            ) %>
+          <% end %>
+
+          <%= render FlatPack::Button::Component.new(
+            icon: "arrows-right-left",
+            icon_only: true,
+            style: :secondary,
+            size: :lg,
+            type: "button",
+            class: "rounded-full",
+            id: "embed-width-trigger",
+            disabled: !@styling_editable,
+            aria: { label: "Width", expanded: false, haspopup: "dialog" },
+            data: { role: "width-trigger" }
+          ) %>
+        <% end %>
+
+        <%= render FlatPack::Popover::Component.new(trigger_id: "embed-width-trigger", placement: :bottom) do |popover| %>
+          <% popover.popover_content do %>
+            <div class="space-y-2" data-style-width-popover="true">
+              <%= render FlatPack::Button::Component.new(
+                text: "Auto",
+                style: (@width_mode == "auto" ? :primary : :ghost),
+                size: :sm,
+                type: "button",
                 disabled: !@styling_editable,
-                data: {
-                  default_color: reset_color,
-                  styling_field: field_name
-                }
+                aria: { pressed: @width_mode == "auto" },
+                data: { style_width_mode: "auto" }
               ) %>
-            <% end %>
+              <%= render FlatPack::Button::Component.new(
+                text: "Custom",
+                style: (@width_mode == "custom" ? :primary : :ghost),
+                size: :sm,
+                type: "button",
+                disabled: !@styling_editable,
+                aria: { pressed: @width_mode == "custom" },
+                data: { style_width_mode: "custom" }
+              ) %>
+            </div>
           <% end %>
         <% end %>
 
@@ -124,59 +160,8 @@
           data-default-width="100%"
         >
 
-        <div data-style-width-controls="true" class="space-y-4">
-          <%= render FlatPack::ChipGroup::Component.new(wrap: false) do %>
-            <%= render FlatPack::Chip::Component.new(
-              text: "Full",
-              type: :button,
-              selected: @width_preset == "full",
-              disabled: !@styling_editable,
-              value: "100%",
-              data: {
-                role: "width-preset-chip",
-                style_width_preset: "full",
-                style_width_value: "100%"
-              }
-            ) %>
-            <%= render FlatPack::Chip::Component.new(
-              text: "Readable",
-              type: :button,
-              selected: @width_preset == "readable",
-              disabled: !@styling_editable,
-              value: "40rem",
-              data: {
-                role: "width-preset-chip",
-                style_width_preset: "readable",
-                style_width_value: "40rem"
-              }
-            ) %>
-            <%= render FlatPack::Chip::Component.new(
-              text: "Compact",
-              type: :button,
-              selected: @width_preset == "compact",
-              disabled: !@styling_editable,
-              value: "24rem",
-              data: {
-                role: "width-preset-chip",
-                style_width_preset: "compact",
-                style_width_value: "24rem"
-              }
-            ) %>
-            <%= render FlatPack::Chip::Component.new(
-              text: "Custom",
-              type: :button,
-              selected: @width_preset == "custom",
-              disabled: !@styling_editable,
-              value: "custom",
-              data: {
-                role: "width-preset-chip",
-                style_width_preset: "custom",
-                style_width_value: @custom_width_value.presence || ""
-              }
-            ) %>
-          <% end %>
-
-          <div data-style-custom-width="true" class="<%= @width_preset == "custom" ? "" : "hidden" %>">
+        <div data-style-width-controls="true">
+          <div data-style-custom-width="true" class="<%= @width_mode == "custom" ? "" : "hidden" %>">
             <%= render FlatPack::TextInput::Component.new(
               name: "custom_width_display",
               id: "embed_custom_width_display",
@@ -198,73 +183,77 @@
 </script>
 
 <script>
-  // Mirror FlatPack::Chip selected classes for exclusive live selection (no Embeddable chip CSS).
-  const widthSelectedClasses = ["ring-2", "ring-inset", "ring-[var(--color-ring)]"];
+  const AUTO_WIDTH = "100%";
 
   const styleWidthHiddenInput = () => document.getElementById("embed_sizing_width");
   const styleCustomWidthWrap = () => document.querySelector("[data-style-custom-width='true']");
   const styleCustomWidthInput = () => document.querySelector("[data-style-custom-width-input='true']");
-  const styleWidthChips = () => Array.from(document.querySelectorAll("[data-style-width-preset]"));
+  const styleWidthModeButtons = () => Array.from(document.querySelectorAll("[data-style-width-mode]"));
 
   const applyPreviewFrameWidth = (width) => {
     const iframe = document.getElementById("embed-styling-preview") ||
       document.querySelector("[data-role='style-preview-frame']");
     if (!iframe) return;
 
-    const nextWidth = (width || "100%").toString().trim() || "100%";
+    const nextWidth = (width || AUTO_WIDTH).toString().trim() || AUTO_WIDTH;
     iframe.style.width = nextWidth;
     iframe.style.maxWidth = "100%";
     iframe.style.height = "auto";
   };
 
-  const setWidthChipSelected = (chip, selected) => {
-    chip.setAttribute("aria-pressed", selected ? "true" : "false");
-    widthSelectedClasses.forEach((className) => {
-      chip.classList.toggle(className, selected);
-    });
-  };
+  const PRIMARY_WIDTH_CLASSES = [
+    "bg-[var(--button-primary-background-color)]",
+    "hover:bg-[var(--button-primary-hover-background-color)]",
+    "text-[var(--button-primary-text-color)]",
+    "border-[var(--button-primary-border-color)]",
+    "shadow-[var(--button-shadow)]"
+  ];
+  const GHOST_WIDTH_CLASSES = [
+    "bg-[var(--button-ghost-background-color)]",
+    "hover:bg-[var(--button-ghost-hover-background-color)]",
+    "text-[var(--button-ghost-text-color)]",
+    "border-[var(--button-ghost-border-color)]"
+  ];
 
-  const selectStyleWidthPreset = (presetKey, explicitValue) => {
+  const selectStyleWidthMode = (mode) => {
     const hidden = styleWidthHiddenInput();
     const customWrap = styleCustomWidthWrap();
     const customInput = styleCustomWidthInput();
-    let widthValue = explicitValue;
 
-    styleWidthChips().forEach((chip) => {
-      const selected = chip.dataset.styleWidthPreset === presetKey;
-      setWidthChipSelected(chip, selected);
+    styleWidthModeButtons().forEach((button) => {
+      const selected = button.dataset.styleWidthMode === mode;
+      button.setAttribute("aria-pressed", selected ? "true" : "false");
+      PRIMARY_WIDTH_CLASSES.forEach((className) => button.classList.toggle(className, selected));
+      GHOST_WIDTH_CLASSES.forEach((className) => button.classList.toggle(className, !selected));
     });
 
-    if (presetKey === "custom") {
+    if (mode === "custom") {
       customWrap?.classList.remove("hidden");
-      if (customInput && !(customInput.value || "").trim() && hidden?.value) {
+      if (customInput && !(customInput.value || "").trim() && hidden?.value && hidden.value !== AUTO_WIDTH) {
         customInput.value = hidden.value;
       }
-      widthValue = (customInput?.value || explicitValue || "").toString().trim();
+      const widthValue = (customInput?.value || "").toString().trim();
       if (hidden) hidden.value = widthValue;
-      applyPreviewFrameWidth(widthValue || "100%");
+      applyPreviewFrameWidth(widthValue || AUTO_WIDTH);
       return;
     }
 
     customWrap?.classList.add("hidden");
-    if (hidden) hidden.value = widthValue;
-    applyPreviewFrameWidth(widthValue);
+    if (hidden) hidden.value = AUTO_WIDTH;
+    applyPreviewFrameWidth(AUTO_WIDTH);
   };
 
   const initializeStyleWidthControls = () => {
-    const controls = document.querySelector("[data-style-width-controls='true']");
-    if (!controls || controls.dataset.widthBound === "true") return;
-    controls.dataset.widthBound = "true";
+    const popover = document.querySelector("[data-style-width-popover='true']");
+    if (!popover || popover.dataset.widthBound === "true") return;
+    popover.dataset.widthBound = "true";
 
-    styleWidthChips().forEach((chip) => {
-      chip.addEventListener("click", (event) => {
+    styleWidthModeButtons().forEach((button) => {
+      button.addEventListener("click", (event) => {
         event.preventDefault();
-        event.stopPropagation();
-        if (chip.disabled) return;
+        if (button.disabled) return;
 
-        const preset = chip.dataset.styleWidthPreset;
-        const value = chip.dataset.styleWidthValue;
-        selectStyleWidthPreset(preset, value);
+        selectStyleWidthMode(button.dataset.styleWidthMode);
       });
     });
 
@@ -273,10 +262,10 @@
       const hidden = styleWidthHiddenInput();
       const value = (customInput.value || "").trim();
       if (hidden) hidden.value = value;
-      applyPreviewFrameWidth(value || "100%");
+      applyPreviewFrameWidth(value || AUTO_WIDTH);
     });
 
-    applyPreviewFrameWidth(styleWidthHiddenInput()?.value || "100%");
+    applyPreviewFrameWidth(styleWidthHiddenInput()?.value || AUTO_WIDTH);
   };
 
   const initializeStylingReset = () => {
@@ -330,10 +319,9 @@
           }));
         });
 
-        const defaultWidth = styleWidthHiddenInput()?.dataset.defaultWidth || "100%";
         const customInput = styleCustomWidthInput();
         if (customInput) customInput.value = "";
-        selectStyleWidthPreset("full", defaultWidth);
+        selectStyleWidthMode("auto");
         applyStylingPreviewFromForm(form);
       });
     });

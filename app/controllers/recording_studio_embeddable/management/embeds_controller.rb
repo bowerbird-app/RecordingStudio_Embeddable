@@ -355,8 +355,8 @@ module RecordingStudioEmbeddable
         @preview_width = sizing[:width].presence ||
                          RecordingStudioEmbeddable.configuration.default_sizing["width"] ||
                          "100%"
-        @width_preset = Styling::WidthPresets.preset_for(@preview_width)
-        @custom_width_value = @width_preset == Styling::WidthPresets::CUSTOM_KEY ? @preview_width.to_s : ""
+        @width_mode = Styling::WidthMode.mode_for(@preview_width)
+        @custom_width_value = @width_mode == Styling::WidthMode::CUSTOM ? @preview_width.to_s : ""
         @styling_preview_css_map = styling_preview_css_map
       end
 

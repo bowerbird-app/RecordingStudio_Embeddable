@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Pin `flat_pack` to `~> 0.1.143` (GitHub tag `v0.1.143`).
+- Replace Style width chips (Full / Readable / Compact) with a round FlatPack Button in the OverflowRow. The button opens a FlatPack Popover with Auto (`100%`) and Custom (one typed CSS width field). Height stays `auto`.
+- Replace `Styling::WidthPresets` with `Styling::WidthMode` (`auto` vs `custom`). Legacy Readable/Compact values load as Custom.
+
 ## [0.1.2] - 2026-08-29
 
 ### Changed
@@ -38,10 +43,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Put Style Save and Reset in one row of separate FlatPack Buttons (Save primary).
 
 ### Upgrade notes
-- Require FlatPack `~> 0.1.141` (tag `v0.1.141`) for `FlatPack::ColorSwatch::Component`, `FlatPack::FontSwatch::Component`, `FlatPack::OverflowRow::Component`, and width `Chip` / `ChipGroup` on the Style screen.
+- Require FlatPack `~> 0.1.143` (tag `v0.1.143`) for `FlatPack::ColorSwatch::Component`, `FlatPack::FontSwatch::Component`, `FlatPack::OverflowRow::Component`, `FlatPack::Button::Component`, and `FlatPack::Popover::Component` on the Style screen.
 - Hosts using `recording_studio/default_layout` for management screens must load `flat_pack/application` (core layout only ships variables + rich_text). This gem’s `recording_studio/_default_layout_head` does that when the host does not override the partial.
 - No host migration is required for existing embed appearance data. Colour values still post from ColorSwatch native inputs. Font may now save as a CSS stack string from FontSwatch; stack keys continue to work when resolving themes.
-- Existing embed `sizing.width` of `100%` maps to Full; other leftover widths (including legacy px values) map to Custom on Style. Style save always writes `sizing.height` as `auto`.
+- Existing embed `sizing.width` of `100%` maps to Auto; other leftover widths (including legacy Readable/Compact values) map to Custom on Style. Style save always writes `sizing.height` as `auto`.
 
 ## [0.1.1] - 2026-04-28
 

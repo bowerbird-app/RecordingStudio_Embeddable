@@ -206,6 +206,34 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes html, "max-width:100%"
   end
 
+  def test_embed_code_auto_width_is_100_percent_with_auto_height
+    recording = Object.new
+    recording.extend(RecordingStudioEmbeddable::RecordingMethods)
+    recording.define_singleton_method(:embed_public_url) { |**| "https://example.com/embed" }
+    recording.define_singleton_method(:embed) do
+      Struct.new(:appearance, :sizing).new({}, { "width" => "100%", "height" => "auto" })
+    end
+
+    html = recording.embed_code(title: "Embedded recording")
+
+    assert_includes html, 'style="border:0;width:100%;height:auto;max-width:100%"'
+  end
+
+  def test_embed_code_custom_width_writes_style_width_with_max_width
+    recording = Object.new
+    recording.extend(RecordingStudioEmbeddable::RecordingMethods)
+    recording.define_singleton_method(:embed_public_url) { |**| "https://example.com/embed" }
+    recording.define_singleton_method(:embed) do
+      Struct.new(:appearance, :sizing).new({}, { "width" => "720px", "height" => "auto" })
+    end
+
+    html = recording.embed_code(title: "Embedded recording")
+
+    assert_includes html, "width:720px"
+    assert_includes html, "height:auto"
+    assert_includes html, "max-width:100%"
+  end
+
   def test_renderer_prefers_capability_over_macro
     recordable = FakeRecordable.new(true)
     def recordable.recording_studio_capabilities
@@ -652,12 +680,15 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, "FlatPack::ColorSwatch::Component"
     assert_includes styling, "FlatPack::FontSwatch::Component"
     assert_includes styling, "FlatPack::OverflowRow::Component.new(gap: :md)"
-    assert_includes styling, "FlatPack::ChipGroup::Component.new(wrap: false)"
-    assert_includes styling, "FlatPack::Chip::Component.new("
-    assert_includes styling, 'text: "Full"'
-    assert_includes styling, 'text: "Readable"'
-    assert_includes styling, 'text: "Compact"'
+    assert_includes styling, "FlatPack::Popover::Component.new(trigger_id: \"embed-width-trigger\""
+    assert_includes styling, 'id: "embed-width-trigger"'
+    assert_includes styling, 'icon: "arrows-right-left"'
+    assert_includes styling, "icon_only: true"
+    assert_includes styling, 'class: "rounded-full"'
+    assert_includes styling, 'text: "Auto"'
     assert_includes styling, 'text: "Custom"'
+    assert_includes styling, 'style_width_mode: "auto"'
+    assert_includes styling, 'style_width_mode: "custom"'
     assert_includes styling, 'name="embed[sizing][width]"'
     assert_includes styling, 'name="embed[sizing][height]"'
     assert_includes styling, 'value="auto"'
@@ -669,9 +700,15 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, 'id: "embed_appearance_font_family"'
     assert_includes styling, 'id="embed-styling-preview"'
     assert_includes styling, "preview_management_embed_path(@embed)"
-    assert_includes styling, 'style_width_value: "100%"'
-    assert_includes styling, 'style_width_value: "40rem"'
-    assert_includes styling, 'style_width_value: "24rem"'
+    assert_includes styling, 'style="width: <%= @preview_width %>; height: auto; min-height: 20rem; max-width: 100%;"'
+    assert_includes styling, "selectStyleWidthMode"
+    refute_includes styling, "FlatPack::ChipGroup"
+    refute_includes styling, "FlatPack::Chip::"
+    refute_includes styling, 'text: "Full"'
+    refute_includes styling, 'text: "Readable"'
+    refute_includes styling, 'text: "Compact"'
+    refute_includes styling, "WidthPresets"
+    refute_includes styling, "width_preset"
     refute_includes styling, 'title: "Styling"'
     refute_includes styling, "FlatPack::Select::Component"
     refute_includes styling, "SegmentedButtons"
@@ -690,9 +727,12 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
     font_swatch_index = styling.index("FlatPack::FontSwatch::Component")
     color_swatch_index = styling.index("FlatPack::ColorSwatch::Component")
+    width_trigger_index = styling.index('id: "embed-width-trigger"')
     assert font_swatch_index, "expected FontSwatch on Style screen"
     assert color_swatch_index, "expected ColorSwatch on Style screen"
+    assert width_trigger_index, "expected width Button on Style screen"
     assert_operator font_swatch_index, :<, color_swatch_index
+    assert_operator color_swatch_index, :<, width_trigger_index
 
     assert_includes stats, 'title: "Stats"'
     refute_includes stats, "Embed Stats"
