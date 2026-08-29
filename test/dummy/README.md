@@ -40,7 +40,7 @@ Then open the app and sign in with:
 
 Use this app to verify the generated addon experience before renaming the gem or copying patterns into another host app. If a layout, route, asset source, or Recording Studio initializer change breaks here, the template likely needs adjustment before reuse.
 
-Authenticated dummy pages use `RecordingStudio::UsesDefaultLayout` and `recording_studio/default_layout`. Core PageNav owns back/close. Dummy copies FlatPack `rounded` onto `<html>` via `app/views/recording_studio/_default_layout_head.html.erb`. Docs navigation lives in `app/views/application/_app_nav.html.erb` as in-page dummy docs links, not as the product frame.
+Authenticated dummy pages use `RecordingStudio::UsesDefaultLayout` and `recording_studio/default_layout`. Core PageNav owns back/close. Dummy loads `flat_pack/application` and copies FlatPack `rounded` onto `<html>` via `app/views/recording_studio/_default_layout_head.html.erb`. Docs navigation lives in `app/views/application/_app_nav.html.erb` as in-page dummy docs links, not as the product frame.
 
 Tailwind scans FlatPack and Recording Studio from Bundler’s loaded gem paths. `bin/rails tailwindcss:build` and `tailwindcss:watch` write `app/assets/tailwind/gem_sources.css` from `Gem.loaded_specs` and `Bundler.bundle_path` before compiling, so Switch and icon size utilities work under vendor, CI, mise, and local `BUNDLE_PATH`.
 
