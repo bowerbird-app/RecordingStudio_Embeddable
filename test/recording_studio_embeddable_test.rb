@@ -636,8 +636,12 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes settings, "subtitle: recordable_title"
     refute_includes settings, "large_subtitle"
     assert_includes settings, "FlatPack::Grid::Component.new(cols: 2)"
-    assert_includes settings, 'label: "Width"'
-    assert_includes settings, 'label: "Height"'
+    refute_includes settings, 'label: "Width"'
+    refute_includes settings, 'label: "Height"'
+    refute_includes settings, "embed[sizing][width]"
+    refute_includes settings, "embed[sizing][height]"
+    assert_includes settings, "Allowed domains"
+    assert_includes settings, "Blocked domains"
     refute_includes settings, "Iframe sizing"
     refute_includes settings, "These values control the copied iframe element itself."
     refute_includes settings, "Iframe width"
@@ -648,6 +652,16 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, "FlatPack::ColorSwatch::Component"
     assert_includes styling, "FlatPack::FontSwatch::Component"
     assert_includes styling, "FlatPack::OverflowRow::Component.new(gap: :md)"
+    assert_includes styling, "FlatPack::ChipGroup::Component.new(wrap: false)"
+    assert_includes styling, "FlatPack::Chip::Component.new("
+    assert_includes styling, 'text: "Full"'
+    assert_includes styling, 'text: "Readable"'
+    assert_includes styling, 'text: "Compact"'
+    assert_includes styling, 'text: "Custom"'
+    assert_includes styling, 'name="embed[sizing][width]"'
+    assert_includes styling, 'name="embed[sizing][height]"'
+    assert_includes styling, 'value="auto"'
+    assert_includes styling, 'label: "Width"'
     assert_includes styling, "default_color: reset_color"
     assert_includes styling, "default_font: reset_font_css"
     assert_includes styling, 'data-controller~="flat-pack--color-swatch"'
@@ -655,9 +669,12 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, 'id: "embed_appearance_font_family"'
     assert_includes styling, 'id="embed-styling-preview"'
     assert_includes styling, "preview_management_embed_path(@embed)"
+    assert_includes styling, 'style_width_value: "100%"'
+    assert_includes styling, 'style_width_value: "40rem"'
+    assert_includes styling, 'style_width_value: "24rem"'
     refute_includes styling, 'title: "Styling"'
     refute_includes styling, "FlatPack::Select::Component"
-    refute_includes styling, "ChipGroup"
+    refute_includes styling, "SegmentedButtons"
     refute_includes styling, "flex flex-wrap items-start gap-[var(--stack-gap-md)]"
     refute_includes styling, "overflow-x-auto"
     refute_includes styling, "data-styling-color-swatch"
@@ -666,6 +683,10 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes styling, "radius_scale"
     refute_includes styling, "Embed overrides"
     refute_includes styling, 'text: "Preview"'
+    refute_includes styling, 'value="320px"'
+    refute_includes styling, 'label: "Height"'
+    refute_includes styling, "iframe width"
+    refute_includes styling, "Iframe"
 
     font_swatch_index = styling.index("FlatPack::FontSwatch::Component")
     color_swatch_index = styling.index("FlatPack::ColorSwatch::Component")

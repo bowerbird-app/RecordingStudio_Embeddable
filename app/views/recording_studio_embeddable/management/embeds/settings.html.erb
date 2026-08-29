@@ -51,20 +51,6 @@
           <p role="alert" class="text-sm text-red-700"><%= @embed.errors.full_messages.to_sentence %></p>
         <% end %>
 
-        <%= render FlatPack::TextInput::Component.new(
-          name: "embed[sizing][width]",
-          label: "Width",
-          value: @embed.sizing[:width].presence || RecordingStudioEmbeddable.configuration.default_sizing["width"],
-          placeholder: "100%"
-        ) %>
-
-        <%= render FlatPack::TextInput::Component.new(
-          name: "embed[sizing][height]",
-          label: "Height",
-          value: @embed.sizing[:height].presence || RecordingStudioEmbeddable.configuration.default_sizing["height"],
-          placeholder: "320px"
-        ) %>
-
         <%= render FlatPack::TextArea::Component.new(
           name: "embed[allowed_embedder_domains_text]",
           label: "Allowed domains (one per line)",

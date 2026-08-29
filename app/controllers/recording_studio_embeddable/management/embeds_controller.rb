@@ -60,6 +60,7 @@ module RecordingStudioEmbeddable
           return
         end
 
+        apply_style_sizing_params
         persist_embed_overrides(validation.cleaned)
       end
 
@@ -350,8 +351,20 @@ module RecordingStudioEmbeddable
         @theme_sources = resolved.sources.stringify_keys
         @styling_editable = styling_editable?
         @styling_errors = {} if @styling_errors.nil?
-        @preview_height = @embed.sizing.to_h.with_indifferent_access[:height].presence || "320px"
+        sizing = @embed.sizing.to_h.with_indifferent_access
+        @preview_width = sizing[:width].presence ||
+                         RecordingStudioEmbeddable.configuration.default_sizing["width"] ||
+                         "100%"
+        @width_preset = Styling::WidthPresets.preset_for(@preview_width)
+        @custom_width_value = @width_preset == Styling::WidthPresets::CUSTOM_KEY ? @preview_width.to_s : ""
         @styling_preview_css_map = styling_preview_css_map
+      end
+
+      def apply_style_sizing_params
+        width = params.dig(:embed, :sizing, :width).to_s.strip
+        width = "100%" if width.blank?
+        current = @embed.sizing.to_h.stringify_keys
+        @embed.sizing = current.merge("width" => width, "height" => "auto")
       end
 
       def styling_preview_css_map

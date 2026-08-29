@@ -17,7 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Show a live embed preview (management preview iframe) below the swatch row on Style. Drop the separate Preview button from that screen.
 - Title the Style screen “Style” (PageTitle and page nav). Subtitle remains the recordable name.
 - OverflowRow order is FontSwatch first, then ColorSwatch circles.
-- Reset restores ColorSwatch native colour inputs and the FontSwatch hidden input to resolved/default values and repaints the live preview.
+- Move embed width onto Style under the live preview: FlatPack ChipGroup (`wrap: false`) with Full (`100%`), Readable (`40rem`), Compact (`24rem`), and Custom (reveals a Width TextInput). Height always saves as `auto`. Live preview width follows the selected chip before Save.
+- Remove Width/Height fields from Settings; Settings keeps allowed/blocked domains and Save only.
+- Default embed sizing height is `auto` (replacing `320px`).
+- Reset restores ColorSwatch native colour inputs and the FontSwatch hidden input to resolved/default values, resets width to Full, and repaints the live preview.
 - Show the recordable name as the default-size FlatPack PageTitle subtitle on Settings, Style, and Stats (no `large_subtitle`). Dummy Article/Document seed titles are human names (“Spring release”, “Workspace notes”), not capability notes.
 
 ### Fixed
@@ -31,13 +34,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cap embed-code, settings, and styling forms with FlatPack `Grid` `cols: 2` (width cap only; fields stay one per row).
 - Show the embed snippet in a wrapping FlatPack `TextArea` with short help “Paste this into your page.”
 - Keep Embed title, recordable subtitle, and Preview/Styling/Settings/Stats nav on the embed-code screen.
-- Title Settings as “Embed settings” with the recordable name as subtitle. Labels are Width and Height.
-- Put Styling Save and Reset in one row of separate FlatPack Buttons (Save primary).
+- Title Settings as “Embed settings” with the recordable name as subtitle (domains only).
+- Put Style Save and Reset in one row of separate FlatPack Buttons (Save primary).
 
 ### Upgrade notes
-- Require FlatPack `~> 0.1.141` (tag `v0.1.141`) for `FlatPack::ColorSwatch::Component`, `FlatPack::FontSwatch::Component`, and `FlatPack::OverflowRow::Component` on the Styling screen.
+- Require FlatPack `~> 0.1.141` (tag `v0.1.141`) for `FlatPack::ColorSwatch::Component`, `FlatPack::FontSwatch::Component`, `FlatPack::OverflowRow::Component`, and width `Chip` / `ChipGroup` on the Style screen.
 - Hosts using `recording_studio/default_layout` for management screens must load `flat_pack/application` (core layout only ships variables + rich_text). This gem’s `recording_studio/_default_layout_head` does that when the host does not override the partial.
 - No host migration is required for existing embed appearance data. Colour values still post from ColorSwatch native inputs. Font may now save as a CSS stack string from FontSwatch; stack keys continue to work when resolving themes.
+- Existing embed `sizing.width` of `100%` maps to Full; other leftover widths (including legacy px values) map to Custom on Style. Style save always writes `sizing.height` as `auto`.
 
 ## [0.1.1] - 2026-04-28
 

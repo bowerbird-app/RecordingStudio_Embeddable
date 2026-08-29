@@ -62,7 +62,7 @@ module RecordingStudioEmbeddable
         "mode" => "responsive",
         "aspect_ratio" => "16:9",
         "width" => "100%",
-        "height" => "320px",
+        "height" => "auto",
         "max_width" => 1200,
         "min_height" => 320
       }

@@ -97,7 +97,9 @@ If a recordable does not declare a field default and an embed does not override 
 
 ## Management UI
 
-On the Style screen:
+### Style
+
+Style owns fonts, colours, and embed width (not domains).
 
 - Font and colour fields share one FlatPack `OverflowRow` (`gap: :md`): `FontSwatch` first, then `ColorSwatch` circles.
 - The row never wraps. When swatches overflow, OverflowRow scrolls sideways with a hidden scrollbar and a soft trailing fade while more remains to the right (fade clears at the end).
@@ -105,11 +107,16 @@ On the Style screen:
 - Clicking a colour circle opens the native colour picker; clicking FontSwatch opens its FlatPack Popover menu (tooltip hides while open).
 - Save posts ColorSwatch colour inputs and FontSwatch’s hidden `name` with the form (`embed[appearance][...]`).
 - A live embed preview iframe sits below the swatch row (management preview). There is no separate Preview button on this screen.
+- Under the preview, width uses one FlatPack `ChipGroup` (`wrap: false`) of button chips: Full (`100%`), Readable (`40rem`), Compact (`24rem`), Custom. Custom reveals a full-width FlatPack `TextInput` labeled Width. Height is always `auto` (no height field). Style save posts `embed[sizing][width]` and `embed[sizing][height]=auto`. The preview iframe width follows the selected chip immediately.
 - Padding, radius, and other non-font fields are not shown on this screen.
 - Save and Reset are separate FlatPack Buttons in one row (Save primary).
-- Reset restores each ColorSwatch colour and the FontSwatch font to resolved/default values and refreshes the live preview.
+- Reset restores each ColorSwatch colour and the FontSwatch font to resolved/default values, resets width to Full (`100%`), and refreshes the live preview.
 
-Require FlatPack `~> 0.1.141` (GitHub tag `v0.1.141`) for `FlatPack::ColorSwatch::Component`, `FlatPack::FontSwatch::Component`, and `FlatPack::OverflowRow::Component`.
+### Settings
+
+Settings owns allowed/blocked domains and Save. Width and height are not edited on Settings.
+
+Require FlatPack `~> 0.1.141` (GitHub tag `v0.1.141`) for `FlatPack::ColorSwatch::Component`, `FlatPack::FontSwatch::Component`, `FlatPack::OverflowRow::Component`, and width `Chip` / `ChipGroup`.
 
 Example composition:
 

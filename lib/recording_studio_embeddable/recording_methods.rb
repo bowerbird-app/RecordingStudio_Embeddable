@@ -67,7 +67,7 @@ module RecordingStudioEmbeddable
       iframe_width = html_options[:width].presence || sizing[:width].presence || sizing["width"].presence ||
                      sizing[:max_width].presence || sizing["max_width"].presence || "100%"
       iframe_height = html_options[:height].presence || sizing[:height].presence || sizing["height"].presence ||
-                      sizing[:min_height].presence || sizing["min_height"].presence || "320px"
+                      sizing[:min_height].presence || sizing["min_height"].presence || "auto"
       [
         %(<iframe src="#{src}" title="#{title}" loading="lazy"),
         %(referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin"),

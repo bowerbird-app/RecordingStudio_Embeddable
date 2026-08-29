@@ -41,7 +41,7 @@
         </p>
       <% end %>
 
-      <%= form_with model: @embed, url: styling_management_embed_path(@embed), method: :patch, class: "space-y-4" do |_form| %>
+      <%= form_with model: @embed, url: styling_management_embed_path(@embed), method: :patch, class: "space-y-4", data: { styling_form: true } do |_form| %>
         <div class="flex flex-wrap items-center gap-3">
           <%= render FlatPack::Button::Component.new(
             text: "Save",
@@ -102,18 +102,93 @@
             <% end %>
           <% end %>
         <% end %>
-      <% end %>
 
-      <iframe
-        id="embed-styling-preview"
-        src="<%= preview_management_embed_path(@embed) %>"
-        title="Embed preview"
-        loading="lazy"
-        referrerpolicy="strict-origin-when-cross-origin"
-        class="w-full border-0"
-        style="height: <%= @preview_height %>; min-height: 320px; max-width: 100%;"
-        data-styling-preview="true"
-      ></iframe>
+        <iframe
+          id="embed-styling-preview"
+          src="<%= preview_management_embed_path(@embed) %>"
+          title="Embed preview"
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+          class="border-0"
+          style="width: <%= @preview_width %>; height: auto; min-height: 20rem; max-width: 100%;"
+          data-styling-preview="true"
+          data-role="style-preview-frame"
+        ></iframe>
+
+        <input type="hidden" name="embed[sizing][height]" value="auto" id="embed_sizing_height">
+        <input
+          type="hidden"
+          name="embed[sizing][width]"
+          id="embed_sizing_width"
+          value="<%= @preview_width %>"
+          data-default-width="100%"
+        >
+
+        <div data-style-width-controls="true" class="space-y-4">
+          <%= render FlatPack::ChipGroup::Component.new(wrap: false) do %>
+            <%= render FlatPack::Chip::Component.new(
+              text: "Full",
+              type: :button,
+              selected: @width_preset == "full",
+              disabled: !@styling_editable,
+              value: "100%",
+              data: {
+                role: "width-preset-chip",
+                style_width_preset: "full",
+                style_width_value: "100%"
+              }
+            ) %>
+            <%= render FlatPack::Chip::Component.new(
+              text: "Readable",
+              type: :button,
+              selected: @width_preset == "readable",
+              disabled: !@styling_editable,
+              value: "40rem",
+              data: {
+                role: "width-preset-chip",
+                style_width_preset: "readable",
+                style_width_value: "40rem"
+              }
+            ) %>
+            <%= render FlatPack::Chip::Component.new(
+              text: "Compact",
+              type: :button,
+              selected: @width_preset == "compact",
+              disabled: !@styling_editable,
+              value: "24rem",
+              data: {
+                role: "width-preset-chip",
+                style_width_preset: "compact",
+                style_width_value: "24rem"
+              }
+            ) %>
+            <%= render FlatPack::Chip::Component.new(
+              text: "Custom",
+              type: :button,
+              selected: @width_preset == "custom",
+              disabled: !@styling_editable,
+              value: "custom",
+              data: {
+                role: "width-preset-chip",
+                style_width_preset: "custom",
+                style_width_value: @custom_width_value.presence || ""
+              }
+            ) %>
+          <% end %>
+
+          <div data-style-custom-width="true" class="<%= @width_preset == "custom" ? "" : "hidden" %>">
+            <%= render FlatPack::TextInput::Component.new(
+              name: "custom_width_display",
+              id: "embed_custom_width_display",
+              label: "Width",
+              value: @custom_width_value,
+              placeholder: "e.g. 40rem or 720px",
+              disabled: !@styling_editable,
+              data: { style_custom_width_input: true }
+            ) %>
+          </div>
+        </div>
+      <% end %>
     </div>
   <% end %>
 </div>
@@ -123,6 +198,87 @@
 </script>
 
 <script>
+  // Mirror FlatPack::Chip selected classes for exclusive live selection (no Embeddable chip CSS).
+  const widthSelectedClasses = ["ring-2", "ring-inset", "ring-[var(--color-ring)]"];
+
+  const styleWidthHiddenInput = () => document.getElementById("embed_sizing_width");
+  const styleCustomWidthWrap = () => document.querySelector("[data-style-custom-width='true']");
+  const styleCustomWidthInput = () => document.querySelector("[data-style-custom-width-input='true']");
+  const styleWidthChips = () => Array.from(document.querySelectorAll("[data-style-width-preset]"));
+
+  const applyPreviewFrameWidth = (width) => {
+    const iframe = document.getElementById("embed-styling-preview") ||
+      document.querySelector("[data-role='style-preview-frame']");
+    if (!iframe) return;
+
+    const nextWidth = (width || "100%").toString().trim() || "100%";
+    iframe.style.width = nextWidth;
+    iframe.style.maxWidth = "100%";
+    iframe.style.height = "auto";
+  };
+
+  const setWidthChipSelected = (chip, selected) => {
+    chip.setAttribute("aria-pressed", selected ? "true" : "false");
+    widthSelectedClasses.forEach((className) => {
+      chip.classList.toggle(className, selected);
+    });
+  };
+
+  const selectStyleWidthPreset = (presetKey, explicitValue) => {
+    const hidden = styleWidthHiddenInput();
+    const customWrap = styleCustomWidthWrap();
+    const customInput = styleCustomWidthInput();
+    let widthValue = explicitValue;
+
+    styleWidthChips().forEach((chip) => {
+      const selected = chip.dataset.styleWidthPreset === presetKey;
+      setWidthChipSelected(chip, selected);
+    });
+
+    if (presetKey === "custom") {
+      customWrap?.classList.remove("hidden");
+      if (customInput && !(customInput.value || "").trim() && hidden?.value) {
+        customInput.value = hidden.value;
+      }
+      widthValue = (customInput?.value || explicitValue || "").toString().trim();
+      if (hidden) hidden.value = widthValue;
+      applyPreviewFrameWidth(widthValue || "100%");
+      return;
+    }
+
+    customWrap?.classList.add("hidden");
+    if (hidden) hidden.value = widthValue;
+    applyPreviewFrameWidth(widthValue);
+  };
+
+  const initializeStyleWidthControls = () => {
+    const controls = document.querySelector("[data-style-width-controls='true']");
+    if (!controls || controls.dataset.widthBound === "true") return;
+    controls.dataset.widthBound = "true";
+
+    styleWidthChips().forEach((chip) => {
+      chip.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (chip.disabled) return;
+
+        const preset = chip.dataset.styleWidthPreset;
+        const value = chip.dataset.styleWidthValue;
+        selectStyleWidthPreset(preset, value);
+      });
+    });
+
+    const customInput = styleCustomWidthInput();
+    customInput?.addEventListener("input", () => {
+      const hidden = styleWidthHiddenInput();
+      const value = (customInput.value || "").trim();
+      if (hidden) hidden.value = value;
+      applyPreviewFrameWidth(value || "100%");
+    });
+
+    applyPreviewFrameWidth(styleWidthHiddenInput()?.value || "100%");
+  };
+
   const initializeStylingReset = () => {
     document.querySelectorAll('button[data-reset-styling-fields="true"]').forEach((button) => {
       if (button.dataset.resetBound === "true") return;
@@ -174,6 +330,10 @@
           }));
         });
 
+        const defaultWidth = styleWidthHiddenInput()?.dataset.defaultWidth || "100%";
+        const customInput = styleCustomWidthInput();
+        if (customInput) customInput.value = "";
+        selectStyleWidthPreset("full", defaultWidth);
         applyStylingPreviewFromForm(form);
       });
     });
@@ -231,11 +391,14 @@
       iframe.addEventListener("load", apply);
     }
 
+    applyPreviewFrameWidth(styleWidthHiddenInput()?.value || "100%");
     apply();
   };
 
   const initializeStylingLivePreview = () => {
-    const form = document.querySelector('form[action*="styling"]') || document.querySelector("form");
+    const form = document.querySelector("[data-styling-form='true']") ||
+      document.querySelector('form[action*="styling"]') ||
+      document.querySelector("form");
     if (!form || form.dataset.livePreviewBound === "true") return;
 
     form.dataset.livePreviewBound = "true";
@@ -248,6 +411,8 @@
 
   document.addEventListener("turbo:load", initializeStylingReset);
   document.addEventListener("DOMContentLoaded", initializeStylingReset);
+  document.addEventListener("turbo:load", initializeStyleWidthControls);
+  document.addEventListener("DOMContentLoaded", initializeStyleWidthControls);
   document.addEventListener("turbo:load", initializeStylingLivePreview);
   document.addEventListener("DOMContentLoaded", initializeStylingLivePreview);
 </script>
