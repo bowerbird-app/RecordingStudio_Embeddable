@@ -12,6 +12,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replace Style width chips (Full / Readable / Compact) with a round FlatPack Button in the OverflowRow. Order is FontSwatch, width Button (tooltip-only “Width”), ColorSwatches. The popover has a Width heading and FlatPack Tabs (`Auto` / `Custom`). Auto has no field (`100%` fill). Custom has one TextInput with help_text `% or px`. Height stays `auto`.
 - Replace `Styling::WidthPresets` with `Styling::WidthMode` (`auto` vs `custom`). Legacy Readable/Compact values load as Custom.
 
+## [0.1.3] - 2026-09-02
+
+Cloud Agent Builds for this gem now match Billing 0.9.13. Boot files are
+tracked. A warm snapshot skips provision and still fetches skills.
+
+### Added
+- `.cursor/fetch-skills.sh`, `.cursor/install.sh`, `.cursor/start.sh`, and
+  `.cursor/environment.json` for Cloud Agent boot. Install skips apt,
+  ruby-build, db:prepare, and tailwind when Ruby, bundle, and Postgres are
+  already usable. A skippable provision failure does not fail the Build.
+  Fetch-skills always runs last. Start only brings PostgreSQL up.
+
+### Upgrade notes
+- No host or schema changes. Rebuild the Cloud Agent environment with Draft
+  off so Build loads the pack. Product embed behavior is unchanged.
+
 ## [0.1.2] - 2026-08-29
 
 ### Changed
@@ -66,7 +82,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.1.3
 [0.1.2]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.1.2
 [0.1.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.1.1
 [0.1.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.1.0
