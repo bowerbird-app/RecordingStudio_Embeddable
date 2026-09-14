@@ -20,7 +20,7 @@ module RecordingStudioEmbeddable
 
       template = Renderer.resolve(recording, embed)
       theme = Renderer.embed_theme_for(recording, embed: embed)
-      raw = render_fragment(template)
+      raw = render_fragment(template, theme)
       html = HtmlSanitizer.call(raw)
       configuration = {
         "theme" => stringify_keys(theme),
@@ -43,23 +43,23 @@ module RecordingStudioEmbeddable
       failure(e)
     end
 
-    def render_fragment(template)
+    def render_fragment(template, theme)
       renderer.render(
         template: template,
         layout: false,
         formats: [:html],
-        assigns: fragment_assigns
+        assigns: fragment_assigns(theme)
       )
     end
 
-    def fragment_assigns
+    def fragment_assigns(theme)
       recordable = recording.respond_to?(:recordable) ? recording.recordable : nil
       base = {
         parent_recording: recording,
         parent_recordable: recordable,
         recordable: recordable,
         embed: embed,
-        embed_theme: Renderer.embed_theme_for(recording, embed: embed)
+        embed_theme: theme
       }
       if recordable.respond_to?(:model_name)
         base[recordable.model_name.element.to_sym] = recordable

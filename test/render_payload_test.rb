@@ -40,14 +40,12 @@ class RenderPayloadTest < Minitest::Test
 
   def setup
     RecordingStudioEmbeddable.reset_configuration!
-    @original_renderer = ActionController::Base.method(:renderer)
     @fake_renderer = FakeRenderer.new(html: '<article class="embed"><p>Hello</p></article>')
-    ActionController::Base.define_singleton_method(:renderer) { @payload_test_renderer }
+    self.class.install_renderer_stub!
     ActionController::Base.instance_variable_set(:@payload_test_renderer, @fake_renderer)
   end
 
   def teardown
-    ActionController::Base.define_singleton_method(:renderer, @original_renderer)
     ActionController::Base.remove_instance_variable(:@payload_test_renderer) if
       ActionController::Base.instance_variable_defined?(:@payload_test_renderer)
   end
@@ -106,14 +104,13 @@ class RenderPayloadTest < Minitest::Test
   end
 
   def test_fragment_has_no_document_layout_chrome
-    @fake_renderer = FakeRenderer.new(
-      html: "<!DOCTYPE html><html><body><p>wrapped</p></body></html>"
-    )
-    ActionController::Base.instance_variable_set(:@payload_test_renderer, @fake_renderer)
+    result = RecordingStudioEmbeddable::RenderPayload.call(recording: recording, embed: embed)
 
-    # Sanitizer keeps doctype/html/body if present; renderer must use layout:false so
-    # production fragments never include them. Assert the render call itself.
-    RecordingStudioEmbeddable::RenderPayload.call(recording: recording, embed: embed)
+    assert result.success?, result.error
+    html = result.value!.html
+    refute_match(/<!DOCTYPE/i, html)
+    refute_match(/<html[\s>]/i, html)
+    refute_match(/<body[\s>]/i, html)
 
     options = @fake_renderer.calls.fetch(0)
     assert_equal false, options[:layout]
@@ -138,7 +135,7 @@ class RenderPayloadTest < Minitest::Test
   def test_does_not_call_capture_view
     called = false
     original = RecordingStudioEmbeddable::Services::CaptureView.method(:call)
-    RecordingStudioEmbeddable::Services::CaptureView.define_singleton_method(:call) do |**|
+    RecordingStudioEmbeddable::Services::CaptureView.define_singleton_method(:call) do |*|
       called = true
     end
 
@@ -150,7 +147,9 @@ class RenderPayloadTest < Minitest::Test
     assert result.success?, result.error
     refute called
   ensure
-    RecordingStudioEmbeddable::Services::CaptureView.define_singleton_method(:call, original)
+    RecordingStudioEmbeddable::Services::CaptureView.define_singleton_method(:call) do |*args, **kwargs, &block|
+      original.call(*args, **kwargs, &block)
+    end
   end
 
   def test_metadata_is_omitted_from_to_h
@@ -180,10 +179,12 @@ class RenderPayloadTest < Minitest::Test
   end
 
   def test_sanitizes_rendered_html
-    @fake_renderer = FakeRenderer.new(
-      html: '<p onclick="x()">ok</p><script>alert(1)</script><a href="javascript:alert(2)">x</a>'
+    ActionController::Base.instance_variable_set(
+      :@payload_test_renderer,
+      FakeRenderer.new(
+        html: '<p onclick="x()">ok</p><script>alert(1)</script><a href="javascript:alert(2)">x</a>'
+      )
     )
-    ActionController::Base.instance_variable_set(:@payload_test_renderer, @fake_renderer)
 
     html = RecordingStudioEmbeddable::RenderPayload.call(recording: recording, embed: embed).value!.html
 
@@ -208,6 +209,17 @@ class RenderPayloadTest < Minitest::Test
   end
 
   private
+
+  def self.install_renderer_stub!
+    return if @renderer_stub_installed
+
+    ActionController::Base.singleton_class.alias_method(
+      :__payload_test_original_renderer,
+      :renderer
+    )
+    ActionController::Base.define_singleton_method(:renderer) { @payload_test_renderer }
+    @renderer_stub_installed = true
+  end
 
   def recording
     @recording ||= FakeRecording.new(FakeRecordable.new, Time.at(1_700_000_050))

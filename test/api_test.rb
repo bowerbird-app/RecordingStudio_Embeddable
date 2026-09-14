@@ -119,7 +119,7 @@ class ApiTest < Minitest::Test
       refute called
     end
   ensure
-    RecordingStudioEmbeddable::Services::CaptureView.define_singleton_method(:call, original)
+    RecordingStudioEmbeddable::Services::CaptureView.define_singleton_method(:call, original) if original
   end
 
   private
