@@ -7,10 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-14
+
+### Added
+- Browser-payload mode for the WordPress Plugin Demo SDK: `RenderPayload` returns a `BrowserPayload` matching schema version 1 (`schema_version`, `html`, `configuration`, `sdk`).
+- `HtmlSanitizer` (Loofah scrubber) strips `script` / `iframe` / `object` / `embed` / `link` / `meta`, `on*` attributes, and `javascript:` URLs at the Ruby boundary.
+- Soft `:embed` capability-action registration via `RecordingStudioEmbeddable::Api` when `recording_studio_api` is present (Moveable-style; no gemspec dependency).
+- `Api.descriptor` hash for discoverability; `Api::EmbedRecording` returns `payload.to_h` and does not call `CaptureView`.
+
 ### Changed
+- README documents iframe mode and browser-payload mode, including the view-logging policy.
 - Pin `flat_pack` to `~> 0.1.143` (GitHub tag `v0.1.143`).
 - Replace Style width chips (Full / Readable / Compact) with a round FlatPack Button in the OverflowRow. Order is FontSwatch, width Button (tooltip-only “Width”), ColorSwatches. The popover has a Width heading and FlatPack Tabs (`Auto` / `Custom`). Auto has no field (`100%` fill). Custom has one TextInput with help_text `% or px`. Height stays `auto`.
 - Replace `Styling::WidthPresets` with `Styling::WidthMode` (`auto` vs `custom`). Legacy Readable/Compact values load as Custom.
+
+### Upgrade notes
+- Bump the gem to `0.2.0`. No host migration is required.
+- Iframe public path, domain policy, cache, rate limit, management UI, and `CaptureView` behavior are unchanged.
+- Call `RecordingStudioEmbeddable::RenderPayload.call(recording:, embed:)` for fragment payloads. Do not route SDK/API embeds through `EmbedsController` if you need to avoid public view counts — browser-payload / API embeds intentionally do **not** log public iframe views.
+- If the host loads `recording_studio_api`, the engine registers a member `:embed` GET/read action automatically. Hosts that already register `:embed` keep their existing action.
+- Payload `sdk.minimum_version` is `"0.3.0"` (WordPress Plugin Demo SDK). `configuration` exposes allowlisted `theme` tokens and `sizing` keys only (`width`, `mode`, `max_width`, `min_height`, `height`).
 
 ## [0.1.3] - 2026-09-02
 
@@ -82,7 +98,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.2.0
 [0.1.3]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.1.3
 [0.1.2]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.1.2
 [0.1.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.1.1

@@ -1,10 +1,17 @@
 # RecordingStudio Embeddable
 
-RecordingStudio Embeddable is the v1 Rails engine for secure, public iframe embeds in Recording Studio. It lets host applications opt recordable models into embeddable pages, control which domains may embed them, and manage cache, rate limiting, styling, and view logging from one place.
+RecordingStudio Embeddable is the Rails engine for secure public embeds in Recording Studio. Hosts opt recordable models into embeddable pages, control which domains may embed them, and manage cache, rate limiting, styling, and view logging from one place.
+
+Two delivery modes ship in this gem:
+
+1. **Iframe mode** — tokenized public HTML document for `<iframe src="…">`.
+2. **Browser-payload mode** — sanitized HTML fragment plus configuration for the WordPress Plugin Demo SDK (schema version 1).
 
 ## What It Includes
 
-- Public embed routes for tokenized recordings.
+- Public embed routes for tokenized iframe recordings.
+- `RenderPayload` / `BrowserPayload` for API and SDK consumers (fragment + theme/sizing, no document chrome).
+- Soft `:embed` capability-action registration when `recording_studio_api` is present (no hard dependency).
 - A management UI for previewing, editing, styling, and reviewing stats for embeds.
 - Host-side configuration for access control, cache policy, rate limiting, and logging.
 - A Rails generator that mounts the engine, installs an initializer, and copies migrations.
@@ -58,9 +65,39 @@ article.embed_public_url(host: "example.com")
 article.embed_code(host: "example.com")
 ```
 
+## Iframe mode
+
 The public embed route is token-based and lives under the mounted engine path:
 
 `/recording_studio_embeddable/embeds/:token`
+
+That path returns a full HTML document (embed layout, FlatPack CSS, theme CSS variables). It applies domain policy, HTTP cache validators, rate limiting, and **counts as a public view** via `CaptureView` / `EmbeddableViewLog`.
+
+## Browser-payload mode
+
+For the WordPress Plugin Demo SDK (and other authenticated API callers), render a schema v1 payload without going through the public iframe controller:
+
+```ruby
+result = RecordingStudioEmbeddable::RenderPayload.call(
+  recording: parent_recording,
+  embed: parent_recording.embed
+)
+hash = result.value!.to_h
+# {
+#   "schema_version" => 1,
+#   "html" => "<…fragment…>",
+#   "configuration" => { "theme" => {...}, "sizing" => {...} },
+#   "sdk" => { "minimum_version" => "0.3.0" }
+# }
+```
+
+`html` is a fragment (`layout: false`), sanitized server-side (no `script` / `iframe` / `object` / `embed` / `link` / `meta`, no `on*` handlers, no `javascript:` URLs). `configuration.theme` is the allowlisted token map from `ResolveTheme`; `configuration.sizing` is the allowlisted sizing subset (`width`, `mode`, `max_width`, `min_height`, `height`).
+
+When `recording_studio_api` is loaded, the engine soft-registers a member `:embed` action (`GET`, read) whose handler returns the same `to_h` shape.
+
+### View logging policy
+
+Browser-payload and API embeds do **not** count as public iframe views. `CaptureView` stays on `EmbedsController` only. That avoids double-counting when the WordPress Plugin Demo SDK refreshes or previews a payload.
 
 ## Configuration
 

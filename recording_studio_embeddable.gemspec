@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.homepage    = "https://github.com/bowerbird-app/RecordingStudio_Embeddable"
   spec.summary     = "Public embed addon for Recording Studio"
   spec.description = "A Rails isolated engine that adds secure, opt-in public iframe embeds " \
-                     "to Recording Studio recordings."
+                     "and browser-payload fragments for Recording Studio recordings."
   spec.license     = "MIT"
   spec.required_ruby_version = ">= 3.3.0"
 
