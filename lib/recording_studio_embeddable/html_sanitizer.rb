@@ -18,11 +18,10 @@ module RecordingStudioEmbeddable
 
         node.attribute_nodes.each do |attribute|
           name = attribute.name.to_s
-          if name.start_with?("on")
-            node.remove_attribute(name)
-          elsif URL_ATTRIBUTES.include?(name) && javascript_url?(attribute.value)
-            node.remove_attribute(name)
-          end
+          next unless name.start_with?("on") ||
+                      (URL_ATTRIBUTES.include?(name) && javascript_url?(attribute.value))
+
+          node.remove_attribute(name)
         end
 
         CONTINUE

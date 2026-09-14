@@ -32,9 +32,7 @@ module RecordingStudioEmbeddable
 
       def resolve_embed!
         recording = context.recording
-        embed = if recording.respond_to?(:embed)
-                  recording.embed
-                end
+        embed = recording.embed if recording.respond_to?(:embed)
         return embed unless embed.nil?
 
         raise not_found_error("Embed was not found for this recording")

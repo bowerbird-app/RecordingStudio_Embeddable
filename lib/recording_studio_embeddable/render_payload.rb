@@ -5,6 +5,7 @@ module RecordingStudioEmbeddable
     SIZING_KEYS = %w[width mode max_width min_height height].freeze
 
     def initialize(recording:, embed: nil, assigns: nil)
+      super()
       @recording = recording
       @embed = embed
       @assigns = assigns || {}
@@ -61,9 +62,7 @@ module RecordingStudioEmbeddable
         embed: embed,
         embed_theme: theme
       }
-      if recordable.respond_to?(:model_name)
-        base[recordable.model_name.element.to_sym] = recordable
-      end
+      base[recordable.model_name.element.to_sym] = recordable if recordable.respond_to?(:model_name)
       base.merge(assigns.transform_keys(&:to_sym))
     end
 

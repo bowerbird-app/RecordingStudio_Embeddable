@@ -40,12 +40,14 @@ class RenderPayloadTest < Minitest::Test
 
   def setup
     RecordingStudioEmbeddable.reset_configuration!
+    @original_renderer = ActionController::Base.method(:renderer)
     @fake_renderer = FakeRenderer.new(html: '<article class="embed"><p>Hello</p></article>')
-    self.class.install_renderer_stub!
     ActionController::Base.instance_variable_set(:@payload_test_renderer, @fake_renderer)
+    ActionController::Base.define_singleton_method(:renderer) { @payload_test_renderer }
   end
 
   def teardown
+    ActionController::Base.define_singleton_method(:renderer, @original_renderer)
     ActionController::Base.remove_instance_variable(:@payload_test_renderer) if
       ActionController::Base.instance_variable_defined?(:@payload_test_renderer)
   end
@@ -209,17 +211,6 @@ class RenderPayloadTest < Minitest::Test
   end
 
   private
-
-  def self.install_renderer_stub!
-    return if @renderer_stub_installed
-
-    ActionController::Base.singleton_class.alias_method(
-      :__payload_test_original_renderer,
-      :renderer
-    )
-    ActionController::Base.define_singleton_method(:renderer) { @payload_test_renderer }
-    @renderer_stub_installed = true
-  end
 
   def recording
     @recording ||= FakeRecording.new(FakeRecordable.new, Time.at(1_700_000_050))
