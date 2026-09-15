@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-09-15
+
+### Changed
+- Pin `recording_studio_accessible` to `~> 0.9` (GitHub tag `v0.9.1`).
+- Soft-registered `:embed` uses Accessible role `:view` for `required_role` and `authorize!`.
+
+### Upgrade notes
+- Bump the gem to `0.2.1`. Require Accessible `~> 0.9` (for example tag `v0.9.1`).
+- Accessible `0.8+` adds `depends_on_recording_id`. Hosts moving from Accessible `0.7.x` must run Accessible's migration generator and `db:migrate`. Embeddable itself adds no migration.
+- `:embed` no longer declares or authorizes `:read`. Accessible roles are `view`, `edit`, and `admin` only. A `:read` required_role fails Recording Studio API boot.
+- Soft registration stays Moveable-style. There is still no hard gemspec dependency on `recording_studio_api`.
+- Iframe public path, domain policy, cache, rate limit, management UI, `RenderPayload`, and `HtmlSanitizer` are unchanged.
+
 ## [0.2.0] - 2026-09-14
 
 ### Added
@@ -25,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump the gem to `0.2.0`. No host migration is required.
 - Iframe public path, domain policy, cache, rate limit, management UI, and `CaptureView` behavior are unchanged.
 - Call `RecordingStudioEmbeddable::RenderPayload.call(recording:, embed:)` for fragment payloads. Do not route SDK/API embeds through `EmbedsController` if you need to avoid public view counts — browser-payload / API embeds intentionally do **not** log public iframe views.
-- If the host loads `recording_studio_api`, the engine registers a member `:embed` GET/read action automatically. Hosts that already register `:embed` keep their existing action.
+- If the host loads `recording_studio_api`, the engine registers a member `:embed` GET action with `required_role: :view` automatically. Hosts that already register `:embed` keep their existing action.
 - Payload `sdk.minimum_version` is `"0.3.0"` (WordPress Plugin Demo SDK). `configuration` exposes allowlisted `theme` tokens and `sizing` keys only (`width`, `mode`, `max_width`, `min_height`, `height`).
 
 ## [0.1.3] - 2026-09-02
@@ -98,7 +111,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.2.1
 [0.2.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.2.0
 [0.1.3]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.1.3
 [0.1.2]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.1.2

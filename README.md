@@ -93,7 +93,7 @@ hash = result.value!.to_h
 
 `html` is a fragment (`layout: false`), sanitized server-side (no `script` / `iframe` / `object` / `embed` / `link` / `meta`, no `on*` handlers, no `javascript:` URLs). `configuration.theme` is the allowlisted token map from `ResolveTheme`; `configuration.sizing` is the allowlisted sizing subset (`width`, `mode`, `max_width`, `min_height`, `height`).
 
-When `recording_studio_api` is loaded, the engine soft-registers a member `:embed` action (`GET`, read) whose handler returns the same `to_h` shape.
+When `recording_studio_api` is loaded, the engine soft-registers a member `:embed` action (`GET`, `required_role: :view`) whose handler returns the same `to_h` shape.
 
 ### View logging policy
 

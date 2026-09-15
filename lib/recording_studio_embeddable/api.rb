@@ -13,7 +13,7 @@ module RecordingStudioEmbeddable
       version_notes: ["Embeddable-owned browser payload action"],
       http_verb: :get,
       scope: :member,
-      required_role: :read,
+      required_role: :view,
       handler: "RecordingStudioEmbeddable::Api::EmbedRecording"
     }.freeze
 
@@ -69,7 +69,7 @@ module RecordingStudioEmbeddable
             description: "Returns a browser payload fragment for the recording embed.",
             responses: {
               "200" => { description: "Embed payload rendered successfully." },
-              "403" => { description: "API access is not authorized to read this recording." },
+              "403" => { description: "API access is not authorized to view this recording." },
               "404" => { description: "Embed was not found for this recording." }
             }
           }
