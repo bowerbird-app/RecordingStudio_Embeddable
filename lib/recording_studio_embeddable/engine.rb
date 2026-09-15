@@ -60,5 +60,10 @@ module RecordingStudioEmbeddable
         end
       end
     end
+
+    initializer "recording_studio_embeddable.register_recording_studio_api_action",
+                before: "recording_studio_api.after_initialize" do
+      RecordingStudioEmbeddable::Api.register_capability_action!
+    end
   end
 end
