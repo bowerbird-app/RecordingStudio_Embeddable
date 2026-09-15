@@ -7,41 +7,23 @@ DUMMY_GEMFILE = File.expand_path("test/dummy/Gemfile", __dir__)
 DUMMY_APP_ROOT = File.expand_path("test/dummy", __dir__)
 
 def run_command!(env, *command)
-  return if system(env, *command)
+  return if Bundler.with_unbundled_env { system(env, *command) }
 
   raise "Command failed (#{Process.last_status.exitstatus}): #{command.join(' ')}"
 end
 
 def dummy_bundle_env
-  dummy_bundle_base_env.merge(dummy_bundle_cleared_env)
-end
-
-def dummy_bundle_base_env
   {
-    "BUNDLE_APP_CONFIG" => ENV.fetch("BUNDLE_APP_CONFIG", nil),
     "BUNDLE_GEMFILE" => DUMMY_GEMFILE,
-    "BUNDLE_PATH" => ENV.fetch("BUNDLE_PATH", nil),
-    "DISABLE_SIMPLECOV" => "true",
-    "GEM_HOME" => ENV.fetch("BUNDLER_ORIG_GEM_HOME", ENV.fetch("GEM_HOME", nil)),
-    "GEM_PATH" => ENV.fetch("BUNDLER_ORIG_GEM_PATH", nil)
-  }
-end
-
-def dummy_bundle_cleared_env
-  {
-    "BUNDLE_BIN_PATH" => nil,
-    "BUNDLE_GEMFILE" => DUMMY_GEMFILE,
-    "BUNDLE_LOCKFILE" => nil,
-    "BUNDLER_SETUP" => nil,
-    "BUNDLER_VERSION" => nil,
-    "RUBYLIB" => nil,
-    "RUBYOPT" => nil
-  }
+    "DISABLE_SIMPLECOV" => "true"
+  }.tap do |env|
+    env["BUNDLE_PATH"] = ENV["BUNDLE_PATH"] if ENV["BUNDLE_PATH"]
+  end
 end
 
 Rake::TestTask.new(:test) do |t|
   t.libs << "test"
-  t.test_files = FileList["test/**/*_test.rb"]
+  t.test_files = FileList["test/**/*_test.rb"].exclude("test/dummy/**/*_test.rb")
   t.verbose = false
 end
 

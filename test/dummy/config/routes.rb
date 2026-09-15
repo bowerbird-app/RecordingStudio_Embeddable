@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   require "recording_studio_attachable"
   require "recording_studio_publishable"
+  require "recording_studio_api"
 
   devise_for :users
   mount RecordingStudioAttachable::Engine, at: "/recording_studio_attachable"
@@ -11,6 +12,7 @@ Rails.application.routes.draw do
   mount RecordingStudio::Engine, at: "/recording_studio"
   mount RecordingStudioEmbeddable::Engine, at: "/recording_studio_embeddable"
   mount RecordingStudioPublishable::Engine, at: "/"
+  mount RecordingStudioApi::Engine, at: "/recording_studio_api"
 
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
