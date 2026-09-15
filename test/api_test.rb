@@ -57,7 +57,7 @@ class ApiTest < Minitest::Test
     assert_equal :embeddable, descriptor[:capability]
     assert_equal :get, descriptor[:http_verb]
     assert_equal :member, descriptor[:scope]
-    assert_equal :read, descriptor[:required_role]
+    assert_equal :view, descriptor[:required_role]
     assert_equal "RecordingStudioEmbeddable::Api::EmbedRecording", descriptor[:handler]
   end
 
@@ -77,7 +77,7 @@ class ApiTest < Minitest::Test
       assert_equal :embeddable, registration.fetch(:capability)
       assert_equal :get, registration.fetch(:http_verb)
       assert_equal :member, registration.fetch(:scope)
-      assert_equal :read, registration.fetch(:required_role)
+      assert_equal :view, registration.fetch(:required_role)
       assert_equal RecordingStudioEmbeddable::Api::EmbedRecording, registration.fetch(:handler)
       assert_equal "Embed", registration.fetch(:openapi).fetch(:summary)
     end
@@ -115,7 +115,7 @@ class ApiTest < Minitest::Test
 
       assert_equal 1, hash.fetch("schema_version")
       assert_equal "<p>payload</p>", hash.fetch("html")
-      assert_equal [[recording, :read]], access_grant.authorized_recordings
+      assert_equal [[recording, :view]], access_grant.authorized_recordings
       refute called
     end
   ensure

@@ -12,7 +12,7 @@ module RecordingStudioEmbeddable
       end
 
       def call
-        authorize_read!
+        authorize_view!
         embed = resolve_embed!
         result = RenderPayload.call(recording: context.recording, embed: embed)
         raise render_error(result) if result.failure?
@@ -24,10 +24,10 @@ module RecordingStudioEmbeddable
 
       attr_reader :context
 
-      def authorize_read!
+      def authorize_view!
         return unless context.respond_to?(:access_grant) && context.access_grant.respond_to?(:authorize!)
 
-        context.access_grant.authorize!(recording: context.recording, role: :read)
+        context.access_grant.authorize!(recording: context.recording, role: :view)
       end
 
       def resolve_embed!

@@ -13,7 +13,7 @@ module RecordingStudioEmbeddable
       version_notes: ["Embeddable-owned browser payload action"],
       http_verb: :get,
       scope: :member,
-      required_role: :read,
+      required_role: :view,
       handler: "RecordingStudioEmbeddable::Api::EmbedRecording"
     }.freeze
 
