@@ -8,6 +8,9 @@ gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.2.0"
 gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.9.1"
 gem "recording_studio_attachable", github: "bowerbird-app/RecordingStudio_attachable", tag: "0.4.0"
 gem "recording_studio_publishable", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.2.0"
+gem "recording_studio_api", github: "bowerbird-app/RecordingStudio_api", tag: "v0.5.5"
+# RS_API 0.5.5 to_prepare requires recording_studio_admin/screens_controller.
+gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.0.2"
 
 # Devise authentication
 gem "devise"
