@@ -95,6 +95,8 @@ hash = result.value!.to_h
 
 When `recording_studio_api` is loaded, the engine soft-registers a member `:embed` action (`GET`, `required_role: :view`) whose handler returns the same `to_h` shape.
 
+The dummy app mounts that public API at `/recording_studio_api` and allowlists `:embed` on Page. That is the HTTP proof for WordPress Plugin Demo clients. Named-API enablement for FlatPack hosts remains a later step.
+
 ### View logging policy
 
 Browser-payload and API embeds do **not** count as public iframe views. `CaptureView` stays on `EmbedsController` only. That avoids double-counting when the WordPress Plugin Demo SDK refreshes or previews a payload.
@@ -133,10 +135,11 @@ For local development in this repository:
 ```bash
 bundle install
 bundle exec rake test
+bundle exec rake test:dummy
 cd test/dummy && bin/dev
 ```
 
-The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine.
+The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine. It pins `recording_studio_api` v0.5.5 and mounts the public API so GET `:embed` can be exercised over HTTP.
 
 ## Cloud Agent boot
 

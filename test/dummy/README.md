@@ -9,6 +9,7 @@ This Rails app exists to validate the Recording Studio addon template in a real 
 - Root workspace plus seeded folder and page recordables
 - FlatPack layout integration and Tailwind source scanning
 - Mounted `RecordingStudio::Engine` route behavior inside a host app
+- Public Recording Studio API at `/recording_studio_api` with GET `:embed` on Page for WordPress Plugin Demo clients
 - A starter sidebar menu and companion docs pages for gem-specific onboarding
 
 ## Quick Start
@@ -35,6 +36,9 @@ Then open the app and sign in with:
 - `/docs/install`, `/docs/config`, `/docs/recordable_types`, `/docs/recordings_tree`, `/docs/gem_views`, `/docs/methods` - starter sidebar pages to adapt for the gem
 - `/dummy/pages/new` - add-page form used to create embeddable test pages
 - `/up` - Rails health check
+- `POST /recording_studio_api/oauth/token` - OAuth2 `client_credentials` token for a provisioned API client
+- `GET /recording_studio_api/api/v1/pages/:id/actions/embed` - AccessGrant-scoped BrowserPayload (schema version 1)
+- `GET /recording_studio_api/api/v1/pages/:id/embed` - short alias for the same payload
 
 ## Why This App Exists
 
