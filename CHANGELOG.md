@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Pin `recording_studio` to GitHub tag `v4.2.2` (still `~> 4.2` in the gemspec).
+
 ### Added
 - Dummy mounts Recording Studio API at `/recording_studio_api` and allowlists GET `:embed` on Page. An AccessGrant client can fetch BrowserPayload schema v1 (`schema_version`, `html`, `configuration`, `sdk`) without a host-owned handler.
 
