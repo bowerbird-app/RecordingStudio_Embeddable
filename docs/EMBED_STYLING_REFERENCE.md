@@ -116,7 +116,7 @@ Style owns fonts, colours, and embed width (not domains).
 
 Settings owns allowed/blocked domains and Save. Width and height are not edited on Settings.
 
-Require FlatPack `~> 0.1.196` (GitHub tag `v0.1.196`) for `FlatPack::ColorSwatch::Component`, `FlatPack::FontSwatch::Component`, `FlatPack::OverflowRow::Component`, `FlatPack::Button::Component`, and `FlatPack::Popover::Component`.
+Require FlatPack `~> 0.1.197` (GitHub tag `v0.1.197`) for `FlatPack::ColorSwatch::Component`, `FlatPack::FontSwatch::Component`, `FlatPack::OverflowRow::Component`, `FlatPack::Button::Component`, and `FlatPack::Popover::Component`.
 
 Example composition:
 
