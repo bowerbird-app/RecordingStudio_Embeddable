@@ -139,7 +139,7 @@ bundle exec rake test:dummy
 cd test/dummy && bin/dev
 ```
 
-The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine. It pins `recording_studio_api` v0.5.5 and mounts the public API so GET `:embed` can be exercised over HTTP.
+The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine. It pins Accessible `v0.11.1`, Publishable `v0.4.2`, Attachable `v0.7.1`, Admin `v2.0.4`, and Recording Studio API `v0.5.5` (held). It mounts the public API so GET `:embed` can be exercised over HTTP. Dummy grants access through Accessible's public services and shims `RecordingStudio::Access.roles` so API 0.5.5 can still authorize member actions against string roles.
 
 ## Cloud Agent boot
 
