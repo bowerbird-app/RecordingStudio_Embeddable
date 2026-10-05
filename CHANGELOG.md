@@ -10,6 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Pin `flat_pack` to `~> 0.1.198` (GitHub tag `v0.1.198`).
 - Pin `recording_studio` to GitHub tag `v4.2.2` (still `~> 4.2` in the gemspec).
+- Pin `recording_studio_accessible` to GitHub tag `v0.11.1` (gemspec stays `~> 0.9`, which already allows 0.11.x).
+- Pin `recording_studio_publishable` to `~> 0.4` (GitHub tag `v0.4.2`).
+- Dummy pins Attachable `v0.7.1` and Admin `v2.0.4`. API stays at `v0.5.5`.
+- Dummy Accessible schema now includes access invitations and stores access roles as strings (`view`, `edit`, `admin`).
+- Dummy API initializer exposes `RecordingStudio::Access.roles` from Accessible's ranked names so API `v0.5.5` can still authorize member actions.
+
+### Upgrade notes
+- Hosts that use Publishable with this gem need Publishable `~> 0.4` (for example tag `v0.4.2`).
+- Accessible `0.11` stores roles as strings and adds access invitations. Hosts moving from Accessible `0.9.x` must run Accessible's 0.8–0.11 migrations (`depends_on_recording_id` if missing, invitations table, role integer → string) and `db:migrate`. Embeddable itself adds no migration.
+- Recording Studio API stays on `v0.5.5` here. That tag still expects `Access.roles`. Dummy shims it; hosts on API 0.5.x with Accessible 0.11 should do the same until API is compatible with Accessible 0.11.
 
 ### Added
 - Dummy mounts Recording Studio API at `/recording_studio_api` and allowlists GET `:embed` on Page. An AccessGrant client can fetch BrowserPayload schema v1 (`schema_version`, `html`, `configuration`, `sdk`) without a host-owned handler.
