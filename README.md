@@ -141,13 +141,17 @@ cd test/dummy && bin/dev
 
 The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine. It pins Accessible `v0.11.1`, Publishable `v0.4.2`, Attachable `v0.7.1`, Admin `v2.0.4`, and Recording Studio API `v0.5.5` (held). It mounts the public API so GET `:embed` can be exercised over HTTP. Dummy grants access through Accessible's public services and shims `RecordingStudio::Access.roles` so API 0.5.5 can still authorize member actions against string roles.
 
+Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key.
+
 ## Cloud Agent boot
 
 Cloud Agent Builds run `.cursor/install.sh`, then `.cursor/fetch-skills.sh`.
 The install hook provisions a cold image. On a warm snapshot it skips apt,
 ruby-build, db:prepare, and tailwind when Ruby, bundle, and Postgres are
-already usable. Fetch-skills always runs last. `.cursor/start.sh` starts
-PostgreSQL on each boot. Rebuild with Draft off to load a new pack. See
+already usable. If `RAILS_MASTER_KEY` is set, `install.sh` writes gitignored
+`test/dummy/config/master.key` so dummy credentials decrypt. Fetch-skills
+always runs last. `.cursor/start.sh` starts PostgreSQL on each boot. Rebuild
+with Draft off to load a new pack. See
 [Cursor skills in Cloud Agents](docs/cursor-skills.md).
 
 ## License
