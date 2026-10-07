@@ -114,7 +114,7 @@ module RecordingStudioEmbeddable
       end
 
       def from_env(key)
-        ENV[ENV_MAP.fetch(key)].to_s.strip.presence
+        ENV.fetch(ENV_MAP.fetch(key), nil).to_s.strip.presence
       end
 
       def from_credentials(key)

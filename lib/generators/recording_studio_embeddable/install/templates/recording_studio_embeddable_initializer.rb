@@ -32,15 +32,15 @@ RecordingStudioEmbeddable.configure do |config|
   # CDN Strategy 1 (DigitalOcean Spaces + Cloudflare). Host owns infra.
   # Prefer ENV in production; credentials dig is supported for local/dummy.
   # See docs/CDN.md for the full variable list and frame-ancestors Worker notes.
-  config.cdn_public_base_url = ENV["EMBED_CDN_PUBLIC_BASE_URL"]
+  config.cdn_public_base_url = ENV.fetch("EMBED_CDN_PUBLIC_BASE_URL", nil)
   config.cdn_object_prefix = "embeds"
-  config.cdn_spaces_endpoint = ENV["EMBED_CDN_SPACES_ENDPOINT"]
-  config.cdn_spaces_region = ENV["EMBED_CDN_SPACES_REGION"]
-  config.cdn_spaces_bucket = ENV["EMBED_CDN_SPACES_BUCKET"]
-  config.cdn_spaces_access_key_id = ENV["EMBED_CDN_SPACES_ACCESS_KEY_ID"]
-  config.cdn_spaces_secret_access_key = ENV["EMBED_CDN_SPACES_SECRET_ACCESS_KEY"]
-  config.cdn_cloudflare_zone_id = ENV["EMBED_CDN_CLOUDFLARE_ZONE_ID"]
-  config.cdn_cloudflare_api_token = ENV["EMBED_CDN_CLOUDFLARE_API_TOKEN"]
+  config.cdn_spaces_endpoint = ENV.fetch("EMBED_CDN_SPACES_ENDPOINT", nil)
+  config.cdn_spaces_region = ENV.fetch("EMBED_CDN_SPACES_REGION", nil)
+  config.cdn_spaces_bucket = ENV.fetch("EMBED_CDN_SPACES_BUCKET", nil)
+  config.cdn_spaces_access_key_id = ENV.fetch("EMBED_CDN_SPACES_ACCESS_KEY_ID", nil)
+  config.cdn_spaces_secret_access_key = ENV.fetch("EMBED_CDN_SPACES_SECRET_ACCESS_KEY", nil)
+  config.cdn_cloudflare_zone_id = ENV.fetch("EMBED_CDN_CLOUDFLARE_ZONE_ID", nil)
+  config.cdn_cloudflare_api_token = ENV.fetch("EMBED_CDN_CLOUDFLARE_API_TOKEN", nil)
   config.cdn_withhold_snippet_until_published = false
   config.cdn_publish_queue = :default
 

@@ -54,19 +54,19 @@ class DummyCredentialsTest < Minitest::Test
     # CDN Strategy 1 host keys (optional until shared credentials are refreshed).
     # Prefer EMBED_CDN_* env vars; credentials dig path is documented in docs/CDN.md.
     cdn = parsed.dig("recording_studio_embeddable", "cdn")
-    if cdn.is_a?(Hash)
-      %w[
-        public_base_url
-        spaces_endpoint
-        spaces_region
-        spaces_bucket
-        spaces_access_key_id
-        spaces_secret_access_key
-        cloudflare_zone_id
-        cloudflare_api_token
-      ].each do |key|
-        assert cdn.key?(key), "Expected recording_studio_embeddable.cdn.#{key} in shared dummy credentials"
-      end
+    return unless cdn.is_a?(Hash)
+
+    %w[
+      public_base_url
+      spaces_endpoint
+      spaces_region
+      spaces_bucket
+      spaces_access_key_id
+      spaces_secret_access_key
+      cloudflare_zone_id
+      cloudflare_api_token
+    ].each do |key|
+      assert cdn.key?(key), "Expected recording_studio_embeddable.cdn.#{key} in shared dummy credentials"
     end
   end
 

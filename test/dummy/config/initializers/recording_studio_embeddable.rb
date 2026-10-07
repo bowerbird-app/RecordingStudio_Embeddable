@@ -17,30 +17,30 @@ RecordingStudioEmbeddable.configure do |config|
   # Spaces secrets are placeholders. Prefer ENV; credentials dig is documented in docs/CDN.md.
   # Hosts add recording_studio_embeddable.cdn.* to credentials (or EMBED_CDN_* env vars).
   config.cdn_public_base_url =
-    ENV["EMBED_CDN_PUBLIC_BASE_URL"].presence ||
+    ENV.fetch("EMBED_CDN_PUBLIC_BASE_URL", nil).presence ||
     Rails.application.credentials.dig(:recording_studio_embeddable, :cdn, :public_base_url).presence ||
     "https://embeds.example.test"
   config.cdn_object_prefix = "embeds"
   config.cdn_spaces_endpoint =
-    ENV["EMBED_CDN_SPACES_ENDPOINT"].presence ||
+    ENV.fetch("EMBED_CDN_SPACES_ENDPOINT", nil).presence ||
     Rails.application.credentials.dig(:recording_studio_embeddable, :cdn, :spaces_endpoint)
   config.cdn_spaces_region =
-    ENV["EMBED_CDN_SPACES_REGION"].presence ||
+    ENV.fetch("EMBED_CDN_SPACES_REGION", nil).presence ||
     Rails.application.credentials.dig(:recording_studio_embeddable, :cdn, :spaces_region)
   config.cdn_spaces_bucket =
-    ENV["EMBED_CDN_SPACES_BUCKET"].presence ||
+    ENV.fetch("EMBED_CDN_SPACES_BUCKET", nil).presence ||
     Rails.application.credentials.dig(:recording_studio_embeddable, :cdn, :spaces_bucket)
   config.cdn_spaces_access_key_id =
-    ENV["EMBED_CDN_SPACES_ACCESS_KEY_ID"].presence ||
+    ENV.fetch("EMBED_CDN_SPACES_ACCESS_KEY_ID", nil).presence ||
     Rails.application.credentials.dig(:recording_studio_embeddable, :cdn, :spaces_access_key_id)
   config.cdn_spaces_secret_access_key =
-    ENV["EMBED_CDN_SPACES_SECRET_ACCESS_KEY"].presence ||
+    ENV.fetch("EMBED_CDN_SPACES_SECRET_ACCESS_KEY", nil).presence ||
     Rails.application.credentials.dig(:recording_studio_embeddable, :cdn, :spaces_secret_access_key)
   config.cdn_cloudflare_zone_id =
-    ENV["EMBED_CDN_CLOUDFLARE_ZONE_ID"].presence ||
+    ENV.fetch("EMBED_CDN_CLOUDFLARE_ZONE_ID", nil).presence ||
     Rails.application.credentials.dig(:recording_studio_embeddable, :cdn, :cloudflare_zone_id)
   config.cdn_cloudflare_api_token =
-    ENV["EMBED_CDN_CLOUDFLARE_API_TOKEN"].presence ||
+    ENV.fetch("EMBED_CDN_CLOUDFLARE_API_TOKEN", nil).presence ||
     Rails.application.credentials.dig(:recording_studio_embeddable, :cdn, :cloudflare_api_token)
   config.cdn_withhold_snippet_until_published = false
 
