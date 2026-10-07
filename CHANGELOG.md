@@ -30,7 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pin `recording_studio` to GitHub tag `v4.2.2` (still `~> 4.2` in the gemspec).
 - Pin `recording_studio_accessible` to GitHub tag `v0.11.1` (gemspec stays `~> 0.9`, which already allows 0.11.x).
 - Pin `recording_studio_publishable` to `~> 0.4` (GitHub tag `v0.4.2`).
-- Pin `recording_studio_artifacts` to `~> 0.3.0` (GitHub tag `v0.3.0`).
+- Pin `recording_studio_artifacts` to `~> 0.3.0`. Root/dummy Gemfiles use
+  `path: "vendor/recording_studio_artifacts"` (v0.3.0 tree) because upstream is
+  private and CI cannot `github:` + tag yet
+  ([RecordingStudio_artifacts#2](https://github.com/bowerbird-app/RecordingStudio_artifacts/issues/2)).
 - Dummy pins Attachable `v0.7.1` and Admin `v2.0.4`. API stays at `v0.5.5`.
 - Dummy Accessible schema now includes access invitations and stores access roles as strings (`view`, `edit`, `admin`).
 - Dummy API initializer exposes `RecordingStudio::Access.roles` from Accessible's ranked names so API `v0.5.5` can still authorize member actions.
@@ -40,8 +43,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is the only CDN publish path.
 
 ### Upgrade notes
-- Bump the gem to `0.3.0`. Add `recording_studio_artifacts` `~> 0.3.0` (for example
-  GitHub tag `v0.3.0`), run Artifacts install + migrations, set `ARTIFACT_CDN_*`
+- Bump the gem to `0.3.0`. Add `recording_studio_artifacts` `~> 0.3.0` (vendored
+  path in this repo until upstream is public; prefer GitHub tag `v0.3.0` when
+  available), run Artifacts install + migrations, set `ARTIFACT_CDN_*`
   (or credentials), and add `gem "aws-sdk-s3"` in production hosts.
 - To serve partners from CDN: set `config.embed_url_strategy = :cdn` (or per-embed),
   configure Artifacts public base / R2, and call `enqueue_embed_cdn_publish!` after

@@ -67,10 +67,8 @@ GIT
       tailwind_merge (~> 0.13)
       view_component (~> 4.12.0)
 
-GIT
-  remote: https://github.com/bowerbird-app/RecordingStudio_artifacts.git
-  revision: 70a839d0db960b2644a5b7ac6e3b00f55ea98f20
-  tag: v0.3.0
+PATH
+  remote: ../../vendor/recording_studio_artifacts
   specs:
     recording_studio_artifacts (0.3.0)
       rails (~> 8.1.0)
