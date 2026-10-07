@@ -50,6 +50,31 @@ class DummyCredentialsTest < Minitest::Test
     assert_equal PLACEHOLDER, parsed.dig("smtp", "password")
     assert_equal PLACEHOLDER, parsed.dig("aws", "access_key_id")
     assert_equal PLACEHOLDER, parsed.dig("aws", "secret_access_key")
+
+    # CDN Strategy 1 host keys (optional until shared credentials are refreshed).
+    # Prefer EMBED_CDN_* env vars; credentials dig path is documented in docs/CDN.md.
+    cdn = parsed.dig("recording_studio_embeddable", "cdn")
+    if cdn.is_a?(Hash)
+      %w[
+        public_base_url
+        spaces_endpoint
+        spaces_region
+        spaces_bucket
+        spaces_access_key_id
+        spaces_secret_access_key
+        cloudflare_zone_id
+        cloudflare_api_token
+      ].each do |key|
+        assert cdn.key?(key), "Expected recording_studio_embeddable.cdn.#{key} in shared dummy credentials"
+      end
+    end
+  end
+
+  def test_cdn_credential_env_names_are_documented
+    docs = File.read(File.expand_path("../docs/CDN.md", __dir__))
+    RecordingStudioEmbeddable::Cdn::Credentials::ENV_MAP.each_value do |env_name|
+      assert_includes docs, env_name
+    end
   end
 
   private

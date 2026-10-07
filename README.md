@@ -67,11 +67,14 @@ article.embed_code(host: "example.com")
 
 ## Iframe mode
 
-The public embed route is token-based and lives under the mounted engine path:
+Two URL strategies:
 
-`/recording_studio_embeddable/embeds/:token`
+1. **Dedicated (default)** — App Platform Rails serves `/recording_studio_embeddable/embeds/:token`.
+2. **CDN** — `PublishEmbedToCdnJob` writes `embeds/{token}.html` to DigitalOcean Spaces behind Cloudflare. Partner helpers return that CDN URL only (never the Rails mount). Updates overwrite the same object key and purge Cloudflare.
 
-That path returns a full HTML document (embed layout, FlatPack CSS, theme CSS variables). It applies domain policy, HTTP cache validators, rate limiting, and **counts as a public view** via `CaptureView` / `EmbeddableViewLog`.
+See [docs/CDN.md](docs/CDN.md) for Spaces/Cloudflare env vars, frame-ancestors, and CaptureView notes.
+
+The dedicated route returns a full HTML document (embed layout, FlatPack CSS, theme CSS variables). It applies domain policy, HTTP cache validators, rate limiting, and **counts as a public view** via `CaptureView` / `EmbeddableViewLog`. CDN-served hits skip Rails view logging — use Cloudflare analytics / rate limits on the edge.
 
 ## Browser-payload mode
 
@@ -110,6 +113,7 @@ Common settings include:
 - `allowed_embedder_domains` and `blocked_embedder_domains`
 - `require_domain_allowlist` and `allow_any_domain`
 - `require_publishable` and `fallback_to_publishable_renderer`
+- `embed_url_strategy` (`:dedicated` or `:cdn`) and the `cdn_*` / `EMBED_CDN_*` settings
 - `rate_limiting_enabled`, `rate_limiter`, `rate_limit`, and `rate_limit_window`
 - `cache_mode` and `cache_policy`
 - `view_logging_enabled` and the related sampling/privacy flags
@@ -141,7 +145,7 @@ cd test/dummy && bin/dev
 
 The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine. It pins Accessible `v0.11.1`, Publishable `v0.4.2`, Attachable `v0.7.1`, Admin `v2.0.4`, and Recording Studio API `v0.5.5` (held). It mounts the public API so GET `:embed` can be exercised over HTTP. Dummy grants access through Accessible's public services and shims `RecordingStudio::Access.roles` so API 0.5.5 can still authorize member actions against string roles.
 
-Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key.
+Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key. CDN Spaces/Cloudflare secrets belong under `recording_studio_embeddable.cdn.*` (or `EMBED_CDN_*` env vars); the dummy initializer falls back to MemoryStorage in development/test so publish can be exercised without real Spaces keys. See [docs/CDN.md](docs/CDN.md).
 
 ## Cloud Agent boot
 

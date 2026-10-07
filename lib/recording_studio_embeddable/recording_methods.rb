@@ -48,16 +48,17 @@ module RecordingStudioEmbeddable
       embed&.public_path
     end
 
+    # When the embed uses CDN strategy, always returns the CDN URL (never the Rails mount).
+    # +host+ / +protocol+ are ignored for CDN strategy — the configured public base URL wins.
     def embed_public_url(host: nil, protocol: nil)
-      path = embed_public_path
-      return unless path
-      return path if host.blank?
+      return unless embed
 
-      scheme = protocol || "https"
-      "#{scheme}://#{host}#{path}"
+      embed.public_url(host: host, protocol: protocol)
     end
 
     def embed_code(**html_options)
+      return "" if withhold_cdn_snippet?
+
       public_url = embed_public_url(**html_options.slice(:host, :protocol))
       return "" unless public_url
 
@@ -89,7 +90,20 @@ module RecordingStudioEmbeddable
       update_embed!(actor: actor, enabled: true)
     end
 
+    # Hosts should call this after parent recording / theme / publishable changes that affect the document.
+    def enqueue_embed_cdn_publish!
+      embed&.enqueue_cdn_publish!
+    end
+
     private
+
+    def withhold_cdn_snippet?
+      return false unless embed.respond_to?(:cdn_url_strategy?) && embed.cdn_url_strategy?
+      return false unless Cdn.withhold_snippet_until_published?
+      return false unless embed.respond_to?(:cdn_published?)
+
+      !embed.cdn_published?
+    end
 
     def recording_attributes_for_embed(embed_record)
       attrs = { recordable: embed_record, parent_recording_id: id }

@@ -5,7 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.0] - 2026-10-07
+
+### Added
+- CDN Strategy 1: `PublishEmbedToCdn` / `PublishEmbedToCdnJob` pre-renders iframe HTML to DigitalOcean Spaces (`embeds/{token}.html`) and purges Cloudflare. Partner URLs stay stable across content updates.
+- `embed_url_strategy: "cdn"` flips `public_path` / `embed_public_url` / `embed_code` to the CDN hostname only — never the App Platform mount `/recording_studio_embeddable/embeds/:token`.
+- Host-owned Spaces/Cloudflare settings via `EMBED_CDN_*` env vars, `config.cdn_*`, or `credentials.dig(:recording_studio_embeddable, :cdn, ...)`.
+- Domain allowlist baked at publish (`DomainPolicy#frame_ancestors` → object metadata + HTML marker). Re-publish on domain change.
+- `recording.enqueue_embed_cdn_publish!` for parent recording / theme / publishable changes.
+- `docs/CDN.md` for Spaces config, origin fallback, CaptureView/rate-limit edge notes, and Cloudflare Worker CSP promotion.
+- Dummy initializer wires CDN base URL + MemoryStorage so tests/dev can publish without real Spaces credentials.
 
 ### Changed
 - Pin `flat_pack` to `~> 0.1.198` (GitHub tag `v0.1.198`).
@@ -17,12 +26,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dummy API initializer exposes `RecordingStudio::Access.roles` from Accessible's ranked names so API `v0.5.5` can still authorize member actions.
 
 ### Upgrade notes
+- Bump the gem to `0.3.0`. No host migration is required (strategy column already exists).
+- To serve partners from CDN: set `config.embed_url_strategy = :cdn` (or per-embed), configure `EMBED_CDN_*` / credentials, add `gem "aws-sdk-s3"` for Spaces uploads, and point a Cloudflare hostname at the bucket.
+- Call `enqueue_embed_cdn_publish!` from the host after parent content, theme, or publishable changes that affect the rendered document.
+- `EmbedsController` remains as an optional Cloudflare origin fallback during migration. Partner snippets must use the CDN URL once strategy is `cdn`.
+- CDN hits do not run `CaptureView` or Rails rate limiting — use Cloudflare analytics / rate limits. Browser-payload / API embeds are unchanged.
 - Hosts that use Publishable with this gem need Publishable `~> 0.4` (for example tag `v0.4.2`).
-- Accessible `0.11` stores roles as strings and adds access invitations. Hosts moving from Accessible `0.9.x` must run Accessible's 0.8–0.11 migrations (`depends_on_recording_id` if missing, invitations table, role integer → string) and `db:migrate`. Embeddable itself adds no migration.
+- Accessible `0.11` stores roles as strings and adds access invitations. Hosts moving from Accessible `0.9.x` must run Accessible's 0.8–0.11 migrations and `db:migrate`. Embeddable itself adds no migration.
 - Recording Studio API stays on `v0.5.5` here. That tag still expects `Access.roles`. Dummy shims it; hosts on API 0.5.x with Accessible 0.11 should do the same until API is compatible with Accessible 0.11.
-
-### Added
-- Dummy mounts Recording Studio API at `/recording_studio_api` and allowlists GET `:embed` on Page. An AccessGrant client can fetch BrowserPayload schema v1 (`schema_version`, `html`, `configuration`, `sdk`) without a host-owned handler.
 
 ## [0.2.1] - 2026-09-15
 
@@ -128,7 +139,7 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.2.1...HEAD
+[0.3.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.3.0
 [0.2.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.2.1
 [0.2.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.2.0
 [0.1.3]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.1.3

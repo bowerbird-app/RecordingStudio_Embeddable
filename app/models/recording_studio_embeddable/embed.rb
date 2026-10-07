@@ -29,6 +29,7 @@ module RecordingStudioEmbeddable
     scope :enabled, -> { where(enabled: true) }
 
     before_validation :apply_defaults
+    after_commit :enqueue_cdn_publish_if_needed, on: %i[create update]
 
     def allowed_domains
       Array(self[:allowed_embedder_domains]).compact_blank
@@ -60,8 +61,67 @@ module RecordingStudioEmbeddable
       recording&.parent_recording if recording.respond_to?(:parent_recording)
     end
 
+    def url_strategy
+      (try(:embed_url_strategy).presence || RecordingStudioEmbeddable.configuration.embed_url_strategy).to_s
+    end
+
+    def cdn_url_strategy?
+      Cdn.strategy?(url_strategy)
+    end
+
+    # Partner-facing path. For CDN strategy this is the Spaces object path, never the Rails mount.
     def public_path
+      return Cdn.object_path(token) if cdn_url_strategy?
+
+      dedicated_public_path
+    end
+
+    def dedicated_public_path
       "/recording_studio_embeddable/embeds/#{token}"
+    end
+
+    def cdn_object_key
+      Cdn.object_key(token)
+    end
+
+    # Partner-facing absolute URL. CDN strategy never returns the App Platform hot path.
+    def public_url(host: nil, protocol: nil)
+      if cdn_url_strategy?
+        return unless Cdn.public_base_configured?
+
+        return Cdn.public_url(token)
+      end
+
+      path = dedicated_public_path
+      return path if host.blank?
+
+      scheme = protocol || "https"
+      "#{scheme}://#{host}#{path}"
+    end
+
+    def cdn_published?
+      cdn_metadata["published_at"].present?
+    end
+
+    def mark_cdn_published!(key:, public_url:, etag: nil)
+      stamp = Time.now.utc.iso8601
+      next_metadata = (metadata || {}).deep_dup
+      next_metadata["cdn"] = (next_metadata["cdn"] || {}).merge(
+        "published_at" => stamp,
+        "object_key" => key,
+        "public_url" => public_url,
+        "etag" => etag
+      ).compact
+      # Recordables are often readonly; update_all avoids revise and after_commit re-publish loops.
+      self.class.where(id: id).update_all(metadata: next_metadata, updated_at: Time.now.utc)
+      self.metadata = next_metadata
+    end
+
+    def enqueue_cdn_publish!
+      return unless cdn_url_strategy?
+      return unless Cdn.public_base_configured?
+
+      PublishEmbedToCdnJob.perform_later(id)
     end
 
     def default_embed_mode
@@ -127,6 +187,17 @@ module RecordingStudioEmbeddable
 
     def normalize_domain_list(value)
       Array(value).flat_map { |entry| entry.to_s.split(/[\s,]+/) }.map(&:strip).compact_blank.uniq
+    end
+
+    def cdn_metadata
+      raw = metadata.is_a?(Hash) ? metadata : {}
+      (raw["cdn"] || raw[:cdn] || {}).stringify_keys
+    end
+
+    def enqueue_cdn_publish_if_needed
+      return unless cdn_url_strategy?
+
+      enqueue_cdn_publish!
     end
 
     class << self

@@ -41,7 +41,21 @@ module RecordingStudioEmbeddable
       :bot_detector,
       :management_authorizer,
       :token_bytes,
-      :prune_views_after
+      :prune_views_after,
+      :cdn_public_base_url,
+      :cdn_object_prefix,
+      :cdn_cache_control,
+      :cdn_spaces_endpoint,
+      :cdn_spaces_region,
+      :cdn_spaces_bucket,
+      :cdn_spaces_access_key_id,
+      :cdn_spaces_secret_access_key,
+      :cdn_cloudflare_zone_id,
+      :cdn_cloudflare_api_token,
+      :cdn_publish_queue,
+      :cdn_withhold_snippet_until_published,
+      :cdn_storage,
+      :cdn_purger
     )
     attr_reader :hooks
 
@@ -97,6 +111,20 @@ module RecordingStudioEmbeddable
       }
       @token_bytes = 24
       @prune_views_after = 90.respond_to?(:days) ? 90.days : 90 * 24 * 60 * 60
+      @cdn_public_base_url = nil
+      @cdn_object_prefix = "embeds"
+      @cdn_cache_control = "public, max-age=300, stale-while-revalidate=60"
+      @cdn_spaces_endpoint = nil
+      @cdn_spaces_region = nil
+      @cdn_spaces_bucket = nil
+      @cdn_spaces_access_key_id = nil
+      @cdn_spaces_secret_access_key = nil
+      @cdn_cloudflare_zone_id = nil
+      @cdn_cloudflare_api_token = nil
+      @cdn_publish_queue = :default
+      @cdn_withhold_snippet_until_published = false
+      @cdn_storage = nil
+      @cdn_purger = nil
       @hooks = Hooks.new
     end
 
@@ -133,6 +161,9 @@ module RecordingStudioEmbeddable
         async_view_logging: async_view_logging,
         token_bytes: token_bytes,
         prune_views_after: prune_views_after,
+        cdn_public_base_url: cdn_public_base_url,
+        cdn_object_prefix: cdn_object_prefix,
+        cdn_withhold_snippet_until_published: cdn_withhold_snippet_until_published,
         hooks_registered: hooks.instance_variable_get(:@registry).transform_values(&:size)
       }
     end

@@ -8,3 +8,4 @@ Next steps:
 4. Apply the migrations with `bin/rails db:migrate`.
 5. Run `bin/rails tailwindcss:build` if you use Tailwind CSS.
 6. Mount routes are added at the configured mount path. Adjust auth, layout, and current actor integration to match your host app.
+7. For CDN Strategy 1 (DigitalOcean Spaces + Cloudflare), set `embed_url_strategy = :cdn` and the `EMBED_CDN_*` env vars documented in docs/CDN.md. Add `gem "aws-sdk-s3"` when publishing for real.
