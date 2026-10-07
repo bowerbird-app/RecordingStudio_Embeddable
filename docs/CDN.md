@@ -50,11 +50,34 @@ bin/rails generate recording_studio_artifacts:migrations
 bin/rails db:migrate
 ```
 
-Then set `ARTIFACT_CDN_*` (or credentials under `recording_studio_artifacts.cdn`)
-and add `gem "aws-sdk-s3"` in production. Full key list:
+### Host credentials (production)
+
+**Real R2 / CDN values stay host-owned.** Embeddable and Artifacts do not ship
+production secrets. Set either:
+
+1. **ENV** — preferred for App Platform / CI:
+   - `ARTIFACT_CDN_SUBDOMAIN`, `ARTIFACT_CDN_DOMAIN`, `ARTIFACT_CDN_PATH_PREFIX`
+   - `ARTIFACT_CDN_PUBLIC_BASE_URL` (optional full-base override)
+   - `ARTIFACT_CDN_R2_ACCOUNT_ID`, `ARTIFACT_CDN_R2_ACCESS_KEY_ID`,
+     `ARTIFACT_CDN_R2_SECRET_ACCESS_KEY`, `ARTIFACT_CDN_R2_BUCKET`,
+     `ARTIFACT_CDN_R2_ENDPOINT`, `ARTIFACT_CDN_R2_REGION`
+   - `ARTIFACT_CDN_CLOUDFLARE_ZONE_ID`, `ARTIFACT_CDN_CLOUDFLARE_API_TOKEN`
+2. **Host Rails credentials** under `recording_studio_artifacts.cdn` (same key
+   names as above, without the `ARTIFACT_CDN_` prefix).
+
+Add `gem "aws-sdk-s3"` in production. Full resolve order and DNS notes:
 [RecordingStudio_artifacts docs/CDN.md](https://github.com/bowerbird-app/RecordingStudio_artifacts/blob/main/docs/CDN.md).
 
-Dummy / test apps can assign Artifacts MemoryStorage:
+### Dummy credentials (this gem only)
+
+The shared dummy file `test/dummy/config/credentials.yml.enc` (same
+RecordingStudio_* development master key as sibling gems) includes a
+`recording_studio_artifacts.cdn` key shape with safe placeholders
+(`dev_placeholder`, `https://artifacts.example.test`). That blob is for
+**dummy development only** — it is not production R2.
+
+Dummy / test apps keep Artifacts `MemoryStorage` plus a fake
+`cdn_public_base_url` so publish works without real R2:
 
 ```ruby
 storage = RecordingStudioArtifacts::Cdn::MemoryStorage.new

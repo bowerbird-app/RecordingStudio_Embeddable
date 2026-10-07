@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 RecordingStudioArtifacts.configure do |config|
-  # Dummy / test publish target: MemoryStorage so CDN publish works without R2 keys.
-  # Production hosts set ARTIFACT_CDN_* (or credentials) and gem "aws-sdk-s3".
-  # See RecordingStudio_artifacts docs/CDN.md and this gem's docs/CDN.md.
+  # Dummy / test: MemoryStorage + fake public_base_url so publish works without R2.
+  # Hosts own real secrets via ARTIFACT_CDN_* ENV or credentials under
+  # recording_studio_artifacts.cdn (see docs/CDN.md). Do not ship production R2
+  # keys in this gem. Dummy credentials.yml.enc only shows the key shape with
+  # safe placeholders under the shared RecordingStudio_* master key.
   config.cdn_public_base_url =
     ENV.fetch("ARTIFACT_CDN_PUBLIC_BASE_URL", nil).presence ||
     "https://artifacts.example.test"

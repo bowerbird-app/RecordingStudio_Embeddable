@@ -7,6 +7,21 @@ require "active_support/encrypted_file"
 class DummyCredentialsTest < Minitest::Test
   PLACEHOLDER = "dev_placeholder"
 
+  CDN_CREDENTIAL_KEYS = %w[
+    subdomain
+    domain
+    path_prefix
+    public_base_url
+    r2_account_id
+    r2_access_key_id
+    r2_secret_access_key
+    r2_bucket
+    r2_endpoint
+    r2_region
+    cloudflare_zone_id
+    cloudflare_api_token
+  ].freeze
+
   def test_only_dummy_credentials_file_is_committed
     tracked = Dir.chdir(File.expand_path("..", __dir__)) do
       `git ls-files -- '*.yml.enc'`.split("\n").reject(&:empty?)
@@ -50,6 +65,34 @@ class DummyCredentialsTest < Minitest::Test
     assert_equal PLACEHOLDER, parsed.dig("smtp", "password")
     assert_equal PLACEHOLDER, parsed.dig("aws", "access_key_id")
     assert_equal PLACEHOLDER, parsed.dig("aws", "secret_access_key")
+    assert_equal PLACEHOLDER, parsed.dig("recording_studio_artifacts", "api_key")
+
+    cdn = parsed.dig("recording_studio_artifacts", "cdn")
+    assert_kind_of Hash, cdn, "Expected recording_studio_artifacts.cdn in shared dummy credentials"
+    CDN_CREDENTIAL_KEYS.each do |key|
+      assert cdn.key?(key), "Expected recording_studio_artifacts.cdn.#{key} in shared dummy credentials"
+    end
+    assert_equal "https://artifacts.example.test", cdn.fetch("public_base_url")
+    assert_equal PLACEHOLDER, cdn.fetch("r2_secret_access_key")
+  end
+
+  def test_cdn_credential_env_names_are_documented_for_hosts
+    docs = File.read(File.expand_path("../docs/CDN.md", __dir__))
+    %w[
+      ARTIFACT_CDN_SUBDOMAIN
+      ARTIFACT_CDN_DOMAIN
+      ARTIFACT_CDN_PATH_PREFIX
+      ARTIFACT_CDN_PUBLIC_BASE_URL
+      ARTIFACT_CDN_R2_ACCOUNT_ID
+      ARTIFACT_CDN_R2_ACCESS_KEY_ID
+      ARTIFACT_CDN_R2_SECRET_ACCESS_KEY
+      ARTIFACT_CDN_R2_BUCKET
+      ARTIFACT_CDN_CLOUDFLARE_ZONE_ID
+      ARTIFACT_CDN_CLOUDFLARE_API_TOKEN
+    ].each do |env_name|
+      assert_includes docs, env_name
+    end
+    assert_includes docs, "recording_studio_artifacts.cdn"
   end
 
   private

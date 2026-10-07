@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `docs/CDN.md` for Artifacts consumer wiring (no Spaces).
 - Dummy installs Artifacts (migration + MemoryStorage initializer) so CDN publish
   is exercisable without real R2 credentials.
+- Shared dummy credentials (`test/dummy/config/credentials.yml.enc`) include
+  `recording_studio_artifacts.cdn` placeholder keys (`dev_placeholder`, fake
+  `public_base_url`). Hosts still own real `ARTIFACT_CDN_*` / R2 secrets.
 - Dummy mounts Recording Studio API at `/recording_studio_api` and allowlists GET `:embed` on Page. An AccessGrant client can fetch BrowserPayload schema v1 (`schema_version`, `html`, `configuration`, `sdk`) without a host-owned handler.
 
 ### Changed

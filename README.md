@@ -92,8 +92,11 @@ RecordingStudioArtifacts.update(id: artifact_id, body: html, content_type: "..."
 on `embed.metadata["artifact"]`). That URL looks like
 `https://{subdomain}.{domain}/recording_studio_artifacts/{uuid}` — never the Rails mount.
 
-Install and configure Artifacts first (`ARTIFACT_CDN_*`, migrations, `aws-sdk-s3` in
-production). Dummy uses Artifacts `MemoryStorage`. Details: [`docs/CDN.md`](docs/CDN.md).
+Install and configure Artifacts first. **Hosts supply real CDN secrets** via
+`ARTIFACT_CDN_*` ENV or host credentials under `recording_studio_artifacts.cdn`
+(plus `aws-sdk-s3` in production). This gem does not ship production R2 keys.
+Dummy uses Artifacts `MemoryStorage` and safe placeholders in the shared dummy
+credentials file. Details: [`docs/CDN.md`](docs/CDN.md).
 
 Hosts should call `recording.enqueue_embed_cdn_publish!` after parent content, theme,
 or publishable changes that affect the rendered document.
@@ -166,7 +169,7 @@ cd test/dummy && bin/dev
 
 The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine. It pins Accessible `v0.11.1`, Publishable `v0.4.2`, Attachable `v0.7.1`, Admin `v2.0.4`, and Recording Studio API `v0.5.5` (held). It mounts the public API so GET `:embed` can be exercised over HTTP. Dummy grants access through Accessible's public services and shims `RecordingStudio::Access.roles` so API 0.5.5 can still authorize member actions against string roles.
 
-Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key.
+Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key. The dummy blob includes `recording_studio_artifacts.cdn` placeholders (`dev_placeholder`, fake `public_base_url`) so the key shape is visible; hosts set real `ARTIFACT_CDN_*` (or host credentials) themselves.
 
 ## Cloud Agent boot
 
