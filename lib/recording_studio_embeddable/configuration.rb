@@ -41,7 +41,11 @@ module RecordingStudioEmbeddable
       :bot_detector,
       :management_authorizer,
       :token_bytes,
-      :prune_views_after
+      :prune_views_after,
+      :cdn_publish_queue,
+      :cdn_withhold_snippet_until_published,
+      :cdn_storage,
+      :cdn_purger
     )
     attr_reader :hooks
 
@@ -97,6 +101,10 @@ module RecordingStudioEmbeddable
       }
       @token_bytes = 24
       @prune_views_after = 90.respond_to?(:days) ? 90.days : 90 * 24 * 60 * 60
+      @cdn_publish_queue = :default
+      @cdn_withhold_snippet_until_published = false
+      @cdn_storage = nil
+      @cdn_purger = nil
       @hooks = Hooks.new
     end
 
@@ -133,6 +141,7 @@ module RecordingStudioEmbeddable
         async_view_logging: async_view_logging,
         token_bytes: token_bytes,
         prune_views_after: prune_views_after,
+        cdn_withhold_snippet_until_published: cdn_withhold_snippet_until_published,
         hooks_registered: hooks.instance_variable_get(:@registry).transform_values(&:size)
       }
     end

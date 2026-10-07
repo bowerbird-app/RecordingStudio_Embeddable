@@ -283,14 +283,15 @@
   <div class="flex flex-col gap-2">
     <%= render FlatPack::SectionTitle::Component.new(
       title: "recording.embed_public_path",
-      subtitle: "Builds the relative public URL path for the embed",
+      subtitle: "Builds the relative public URL path for the embed (Artifacts path when strategy is :cdn)",
     ) %>
 
     <%= render FlatPack::CodeBlock::Component.new(
       language: :ruby,
       code: <<~'CODE'
         recording.embed_public_path
-        # => "/recording_studio_embeddable/embeds/..."
+        # dedicated => "/recording_studio_embeddable/embeds/..."
+        # cdn       => "/recording_studio_artifacts/{uuid}"  # from Artifacts
       CODE
     ) %>
   </div>
@@ -298,14 +299,15 @@
   <div class="flex flex-col gap-2">
     <%= render FlatPack::SectionTitle::Component.new(
       title: "recording.embed_public_url",
-      subtitle: "Builds the absolute public URL for the embed",
+      subtitle: "Builds the absolute public URL (Artifacts public_url when strategy is :cdn)",
     ) %>
 
     <%= render FlatPack::CodeBlock::Component.new(
       language: :ruby,
       code: <<~'CODE'
-        recording.embed_public_url
-        # => "https://app.example.com/recording_studio_embeddable/embeds/..."
+        recording.embed_public_url(host: "app.example.com")
+        # dedicated => "https://app.example.com/recording_studio_embeddable/embeds/..."
+        # cdn       => "https://artifacts.example.test/recording_studio_artifacts/{uuid}"
       CODE
     ) %>
   </div>
@@ -320,7 +322,22 @@
       language: :ruby,
       code: <<~'CODE'
         recording.embed_code(host: "app.example.com", protocol: "https")
-        # => "<iframe ...>"
+        # => "<iframe src=\"…Artifacts or dedicated URL…\" ...>"
+      CODE
+    ) %>
+  </div>
+
+  <div class="flex flex-col gap-2">
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "recording.enqueue_embed_cdn_publish!",
+      subtitle: "Re-publish iframe HTML to Artifacts after parent content / theme / publishable changes",
+    ) %>
+
+    <%= render FlatPack::CodeBlock::Component.new(
+      language: :ruby,
+      code: <<~'CODE'
+        recording.enqueue_embed_cdn_publish!
+        # => PublishEmbedToCdnJob → RecordingStudioArtifacts.publish / .update
       CODE
     ) %>
   </div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_02_000012) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_07_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -203,6 +203,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_02_000012) do
     t.jsonb "runtime_overrides", default: {}, null: false
     t.datetime "updated_at", null: false
     t.index ["key"], name: "index_recording_studio_api_api_settings_on_key", unique: true
+  end
+
+  create_table "recording_studio_artifacts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "format", null: false
+    t.string "content_type", null: false
+    t.text "body", null: false
+    t.jsonb "source", default: {}, null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.string "status", default: "pending", null: false
+    t.string "object_key"
+    t.string "public_url"
+    t.string "etag"
+    t.datetime "published_at"
+    t.text "last_error"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["object_key"], name: "index_recording_studio_artifacts_on_object_key", unique: true
+    t.index ["published_at"], name: "index_recording_studio_artifacts_on_published_at"
+    t.index ["status"], name: "index_recording_studio_artifacts_on_status"
   end
 
   create_table "recording_studio_device_sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

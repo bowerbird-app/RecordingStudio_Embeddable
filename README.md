@@ -4,12 +4,13 @@ RecordingStudio Embeddable is the Rails engine for secure public embeds in Recor
 
 Two delivery modes ship in this gem:
 
-1. **Iframe mode** — tokenized public HTML document for `<iframe src="…">`.
+1. **Iframe mode** — tokenized public HTML document for `<iframe src="…">` (dedicated Rails mount, or CDN via Artifacts).
 2. **Browser-payload mode** — sanitized HTML fragment plus configuration for the WordPress Plugin Demo SDK (schema version 1).
 
 ## What It Includes
 
 - Public embed routes for tokenized iframe recordings.
+- CDN publish through [`recording_studio_artifacts`](https://github.com/bowerbird-app/RecordingStudio_artifacts) (Cloudflare R2) when `embed_url_strategy` is `:cdn`.
 - `RenderPayload` / `BrowserPayload` for API and SDK consumers (fragment + theme/sizing, no document chrome).
 - Soft `:embed` capability-action registration when `recording_studio_api` is present (no hard dependency).
 - A management UI for previewing, editing, styling, and reviewing stats for embeds.
@@ -22,6 +23,7 @@ Two delivery modes ship in this gem:
 - Ruby 3.3 or newer.
 - Rails 8.1 or newer.
 - A host application that can mount the engine and run the supplied migrations.
+- `recording_studio_artifacts` `~> 0.3.0` (CDN publish path).
 
 ## Install
 
@@ -67,11 +69,34 @@ article.embed_code(host: "example.com")
 
 ## Iframe mode
 
+### Dedicated (default)
+
 The public embed route is token-based and lives under the mounted engine path:
 
 `/recording_studio_embeddable/embeds/:token`
 
 That path returns a full HTML document (embed layout, FlatPack CSS, theme CSS variables). It applies domain policy, HTTP cache validators, rate limiting, and **counts as a public view** via `CaptureView` / `EmbeddableViewLog`.
+
+### CDN (Artifacts)
+
+Set `config.embed_url_strategy = :cdn` (or per-embed). Embeddable pre-renders the
+iframe document and calls:
+
+```ruby
+RecordingStudioArtifacts.publish(body: html, content_type: "text/html; charset=utf-8", ...)
+# re-publish:
+RecordingStudioArtifacts.update(id: artifact_id, body: html, content_type: "...")
+```
+
+`embed_public_url` / `embed_code` then return `result.value[:public_url]` (also stored
+on `embed.metadata["artifact"]`). That URL looks like
+`https://{subdomain}.{domain}/recording_studio_artifacts/{uuid}` — never the Rails mount.
+
+Install and configure Artifacts first (`ARTIFACT_CDN_*`, migrations, `aws-sdk-s3` in
+production). Dummy uses Artifacts `MemoryStorage`. Details: [`docs/CDN.md`](docs/CDN.md).
+
+Hosts should call `recording.enqueue_embed_cdn_publish!` after parent content, theme,
+or publishable changes that affect the rendered document.
 
 ## Browser-payload mode
 

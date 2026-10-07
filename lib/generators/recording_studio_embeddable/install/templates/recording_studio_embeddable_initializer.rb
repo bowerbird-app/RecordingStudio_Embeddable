@@ -2,6 +2,9 @@
 
 RecordingStudioEmbeddable.configure do |config|
   config.public_embeds_enabled = true
+  # :dedicated serves App Platform Rails. :cdn publishes iframe HTML via
+  # RecordingStudioArtifacts (Cloudflare R2) — partner snippets then use the
+  # Artifacts public URL only (never the Rails mount). See docs/CDN.md.
   config.embed_url_strategy = :dedicated
   config.allowed_embed_modes = %i[iframe oembed]
   config.default_embed_mode = :iframe
@@ -26,6 +29,12 @@ RecordingStudioEmbeddable.configure do |config|
   config.view_log_raw_ip = false
   config.view_log_raw_user_agent = false
   config.view_log_raw_referer = false
+
+  # CDN via RecordingStudioArtifacts. Host owns ARTIFACT_CDN_* / R2 / DNS.
+  # Install Artifacts (migrations + initializer) before flipping strategy to :cdn.
+  config.cdn_withhold_snippet_until_published = false
+  config.cdn_publish_queue = :default
+
   config.management_authorizer = lambda do |controller:|
     next false unless controller.respond_to?(:current_user, true)
 

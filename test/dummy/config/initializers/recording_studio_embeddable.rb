@@ -12,4 +12,9 @@ RecordingStudioEmbeddable.configure do |config|
     user = controller.send(:current_user)
     user.present? && user.respond_to?(:RS_accessible, true) && user.RS_accessible
   end
+
+  # CDN strategy publishes via RecordingStudioArtifacts (see recording_studio_artifacts.rb).
+  # Dummy keeps :dedicated by default; CDN tests flip strategy per example.
+  config.cdn_withhold_snippet_until_published = false
+  config.cdn_publish_queue = :default
 end

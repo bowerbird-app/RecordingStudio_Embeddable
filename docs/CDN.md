@@ -1,0 +1,103 @@
+# CDN publish — RecordingStudio Artifacts (Cloudflare R2)
+
+Partner iframe traffic should hit a stable Artifacts public URL, not App Platform
+Rails. Embeddable pre-renders the iframe HTML and calls the Artifacts service API.
+**Artifacts owns R2 upload, object keys, and public URL shape.** Embeddable does
+not talk to DigitalOcean Spaces.
+
+Pretty host paths (Cloudflare Worker) are a separate follow-up.
+
+## URL strategy
+
+Set `config.embed_url_strategy = :cdn` (or per-embed `embed_url_strategy = "cdn"`).
+
+| Helper | Dedicated (default) | CDN (Artifacts) |
+|--------|---------------------|-----------------|
+| `embed_public_path` | `/recording_studio_embeddable/embeds/:token` | `/recording_studio_artifacts/{uuid}` |
+| `embed_public_url` | host + dedicated path | Artifacts `public_url` |
+| `embed_code` | iframe at dedicated URL | iframe at Artifacts URL only |
+
+CDN helpers **never** paste the Rails mount into partner markup. The public URL
+comes from `RecordingStudioArtifacts.publish` / `.update` →
+`result.value[:public_url]` (also stored on the embed as
+`metadata.artifact.public_url`).
+
+Until the first publish succeeds you can set
+`config.cdn_withhold_snippet_until_published = true` so `embed_code` stays empty
+until `metadata.artifact.published_at` is set.
+
+Default public URL shape (host-owned DNS):
+
+```text
+https://{subdomain}.{domain}/recording_studio_artifacts/{artifact_uuid}
+```
+
+Content updates call `.update` so the UUID and URL never change.
+
+## Install Artifacts (host)
+
+```bash
+# Gemfile — same GitHub tag pattern as other RecordingStudio_* siblings
+gem "recording_studio_artifacts", "~> 0.3.0",
+    github: "bowerbird-app/RecordingStudio_artifacts", tag: "v0.3.0"
+
+bundle install
+bin/rails generate recording_studio_artifacts:install
+bin/rails generate recording_studio_artifacts:migrations
+bin/rails db:migrate
+```
+
+Then set `ARTIFACT_CDN_*` (or credentials under `recording_studio_artifacts.cdn`)
+and add `gem "aws-sdk-s3"` in production. Full key list:
+[RecordingStudio_artifacts docs/CDN.md](https://github.com/bowerbird-app/RecordingStudio_artifacts/blob/main/docs/CDN.md).
+
+Dummy / test apps can assign Artifacts MemoryStorage:
+
+```ruby
+storage = RecordingStudioArtifacts::Cdn::MemoryStorage.new
+RecordingStudioArtifacts.configure do |config|
+  config.cdn_public_base_url = "https://artifacts.example.test"
+  config.cdn_storage = storage
+  config.cdn_purger = storage
+end
+```
+
+## Publish triggers
+
+`PublishEmbedToCdnJob` runs when:
+
+- An embed with CDN strategy is created or updated (settings, domains, styling, enable/disable)
+- The host calls `recording.enqueue_embed_cdn_publish!` after parent recording / theme / publishable changes
+
+The job calls `Services::PublishEmbedToCdn`, which:
+
+1. Renders the full iframe document (`RenderEmbedDocument`) and bakes
+   `DomainPolicy#frame_ancestors` into an HTML CSP meta marker
+2. Calls `RecordingStudioArtifacts.publish` (first time) or `.update` (re-publish)
+   with `synchronous: true`
+3. Stores `metadata.artifact` (`id`, `public_url`, `published_at`, …)
+
+Disabled or unpublished embeds overwrite the same artifact with a minimal
+“unavailable” document (`frame-ancestors 'none'`).
+
+## Domain / frame-ancestors
+
+Static HTML cannot vary CSP by `Referer`. At publish time Embeddable injects a
+CSP comment + `<meta http-equiv="Content-Security-Policy">` into the HTML and
+stores `frame_ancestors` on the Artifacts metadata. Hosts that need a real CSP
+**response header** should promote it with a Cloudflare Transform Rule or Worker
+(pretty-URL Worker is still deferred).
+
+## CaptureView / rate limit
+
+CDN-served hits never reach `EmbedsController`, so `CaptureView` and the Rails
+rate limiter do not run on the edge. Use Cloudflare rate limiting / analytics for
+CDN traffic. Keep `EmbedsController` as an optional origin fallback during
+migration. Browser-payload / API embeds stay on Rails.
+
+## What was retired
+
+PR #10’s DigitalOcean Spaces path (`EMBED_CDN_SPACES_*`, `Cdn::SpacesClient`,
+Spaces MemoryStorage as Embeddable’s upload target) is **not** the source of
+truth. Do not reintroduce Spaces upload in this gem. Artifacts → R2 is the
+publish path.
