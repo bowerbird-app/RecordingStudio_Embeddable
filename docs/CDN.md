@@ -37,9 +37,12 @@ Content updates call `.update` so the UUID and URL never change.
 ## Install Artifacts (host)
 
 ```bash
-# Gemfile — same GitHub tag pattern as other RecordingStudio_* siblings
-gem "recording_studio_artifacts", "~> 0.3.0",
-    github: "bowerbird-app/RecordingStudio_artifacts", tag: "v0.3.0"
+# Intended (when upstream is public):
+# gem "recording_studio_artifacts", "~> 0.3.0",
+#     github: "bowerbird-app/RecordingStudio_artifacts", tag: "v0.3.0"
+#
+# This repo currently vendors v0.3.0 (private upstream; see RecordingStudio_artifacts#2):
+gem "recording_studio_artifacts", "~> 0.3.0", path: "vendor/recording_studio_artifacts"
 
 bundle install
 bin/rails generate recording_studio_artifacts:install
