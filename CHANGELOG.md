@@ -7,6 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-08
+
+### Added
+- Rich Flatpack embed body (shared `_rich_body`) with title, description, cover
+  image, and gallery. Images use Attachable **direct** URLs (`url_mode: :direct`)
+  with `srcset`/`sizes` across preprocessed variants, `loading="lazy"` (eager for
+  the cover), and explicit `width`/`height`.
+- `DirectImageUrls` + `DirectImageHelper` — build image tags from Attachable's
+  public API only (`original_url` / `url_for_variant` with `mode: :direct`,
+  `variant_processed?`). Unprocessed variants are omitted from `srcset` instead
+  of falling back to Rails preview paths.
+- `EnsureEmbedImageVariants` — before Artifacts publish, runs Attachable's
+  `PreprocessVariantsJob` synchronously for every image on the recording and
+  verifies `variant_processed?` for each configured preprocessed name.
+- `PublishedHtmlGuard` — refuses to publish HTML that still contains
+  `/rails/active_storage` or Attachable Rails preview/file paths. If variants
+  are not ready after sync processing, publish **defers** and re-enqueues
+  `PublishEmbedToCdnJob` (`config.cdn_variant_retry_wait`, default 15s).
+- Dummy Attachable pin `v0.9.0` with `direct_url_host = "cdn.example.test"`,
+  seed cover + gallery fixtures, and a dummy-only `DummyCdnController` /
+  `DummyCdnHost` middleware so direct URLs resolve locally for screenshots.
+
+### Changed
+- Version bump to `0.5.0`.
+- Public embed 404 EmptyState title is **Oops** with heroicon `exclamation-circle`
+  (still HTTP 404, still Flatpack EmptyState).
+- Runtime dependency on `recording_studio_attachable` `~> 0.9`.
+- Pin `flat_pack` to `~> 0.1.207` (Attachable 0.9 requires `>= 0.1.205`).
+
+### Upgrade notes
+- Bump the gem to `0.5.0` and add/upgrade `recording_studio_attachable` to
+  `~> 0.9` (GitHub tag `v0.9.0`).
+- For direct image URLs on embeds, set Attachable:
+  `config.url_mode = :direct` and `config.direct_url_host = "images.example.com"`.
+  Calling `:direct` without a host raises `RecordingStudioAttachable::ConfigurationError`.
+- Ensure Active Storage `track_variants` stays enabled. Default preprocessing is
+  `small`/`med`/`large` plus host-added `image_variants` names.
+- No data migration. Existing embeds republish on the next CDN job; HTML then
+  uses direct host URLs only when images are present and variants are processed.
+
 ## [0.4.0] - 2026-10-08
 
 ### Added

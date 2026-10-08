@@ -1,0 +1,55 @@
+<%#
+  Shared Flatpack embed body: title, description, cover, gallery.
+  Locals:
+    recordable: - host recordable (Page, Article, …)
+    recording:  - parent Recording (for Attachable images)
+%>
+<% recordable = local_assigns[:recordable] || @parent_recordable || @recordable %>
+<% recording = local_assigns[:recording] || @parent_recording || @recording %>
+<% images = embed_cover_and_gallery(recording) %>
+<% cover = images[:cover] %>
+<% gallery = images[:gallery] %>
+<% body_text = recordable&.try(:description).presence || "No description provided." %>
+<% title_text = recordable&.try(:title).presence || recordable&.try(:recordable_name).presence || "Embedded page" %>
+
+<div class="mx-auto w-full max-w-[var(--embed-max-width,48rem)] px-[var(--embed-padding,1rem)] py-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: title_text,
+    subtitle: nil,
+    variant: :h1
+  ) %>
+
+  <% if cover %>
+    <figure class="mb-6 overflow-hidden rounded-[var(--radius-lg,0.5rem)]">
+      <%= embed_direct_image_tag(cover, cover: true, class: "h-auto w-full object-cover") %>
+      <% if cover.caption.present? || cover.credit.present? %>
+        <figcaption class="mt-2 text-sm text-[var(--surface-muted-content-color)]">
+          <%= [cover.caption, cover.credit].compact.join(" · ") %>
+        </figcaption>
+      <% end %>
+    </figure>
+  <% end %>
+
+  <%= render FlatPack::Content::Component.new do %>
+    <%= simple_format(body_text) %>
+  <% end %>
+
+  <% if gallery.any? %>
+    <%= render FlatPack::SectionTitle::Component.new(
+      title: "Gallery",
+      subtitle: "More shots from this page"
+    ) %>
+    <%= render FlatPack::Grid::Component.new(cols: 2, gap: :md) do %>
+      <% gallery.each do |image| %>
+        <figure class="overflow-hidden rounded-[var(--radius-md,0.375rem)]">
+          <%= embed_direct_image_tag(image, class: "h-auto w-full object-cover") %>
+          <% if image.caption.present? || image.credit.present? %>
+            <figcaption class="mt-2 text-xs text-[var(--surface-muted-content-color)]">
+              <%= [image.caption, image.credit].compact.join(" · ") %>
+            </figcaption>
+          <% end %>
+        </figure>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

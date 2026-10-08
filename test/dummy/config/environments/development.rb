@@ -73,6 +73,9 @@ Rails.application.configure do
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
 
+  # Dummy Attachable direct_url_host stand-in (see DummyCdnHost middleware).
+  config.hosts << "cdn.example.test"
+
   # Codespaces environment configuration
   if ENV["CODESPACES"] == "true"
     # Relax CSRF origin check

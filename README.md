@@ -25,6 +25,8 @@ Two delivery modes ship in this gem:
 - A host application that can mount the engine and run the supplied migrations.
 - `recording_studio_artifacts` `~> 0.4.0` (always installed; usage gated by
   `config.artifacts_enabled`, default off).
+- `recording_studio_attachable` `~> 0.9` for direct image URLs on rich embeds
+  (`url_mode: :direct` + `direct_url_host`).
 
 ## Install
 
@@ -109,6 +111,25 @@ credentials file. Details: [`docs/CDN.md`](docs/CDN.md).
 
 Hosts should call `recording.enqueue_embed_cdn_publish!` after parent content, theme,
 or publishable changes that affect the rendered document.
+
+### Rich embeds and Attachable direct images
+
+The shared Flatpack embed body (`recording_studio_embeddable/embeds/rich_body`)
+renders title, description, cover, and gallery. Image `src` / `srcset` values come
+from Attachable direct URLs only:
+
+```ruby
+RecordingStudioAttachable.configure do |config|
+  config.url_mode = :direct
+  config.direct_url_host = "images.example.com"
+  # optional: config.image_variants = { poster: { resize_to_limit: [1280, 720] } }
+  # optional exact list: config.preprocessed_variants = %i[small med large poster]
+end
+```
+
+Before CDN publish, Embeddable processes preprocessed variants synchronously and
+refuses to upload HTML that still points at Rails / Active Storage delivery paths.
+See [`docs/CDN.md`](docs/CDN.md).
 
 ## Browser-payload mode
 

@@ -106,6 +106,85 @@ unless RecordingStudioAccessible.authorized?(actor: viewer, recording: root_reco
   raise viewer_grant.error unless viewer_grant.success?
 end
 
+# Cover + gallery images on the Getting Started page (Attachable direct URLs).
+# Runs after Accessible grants so upload authorization succeeds.
+press_kit = [
+  {
+    file: "kiln-canister-hero.jpg",
+    name: "Kiln canister",
+    caption: "Hero, three-quarter",
+    credit: "Studio North",
+    alt_text: "Smoked glass canister with a brass lid on pale limestone"
+  },
+  {
+    file: "kiln-canister-open.jpg",
+    name: "Kiln canister, open",
+    caption: "Lid set aside",
+    credit: "Studio North",
+    alt_text: "Smoked glass canister with the brass lid resting beside it"
+  },
+  {
+    file: "kiln-canister-detail.jpg",
+    name: "Kiln canister, detail",
+    caption: "Brass lid",
+    credit: "Studio North",
+    alt_text: "Close view of the brass lid on the smoked glass canister"
+  },
+  {
+    file: "kiln-canister-table.jpg",
+    name: "Kiln canister, table",
+    caption: "On the breakfast table",
+    credit: "Studio North",
+    alt_text: "Smoked glass canister on a linen table beside a cup and napkin"
+  }
+]
+press_kit_dir = Rails.root.join("db/seed_images")
+press_kit.each do |shot|
+  path = press_kit_dir.join(shot[:file])
+  raise "Missing seed image fixture: #{path}" unless path.file?
+end
+
+existing_page_images = page_recording.images(per_page: 100).to_a
+seed_blob_available = lambda do |recording|
+  attachment = recording&.recordable
+  next false unless attachment&.file&.attached?
+
+  blob = attachment.file.blob
+  blob.service.exist?(blob.key)
+rescue StandardError
+  false
+end
+
+press_kit.each do |shot|
+  existing = existing_page_images.find { |recording| recording.recordable.original_filename == shot[:file] }
+  next if existing && seed_blob_available.call(existing)
+
+  existing&.remove_attachment(actor: user)
+
+  image_recording = File.open(press_kit_dir.join(shot[:file]), "rb") do |io|
+    page_recording.import_attachment(
+      io: io,
+      filename: shot[:file],
+      content_type: "image/jpeg",
+      name: shot[:name],
+      actor: user,
+      source: "press_kit"
+    )
+  end
+  raise "Could not import #{shot[:file]}" if image_recording.nil?
+  raise "Imported #{shot[:file]} but blob is missing" unless seed_blob_available.call(image_recording)
+
+  image_recording.revise_attachment_metadata(
+    actor: user,
+    caption: shot[:caption],
+    credit: shot[:credit],
+    alt_text: shot[:alt_text]
+  )
+
+  attachment = image_recording.recordable
+  RecordingStudioAttachable::PreprocessVariantsJob.perform_now(attachment.id)
+end
+
 puts "Seeded: admin@admin.com / Password"
 puts "Seeded: viewer@admin.com / Password"
 puts "Seeded: Workspace '#{workspace.name}' with root recording ##{root_recording.id}"
@@ -115,3 +194,4 @@ puts "Seeded: Document '#{document.title}' (publishable enabled, embeddable not 
 puts "Seeded: Page public embed at /recording_studio_embeddable/embeds/#{page_recording.embed&.token}" if page_recording.respond_to?(:embed)
 puts "Seeded: Article public embed at /recording_studio_embeddable/embeds/#{article_recording.embed&.token}" if
   article_recording.respond_to?(:embed)
+puts "Seeded: Page press kit (#{press_kit.size} images) with Attachable direct URLs"

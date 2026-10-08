@@ -126,11 +126,27 @@ uses CDN strategy:
 
 The job calls `Services::PublishEmbedToCdn`, which:
 
-1. Renders the full iframe document (`RenderEmbedDocument`) and bakes
+1. Runs `EnsureEmbedImageVariants` — Attachable `PreprocessVariantsJob`
+   synchronously for every image on the parent recording, then checks
+   `variant_processed?` for each configured preprocessed variant. If any are
+   still missing, publish **defers** and re-enqueues the job after
+   `config.cdn_variant_retry_wait` (default 15s) instead of writing HTML that
+   would fall back to Rails preview paths.
+2. Renders the full iframe document (`RenderEmbedDocument`) and bakes
    `DomainPolicy#frame_ancestors` into an HTML CSP meta marker
-2. Calls `RecordingStudioArtifacts.publish` (first time) or `.update` (re-publish)
+3. Runs `PublishedHtmlGuard` so the body never contains `/rails/active_storage`
+   or Attachable Rails preview/file paths
+4. Calls `RecordingStudioArtifacts.publish` (first time) or `.update` (re-publish)
    with `synchronous: true`
-3. Stores `metadata.artifact` (`id`, `public_url`, `published_at`, …)
+5. Stores `metadata.artifact` (`id`, `public_url`, `published_at`, …)
+
+### Why sync process (then defer) instead of only re-enqueue?
+
+Publish already runs in a background job. Processing variants inline with
+Attachable's own `PreprocessVariantsJob.perform_now` is deterministic and reuses
+the public API. Deferral is only the safety valve when verification still fails
+(slow disk, transient errors) — Artifacts HTML is never published with Rails
+fallback image URLs.
 
 Disabled or publishable-blocked embeds overwrite the same artifact with a
 minimal “unavailable” document (`frame-ancestors 'none'`). Embeddable does not

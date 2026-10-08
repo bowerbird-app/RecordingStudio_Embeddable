@@ -47,7 +47,16 @@ module RecordingStudioEmbeddable
         options = Renderer.options_for(recording)
         available = publicly_available?(recording, options)
         frame_ancestors = resolve_frame_ancestors(options, available: available)
+
+        if available
+          variants = EnsureEmbedImageVariants.call(recording: recording)
+          unless variants.success?
+            return defer_until_variants_ready(variants.error)
+          end
+        end
+
         html = render_html(recording, frame_ancestors, available: available)
+        PublishedHtmlGuard.assert_direct_only!(html) if available
         publish_result = publish_via_artifacts(html, frame_ancestors: frame_ancestors)
         return publish_result if publish_result.failure?
 
@@ -159,6 +168,23 @@ module RecordingStudioEmbeddable
           public_url: public_url,
           object_key: artifact&.try(:object_key),
           etag: artifact&.try(:etag)
+        )
+      end
+
+      # Variants are processed synchronously in EnsureEmbedImageVariants. When
+      # verification still fails (slow disk, job error), defer publish instead of
+      # writing Artifacts HTML that would fall back to Rails preview paths.
+      def defer_until_variants_ready(error)
+        wait = RecordingStudioEmbeddable.configuration.cdn_variant_retry_wait || 15.seconds
+        if defined?(RecordingStudioEmbeddable::PublishEmbedToCdnJob) &&
+           embed.respond_to?(:id) && embed.id.present?
+          RecordingStudioEmbeddable::PublishEmbedToCdnJob.set(wait: wait).perform_later(embed.id)
+        end
+
+        success(
+          deferred: true,
+          reason: error.to_s,
+          wait: wait
         )
       end
 
