@@ -33,7 +33,7 @@ class DirectImageUrlsTest < Minitest::Test
       processed.include?(name.to_sym)
     end
 
-    def url_for_variant(name, mode: nil, rails_url: nil)
+    def url_for_variant(name, mode: nil, rails_url: nil) # rubocop:disable Lint/UnusedMethodArgument
       unless variant_processed?(name)
         raise ArgumentError, "rails_url is required when a direct variant URL cannot be built" if rails_url.blank?
 
@@ -46,9 +46,7 @@ class DirectImageUrlsTest < Minitest::Test
 
   def setup
     @host = "cdn.example.test"
-    unless defined?(RecordingStudioAttachable)
-      Object.const_set(:RecordingStudioAttachable, Module.new)
-    end
+    Object.const_set(:RecordingStudioAttachable, Module.new) unless defined?(RecordingStudioAttachable)
     unless RecordingStudioAttachable.const_defined?(:ConfigurationError)
       RecordingStudioAttachable.const_set(:ConfigurationError, Class.new(StandardError))
     end
@@ -60,20 +58,20 @@ class DirectImageUrlsTest < Minitest::Test
       end
       RecordingStudioAttachable.const_set(:DirectUrl, mod)
     end
-    unless RecordingStudioAttachable.respond_to?(:configuration)
-      config = Object.new
-      config.define_singleton_method(:direct_url_host) { "cdn.example.test" }
-      config.define_singleton_method(:preprocessed_variants) { %i[small med large poster] }
-      config.define_singleton_method(:image_variant) do |name|
-        {
-          small: { resize_to_limit: [480, 480] },
-          med: { resize_to_limit: [960, 960] },
-          large: { resize_to_limit: [1600, 1600] },
-          poster: { resize_to_limit: [1280, 720] }
-        }[name.to_sym]
-      end
-      RecordingStudioAttachable.define_singleton_method(:configuration) { config }
+    return if RecordingStudioAttachable.respond_to?(:configuration)
+
+    config = Object.new
+    config.define_singleton_method(:direct_url_host) { "cdn.example.test" }
+    config.define_singleton_method(:preprocessed_variants) { %i[small med large poster] }
+    config.define_singleton_method(:image_variant) do |name|
+      {
+        small: { resize_to_limit: [480, 480] },
+        med: { resize_to_limit: [960, 960] },
+        large: { resize_to_limit: [1600, 1600] },
+        poster: { resize_to_limit: [1280, 720] }
+      }[name.to_sym]
     end
+    RecordingStudioAttachable.define_singleton_method(:configuration) { config }
   end
 
   def test_builds_srcset_from_processed_direct_variants_only

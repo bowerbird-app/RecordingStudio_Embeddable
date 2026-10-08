@@ -191,7 +191,7 @@ class CdnPublishTest < Minitest::Test
     assert result.success?, result.error.to_s
     assert result.value[:deferred]
     assert_match(/not processed yet/, result.value[:reason])
-    assert_equal [embed.id], enqueued.map { |row| row[:id] }
+    assert_equal([embed.id], enqueued.map { |row| row[:id] })
     assert_empty @publish_calls
   ensure
     ensure_mod.define_singleton_method(:call, original) if ensure_mod && original
@@ -209,7 +209,7 @@ class CdnPublishTest < Minitest::Test
       stub_document_render(bad) do
         result = publish_embed(embed)
         assert result.failure?
-        assert_match(/must not include Rails\/Active Storage/, result.error.to_s)
+        assert_match(%r{must not include Rails/Active Storage}, result.error.to_s)
         assert_empty @publish_calls
       end
     end

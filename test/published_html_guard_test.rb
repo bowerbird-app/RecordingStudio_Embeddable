@@ -19,7 +19,7 @@ class PublishedHtmlGuardTest < Minitest::Test
     error = assert_raises(ArgumentError) do
       RecordingStudioEmbeddable::PublishedHtmlGuard.assert_direct_only!(html)
     end
-    assert_match(/must not include Rails\/Active Storage/, error.message)
+    assert_match(%r{must not include Rails/Active Storage}, error.message)
   end
 
   def test_rejects_attachable_preview_fallback_paths

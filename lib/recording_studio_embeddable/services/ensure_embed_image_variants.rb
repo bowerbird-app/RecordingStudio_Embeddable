@@ -31,7 +31,9 @@ module RecordingStudioEmbeddable
         missing = missing_variants(attachments, variants)
         if missing.any?
           return failure(
-            "Embed image variants are not processed yet: #{missing.map { |row| "#{row[:attachment_id]}:#{row[:variant]}" }.join(", ")}"
+            "Embed image variants are not processed yet: #{missing.map do |row|
+              "#{row[:attachment_id]}:#{row[:variant]}"
+            end.join(', ')}"
           )
         end
 
@@ -41,8 +43,7 @@ module RecordingStudioEmbeddable
       end
 
       def attachable_available?
-        defined?(RecordingStudioAttachable) &&
-          defined?(RecordingStudioAttachable::PreprocessVariantsJob) &&
+        defined?(RecordingStudioAttachable::PreprocessVariantsJob) &&
           defined?(RecordingStudioAttachable::Attachment)
       end
 

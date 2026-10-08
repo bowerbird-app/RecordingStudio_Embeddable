@@ -7,7 +7,7 @@ module RecordingStudioEmbeddable
   # +url_for_variant(..., mode: :direct)+, and +variant_processed?+.
   # Never returns a Rails / Active Storage fallback path — unprocessed
   # variants are omitted from +srcset+ instead of falling back.
-  class DirectImageUrls
+  class DirectImageUrls # rubocop:disable Metrics/ClassLength
     VariantSource = Struct.new(
       :name,
       :url,
@@ -31,8 +31,8 @@ module RecordingStudioEmbeddable
     )
 
     DEFAULT_SRCSET_VARIANTS = %i[small med large].freeze
-    DEFAULT_SIZES = "(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 960px".freeze
-    COVER_SIZES = "100vw".freeze
+    DEFAULT_SIZES = "(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 960px"
+    COVER_SIZES = "100vw"
 
     # Width hints from Attachable's default +resize_to_limit+ variants.
     VARIANT_WIDTHS = {
@@ -183,5 +183,5 @@ module RecordingStudioEmbeddable
       number = Integer(value, exception: false)
       number if number&.positive?
     end
-  end
+  end # rubocop:enable Metrics/ClassLength
 end

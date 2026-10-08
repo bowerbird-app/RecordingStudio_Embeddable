@@ -50,9 +50,7 @@ module RecordingStudioEmbeddable
 
         if available
           variants = EnsureEmbedImageVariants.call(recording: recording)
-          unless variants.success?
-            return defer_until_variants_ready(variants.error)
-          end
+          return defer_until_variants_ready(variants.error) unless variants.success?
         end
 
         html = render_html(recording, frame_ancestors, available: available)
