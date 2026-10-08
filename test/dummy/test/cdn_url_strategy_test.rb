@@ -36,6 +36,11 @@ class CdnUrlStrategyTest < ActiveSupport::TestCase
     assert_includes embed.public_url, "recording_studio_artifacts/"
     refute_includes embed.public_url, "recording_studio_embeddable"
     assert_equal URI.parse(embed.public_url).path, embed.public_path
+
+    artifact = RecordingStudioArtifacts::Artifact.find(embed.artifact_id)
+    assert_equal "published", artifact.status
+    assert_operator artifact.revision, :>=, 1
+    assert_nil artifact.purge_error
   end
 
   test "re-publish updates the same Artifacts URL" do
@@ -51,6 +56,7 @@ class CdnUrlStrategyTest < ActiveSupport::TestCase
     assert first.success?, first.error.to_s
     artifact_id = first.value[:artifact_id]
     public_url = first.value[:public_url]
+    first_revision = RecordingStudioArtifacts::Artifact.find(artifact_id).revision
 
     RecordingStudioEmbeddable::Embed.where(id: embed.id).update_all(enabled: true)
     embed = RecordingStudioEmbeddable::Embed.find(embed.id)
@@ -63,6 +69,34 @@ class CdnUrlStrategyTest < ActiveSupport::TestCase
     assert_equal artifact_id, second.value[:artifact_id]
     assert_equal public_url, second.value[:public_url]
     assert_equal 1, @storage.objects.size
+    assert_includes @storage.read("recording_studio_artifacts/#{artifact_id}")[:body], "Embed unavailable"
+
+    artifact = RecordingStudioArtifacts::Artifact.find(artifact_id)
+    assert_operator artifact.revision, :>, first_revision
+    assert_equal "published", artifact.status
+  end
+
+  test "disable keeps the Artifacts row instead of unpublishing" do
+    embed = RecordingStudioEmbeddable::Embed.create!(
+      enabled: true,
+      embed_url_strategy: "cdn"
+    )
+    first = RecordingStudioEmbeddable::Services::PublishEmbedToCdn.call(
+      embed: embed,
+      synchronous: true
+    )
+    assert first.success?, first.error.to_s
+    artifact_id = first.value[:artifact_id]
+
+    RecordingStudioEmbeddable::Embed.where(id: embed.id).update_all(enabled: false)
+    embed = RecordingStudioEmbeddable::Embed.find(embed.id)
+    second = RecordingStudioEmbeddable::Services::PublishEmbedToCdn.call(
+      embed: embed,
+      synchronous: true
+    )
+    assert second.success?, second.error.to_s
+    assert RecordingStudioArtifacts::Artifact.exists?(artifact_id)
+    assert_equal artifact_id, RecordingStudioEmbeddable::Embed.find(embed.id).artifact_id
     assert_includes @storage.read("recording_studio_artifacts/#{artifact_id}")[:body], "Embed unavailable"
   end
 end

@@ -37,8 +37,8 @@ Content updates call `.update` so the UUID and URL never change.
 ## Install Artifacts (host)
 
 ```bash
-gem "recording_studio_artifacts", "~> 0.3.0",
-    github: "bowerbird-app/RecordingStudio_artifacts", tag: "v0.3.0"
+gem "recording_studio_artifacts", "~> 0.4.0",
+    github: "bowerbird-app/RecordingStudio_artifacts", tag: "v0.4.0"
 
 bundle install
 bin/rails generate recording_studio_artifacts:install
@@ -61,7 +61,8 @@ production secrets. Set either:
 2. **Host Rails credentials** under `recording_studio_artifacts.cdn` (same key
    names as above, without the `ARTIFACT_CDN_` prefix).
 
-Add `gem "aws-sdk-s3"` in production. Full resolve order and DNS notes:
+`aws-sdk-s3` is a runtime dependency of Artifacts `0.4.0+` (hosts no longer add
+it only for this gem). Full resolve order and DNS notes:
 [RecordingStudio_artifacts docs/CDN.md](https://github.com/bowerbird-app/RecordingStudio_artifacts/blob/main/docs/CDN.md).
 
 ### Dummy credentials (this gem only)
@@ -99,8 +100,16 @@ The job calls `Services::PublishEmbedToCdn`, which:
    with `synchronous: true`
 3. Stores `metadata.artifact` (`id`, `public_url`, `published_at`, …)
 
-Disabled or unpublished embeds overwrite the same artifact with a minimal
-“unavailable” document (`frame-ancestors 'none'`).
+Disabled or publishable-blocked embeds overwrite the same artifact with a
+minimal “unavailable” document (`frame-ancestors 'none'`). Embeddable does not
+destroy embeds and does not call `RecordingStudioArtifacts.unpublish` — disable
+keeps the stable Artifacts URL. Hosts that need to remove the R2 object can call
+`RecordingStudioArtifacts.unpublish(id:)` themselves and clear `metadata.artifact`.
+
+Artifacts `0.4.0+` marks an artifact `published` once R2 upload succeeds; purge
+failures are recorded on `purge_error` / `purged_at` and no longer fail the
+publish. `PublishArtifactJob` takes `(artifact_id, revision)` (Artifacts owns
+that job; Embeddable does not enqueue it).
 
 ## Domain / frame-ancestors
 

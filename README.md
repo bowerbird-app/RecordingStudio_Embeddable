@@ -23,7 +23,7 @@ Two delivery modes ship in this gem:
 - Ruby 3.3 or newer.
 - Rails 8.1 or newer.
 - A host application that can mount the engine and run the supplied migrations.
-- `recording_studio_artifacts` `~> 0.3.0` (CDN publish path).
+- `recording_studio_artifacts` `~> 0.4.0` (CDN publish path).
 
 ## Install
 
@@ -94,7 +94,7 @@ on `embed.metadata["artifact"]`). That URL looks like
 
 Install and configure Artifacts first. **Hosts supply real CDN secrets** via
 `ARTIFACT_CDN_*` ENV or host credentials under `recording_studio_artifacts.cdn`
-(plus `aws-sdk-s3` in production). This gem does not ship production R2 keys.
+(`aws-sdk-s3` comes with Artifacts `0.4.0+`). This gem does not ship production R2 keys.
 Dummy uses Artifacts `MemoryStorage` and safe placeholders in the shared dummy
 credentials file. Details: [`docs/CDN.md`](docs/CDN.md).
 

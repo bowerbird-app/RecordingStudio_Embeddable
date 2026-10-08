@@ -230,6 +230,32 @@ class CdnPublishTest < Minitest::Test
     refute defined?(RecordingStudioEmbeddable::Cdn::MemoryStorage)
   end
 
+  def test_embeddable_does_not_enqueue_artifacts_publish_job
+    refute RecordingStudioEmbeddable.const_defined?(:PublishArtifactJob)
+    job_source = File.read(
+      File.expand_path("../app/jobs/recording_studio_embeddable/publish_embed_to_cdn_job.rb", __dir__)
+    )
+    refute_includes job_source, "PublishArtifactJob"
+  end
+
+  def test_artifacts_api_stub_exposes_unpublish_but_publish_path_does_not_call_it
+    unpublish_calls = []
+    @artifacts_module.define_singleton_method(:unpublish) do |**kwargs|
+      unpublish_calls << kwargs
+      RecordingStudioEmbeddable::Services::BaseService::Result.new(
+        success: true,
+        value: { id: kwargs[:id], destroyed: true }
+      )
+    end
+
+    embed = build_embed(token: "no-unpublish")
+    embed.enabled = false
+    result = publish_embed(embed)
+    assert result.success?, result.error.to_s
+    assert_empty unpublish_calls
+    assert embed.artifact_id.present?
+  end
+
   private
 
   def publish_embed(embed)

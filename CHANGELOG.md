@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.0] - 2026-10-07
 
 ### Added
-- CDN publish via `recording_studio_artifacts` (`~> 0.3.0`): `PublishEmbedToCdn` /
+- CDN publish via `recording_studio_artifacts` (`~> 0.4.0`): `PublishEmbedToCdn` /
   `PublishEmbedToCdnJob` pre-render iframe HTML and call
   `RecordingStudioArtifacts.publish` (first time) or `.update` (re-publish).
   Partner URLs are Artifacts public URLs
@@ -21,8 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `recording.enqueue_embed_cdn_publish!` for parent recording / theme / publishable changes.
 - Domain allowlist baked at publish (`DomainPolicy#frame_ancestors` → HTML CSP marker).
 - `docs/CDN.md` for Artifacts consumer wiring (no Spaces).
-- Dummy installs Artifacts (migration + MemoryStorage initializer) so CDN publish
-  is exercisable without real R2 credentials.
+- Dummy installs Artifacts (create + revision/purge migrations + MemoryStorage
+  initializer) so CDN publish is exercisable without real R2 credentials.
 - Shared dummy credentials (`test/dummy/config/credentials.yml.enc`) include
   `recording_studio_artifacts.cdn` placeholder keys (`dev_placeholder`, fake
   `public_base_url`). Hosts still own real `ARTIFACT_CDN_*` / R2 secrets.
@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pin `recording_studio` to GitHub tag `v4.2.2` (still `~> 4.2` in the gemspec).
 - Pin `recording_studio_accessible` to GitHub tag `v0.11.1` (gemspec stays `~> 0.9`, which already allows 0.11.x).
 - Pin `recording_studio_publishable` to `~> 0.4` (GitHub tag `v0.4.2`).
-- Pin `recording_studio_artifacts` to `~> 0.3.0` (GitHub tag `v0.3.0`).
+- Pin `recording_studio_artifacts` to `~> 0.4.0` (GitHub tag `v0.4.0`).
 - Dummy pins Attachable `v0.7.1` and Admin `v2.0.4`. API stays at `v0.5.5`.
 - Dummy Accessible schema now includes access invitations and stores access roles as strings (`view`, `edit`, `admin`).
 - Dummy API initializer exposes `RecordingStudio::Access.roles` from Accessible's ranked names so API `v0.5.5` can still authorize member actions.
@@ -43,9 +43,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   is the only CDN publish path.
 
 ### Upgrade notes
-- Bump the gem to `0.3.0`. Add `recording_studio_artifacts` `~> 0.3.0`
-  (GitHub tag `v0.3.0`), run Artifacts install + migrations, set `ARTIFACT_CDN_*`
-  (or credentials), and add `gem "aws-sdk-s3"` in production hosts.
+- Bump the gem to `0.3.0`. Add `recording_studio_artifacts` `~> 0.4.0`
+  (GitHub tag `v0.4.0`), run Artifacts install + migrations (including
+  `revision` / `purge_error` / `purged_at`), and set `ARTIFACT_CDN_*`
+  (or credentials). `aws-sdk-s3` is a runtime dependency of Artifacts `0.4.0+`.
+- Drain or ignore in-flight Artifacts `PublishArtifactJob` jobs that used a
+  single `artifact_id` argument; `0.4.0` jobs take `(artifact_id, revision)`.
+  Embeddable does not enqueue that job.
+- Purge failures no longer fail an Artifacts publish (`purge_error` is recorded
+  instead). Embeddable still treats publish/update success as the CDN publish
+  success signal.
+- Embeddable does not destroy embeds and does not call
+  `RecordingStudioArtifacts.unpublish`. Disable overwrites the same artifact with
+  an unavailable document so the partner URL stays stable. Hosts that need to
+  remove the R2 object can call `unpublish(id:)` and clear `metadata.artifact`.
 - To serve partners from CDN: set `config.embed_url_strategy = :cdn` (or per-embed),
   configure Artifacts public base / R2, and call `enqueue_embed_cdn_publish!` after
   parent content, theme, or publishable changes.
