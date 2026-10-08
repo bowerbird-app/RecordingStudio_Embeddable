@@ -20,10 +20,14 @@
   ) %>
 
   <% if cover %>
-    <figure class="mb-6 overflow-hidden rounded-[var(--radius-lg,0.5rem)]">
-      <%= embed_direct_image_tag(cover, cover: true, class: "h-auto w-full object-cover") %>
+    <%# Match FlatPack Carousel figure/figcaption: overflow on the media only,
+        padded caption below so the first glyph is never clipped. %>
+    <figure class="mb-6 flex w-full max-w-full flex-col">
+      <div class="overflow-hidden rounded-[var(--radius-lg,0.5rem)]">
+        <%= embed_direct_image_tag(cover, cover: true, class: "h-auto w-full object-cover") %>
+      </div>
       <% if cover.caption.present? || cover.credit.present? %>
-        <figcaption class="mt-2 text-sm text-[var(--surface-muted-content-color)]">
+        <figcaption class="mt-2 border-t border-[var(--surface-border-color)] px-4 py-3 text-sm text-[var(--surface-muted-content-color)]">
           <%= [cover.caption, cover.credit].compact.join(" · ") %>
         </figcaption>
       <% end %>
@@ -41,10 +45,12 @@
     ) %>
     <%= render FlatPack::Grid::Component.new(cols: 2, gap: :md) do %>
       <% gallery.each do |image| %>
-        <figure class="overflow-hidden rounded-[var(--radius-md,0.375rem)]">
-          <%= embed_direct_image_tag(image, class: "h-auto w-full object-cover") %>
+        <figure class="flex w-full max-w-full flex-col">
+          <div class="overflow-hidden rounded-[var(--radius-md,0.375rem)]">
+            <%= embed_direct_image_tag(image, class: "h-auto w-full object-cover") %>
+          </div>
           <% if image.caption.present? || image.credit.present? %>
-            <figcaption class="mt-2 text-xs text-[var(--surface-muted-content-color)]">
+            <figcaption class="mt-2 border-t border-[var(--surface-border-color)] px-4 py-3 text-xs text-[var(--surface-muted-content-color)]">
               <%= [image.caption, image.credit].compact.join(" · ") %>
             </figcaption>
           <% end %>

@@ -36,6 +36,8 @@ Then open the app and sign in with:
 - `/` - embeddable dummy index with a table of page recordings and edit/preview actions
 - `/recording_studio` - redirects to `/` while the mounted Recording Studio engine stays available under that prefix for non-root routes
 - `/recording_studio_artifacts` - dummy Artifacts wiring page (toggle via `RECORDING_STUDIO_ARTIFACTS_ENABLED`)
+- `/recording_studio_artifacts/:uuid` - dummy-only MemoryStorage/tmp stand-in for the CDN edge path (screenshot/publish checks)
+- `/dummy_cdn/*key` - dummy-only stand-in for Attachable `direct_url_host` blob bytes
 - `/users/sign_in` - Devise sign-in page
 - `/docs/install`, `/docs/config`, `/docs/recordable_types`, `/docs/recordings_tree`, `/docs/gem_views`, `/docs/methods` - starter sidebar pages to adapt for the gem
 - `/dummy/pages/new` - add-page form used to create embeddable test pages

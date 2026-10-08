@@ -15,6 +15,11 @@ Rails.application.routes.draw do
   # Host page for the Artifacts mount root. The engine's HomeController only
   # returns head :ok (empty body); the dummy shows real Flatpack wiring docs.
   get "/recording_studio_artifacts", to: "artifacts_homes#show", as: :artifacts_engine_home
+  # Dummy-only: serve MemoryStorage-published embed HTML at the CDN path shape.
+  get "/recording_studio_artifacts/:artifact_id",
+      to: "dummy_artifacts#show",
+      as: :dummy_artifact,
+      constraints: { artifact_id: /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i }
   mount RecordingStudioArtifacts::Engine, at: "/recording_studio_artifacts"
   mount RecordingStudioPublishable::Engine, at: "/"
   mount RecordingStudioApi::Engine, at: "/recording_studio_api"

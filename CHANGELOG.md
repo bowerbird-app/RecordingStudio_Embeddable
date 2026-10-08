@@ -37,6 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pin `flat_pack` to `~> 0.1.207` (Attachable 0.9 requires `>= 0.1.205`).
 - CI installs **libvips** so dummy direct-image / CDN publish tests can run
   Attachable `PreprocessVariantsJob` (Active Storage `:vips`).
+- Embed figure captions use Flatpack Carousel-style layout: `overflow-hidden` +
+  radius on the media wrapper only, `figcaption` with `px-4 py-3` so caption
+  text is not clipped on the left edge.
 
 ### Upgrade notes
 - Bump the gem to `0.5.0` and add/upgrade `recording_studio_attachable` to

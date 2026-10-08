@@ -32,7 +32,9 @@ want an exact override.
 - Unprocessed names are **omitted** from `srcset` (no Rails fallback)
 
 Each image includes `srcset` / `sizes`, explicit `width` / `height`, and
-`loading="lazy"` except the cover (`loading="eager"`).
+`loading="lazy"` except the cover (`loading="eager"`). Captions sit in a
+padded `figcaption` below the media (Flatpack Carousel pattern) so
+`overflow-hidden` on the image wrapper never clips the first glyph.
 
 ## Artifacts publish
 
