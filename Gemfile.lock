@@ -16,6 +16,15 @@ GIT
       recording_studio (~> 4.2)
 
 GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_artifacts.git
+  revision: 70a839d0db960b2644a5b7ac6e3b00f55ea98f20
+  tag: v0.3.0
+  specs:
+    recording_studio_artifacts (0.3.0)
+      rails (~> 8.1.0)
+      recording_studio (~> 4.2)
+
+GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_publishable.git
   revision: 7cfe3d5a827b5d0cd4e62a6adfaf9ddccae3d254
   tag: v0.4.2
@@ -46,13 +55,6 @@ PATH
       recording_studio_accessible (~> 0.9)
       recording_studio_artifacts (~> 0.3.0)
       recording_studio_publishable (~> 0.4)
-
-PATH
-  remote: vendor/recording_studio_artifacts
-  specs:
-    recording_studio_artifacts (0.3.0)
-      rails (~> 8.1.0)
-      recording_studio (~> 4.2)
 
 GEM
   remote: https://rubygems.org/
