@@ -65,6 +65,15 @@ document_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
   recordable: document
 )
 
+# Publish Getting Started so the dedicated public embed path renders (require_publishable).
+if page_recording.respond_to?(:currently_published?) && !page_recording.currently_published?
+  RecordingStudioPublishable::Services::Publishables::Update.call(
+    parent_recording: page_recording,
+    actor: user,
+    attributes: { slug: "getting-started", status: "published" }
+  )
+end
+
 # Grant root-level admin access to the admin user
 RecordingStudioAccessible.grant_access(recording: root_recording, actor: user, role: :admin)
 

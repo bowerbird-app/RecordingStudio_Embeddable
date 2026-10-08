@@ -7,12 +7,32 @@ not talk to DigitalOcean Spaces.
 
 Pretty host paths (Cloudflare Worker) are a separate follow-up.
 
+## Host switch: `artifacts_enabled`
+
+`recording_studio_artifacts` is always installed with Embeddable. The host switch
+only controls whether Embeddable **uses** it:
+
+```ruby
+# config/initializers/recording_studio_embeddable.rb
+config.artifacts_enabled = false # default
+```
+
+| `artifacts_enabled` | Behaviour |
+|---------------------|-----------|
+| `false` (default) | No publish/purge jobs. `embed_code` / public URLs use the Rails mount even if an embed row still says `embed_url_strategy: "cdn"`. Existing R2 objects are **not** deleted. |
+| `true` | Honors `:cdn` strategy for URLs and enqueues `PublishEmbedToCdnJob`. |
+
+Turning the switch from ON → OFF falls partner traffic back to
+`/recording_studio_embeddable/embeds/:token`. Metadata and R2 stay put so you can
+turn Artifacts back on later.
+
 ## URL strategy
 
-Set `config.embed_url_strategy = :cdn` (or per-embed `embed_url_strategy = "cdn"`).
+With `artifacts_enabled = true`, set `config.embed_url_strategy = :cdn`
+(or per-embed `embed_url_strategy = "cdn"`).
 
-| Helper | Dedicated (default) | CDN (Artifacts) |
-|--------|---------------------|-----------------|
+| Helper | Dedicated / Artifacts off | CDN (Artifacts on + strategy cdn) |
+|--------|---------------------------|-----------------------------------|
 | `embed_public_path` | `/recording_studio_embeddable/embeds/:token` | `/recording_studio_artifacts/{uuid}` |
 | `embed_public_url` | host + dedicated path | Artifacts `public_url` |
 | `embed_code` | iframe at dedicated URL | iframe at Artifacts URL only |
@@ -36,14 +56,20 @@ Content updates call `.update` so the UUID and URL never change.
 
 ## Install Artifacts (host)
 
-```bash
-gem "recording_studio_artifacts", "~> 0.4.0",
-    github: "bowerbird-app/RecordingStudio_artifacts", tag: "v0.4.0"
+Artifacts ships as a runtime dependency of Embeddable. Run its host install so
+migrations and CDN credentials exist before you flip the usage switch:
 
-bundle install
+```bash
 bin/rails generate recording_studio_artifacts:install
 bin/rails generate recording_studio_artifacts:migrations
 bin/rails db:migrate
+```
+
+Then in the Embeddable initializer:
+
+```ruby
+config.artifacts_enabled = true
+config.embed_url_strategy = :cdn
 ```
 
 ### Host credentials (production)
@@ -87,7 +113,8 @@ end
 
 ## Publish triggers
 
-`PublishEmbedToCdnJob` runs when:
+`PublishEmbedToCdnJob` runs only when `artifacts_enabled` is true and the embed
+uses CDN strategy:
 
 - An embed with CDN strategy is created or updated (settings, domains, styling, enable/disable)
 - The host calls `recording.enqueue_embed_cdn_publish!` after parent recording / theme / publishable changes

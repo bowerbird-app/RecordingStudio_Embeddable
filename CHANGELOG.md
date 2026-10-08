@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-08
+
+### Added
+- `config.artifacts_enabled` (default `false`) — explicit host-wide Artifacts/CDN
+  usage switch. The Artifacts gem stays a hard dependency; the switch only
+  controls whether Embeddable enqueues publish/purge jobs and returns CDN URLs.
+  When off, partner URLs use the Rails mount even if an embed row still says
+  `embed_url_strategy: "cdn"`. Turning OFF does not delete R2 objects.
+- Public embed `404` renders a Flatpack `EmptyState` (with icon) in the embed
+  layout instead of a bare `head :not_found`. Same generic copy for missing /
+  disabled / unpublished tokens — no leaked detail. Artifacts “unavailable”
+  CDN document is unchanged.
+- DomainPolicy treats same-origin Referer/Origin as allowed so opening the
+  dedicated public path from the host app no longer returns an empty `403`.
+- Management Preview forces a full document load (`turbo-visit-control` +
+  `data-turbo="false"`) and allows same-origin framing so the preview is not
+  blank under Turbo Drive / styling iframes.
+
+### Changed
+- Version bump to `0.4.0`.
+
+### Upgrade notes
+- Bump the gem to `0.4.0`.
+- Artifacts/CDN usage is off by default. Hosts that already publish via
+  Artifacts must set `config.artifacts_enabled = true` (and keep
+  `embed_url_strategy = :cdn` where needed).
+- No data migration. Existing `metadata.artifact` rows stay; with Artifacts off,
+  `embed_code` / public URLs fall back to `/recording_studio_embeddable/embeds/:token`.
+
 ## [0.3.0] - 2026-10-07
 
 ### Added

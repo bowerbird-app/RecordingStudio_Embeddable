@@ -40,6 +40,7 @@ module RecordingStudioEmbeddable
           embed: embed,
           origin: request.get_header("HTTP_ORIGIN"),
           referer: request.referer,
+          request_host: request.respond_to?(:host) ? request.host : nil,
           options: options
         )
       end

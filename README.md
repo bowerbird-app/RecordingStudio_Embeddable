@@ -10,7 +10,7 @@ Two delivery modes ship in this gem:
 ## What It Includes
 
 - Public embed routes for tokenized iframe recordings.
-- CDN publish through [`recording_studio_artifacts`](https://github.com/bowerbird-app/RecordingStudio_artifacts) (Cloudflare R2) when `embed_url_strategy` is `:cdn`.
+- CDN publish through [`recording_studio_artifacts`](https://github.com/bowerbird-app/RecordingStudio_artifacts) (Cloudflare R2) when `config.artifacts_enabled` is true and `embed_url_strategy` is `:cdn`.
 - `RenderPayload` / `BrowserPayload` for API and SDK consumers (fragment + theme/sizing, no document chrome).
 - Soft `:embed` capability-action registration when `recording_studio_api` is present (no hard dependency).
 - A management UI for previewing, editing, styling, and reviewing stats for embeds.
@@ -23,7 +23,8 @@ Two delivery modes ship in this gem:
 - Ruby 3.3 or newer.
 - Rails 8.1 or newer.
 - A host application that can mount the engine and run the supplied migrations.
-- `recording_studio_artifacts` `~> 0.4.0` (CDN publish path).
+- `recording_studio_artifacts` `~> 0.4.0` (always installed; usage gated by
+  `config.artifacts_enabled`, default off).
 
 ## Install
 
@@ -79,8 +80,16 @@ That path returns a full HTML document (embed layout, FlatPack CSS, theme CSS va
 
 ### CDN (Artifacts)
 
-Set `config.embed_url_strategy = :cdn` (or per-embed). Embeddable pre-renders the
-iframe document and calls:
+`recording_studio_artifacts` is always installed. Default
+`config.artifacts_enabled = false` keeps every partner URL on the Rails mount
+and never enqueues publish/purge jobs. Turning the switch off later falls
+existing CDN embeds back to host URLs without deleting R2 objects.
+
+To enable CDN partner URLs: run the Artifacts install + migrations, set
+`config.artifacts_enabled = true`, then `config.embed_url_strategy = :cdn`
+(or per-embed).
+
+Embeddable pre-renders the iframe document and calls:
 
 ```ruby
 RecordingStudioArtifacts.publish(body: html, content_type: "text/html; charset=utf-8", ...)
@@ -135,6 +144,8 @@ The default configuration is intentionally locked down. At a minimum, you will u
 
 Common settings include:
 
+- `artifacts_enabled` (default `false`) — host-wide Artifacts/CDN switch
+- `embed_url_strategy` (`:dedicated` / `:cdn`) — used when Artifacts is enabled
 - `allowed_embedder_domains` and `blocked_embedder_domains`
 - `require_domain_allowlist` and `allow_any_domain`
 - `require_publishable` and `fallback_to_publishable_renderer`
