@@ -5,7 +5,8 @@
     text: "Preview",
     style: :secondary,
     size: :md,
-    href: preview_management_embed_path(@embed)
+    href: preview_management_embed_path(@embed),
+    data: { turbo: false }
   ) %>
   <%= render FlatPack::Button::Component.new(
     text: "Styling",

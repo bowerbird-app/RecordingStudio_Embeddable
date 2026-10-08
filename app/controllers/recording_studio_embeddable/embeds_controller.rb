@@ -107,7 +107,11 @@ module RecordingStudioEmbeddable
     def render_not_found
       response.cache_control.replace(no_store: true)
       response.set_header("Content-Security-Policy", "frame-ancestors 'none'")
-      head :not_found
+      response.delete_header("X-Frame-Options")
+      render template: "recording_studio_embeddable/embeds/not_found",
+             formats: [:html],
+             layout: "recording_studio_embeddable/embed",
+             status: :not_found
     end
 
     def render_rate_limited

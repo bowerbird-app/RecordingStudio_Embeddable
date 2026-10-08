@@ -1,0 +1,75 @@
+<% recording_studio_page_nav(
+  title: "Artifacts",
+  page_nav_anchor_url: root_path,
+  page_nav_anchor_label: "Close"
+) %>
+
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: "RecordingStudio Artifacts",
+    subtitle: "CDN publish mount for partner embed URLs. Embeddable decides when to use it.",
+    variant: :h1
+  ) %>
+
+  <% if @artifacts_enabled %>
+    <%= render FlatPack::Alert::Component.new(
+      style: :success,
+      title: "Artifacts is on",
+      description: "Embeddable may publish to the CDN and return Artifacts public URLs when the URL strategy is CDN."
+    ) %>
+  <% else %>
+    <%= render FlatPack::Alert::Component.new(
+      style: :info,
+      title: "Artifacts is off",
+      description: "The gem stays installed. Partner URLs use the Rails mount until you set config.artifacts_enabled = true."
+    ) %>
+  <% end %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Host switch",
+    subtitle: "artifacts_enabled controls use, not whether the gem is installed"
+  ) %>
+
+  <p class="text-sm leading-6 text-(--body-muted-content-color)">
+    Current dummy values:
+    <code>artifacts_enabled=<%= @artifacts_enabled.inspect %></code>
+    ·
+    <code>embed_url_strategy=<%= @embed_url_strategy.inspect %></code>
+  </p>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :ruby,
+    code: <<~CODE
+      # config/initializers/recording_studio_embeddable.rb
+      config.artifacts_enabled = false # default
+      config.embed_url_strategy = :dedicated # :cdn needs artifacts_enabled
+    CODE
+  ) %>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Public URL shape",
+    subtitle: "Stable UUID path owned by Artifacts — not the App Platform mount"
+  ) %>
+
+  <%= render FlatPack::CodeBlock::Component.new(
+    language: :bash,
+    code: "https://{subdomain}.{domain}/{path_prefix}/{artifact_uuid}"
+  ) %>
+
+  <p class="text-sm leading-6 text-(--body-muted-content-color)">
+    Dummy base: <code><%= @public_base_url.presence || "(not configured)" %></code>
+    · path prefix: <code><%= @path_prefix %></code>
+    · example: <code class="break-all"><%= @example_public_url %></code>
+  </p>
+
+  <%= render FlatPack::SectionTitle::Component.new(
+    title: "Dummy storage",
+    subtitle: "MemoryStorage in development and test — no real R2 keys in this app"
+  ) %>
+
+  <p class="text-sm leading-6 text-(--body-muted-content-color)">
+    Storage:
+    <code><%= @using_memory_storage ? "MemoryStorage" : @storage.class.name %></code>
+    · Artifact rows: <code><%= @artifact_count %></code>
+  </p>
+</div>

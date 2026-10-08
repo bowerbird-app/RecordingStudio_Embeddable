@@ -45,7 +45,12 @@ class CdnPublishTest < Minitest::Test
     end
 
     def enabled? = !!@enabled
-    def cdn_url_strategy? = RecordingStudioEmbeddable::Cdn.strategy?(embed_url_strategy)
+
+    def cdn_url_strategy?
+      RecordingStudioEmbeddable::Cdn.enabled? &&
+        RecordingStudioEmbeddable::Cdn.strategy?(embed_url_strategy)
+    end
+
     def allowed_domains = Array(@allowed_embedder_domains)
     def blocked_domains = Array(@blocked_embedder_domains)
 
@@ -105,6 +110,7 @@ class CdnPublishTest < Minitest::Test
     @publish_calls = []
     @update_calls = []
     RecordingStudioEmbeddable.configure do |config|
+      config.artifacts_enabled = true
       config.embed_url_strategy = :cdn
       config.allow_any_domain = false
       config.require_domain_allowlist = true

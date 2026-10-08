@@ -40,6 +40,9 @@ module RecordingStudioEmbeddable
         @recordable = @parent_recordable
         assign_recordable_instance_variable
         @embed_theme = Renderer.embed_theme_for(@recording, embed: @embed)
+        # Same-origin styling iframe + Turbo full-page Preview both need framing allowed.
+        response.delete_header("X-Frame-Options")
+        response.set_header("Content-Security-Policy", "frame-ancestors 'self'")
         render Renderer.resolve(@recording, @embed),
                layout: Renderer.layout_for(@recording, @embed)
       end

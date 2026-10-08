@@ -7,8 +7,14 @@ class CdnUrlStrategyTest < ActiveSupport::TestCase
     @storage = RecordingStudioArtifacts.configuration.cdn_storage
     @storage.clear! if @storage.respond_to?(:clear!)
     RecordingStudioArtifacts.configuration.cdn_public_base_url = "https://artifacts.example.test"
+    RecordingStudioEmbeddable.configuration.artifacts_enabled = true
     RecordingStudioEmbeddable.configuration.require_publishable = false
     RecordingStudioEmbeddable.configuration.allow_any_domain = true
+  end
+
+  teardown do
+    RecordingStudioEmbeddable.configuration.artifacts_enabled = false
+    RecordingStudioEmbeddable.configuration.require_publishable = true
   end
 
   test "dummy wires Artifacts MemoryStorage for CDN publish" do

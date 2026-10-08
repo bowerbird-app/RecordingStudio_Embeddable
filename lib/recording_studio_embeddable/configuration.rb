@@ -10,6 +10,7 @@ module RecordingStudioEmbeddable
       :embed_renderer_resolver,
       :require_publishable,
       :embed_url_strategy,
+      :artifacts_enabled,
       :allowed_embed_modes,
       :default_embed_mode,
       :fallback_to_publishable_renderer,
@@ -57,6 +58,10 @@ module RecordingStudioEmbeddable
       @embed_renderer_resolver = nil
       @require_publishable = true
       @embed_url_strategy = :dedicated
+      # Host-wide Artifacts/CDN usage switch. The Artifacts gem stays installed;
+      # when off, partner URLs stay on the Rails mount and no publish/purge jobs
+      # are enqueued (R2 objects are left alone).
+      @artifacts_enabled = false
       @allowed_embed_modes = %i[iframe oembed]
       @default_embed_mode = :iframe
       @fallback_to_publishable_renderer = false
@@ -124,6 +129,7 @@ module RecordingStudioEmbeddable
         public_embeds_enabled: public_embeds_enabled,
         require_publishable: require_publishable,
         embed_url_strategy: embed_url_strategy,
+        artifacts_enabled: artifacts_enabled,
         allowed_embed_modes: allowed_embed_modes,
         default_embed_mode: default_embed_mode,
         require_domain_allowlist: require_domain_allowlist,

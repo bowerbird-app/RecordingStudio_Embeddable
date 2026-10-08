@@ -13,8 +13,14 @@ RecordingStudioEmbeddable.configure do |config|
     user.present? && user.respond_to?(:RS_accessible, true) && user.RS_accessible
   end
 
-  # CDN strategy publishes via RecordingStudioArtifacts (see recording_studio_artifacts.rb).
-  # Dummy keeps :dedicated by default; CDN tests flip strategy per example.
+  # Dummy keeps Artifacts off by default (Rails mount URLs). CDN tests flip
+  # artifacts_enabled + embed_url_strategy. Screenshot / local runs may set
+  # RECORDING_STUDIO_ARTIFACTS_ENABLED=true without changing the default.
+  # See recording_studio_artifacts.rb.
+  config.artifacts_enabled = ActiveModel::Type::Boolean.new.cast(
+    ENV.fetch("RECORDING_STUDIO_ARTIFACTS_ENABLED", "false")
+  )
+  config.embed_url_strategy = :dedicated
   config.cdn_withhold_snippet_until_published = false
   config.cdn_publish_queue = :default
 end

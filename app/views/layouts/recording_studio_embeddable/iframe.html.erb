@@ -4,11 +4,13 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width,initial-scale=1">
 		<meta name="robots" content="noindex, nofollow">
+		<meta name="turbo-visit-control" content="reload">
 		<title>Embedded recording</title>
 		<%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
 		<%= stylesheet_link_tag "flat_pack/variables", "data-turbo-track": "reload" %>
 		<%= stylesheet_link_tag "flat_pack/application", "data-turbo-track": "reload" %>
 		<%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+		<%= javascript_importmap_tags %>
 		<% if (google_font_family = embed_layout_google_font_family) %>
 		  <link rel="preconnect" href="https://fonts.googleapis.com">
 		  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

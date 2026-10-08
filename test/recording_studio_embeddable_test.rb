@@ -128,7 +128,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.3.0", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.4.0", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -434,6 +434,19 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert RecordingStudioEmbeddable::Security::DomainPolicy.valid_domain?("*.example.com")
     assert RecordingStudioEmbeddable::Security::DomainPolicy.new(embed: embed, origin: "https://docs.example.com").allowed?
     refute RecordingStudioEmbeddable::Security::DomainPolicy.new(embed: embed, origin: "https://blocked.example.com").allowed?
+  end
+
+  def test_preview_nav_disables_turbo_for_full_document_load
+    nav = File.read(
+      File.expand_path("../app/views/recording_studio_embeddable/management/embeds/_section_nav.html.erb", __dir__)
+    )
+    layout = File.read(
+      File.expand_path("../app/views/layouts/recording_studio_embeddable/embed.html.erb", __dir__)
+    )
+
+    assert_includes nav, "data: { turbo: false }"
+    assert_includes layout, 'name="turbo-visit-control"'
+    assert_includes layout, 'content="reload"'
   end
 
   def test_publishable_gate_fails_closed_without_helper

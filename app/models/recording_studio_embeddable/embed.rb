@@ -66,10 +66,12 @@ module RecordingStudioEmbeddable
     end
 
     def cdn_url_strategy?
-      Cdn.strategy?(url_strategy)
+      Cdn.enabled? && Cdn.strategy?(url_strategy)
     end
 
     # Partner-facing path. CDN strategy returns the Artifacts path (never the Rails mount).
+    # When Artifacts is disabled host-wide, always use the Rails mount (existing CDN
+    # metadata is left in place; R2 objects are not deleted).
     def public_path
       return artifact_public_path if cdn_url_strategy?
 

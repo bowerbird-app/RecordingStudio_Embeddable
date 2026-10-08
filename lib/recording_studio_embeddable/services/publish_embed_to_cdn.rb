@@ -38,6 +38,7 @@ module RecordingStudioEmbeddable
       def perform
         return failure("embed is required") if embed.blank?
         return failure("embed token is required") if embed.token.blank?
+        return failure("Artifacts publishing is disabled") unless Cdn.enabled?
         return failure("embed is not on the CDN URL strategy") unless embed.cdn_url_strategy?
         return failure("RecordingStudioArtifacts is not available") unless Cdn.artifacts_available?
         return failure("Artifacts CDN public base URL is not configured") unless artifacts_public_base_configured?

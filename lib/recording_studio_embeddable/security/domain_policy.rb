@@ -14,16 +14,18 @@ module RecordingStudioEmbeddable
         true
       end
 
-      def initialize(embed:, origin: nil, referer: nil, options: {})
+      def initialize(embed:, origin: nil, referer: nil, options: {}, request_host: nil)
         @embed = embed
         @origin = origin
         @referer = referer
+        @request_host = request_host.to_s.downcase.presence
         @options = options || {}
       end
 
       def allowed?
         return false unless embeddable_available?
         return true if host.blank?
+        return true if same_origin_host?
         return false if matches_any?(host, blocked_domains)
         return true if RecordingStudioEmbeddable.configuration.allow_any_domain && allowed_domains.empty?
         return true if allowed_domains.empty?
@@ -41,7 +43,7 @@ module RecordingStudioEmbeddable
 
       private
 
-      attr_reader :embed, :origin, :referer, :options
+      attr_reader :embed, :origin, :referer, :request_host, :options
 
       def host
         @host ||= begin
@@ -50,6 +52,12 @@ module RecordingStudioEmbeddable
         rescue URI::InvalidURIError
           nil
         end
+      end
+
+      # Partner allowlists apply to cross-origin embedders. Same-origin Referer/Origin
+      # (opening the dedicated path from the host app) must not blank the document.
+      def same_origin_host?
+        request_host.present? && host.present? && host == request_host
       end
 
       def allowed_domains
