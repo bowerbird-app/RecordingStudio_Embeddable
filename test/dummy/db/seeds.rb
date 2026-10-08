@@ -17,16 +17,27 @@ end
 workspace = Workspace.find_or_create_by!(name: "Studio Workspace")
 folder = Folder.find_or_create_by!(name: "Product Docs")
 page = Page.find_or_create_by!(title: "Getting Started")
-article = Article.find_by(title: "Spring release") ||
-          Article.find_by(title: "Article Requires Publishable") ||
-          Article.new
-article.title = "Spring release"
-article.save!
-document = Document.find_by(title: "Workspace notes") ||
-           Document.find_by(title: "Document Publishable Only") ||
-           Document.new
-document.title = "Workspace notes"
-document.save!
+# Recordables are immutable snapshots — prefer create / update_all over save!.
+article = Article.find_by(title: "Spring release")
+if article.blank?
+  legacy_article = Article.find_by(title: "Article Requires Publishable")
+  if legacy_article
+    Article.where(id: legacy_article.id).update_all(title: "Spring release")
+    article = Article.find(legacy_article.id)
+  else
+    article = Article.create!(title: "Spring release")
+  end
+end
+document = Document.find_by(title: "Workspace notes")
+if document.blank?
+  legacy_document = Document.find_by(title: "Document Publishable Only")
+  if legacy_document
+    Document.where(id: legacy_document.id).update_all(title: "Workspace notes")
+    document = Document.find(legacy_document.id)
+  else
+    document = Document.create!(title: "Workspace notes")
+  end
+end
 
 Page.where(id: page.id).update_all(description: "Walk through workspace setup, embed codes, and how guests see a published page.")
 Article.where(id: article.id).update_all(description: "What changed in the spring workspace release, including embed codes and guest publish flow.")
@@ -74,11 +85,26 @@ if page_recording.respond_to?(:currently_published?) && !page_recording.currentl
   )
 end
 
-# Grant root-level admin access to the admin user
-RecordingStudioAccessible.grant_access(recording: root_recording, actor: user, role: :admin)
+# First admin on an empty owned root must bootstrap — grant_access alone fails
+# with "Not authorized to manage access" when nobody can manage yet.
+unless RecordingStudioAccessible.authorized?(actor: user, recording: root_recording, role: :admin)
+  bootstrap = RecordingStudioAccessible.bootstrap_owner_access!(
+    recording: root_recording,
+    actor: user
+  )
+  raise bootstrap.error unless bootstrap.success?
+end
 
-# Grant root-level view access to the viewer user
-RecordingStudioAccessible.grant_access(recording: root_recording, actor: viewer, role: :view)
+# Further invites use grant_access with the bootstrapped admin as manager.
+unless RecordingStudioAccessible.authorized?(actor: viewer, recording: root_recording, role: :view)
+  viewer_grant = RecordingStudioAccessible.grant_access(
+    recording: root_recording,
+    actor: viewer,
+    role: :view,
+    manager_actor: user
+  )
+  raise viewer_grant.error unless viewer_grant.success?
+end
 
 puts "Seeded: admin@admin.com / Password"
 puts "Seeded: viewer@admin.com / Password"

@@ -17,6 +17,11 @@ only controls whether Embeddable **uses** it:
 config.artifacts_enabled = false # default
 ```
 
+The dummy app reads optional `RECORDING_STUDIO_ARTIFACTS_ENABLED=true` so
+screenshot or local runs can flip the switch without editing the initializer.
+Default stays off. The dummy also serves a Flatpack page at
+`/recording_studio_artifacts` (the engine root alone returns an empty `200`).
+
 | `artifacts_enabled` | Behaviour |
 |---------------------|-----------|
 | `false` (default) | No publish/purge jobs. `embed_code` / public URLs use the Rails mount even if an embed row still says `embed_url_strategy: "cdn"`. Existing R2 objects are **not** deleted. |

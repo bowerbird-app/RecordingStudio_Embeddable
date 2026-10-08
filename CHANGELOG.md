@@ -27,6 +27,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Version bump to `0.4.0`.
+- Dummy seeds bootstrap Accessible owner access with
+  `bootstrap_owner_access!` (then `grant_access` for the viewer). Plain
+  `grant_access` for the first admin fails closed, which left publishable
+  edit/preview as empty `403` / `404`.
+- Dummy mounts a Flatpack Artifacts home at `/recording_studio_artifacts`
+  so the engine root is not a blank `head :ok`. Optional
+  `RECORDING_STUDIO_ARTIFACTS_ENABLED=true` flips the dummy switch for
+  local/screenshot runs without changing the default.
 
 ### Upgrade notes
 - Bump the gem to `0.4.0`.
@@ -35,6 +43,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `embed_url_strategy = :cdn` where needed).
 - No data migration. Existing `metadata.artifact` rows stay; with Artifacts off,
   `embed_code` / public URLs fall back to `/recording_studio_embeddable/embeds/:token`.
+- Hosts that seed Accessible the way the old dummy did (`grant_access` for the
+  first admin with no manager) should switch the first grant to
+  `bootstrap_owner_access!`.
 
 ## [0.3.0] - 2026-10-07
 

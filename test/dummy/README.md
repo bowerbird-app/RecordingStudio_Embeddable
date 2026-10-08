@@ -6,7 +6,10 @@ This Rails app exists to validate the Recording Studio addon template in a real 
 
 - Devise authentication with a seeded admin user
 - `Current.actor` wiring for Recording Studio events
-- Root workspace plus seeded folder and page recordables
+- Root workspace plus seeded folder and page recordables, with Accessible
+  bootstrap (`bootstrap_owner_access!`) so publishable edit/preview work for admin
+- Artifacts mount home at `/recording_studio_artifacts` renders Flatpack wiring
+  docs (the engine itself only returns an empty `200`)
 - FlatPack layout integration and Tailwind source scanning
 - Mounted `RecordingStudio::Engine` route behavior inside a host app
 - Public Recording Studio API at `/recording_studio_api` with GET `:embed` on Page for WordPress Plugin Demo clients
@@ -32,6 +35,7 @@ Then open the app and sign in with:
 
 - `/` - embeddable dummy index with a table of page recordings and edit/preview actions
 - `/recording_studio` - redirects to `/` while the mounted Recording Studio engine stays available under that prefix for non-root routes
+- `/recording_studio_artifacts` - dummy Artifacts wiring page (toggle via `RECORDING_STUDIO_ARTIFACTS_ENABLED`)
 - `/users/sign_in` - Devise sign-in page
 - `/docs/install`, `/docs/config`, `/docs/recordable_types`, `/docs/recordings_tree`, `/docs/gem_views`, `/docs/methods` - starter sidebar pages to adapt for the gem
 - `/dummy/pages/new` - add-page form used to create embeddable test pages
