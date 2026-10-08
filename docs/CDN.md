@@ -105,7 +105,10 @@ RecordingStudio_* development master key as sibling gems) includes a
 **dummy development only** — it is not production R2.
 
 Dummy / test apps keep Artifacts `MemoryStorage` plus a fake
-`cdn_public_base_url` so publish works without real R2:
+`cdn_public_base_url` so publish works without real R2. The dummy also serves
+published HTML at `/recording_studio_artifacts/:uuid` (`DummyArtifactsController`)
+from MemoryStorage or `tmp/dummy_artifacts/*.html` so local screenshots can hit
+the CDN path shape without R2:
 
 ```ruby
 storage = RecordingStudioArtifacts::Cdn::MemoryStorage.new
