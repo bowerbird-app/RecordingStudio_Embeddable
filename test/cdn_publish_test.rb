@@ -45,10 +45,12 @@ class CdnPublishTest < Minitest::Test
     end
 
     def enabled? = !!@enabled
+
     def cdn_url_strategy?
       RecordingStudioEmbeddable::Cdn.enabled? &&
         RecordingStudioEmbeddable::Cdn.strategy?(embed_url_strategy)
     end
+
     def allowed_domains = Array(@allowed_embedder_domains)
     def blocked_domains = Array(@blocked_embedder_domains)
 

@@ -70,7 +70,7 @@ module RecordingStudioEmbeddable
       )
     end
 
-      def set_security_headers(domain_policy)
+    def set_security_headers(domain_policy)
       response.set_header("Content-Security-Policy", "frame-ancestors #{domain_policy.frame_ancestors.join(' ')}")
       response.set_header("X-Content-Type-Options", "nosniff")
       response.set_header("Referrer-Policy", "strict-origin-when-cross-origin")
