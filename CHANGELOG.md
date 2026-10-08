@@ -7,22 +7,68 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-07
+
+### Added
+- CDN publish via `recording_studio_artifacts` (`~> 0.4.0`): `PublishEmbedToCdn` /
+  `PublishEmbedToCdnJob` pre-render iframe HTML and call
+  `RecordingStudioArtifacts.publish` (first time) or `.update` (re-publish).
+  Partner URLs are Artifacts public URLs
+  (`https://{sub}.{domain}/recording_studio_artifacts/{uuid}`).
+- `embed_url_strategy: "cdn"` flips `public_path` / `embed_public_url` /
+  `embed_code` to the stored Artifacts URL only — never the App Platform mount
+  `/recording_studio_embeddable/embeds/:token`.
+- `recording.enqueue_embed_cdn_publish!` for parent recording / theme / publishable changes.
+- Domain allowlist baked at publish (`DomainPolicy#frame_ancestors` → HTML CSP marker).
+- `docs/CDN.md` for Artifacts consumer wiring (no Spaces).
+- Dummy installs Artifacts (create + revision/purge migrations + MemoryStorage
+  initializer) so CDN publish is exercisable without real R2 credentials.
+- Shared dummy credentials (`test/dummy/config/credentials.yml.enc`) include
+  `recording_studio_artifacts.cdn` placeholder keys (`dev_placeholder`, fake
+  `public_base_url`). Hosts still own real `ARTIFACT_CDN_*` / R2 secrets.
+- Dummy mounts Recording Studio API at `/recording_studio_api` and allowlists GET `:embed` on Page. An AccessGrant client can fetch BrowserPayload schema v1 (`schema_version`, `html`, `configuration`, `sdk`) without a host-owned handler.
+
 ### Changed
 - Pin `flat_pack` to `~> 0.1.198` (GitHub tag `v0.1.198`).
 - Pin `recording_studio` to GitHub tag `v4.2.2` (still `~> 4.2` in the gemspec).
 - Pin `recording_studio_accessible` to GitHub tag `v0.11.1` (gemspec stays `~> 0.9`, which already allows 0.11.x).
 - Pin `recording_studio_publishable` to `~> 0.4` (GitHub tag `v0.4.2`).
+- Pin `recording_studio_artifacts` to `~> 0.4.0` (GitHub tag `v0.4.0`).
 - Dummy pins Attachable `v0.7.1` and Admin `v2.0.4`. API stays at `v0.5.5`.
 - Dummy Accessible schema now includes access invitations and stores access roles as strings (`view`, `edit`, `admin`).
 - Dummy API initializer exposes `RecordingStudio::Access.roles` from Accessible's ranked names so API `v0.5.5` can still authorize member actions.
 
-### Upgrade notes
-- Hosts that use Publishable with this gem need Publishable `~> 0.4` (for example tag `v0.4.2`).
-- Accessible `0.11` stores roles as strings and adds access invitations. Hosts moving from Accessible `0.9.x` must run Accessible's 0.8–0.11 migrations (`depends_on_recording_id` if missing, invitations table, role integer → string) and `db:migrate`. Embeddable itself adds no migration.
-- Recording Studio API stays on `v0.5.5` here. That tag still expects `Access.roles`. Dummy shims it; hosts on API 0.5.x with Accessible 0.11 should do the same until API is compatible with Accessible 0.11.
+### Removed
+- DigitalOcean Spaces / `EMBED_CDN_*` publish path (closed PR #10). Artifacts → R2
+  is the only CDN publish path.
 
-### Added
-- Dummy mounts Recording Studio API at `/recording_studio_api` and allowlists GET `:embed` on Page. An AccessGrant client can fetch BrowserPayload schema v1 (`schema_version`, `html`, `configuration`, `sdk`) without a host-owned handler.
+### Upgrade notes
+- Bump the gem to `0.3.0`. Add `recording_studio_artifacts` `~> 0.4.0`
+  (GitHub tag `v0.4.0`), run Artifacts install + migrations (including
+  `revision` / `purge_error` / `purged_at`), and set `ARTIFACT_CDN_*`
+  (or credentials). `aws-sdk-s3` is a runtime dependency of Artifacts `0.4.0+`.
+- Drain or ignore in-flight Artifacts `PublishArtifactJob` jobs that used a
+  single `artifact_id` argument; `0.4.0` jobs take `(artifact_id, revision)`.
+  Embeddable does not enqueue that job.
+- Purge failures no longer fail an Artifacts publish (`purge_error` is recorded
+  instead). Embeddable still treats publish/update success as the CDN publish
+  success signal.
+- Embeddable does not destroy embeds and does not call
+  `RecordingStudioArtifacts.unpublish`. Disable overwrites the same artifact with
+  an unavailable document so the partner URL stays stable. Hosts that need to
+  remove the R2 object can call `unpublish(id:)` and clear `metadata.artifact`.
+- To serve partners from CDN: set `config.embed_url_strategy = :cdn` (or per-embed),
+  configure Artifacts public base / R2, and call `enqueue_embed_cdn_publish!` after
+  parent content, theme, or publishable changes.
+- Embed metadata stores `artifact.id` + `artifact.public_url`. Do not point hosts at
+  Spaces object keys or `EMBED_CDN_SPACES_*`.
+- `EmbedsController` remains as an optional origin fallback during migration.
+  Partner snippets must use the Artifacts URL once strategy is `cdn`.
+- CDN hits do not run `CaptureView` or Rails rate limiting — use Cloudflare analytics /
+  rate limits. Browser-payload / API embeds are unchanged. Pretty-URL CF Worker is deferred.
+- Hosts that use Publishable with this gem need Publishable `~> 0.4` (for example tag `v0.4.2`).
+- Accessible `0.11` stores roles as strings and adds access invitations. Hosts moving from Accessible `0.9.x` must run Accessible's 0.8–0.11 migrations and `db:migrate`.
+- Recording Studio API stays on `v0.5.5` here. That tag still expects `Access.roles`. Dummy shims it; hosts on API 0.5.x with Accessible 0.11 should do the same until API is compatible with Accessible 0.11.
 
 ## [0.2.1] - 2026-09-15
 
@@ -128,7 +174,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.3.0
 [0.2.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.2.1
 [0.2.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.2.0
 [0.1.3]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.1.3

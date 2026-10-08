@@ -4,12 +4,13 @@ RecordingStudio Embeddable is the Rails engine for secure public embeds in Recor
 
 Two delivery modes ship in this gem:
 
-1. **Iframe mode** — tokenized public HTML document for `<iframe src="…">`.
+1. **Iframe mode** — tokenized public HTML document for `<iframe src="…">` (dedicated Rails mount, or CDN via Artifacts).
 2. **Browser-payload mode** — sanitized HTML fragment plus configuration for the WordPress Plugin Demo SDK (schema version 1).
 
 ## What It Includes
 
 - Public embed routes for tokenized iframe recordings.
+- CDN publish through [`recording_studio_artifacts`](https://github.com/bowerbird-app/RecordingStudio_artifacts) (Cloudflare R2) when `embed_url_strategy` is `:cdn`.
 - `RenderPayload` / `BrowserPayload` for API and SDK consumers (fragment + theme/sizing, no document chrome).
 - Soft `:embed` capability-action registration when `recording_studio_api` is present (no hard dependency).
 - A management UI for previewing, editing, styling, and reviewing stats for embeds.
@@ -22,6 +23,7 @@ Two delivery modes ship in this gem:
 - Ruby 3.3 or newer.
 - Rails 8.1 or newer.
 - A host application that can mount the engine and run the supplied migrations.
+- `recording_studio_artifacts` `~> 0.4.0` (CDN publish path).
 
 ## Install
 
@@ -67,11 +69,37 @@ article.embed_code(host: "example.com")
 
 ## Iframe mode
 
+### Dedicated (default)
+
 The public embed route is token-based and lives under the mounted engine path:
 
 `/recording_studio_embeddable/embeds/:token`
 
 That path returns a full HTML document (embed layout, FlatPack CSS, theme CSS variables). It applies domain policy, HTTP cache validators, rate limiting, and **counts as a public view** via `CaptureView` / `EmbeddableViewLog`.
+
+### CDN (Artifacts)
+
+Set `config.embed_url_strategy = :cdn` (or per-embed). Embeddable pre-renders the
+iframe document and calls:
+
+```ruby
+RecordingStudioArtifacts.publish(body: html, content_type: "text/html; charset=utf-8", ...)
+# re-publish:
+RecordingStudioArtifacts.update(id: artifact_id, body: html, content_type: "...")
+```
+
+`embed_public_url` / `embed_code` then return `result.value[:public_url]` (also stored
+on `embed.metadata["artifact"]`). That URL looks like
+`https://{subdomain}.{domain}/recording_studio_artifacts/{uuid}` — never the Rails mount.
+
+Install and configure Artifacts first. **Hosts supply real CDN secrets** via
+`ARTIFACT_CDN_*` ENV or host credentials under `recording_studio_artifacts.cdn`
+(`aws-sdk-s3` comes with Artifacts `0.4.0+`). This gem does not ship production R2 keys.
+Dummy uses Artifacts `MemoryStorage` and safe placeholders in the shared dummy
+credentials file. Details: [`docs/CDN.md`](docs/CDN.md).
+
+Hosts should call `recording.enqueue_embed_cdn_publish!` after parent content, theme,
+or publishable changes that affect the rendered document.
 
 ## Browser-payload mode
 
@@ -141,7 +169,7 @@ cd test/dummy && bin/dev
 
 The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine. It pins Accessible `v0.11.1`, Publishable `v0.4.2`, Attachable `v0.7.1`, Admin `v2.0.4`, and Recording Studio API `v0.5.5` (held). It mounts the public API so GET `:embed` can be exercised over HTTP. Dummy grants access through Accessible's public services and shims `RecordingStudio::Access.roles` so API 0.5.5 can still authorize member actions against string roles.
 
-Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key.
+Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key. The dummy blob includes `recording_studio_artifacts.cdn` placeholders (`dev_placeholder`, fake `public_base_url`) so the key shape is visible; hosts set real `ARTIFACT_CDN_*` (or host credentials) themselves.
 
 ## Cloud Agent boot
 

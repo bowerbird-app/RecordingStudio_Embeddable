@@ -23,15 +23,24 @@ require "recording_studio_embeddable/security/public_access"
 require "recording_studio_embeddable/services/base_service"
 require "recording_studio_embeddable/render_payload"
 require "recording_studio_embeddable/api"
+require "recording_studio_embeddable/cdn"
 require "recording_studio_embeddable/services/bot_detector"
 require "recording_studio_embeddable/services/normalize_payload"
 require "recording_studio_embeddable/services/log_view"
 require "recording_studio_embeddable/services/capture_view"
 require "recording_studio_embeddable/services/google_fonts"
+require "recording_studio_embeddable/services/render_embed_document"
+require "recording_studio_embeddable/services/publish_embed_to_cdn"
 require "recording_studio_embeddable/rate_limiters/null"
 require "recording_studio_embeddable/rate_limiters/rails_cache"
 require "recording_studio_embeddable/rate_limiters/redis"
 require "recording_studio_embeddable/engine"
+
+begin
+  require "recording_studio_artifacts"
+rescue LoadError
+  # Hard gemspec dependency; LoadError only surfaces in incomplete bundles.
+end
 
 module RecordingStudioEmbeddable
   class << self

@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   require "recording_studio_attachable"
   require "recording_studio_publishable"
   require "recording_studio_api"
+  require "recording_studio_artifacts"
 
   devise_for :users
   mount RecordingStudioAttachable::Engine, at: "/recording_studio_attachable"
@@ -11,6 +12,7 @@ Rails.application.routes.draw do
   get "/recording_studio", to: redirect("/"), as: nil
   mount RecordingStudio::Engine, at: "/recording_studio"
   mount RecordingStudioEmbeddable::Engine, at: "/recording_studio_embeddable"
+  mount RecordingStudioArtifacts::Engine, at: "/recording_studio_artifacts"
   mount RecordingStudioPublishable::Engine, at: "/"
   mount RecordingStudioApi::Engine, at: "/recording_studio_api"
 
