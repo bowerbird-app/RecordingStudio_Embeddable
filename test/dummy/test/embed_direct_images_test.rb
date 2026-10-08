@@ -108,7 +108,9 @@ class EmbedDirectImagesTest < ActionDispatch::IntegrationTest
       kiln-canister-detail.jpg
     ].each do |filename|
       path = dir.join(filename)
-      recording = File.open(path, "rb") do |io|
+      raise "Missing fixture image: #{path}" unless path.file?
+
+      image_recording = File.open(path, "rb") do |io|
         @page_recording.import_attachment(
           io: io,
           filename: filename,
@@ -118,8 +120,11 @@ class EmbedDirectImagesTest < ActionDispatch::IntegrationTest
           source: "test"
         )
       end
-      RecordingStudioAttachable::PreprocessVariantsJob.perform_now(recording.recordable.id)
-      blob = recording.recordable.file.blob
+      raise "Could not import #{filename}" if image_recording.nil?
+
+      attachment = image_recording.recordable
+      RecordingStudioAttachable::PreprocessVariantsJob.perform_now(attachment.id)
+      blob = attachment.file.blob
       blob.analyze unless blob.analyzed?
     end
   end

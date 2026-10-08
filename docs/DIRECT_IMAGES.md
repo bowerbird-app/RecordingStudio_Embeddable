@@ -45,3 +45,8 @@ Each image includes `srcset` / `sizes`, explicit `width` / `height`, and
 The dummy sets `direct_url_host = "cdn.example.test"` and serves blob keys via
 `DummyCdnController` / `DummyCdnHost` so local screenshots show real pictures
 without R2 credentials. That stand-in is dummy-only.
+
+Variant preprocessing (seeds and dummy integration tests) uses Active Storage’s
+`:vips` processor — install **libvips** locally and in CI (`libvips42` /
+`libvips42t64` on Ubuntu). Without it, `PreprocessVariantsJob` cannot materialize
+variant blobs and direct `srcset` URLs stay empty.
