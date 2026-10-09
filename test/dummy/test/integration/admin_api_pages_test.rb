@@ -25,19 +25,18 @@ class AdminApiPagesTest < ActionDispatch::IntegrationTest
       user.password_confirmation = TEST_PASSWORD
     end
 
-    @admin_root = AdminRoot.find_or_create_by!(name: "Admin")
-    @admin_root_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
+    # Own AdminRoot so bootstrap stays available even when seeds already own "Admin".
+    @admin_root = AdminRoot.create!(name: "Admin API Pages #{SecureRandom.hex(3)}")
+    @admin_root_recording = RecordingStudio::Recording.unscoped.create!(
       recordable: @admin_root,
       parent_recording_id: nil
     )
 
-    unless RecordingStudioAccessible.authorized?(actor: @user, recording: @admin_root_recording, role: :admin)
-      result = RecordingStudioAccessible.bootstrap_owner_access!(
-        recording: @admin_root_recording,
-        actor: @user
-      )
-      raise result.error unless result.success?
-    end
+    result = RecordingStudioAccessible.bootstrap_owner_access!(
+      recording: @admin_root_recording,
+      actor: @user
+    )
+    raise result.error unless result.success?
 
     RecordingStudioApi::Admin::ApiAuthorization.recording_for(
       api: :public,
