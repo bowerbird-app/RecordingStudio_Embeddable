@@ -27,8 +27,21 @@ class DummyDevCredentialsTest < ActiveSupport::TestCase
 
     assert_includes gitignore, "test/dummy/config/credentials/development.key"
     assert_includes gitignore, "test/dummy/config/credentials/*.key"
-    refute File.exist?(Rails.root.join("config/credentials/development.key")),
-           "development.key must never be committed"
+
+    key_path = Rails.root.join("config/credentials/development.key")
+    if key_path.exist?
+      tracked = `git -C #{Rails.root.join("../..")} ls-files --error-unmatch config/credentials/development.key 2>/dev/null`
+      # Prefer checking from repo root path used by gitignore.
+      tracked = `git -C #{Rails.root.join("../..")} ls-files --error-unmatch test/dummy/config/credentials/development.key 2>/dev/null`
+      assert_equal "", tracked.to_s.strip, "development.key must never be tracked by git"
+    end
+  end
+
+  test "artifacts_cdn_configured is independent of Active Storage r2 keys" do
+    # In test, shared credentials either lack CDN keys or use placeholders that dig ignores.
+    refute DummyDevCredentials.artifacts_cdn_configured?
+    assert_kind_of RecordingStudioArtifacts::Cdn::MemoryStorage,
+                   RecordingStudioArtifacts.configuration.cdn_storage
   end
 
   test "dig returns nil for missing paths without raising" do

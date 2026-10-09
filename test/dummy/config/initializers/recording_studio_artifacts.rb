@@ -23,12 +23,12 @@ RecordingStudioArtifacts.configure do |config|
   config.cdn_cloudflare_api_token = cdn.call(:cloudflare_api_token)
   config.cdn_publish_queue = :default
 
-  # Test always uses MemoryStorage. Development uses real R2 only when
-  # development credentials supply Active Storage :r2 keys. Placeholder /
-  # missing credentials keep MemoryStorage so CI stays green.
+  # Test always uses MemoryStorage. Development uses real Artifacts CDN R2 only
+  # when recording_studio_artifacts.cdn keys are present. Active Storage :r2
+  # (Attachable uploads) is independent — without CDN keys, keep MemoryStorage.
   use_memory =
     Rails.env.test? ||
-    (Rails.env.development? && !DummyDevCredentials.r2_active_storage_configured?)
+    !DummyDevCredentials.artifacts_cdn_configured?
 
   if use_memory
     storage = RecordingStudioArtifacts::Cdn::MemoryStorage.new

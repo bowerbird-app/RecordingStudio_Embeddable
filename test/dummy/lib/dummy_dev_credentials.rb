@@ -48,6 +48,19 @@ module DummyDevCredentials
       dig(:r2, :bucket).present?
   end
 
+  # Artifacts CDN publish shape: dig(:recording_studio_artifacts, :cdn, …).
+  # Independent of Active Storage :r2 — development may upload Attachable blobs
+  # to R2 while Artifacts still uses MemoryStorage when CDN keys are absent.
+  def artifacts_cdn_configured?
+    dig(:recording_studio_artifacts, :cdn, :r2_access_key_id).present? &&
+      dig(:recording_studio_artifacts, :cdn, :r2_secret_access_key).present? &&
+      dig(:recording_studio_artifacts, :cdn, :r2_bucket).present? &&
+      (
+        dig(:recording_studio_artifacts, :cdn, :r2_endpoint).present? ||
+          dig(:recording_studio_artifacts, :cdn, :r2_account_id).present?
+      )
+  end
+
   def apply_development_runtime!
     return unless Rails.env.development?
     return unless r2_active_storage_configured?
