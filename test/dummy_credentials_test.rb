@@ -29,13 +29,23 @@ class DummyCredentialsTest < Minitest::Test
 
     assert_equal [
       "test/dummy/config/credentials.yml.enc",
-      "test/dummy/config/credentials/development.yml.enc"
+      "test/dummy/config/credentials/development.yml.enc",
+      "test/dummy/config/credentials/test.yml.enc"
     ], tracked
 
     tracked_keys = Dir.chdir(File.expand_path("..", __dir__)) do
       `git ls-files -- '**/credentials/*.key' '**/master.key'`.split("\n").reject(&:empty?)
     end
     assert_empty tracked_keys, "credential keys must never be committed"
+
+    %w[
+      test/dummy/config/credentials/development.key
+      test/dummy/config/credentials/test.key
+      test/dummy/config/master.key
+      config/master.key
+    ].each do |key_path|
+      refute_includes tracked_keys, key_path, "#{key_path} must never be tracked"
+    end
   end
 
   def test_encrypted_credentials_file_is_present
@@ -48,11 +58,14 @@ class DummyCredentialsTest < Minitest::Test
     gitignore = File.read(File.expand_path("../.gitignore", __dir__))
     assert_includes gitignore, "test/dummy/config/master.key"
     assert_includes gitignore, "config/master.key"
+    assert_includes gitignore, "test/dummy/config/credentials/*.key"
+    assert_includes gitignore, "test/dummy/config/credentials/development.key"
+    assert_includes gitignore, "test/dummy/config/credentials/test.key"
 
     tracked = Dir.chdir(File.expand_path("..", __dir__)) do
-      `git ls-files -- config/master.key test/dummy/config/master.key`.strip
+      `git ls-files -- config/master.key test/dummy/config/master.key test/dummy/config/credentials/development.key test/dummy/config/credentials/test.key`.strip
     end
-    assert_equal "", tracked, "master.key must not be committed"
+    assert_equal "", tracked, "master.key and credentials/*.key must not be committed"
   end
 
   def test_dummy_credentials_decrypt_when_master_key_is_available

@@ -6,6 +6,11 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # credentials/test.yml.enc may be committed; CI has no test.key / RAILS_MASTER_KEY.
+  # Keep require_master_key false so Rails boots with DummyDevCredentials fallbacks
+  # (MemoryStorage, cdn.example.test) instead of raising MissingKeyError.
+  config.require_master_key = false
+
   # While tests run files are not watched, reloading is not necessary.
   config.enable_reloading = false
 

@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
-# Safe digs into Rails credentials for dummy development R2 / CDN / Attachable.
-# Real values live in config/credentials/development.yml.enc (committed) decrypted
-# by gitignored config/credentials/development.key. Never logs values.
-# When the key / file is absent (CI, test, cold clones), every dig returns nil
-# and callers fall back to dummy stand-ins (cdn.example.test, MemoryStorage).
+# Safe digs into Rails credentials for dummy development / test R2 / CDN / Attachable.
+# Real values live in committed env credentials:
+#   config/credentials/development.yml.enc + gitignored development.key
+#   config/credentials/test.yml.enc + gitignored test.key (same shared RS key)
+# Never logs values. When the key is absent (CI, cold clones), every dig returns
+# nil and callers fall back to dummy stand-ins (cdn.example.test, MemoryStorage).
+# Rails test keeps config.require_master_key = false so an undecryptable
+# test.yml.enc does not raise on boot.
 module DummyDevCredentials
   PLACEHOLDER = "dev_placeholder"
 

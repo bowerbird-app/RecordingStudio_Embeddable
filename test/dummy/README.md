@@ -34,11 +34,14 @@ Then open the app and sign in with:
 ## Running the dummy against real dev R2
 
 This repo is public. Shared `config/credentials.yml.enc` stays **dummy
-placeholders** only. Real Cloudflare R2 values for local development live in
-**per-environment** Rails credentials:
+placeholders** only. Real Cloudflare R2 values for local development / test live
+in **per-environment** Rails credentials (same shared RecordingStudio_* key
+across RS repos):
 
-- Committed encrypted: `config/credentials/development.yml.enc`
-- Gitignored key: `config/credentials/development.key` (never commit)
+- Committed encrypted: `config/credentials/development.yml.enc`,
+  `config/credentials/test.yml.enc`
+- Gitignored keys: `config/credentials/development.key`,
+  `config/credentials/test.key` (never commit; same shared key value)
 
 Key names match featured_in + RecordingStudio Artifacts (see
 `config/credentials/development.yml.example` — names only):
@@ -77,10 +80,10 @@ recording_studio_attachable:
    bin/rails credentials:show -e development
    ```
 
-2. Put `config/credentials/development.key` locally (gitignored). Decrypt /
-   edit the committed `development.yml.enc` with those values under the key
-   paths above (`bin/rails credentials:edit --environment development` from
-   `test/dummy`).
+2. Put `config/credentials/development.key` locally (gitignored). For the test
+   env, copy the same shared key to `config/credentials/test.key`. Decrypt /
+   edit the committed env blobs under the key paths above
+   (`bin/rails credentials:edit --environment development` from `test/dummy`).
 
 3. Start the dummy with Artifacts usage on, reseed, publish:
 
@@ -95,9 +98,11 @@ recording_studio_attachable:
    Settings, set URL strategy to CDN if needed, save (triggers publish), then
    open the Artifacts public URL.
 
-Without `development.key`, the dummy keeps MemoryStorage +
-`cdn.example.test` / `artifacts.example.test` so CI is unchanged. Artifacts’
-built-in `ARTIFACT_CDN_*` ENV resolve remains a harmless optional override.
+Without `development.key` / `test.key` (and without `RAILS_MASTER_KEY`), the
+dummy keeps MemoryStorage + `cdn.example.test` / `artifacts.example.test` so CI
+is unchanged — `config.require_master_key` is false in test, so an undecryptable
+`test.yml.enc` does not raise. Artifacts’ built-in `ARTIFACT_CDN_*` ENV resolve
+remains a harmless optional override.
 
 ## Useful Routes
 

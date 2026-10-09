@@ -22,19 +22,32 @@ class DummyDevCredentialsTest < ActiveSupport::TestCase
     refute_includes example, "dev_placeholder"
   end
 
-  test "development.key is gitignored and development.yml.enc is not required for CI" do
+  test "credential key files stay gitignored and untracked" do
     gitignore = File.read(Rails.root.join("../../.gitignore"))
+    repo_root = Rails.root.join("../..")
 
-    assert_includes gitignore, "test/dummy/config/credentials/development.key"
-    assert_includes gitignore, "test/dummy/config/credentials/*.key"
-
-    key_path = Rails.root.join("config/credentials/development.key")
-    if key_path.exist?
-      tracked = `git -C #{Rails.root.join("../..")} ls-files --error-unmatch config/credentials/development.key 2>/dev/null`
-      # Prefer checking from repo root path used by gitignore.
-      tracked = `git -C #{Rails.root.join("../..")} ls-files --error-unmatch test/dummy/config/credentials/development.key 2>/dev/null`
-      assert_equal "", tracked.to_s.strip, "development.key must never be tracked by git"
+    %w[
+      test/dummy/config/credentials/*.key
+      test/dummy/config/credentials/development.key
+      test/dummy/config/credentials/test.key
+      test/dummy/config/master.key
+    ].each do |pattern|
+      assert_includes gitignore, pattern
     end
+
+    %w[
+      test/dummy/config/credentials/development.key
+      test/dummy/config/credentials/test.key
+      test/dummy/config/master.key
+    ].each do |key_path|
+      tracked = `git -C #{repo_root} ls-files --error-unmatch #{key_path} 2>/dev/null`
+      assert_equal "", tracked.to_s.strip, "#{key_path} must never be tracked by git"
+    end
+  end
+
+  test "test env does not require a master key when test.yml.enc is present" do
+    assert_equal false, Rails.application.config.require_master_key
+    assert Rails.root.join("config/credentials/test.yml.enc").exist?
   end
 
   test "artifacts_cdn_configured is independent of Active Storage r2 keys" do
@@ -48,15 +61,22 @@ class DummyDevCredentialsTest < ActiveSupport::TestCase
     assert_nil DummyDevCredentials.dig(:definitely_missing, :path)
   end
 
-  test "dig ignores shared credential placeholders" do
-    skip "Set RAILS_MASTER_KEY or test/dummy/config/master.key" unless DummyDevCredentials.credentials_readable?
-
-    # Shared credentials.yml.enc uses dev_placeholder under recording_studio_artifacts.cdn
+  test "dig ignores placeholders and missing CDN secrets" do
+    # test.yml.enc / development.yml.enc omit Artifacts CDN secrets; shared
+    # credentials.yml.enc uses dev_placeholder (filtered by dig). Either way,
+    # dig must not surface a usable CDN secret in this suite.
     assert_nil DummyDevCredentials.dig(:recording_studio_artifacts, :cdn, :r2_secret_access_key)
   end
 
-  test "attachable direct_url_host falls back to dummy stand-in" do
-    assert_equal "cdn.example.test", RecordingStudioAttachable.configuration.direct_url_host
+  test "attachable direct_url_host falls back to dummy stand-in without decryptable credentials" do
+    configured = DummyDevCredentials.dig(:recording_studio_attachable, :direct_url_host)
+    host = RecordingStudioAttachable.configuration.direct_url_host
+
+    if configured.present?
+      assert_equal configured, host
+    else
+      assert_equal "cdn.example.test", host
+    end
   end
 
   test "artifacts cdn public base falls back to dummy stand-in" do
