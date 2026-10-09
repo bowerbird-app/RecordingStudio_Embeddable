@@ -4,6 +4,8 @@ require "test_helper"
 
 class EmbedDirectImagesTest < ActionDispatch::IntegrationTest
   setup do
+    @original_url_mode = RecordingStudioAttachable.configuration.url_mode
+    @original_direct_url_host = RecordingStudioAttachable.configuration.direct_url_host
     RecordingStudioEmbeddable.configuration.public_embeds_enabled = true
     RecordingStudioEmbeddable.configuration.allow_any_domain = true
     RecordingStudioEmbeddable.configuration.require_publishable = false
@@ -46,6 +48,8 @@ class EmbedDirectImagesTest < ActionDispatch::IntegrationTest
   teardown do
     RecordingStudioEmbeddable.configuration.require_publishable = true
     RecordingStudioEmbeddable.configuration.rate_limiting_enabled = true
+    RecordingStudioAttachable.configuration.url_mode = @original_url_mode
+    RecordingStudioAttachable.configuration.direct_url_host = @original_direct_url_host
   end
 
   test "public embed page uses only direct_url_host image URLs" do

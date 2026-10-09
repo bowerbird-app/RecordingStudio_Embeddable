@@ -6,12 +6,14 @@ module Dummy
 
     GEM_DIRECTORIES = {
       "flat_pack" => ["app/components"],
-      "recording_studio" => ["app/views"]
+      "recording_studio" => ["app/views"],
+      "recording_studio_root_switchable" => ["app/views"]
     }.freeze
 
     ENGINE_CONSTANTS = {
       "flat_pack" => "FlatPack",
-      "recording_studio" => "RecordingStudio"
+      "recording_studio" => "RecordingStudio",
+      "recording_studio_root_switchable" => "RecordingStudioRootSwitchable"
     }.freeze
 
     def css
@@ -70,8 +72,11 @@ module Dummy
         File.join(bundle_path, "bundler/gems/flatpack-*/app/components"),
         File.join(bundle_path, "bundler/gems/RecordingStudio-*/app/views"),
         File.join(bundle_path, "bundler/gems/recordingstudio-*/app/views"),
+        File.join(bundle_path, "bundler/gems/RecordingStudio_root_switchable-*/app/views"),
+        File.join(bundle_path, "bundler/gems/recording_studio_root_switchable-*/app/views"),
         File.join(bundle_path, "gems/flat_pack-*/app/components"),
-        File.join(bundle_path, "gems/recording_studio-*/app/views")
+        File.join(bundle_path, "gems/recording_studio-*/app/views"),
+        File.join(bundle_path, "gems/recording_studio_root_switchable-*/app/views")
       ]
     end
   end
