@@ -11,7 +11,9 @@ RecordingStudio.configure do |config|
     "AdminRoot",
     "RecordingStudioEmbeddable::Embed",
     "RecordingStudioPublishable::Publishable",
-    "RecordingStudioAttachable::Attachment"
+    "RecordingStudioAttachable::Attachment",
+    "RecordingStudioAttachable::Library",
+    "RecordingStudioAttachable::Placement"
   ]
 
   # Keep fallback enabled unless all installed RecordingStudio addons
