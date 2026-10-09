@@ -43,5 +43,12 @@ module Dummy
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    # Dummy-only: map Attachable direct_url_host requests onto DummyCdnController.
+    require_relative "../app/middleware/dummy_cdn_host"
+    config.middleware.insert_before 0, DummyCdnHost
+
+    # Needed by config/storage.yml ERB before initializers run.
+    require_relative "../lib/dummy_dev_credentials"
   end
 end

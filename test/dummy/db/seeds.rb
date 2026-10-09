@@ -76,15 +76,6 @@ document_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
   recordable: document
 )
 
-# Publish Getting Started so the dedicated public embed path renders (require_publishable).
-if page_recording.respond_to?(:currently_published?) && !page_recording.currently_published?
-  RecordingStudioPublishable::Services::Publishables::Update.call(
-    parent_recording: page_recording,
-    actor: user,
-    attributes: { slug: "getting-started", status: "published" }
-  )
-end
-
 # First admin on an empty owned root must bootstrap — grant_access alone fails
 # with "Not authorized to manage access" when nobody can manage yet.
 unless RecordingStudioAccessible.authorized?(actor: user, recording: root_recording, role: :admin)
@@ -106,12 +97,114 @@ unless RecordingStudioAccessible.authorized?(actor: viewer, recording: root_reco
   raise viewer_grant.error unless viewer_grant.success?
 end
 
+# Publish Getting Started + Spring release so dedicated public embed paths render
+# (Embeddable require_publishable). After Accessible bootstrap so publish is authorized.
+if page_recording.respond_to?(:currently_published?) && !page_recording.currently_published?
+  RecordingStudioPublishable::Services::Publishables::Update.call(
+    parent_recording: page_recording,
+    actor: user,
+    attributes: { slug: "getting-started", status: "published" }
+  )
+end
+
+if article_recording.respond_to?(:currently_published?) && !article_recording.currently_published?
+  RecordingStudioPublishable::Services::Publishables::Update.call(
+    parent_recording: article_recording,
+    actor: user,
+    attributes: { slug: "spring-release", status: "published" }
+  )
+end
+
+# Cover + gallery images on every embeddable example (Page + Article).
+# Attachable APIs only. Runs after Accessible grants so upload authorization succeeds.
+press_kit = [
+  {
+    file: "kiln-canister-hero.jpg",
+    name: "Kiln canister",
+    caption: "Hero, three-quarter",
+    credit: "Studio North",
+    alt_text: "Smoked glass canister with a brass lid on pale limestone"
+  },
+  {
+    file: "kiln-canister-open.jpg",
+    name: "Kiln canister, open",
+    caption: "Lid set aside",
+    credit: "Studio North",
+    alt_text: "Smoked glass canister with the brass lid resting beside it"
+  },
+  {
+    file: "kiln-canister-detail.jpg",
+    name: "Kiln canister, detail",
+    caption: "Brass lid",
+    credit: "Studio North",
+    alt_text: "Close view of the brass lid on the smoked glass canister"
+  },
+  {
+    file: "kiln-canister-table.jpg",
+    name: "Kiln canister, table",
+    caption: "On the breakfast table",
+    credit: "Studio North",
+    alt_text: "Smoked glass canister on a linen table beside a cup and napkin"
+  }
+]
+press_kit_dir = Rails.root.join("db/seed_images")
+press_kit.each do |shot|
+  path = press_kit_dir.join(shot[:file])
+  raise "Missing seed image fixture: #{path}" unless path.file?
+end
+
+seed_blob_available = lambda do |recording|
+  attachment = recording&.recordable
+  next false unless attachment&.file&.attached?
+
+  blob = attachment.file.blob
+  blob.service.exist?(blob.key)
+rescue StandardError
+  false
+end
+
+seed_press_kit_on = lambda do |parent_recording|
+  existing_images = parent_recording.images(per_page: 100).to_a
+  press_kit.each do |shot|
+    existing = existing_images.find { |recording| recording.recordable.original_filename == shot[:file] }
+    next if existing && seed_blob_available.call(existing)
+
+    existing&.remove_attachment(actor: user)
+
+    image_recording = File.open(press_kit_dir.join(shot[:file]), "rb") do |io|
+      parent_recording.import_attachment(
+        io: io,
+        filename: shot[:file],
+        content_type: "image/jpeg",
+        name: shot[:name],
+        actor: user,
+        source: "press_kit"
+      )
+    end
+    raise "Could not import #{shot[:file]} onto #{parent_recording.id}" if image_recording.nil?
+    raise "Imported #{shot[:file]} but blob is missing" unless seed_blob_available.call(image_recording)
+
+    image_recording.revise_attachment_metadata(
+      actor: user,
+      caption: shot[:caption],
+      credit: shot[:credit],
+      alt_text: shot[:alt_text]
+    )
+
+    RecordingStudioAttachable::PreprocessVariantsJob.perform_now(image_recording.recordable.id)
+  end
+end
+
+seed_press_kit_on.call(page_recording)
+seed_press_kit_on.call(article_recording)
+
 puts "Seeded: admin@admin.com / Password"
 puts "Seeded: viewer@admin.com / Password"
 puts "Seeded: Workspace '#{workspace.name}' with root recording ##{root_recording.id}"
 puts "Seeded: Folder '#{folder.name}' and page '#{page.title}'"
-puts "Seeded: Article '#{article.title}' (embeddable; publishable not configured in this dummy)"
+puts "Seeded: Article '#{article.title}' (embeddable + publishable + Attachable)"
 puts "Seeded: Document '#{document.title}' (publishable enabled, embeddable not configured)"
 puts "Seeded: Page public embed at /recording_studio_embeddable/embeds/#{page_recording.embed&.token}" if page_recording.respond_to?(:embed)
 puts "Seeded: Article public embed at /recording_studio_embeddable/embeds/#{article_recording.embed&.token}" if
   article_recording.respond_to?(:embed)
+puts "Seeded: Page + Article press kits (#{press_kit.size} images each) with Attachable direct URLs"

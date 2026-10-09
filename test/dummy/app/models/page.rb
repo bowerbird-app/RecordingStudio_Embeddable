@@ -8,6 +8,13 @@ class Page < ApplicationRecord
     seo: false
   )
 
+  include RecordingStudio::Capabilities::Attachable.to(
+    allowed_content_types: [ "image/*" ],
+    max_file_size: 25.megabytes,
+    max_file_count: 20,
+    enabled_attachment_kinds: %i[image]
+  )
+
   include RecordingStudio::Capabilities::Embeddable.to(
     embed_controller: "pages",
     embed_action: :embed,

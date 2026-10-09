@@ -102,10 +102,39 @@ The shared dummy file `test/dummy/config/credentials.yml.enc` (same
 RecordingStudio_* development master key as sibling gems) includes a
 `recording_studio_artifacts.cdn` key shape with safe placeholders
 (`dev_placeholder`, `https://artifacts.example.test`). That blob is for
-**dummy development only** — it is not production R2.
+**dummy development only** — it is not production R2. This repo is **public**:
+never commit real R2 secrets in plaintext or encrypted form.
+
+### Running the dummy against real dev R2
+
+Local development reads real R2 / Artifacts CDN / Attachable `direct_url_host`
+from Rails per-environment credentials:
+
+- `test/dummy/config/credentials/development.yml.enc` (committed, encrypted)
+- `test/dummy/config/credentials/development.key` (gitignored — never commit)
+
+Key names (see `development.yml.example`): featured_in `r2.*`, Artifacts
+`recording_studio_artifacts.cdn.*`, and
+`recording_studio_attachable.direct_url_host`. From a featured_in checkout,
+inspect names with `bin/rails credentials:show -e development` — do not paste
+secret values into this public repo. Then:
+
+```bash
+cd test/dummy
+export RECORDING_STUDIO_ARTIFACTS_ENABLED=true
+bin/rails db:seed
+bin/dev
+```
+
+Without `development.key`, development keeps `MemoryStorage` + dummy hosts so
+CI is unchanged. `ARTIFACT_CDN_*` ENV remains Artifacts’ built-in optional
+override. Step-by-step: [`test/dummy/README.md`](../test/dummy/README.md).
 
 Dummy / test apps keep Artifacts `MemoryStorage` plus a fake
-`cdn_public_base_url` so publish works without real R2:
+`cdn_public_base_url` so publish works without real R2. The dummy also serves
+published HTML at `/recording_studio_artifacts/:uuid` (`DummyArtifactsController`)
+from MemoryStorage or `tmp/dummy_artifacts/*.html` so local screenshots can hit
+the CDN path shape without R2:
 
 ```ruby
 storage = RecordingStudioArtifacts::Cdn::MemoryStorage.new
@@ -126,11 +155,27 @@ uses CDN strategy:
 
 The job calls `Services::PublishEmbedToCdn`, which:
 
-1. Renders the full iframe document (`RenderEmbedDocument`) and bakes
+1. Runs `EnsureEmbedImageVariants` — Attachable `PreprocessVariantsJob`
+   synchronously for every image on the parent recording, then checks
+   `variant_processed?` for each configured preprocessed variant. If any are
+   still missing, publish **defers** and re-enqueues the job after
+   `config.cdn_variant_retry_wait` (default 15s) instead of writing HTML that
+   would fall back to Rails preview paths.
+2. Renders the full iframe document (`RenderEmbedDocument`) and bakes
    `DomainPolicy#frame_ancestors` into an HTML CSP meta marker
-2. Calls `RecordingStudioArtifacts.publish` (first time) or `.update` (re-publish)
+3. Runs `PublishedHtmlGuard` so the body never contains `/rails/active_storage`
+   or Attachable Rails preview/file paths
+4. Calls `RecordingStudioArtifacts.publish` (first time) or `.update` (re-publish)
    with `synchronous: true`
-3. Stores `metadata.artifact` (`id`, `public_url`, `published_at`, …)
+5. Stores `metadata.artifact` (`id`, `public_url`, `published_at`, …)
+
+### Why sync process (then defer) instead of only re-enqueue?
+
+Publish already runs in a background job. Processing variants inline with
+Attachable's own `PreprocessVariantsJob.perform_now` is deterministic and reuses
+the public API. Deferral is only the safety valve when verification still fails
+(slow disk, transient errors) — Artifacts HTML is never published with Rails
+fallback image URLs.
 
 Disabled or publishable-blocked embeds overwrite the same artifact with a
 minimal “unavailable” document (`frame-ancestors 'none'`). Embeddable does not

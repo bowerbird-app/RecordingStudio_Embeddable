@@ -45,6 +45,7 @@ module RecordingStudioEmbeddable
       :prune_views_after,
       :cdn_publish_queue,
       :cdn_withhold_snippet_until_published,
+      :cdn_variant_retry_wait,
       :cdn_storage,
       :cdn_purger
     )
@@ -108,6 +109,7 @@ module RecordingStudioEmbeddable
       @prune_views_after = 90.respond_to?(:days) ? 90.days : 90 * 24 * 60 * 60
       @cdn_publish_queue = :default
       @cdn_withhold_snippet_until_published = false
+      @cdn_variant_retry_wait = 15.respond_to?(:seconds) ? 15.seconds : 15
       @cdn_storage = nil
       @cdn_purger = nil
       @hooks = Hooks.new

@@ -148,6 +148,73 @@ class CdnPublishTest < Minitest::Test
                  embed.public_url(host: "app.example.com", protocol: "https")
   end
 
+  def test_published_html_contains_only_direct_url_host_image_urls
+    host = "cdn.example.test"
+    html = <<~HTML
+      <html><head></head><body>
+        <img src="https://#{host}/cover-key" srcset="https://#{host}/v-small 480w, https://#{host}/v-med 960w" width="1200" height="800">
+      </body></html>
+    HTML
+    embed = build_embed(token: "direct-imgs")
+    stub_ensure_variants_success! do
+      stub_document_render(html) do
+        result = publish_embed(embed)
+        assert result.success?, result.error.to_s
+        body = @bodies[embed.artifact_id]
+        assert_includes body, "https://#{host}/cover-key"
+        refute_match(%r{/rails/active_storage}, body)
+        refute_match(%r{/recording_studio_attachable/.*/preview/}, body)
+      end
+    end
+  end
+
+  def test_publish_defers_when_image_variants_are_not_yet_processed
+    embed = build_embed(token: "defer-variants")
+    ensure_mod = RecordingStudioEmbeddable::Services::EnsureEmbedImageVariants
+    failure = RecordingStudioEmbeddable::Services::BaseService::Result.new(
+      success: false,
+      error: "Embed image variants are not processed yet: att-1:med"
+    )
+
+    enqueued = []
+    job = Module.new
+    job.define_singleton_method(:set) do |wait:|
+      proxy = Object.new
+      proxy.define_singleton_method(:perform_later) { |id| enqueued << { wait: wait, id: id } }
+      proxy
+    end
+    silence_warnings { RecordingStudioEmbeddable.const_set(:PublishEmbedToCdnJob, job) }
+
+    original = ensure_mod.method(:call)
+    ensure_mod.define_singleton_method(:call) { |**_| failure }
+    result = publish_embed(embed)
+    assert result.success?, result.error.to_s
+    assert result.value[:deferred]
+    assert_match(/not processed yet/, result.value[:reason])
+    assert_equal([embed.id], enqueued.map { |row| row[:id] })
+    assert_empty @publish_calls
+  ensure
+    ensure_mod.define_singleton_method(:call, original) if ensure_mod && original
+    if RecordingStudioEmbeddable.const_defined?(:PublishEmbedToCdnJob, false) &&
+       RecordingStudioEmbeddable::PublishEmbedToCdnJob.is_a?(Module) &&
+       !RecordingStudioEmbeddable::PublishEmbedToCdnJob.is_a?(Class)
+      RecordingStudioEmbeddable.send(:remove_const, :PublishEmbedToCdnJob)
+    end
+  end
+
+  def test_publish_rejects_html_with_rails_fallback_image_paths
+    embed = build_embed(token: "fallback-reject")
+    stub_ensure_variants_success! do
+      bad = '<html><head></head><body><img src="/recording_studio_attachable/attachments/1/preview/med"></body></html>'
+      stub_document_render(bad) do
+        result = publish_embed(embed)
+        assert result.failure?
+        assert_match(%r{must not include Rails/Active Storage}, result.error.to_s)
+        assert_empty @publish_calls
+      end
+    end
+  end
+
   def test_publish_calls_artifacts_publish_then_update_with_stable_url
     embed = build_embed(token: "overwrite-token")
     stub_document_render("<html><head></head><body>v1</body></html>") do
@@ -283,6 +350,19 @@ class CdnPublishTest < Minitest::Test
     yield
   ensure
     klass.define_singleton_method(:call, original)
+  end
+
+  def stub_ensure_variants_success!
+    klass = RecordingStudioEmbeddable::Services::EnsureEmbedImageVariants
+    result = RecordingStudioEmbeddable::Services::BaseService::Result.new(
+      success: true,
+      value: { attachments: [], variants: [] }
+    )
+    original = klass.method(:call)
+    klass.define_singleton_method(:call) { |**_| result }
+    yield
+  ensure
+    klass.define_singleton_method(:call, original) if klass && original
   end
 
   def stub_artifacts_api!

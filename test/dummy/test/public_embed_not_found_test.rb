@@ -19,13 +19,15 @@ class PublicEmbedNotFoundTest < ActionDispatch::IntegrationTest
     get "/recording_studio_embeddable/embeds/missing-token-does-not-exist"
 
     assert_response :not_found
-    assert_includes response.body, "Embed not available"
+    assert_includes response.body, "Oops"
     assert_includes response.body, "This embed is gone, or the link is wrong"
     assert_includes response.body, "fp-empty-state"
+    assert_includes response.body, "exclamation-circle"
     assert_equal "frame-ancestors 'none'", response.headers["Content-Security-Policy"]
     refute_includes response.body, "disabled"
     refute_includes response.body, "unpublished"
     refute_includes response.body, "invalid_token"
+    refute_includes response.body, "Embed not available"
   end
 
   test "disabled embed renders the same generic empty state" do
@@ -34,8 +36,10 @@ class PublicEmbedNotFoundTest < ActionDispatch::IntegrationTest
     get "/recording_studio_embeddable/embeds/#{embed.token}"
 
     assert_response :not_found
-    assert_includes response.body, "Embed not available"
+    assert_includes response.body, "Oops"
     assert_includes response.body, "fp-empty-state"
+    assert_includes response.body, "exclamation-circle"
     refute_includes response.body, "disabled"
+    refute_includes response.body, "Embed not available"
   end
 end

@@ -31,11 +31,81 @@ Then open the app and sign in with:
 - Email: `admin@admin.com`
 - Password: `Password`
 
+## Running the dummy against real dev R2
+
+This repo is public. Shared `config/credentials.yml.enc` stays **dummy
+placeholders** only. Real Cloudflare R2 values for local development live in
+**per-environment** Rails credentials:
+
+- Committed encrypted: `config/credentials/development.yml.enc`
+- Gitignored key: `config/credentials/development.key` (never commit)
+
+Key names match featured_in + RecordingStudio Artifacts (see
+`config/credentials/development.yml.example` — names only):
+
+```yaml
+secret_key_base:          # required — env credentials replace credentials.yml.enc
+r2:                       # featured_in Active Storage
+  access_key_id:
+  secret_access_key:
+  endpoint:
+  bucket:
+recording_studio_artifacts:
+  cdn:                    # Artifacts Credentials dig path
+    subdomain:
+    domain:
+    path_prefix:
+    public_base_url:
+    r2_account_id:
+    r2_access_key_id:
+    r2_secret_access_key:
+    r2_bucket:
+    r2_endpoint:
+    r2_region:
+    cloudflare_zone_id:
+    cloudflare_api_token:
+recording_studio_attachable:
+  direct_url_host:        # Attachable DirectUrl host
+```
+
+### Steps (Marco / local)
+
+1. From a `featured_in` checkout, inspect **key names only** (do not paste secret
+   values into chat or this public repo):
+
+   ```bash
+   bin/rails credentials:show -e development
+   ```
+
+2. Put `config/credentials/development.key` locally (gitignored). Decrypt /
+   edit the committed `development.yml.enc` with those values under the key
+   paths above (`bin/rails credentials:edit --environment development` from
+   `test/dummy`).
+
+3. Start the dummy with Artifacts usage on, reseed, publish:
+
+   ```bash
+   cd test/dummy
+   export RECORDING_STUDIO_ARTIFACTS_ENABLED=true
+   bin/rails db:seed
+   bin/dev
+   ```
+
+   Sign in as `admin@admin.com` / `Password`, open an embed’s management
+   Settings, set URL strategy to CDN if needed, save (triggers publish), then
+   open the Artifacts public URL.
+
+Without `development.key`, the dummy keeps MemoryStorage +
+`cdn.example.test` / `artifacts.example.test` so CI is unchanged. Artifacts’
+built-in `ARTIFACT_CDN_*` ENV resolve remains a harmless optional override.
+
 ## Useful Routes
 
 - `/` - embeddable dummy index with a table of page recordings and edit/preview actions
 - `/recording_studio` - redirects to `/` while the mounted Recording Studio engine stays available under that prefix for non-root routes
 - `/recording_studio_artifacts` - dummy Artifacts wiring page (toggle via `RECORDING_STUDIO_ARTIFACTS_ENABLED`)
+- `/recording_studio_artifacts/:uuid` - dummy-only MemoryStorage/tmp stand-in for the CDN edge path (screenshot/publish checks)
+- `/dummy_cdn/*key` - dummy-only stand-in for Attachable `direct_url_host` blob bytes
 - `/users/sign_in` - Devise sign-in page
 - `/docs/install`, `/docs/config`, `/docs/recordable_types`, `/docs/recordings_tree`, `/docs/gem_views`, `/docs/methods` - starter sidebar pages to adapt for the gem
 - `/dummy/pages/new` - add-page form used to create embeddable test pages

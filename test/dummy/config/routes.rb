@@ -15,6 +15,11 @@ Rails.application.routes.draw do
   # Host page for the Artifacts mount root. The engine's HomeController only
   # returns head :ok (empty body); the dummy shows real Flatpack wiring docs.
   get "/recording_studio_artifacts", to: "artifacts_homes#show", as: :artifacts_engine_home
+  # Dummy-only: serve MemoryStorage-published embed HTML at the CDN path shape.
+  get "/recording_studio_artifacts/:artifact_id",
+      to: "dummy_artifacts#show",
+      as: :dummy_artifact,
+      constraints: { artifact_id: /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i }
   mount RecordingStudioArtifacts::Engine, at: "/recording_studio_artifacts"
   mount RecordingStudioPublishable::Engine, at: "/"
   mount RecordingStudioApi::Engine, at: "/recording_studio_api"
@@ -24,6 +29,9 @@ Rails.application.routes.draw do
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
+
+  # Dummy-only stand-in for Attachable direct_url_host (R2/custom domain).
+  get "/dummy_cdn/*key", to: "dummy_cdn#show", format: false
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

@@ -25,6 +25,8 @@ Two delivery modes ship in this gem:
 - A host application that can mount the engine and run the supplied migrations.
 - `recording_studio_artifacts` `~> 0.4.0` (always installed; usage gated by
   `config.artifacts_enabled`, default off).
+- `recording_studio_attachable` `~> 0.9` for direct image URLs on rich embeds
+  (`url_mode: :direct` + `direct_url_host`).
 
 ## Install
 
@@ -110,6 +112,25 @@ credentials file. Details: [`docs/CDN.md`](docs/CDN.md).
 Hosts should call `recording.enqueue_embed_cdn_publish!` after parent content, theme,
 or publishable changes that affect the rendered document.
 
+### Rich embeds and Attachable direct images
+
+The shared Flatpack embed body (`recording_studio_embeddable/embeds/rich_body`)
+renders title, description, cover, and gallery. Image `src` / `srcset` values come
+from Attachable direct URLs only:
+
+```ruby
+RecordingStudioAttachable.configure do |config|
+  config.url_mode = :direct
+  config.direct_url_host = "images.example.com"
+  # optional: config.image_variants = { poster: { resize_to_limit: [1280, 720] } }
+  # optional exact list: config.preprocessed_variants = %i[small med large poster]
+end
+```
+
+Before CDN publish, Embeddable processes preprocessed variants synchronously and
+refuses to upload HTML that still points at Rails / Active Storage delivery paths.
+See [`docs/CDN.md`](docs/CDN.md).
+
 ## Browser-payload mode
 
 For the WordPress Plugin Demo SDK (and other authenticated API callers), render a schema v1 payload without going through the public iframe controller:
@@ -180,7 +201,28 @@ cd test/dummy && bin/dev
 
 The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine. It pins Accessible `v0.11.1`, Publishable `v0.4.2`, Attachable `v0.7.1`, Admin `v2.0.4`, and Recording Studio API `v0.5.5` (held). It mounts the public API so GET `:embed` can be exercised over HTTP. Dummy grants access through Accessible's public services and shims `RecordingStudio::Access.roles` so API 0.5.5 can still authorize member actions against string roles.
 
-Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key. The dummy blob includes `recording_studio_artifacts.cdn` placeholders (`dev_placeholder`, fake `public_base_url`) so the key shape is visible; hosts set real `ARTIFACT_CDN_*` (or host credentials) themselves.
+Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key. The dummy blob includes `recording_studio_artifacts.cdn` placeholders (`dev_placeholder`, fake `public_base_url`) so the key shape is visible — **never real R2 secrets** (this repo is public).
+
+### Running the dummy against real dev R2
+
+Real local R2 values live in committed encrypted
+`test/dummy/config/credentials/development.yml.enc`, decrypted by gitignored
+`test/dummy/config/credentials/development.key` (never commit the key). Key
+names match featured_in (`r2.*`) and Artifacts
+(`recording_studio_artifacts.cdn.*`) plus
+`recording_studio_attachable.direct_url_host` — see
+`test/dummy/config/credentials/development.yml.example`.
+
+```bash
+cd test/dummy
+# development.key present locally; development.yml.enc already committed
+export RECORDING_STUDIO_ARTIFACTS_ENABLED=true
+bin/rails db:seed
+bin/dev
+```
+
+Without the development key, dummy fallbacks (`cdn.example.test`, MemoryStorage)
+keep CI green. Full steps: [`test/dummy/README.md`](test/dummy/README.md).
 
 ## Cloud Agent boot
 

@@ -12,6 +12,7 @@ module RecordingStudioEmbeddable
       require "recording_studio"
       require "recording_studio_accessible"
       require "recording_studio_publishable"
+      require "recording_studio_attachable"
       require "flat_pack"
 
       RecordingStudio.register_capability(
@@ -46,7 +47,9 @@ module RecordingStudioEmbeddable
 
       ActiveSupport.on_load(:action_view) do
         require_dependency "recording_studio_embeddable/embed_layout_helper"
+        require_dependency "recording_studio_embeddable/direct_image_helper"
         include RecordingStudioEmbeddable::EmbedLayoutHelper
+        include RecordingStudioEmbeddable::DirectImageHelper
       end
 
       config.to_prepare do

@@ -41,6 +41,13 @@ jobs:
         bundler-cache: true
       env:
         BUNDLE_GITHUB__COM: x-access-token:${{ secrets.BOWERBIRD_ORG_CI_TOKEN }}
+
+    # Active Storage :vips transforms need libvips for Attachable PreprocessVariantsJob
+    # (dummy direct-image / CDN publish integration tests).
+    - name: Install libvips
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends libvips42t64 || sudo apt-get install -y --no-install-recommends libvips42
     
     - name: Install dummy app dependencies
       run: bundle install
