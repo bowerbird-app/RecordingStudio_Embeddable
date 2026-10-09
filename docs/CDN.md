@@ -103,15 +103,20 @@ RecordingStudio_* development master key as sibling gems) includes a
 `recording_studio_artifacts.cdn` key shape with safe placeholders
 (`dev_placeholder`, `https://artifacts.example.test`). That blob is for
 **dummy development only** — it is not production R2. This repo is **public**:
-never commit real R2 secrets in plaintext or encrypted form.
+never commit real R2 secrets in plaintext. Encrypted per-env blobs
+(`credentials/development.yml.enc`, `credentials/test.yml.enc`) may hold
+shared-dev R2 values; keys stay gitignored.
 
 ### Running the dummy against real dev R2
 
-Local development reads real R2 / Artifacts CDN / Attachable `direct_url_host`
-from Rails per-environment credentials:
+Local development / test read real R2 / Artifacts CDN / Attachable
+`direct_url_host` from Rails per-environment credentials:
 
 - `test/dummy/config/credentials/development.yml.enc` (committed, encrypted)
-- `test/dummy/config/credentials/development.key` (gitignored — never commit)
+- `test/dummy/config/credentials/test.yml.enc` (committed, encrypted; same
+  shared RS key and shape as development)
+- `test/dummy/config/credentials/development.key` and `test.key` (gitignored —
+  never commit)
 
 Key names (see `development.yml.example`): featured_in `r2.*`, Artifacts
 `recording_studio_artifacts.cdn.*`, and
@@ -126,9 +131,10 @@ bin/rails db:seed
 bin/dev
 ```
 
-Without `development.key`, development keeps `MemoryStorage` + dummy hosts so
-CI is unchanged. `ARTIFACT_CDN_*` ENV remains Artifacts’ built-in optional
-override. Step-by-step: [`test/dummy/README.md`](../test/dummy/README.md).
+Without the env key / `RAILS_MASTER_KEY`, the dummy keeps `MemoryStorage` +
+dummy hosts so CI is unchanged (no CI secret for `test.yml.enc`).
+`ARTIFACT_CDN_*` ENV remains Artifacts’ built-in optional override.
+Step-by-step: [`test/dummy/README.md`](../test/dummy/README.md).
 
 Dummy / test apps keep Artifacts `MemoryStorage` plus a fake
 `cdn_public_base_url` so publish works without real R2. The dummy also serves

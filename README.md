@@ -206,23 +206,25 @@ Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with t
 ### Running the dummy against real dev R2
 
 Real local R2 values live in committed encrypted
-`test/dummy/config/credentials/development.yml.enc`, decrypted by gitignored
-`test/dummy/config/credentials/development.key` (never commit the key). Key
-names match featured_in (`r2.*`) and Artifacts
+`test/dummy/config/credentials/development.yml.enc` and
+`test/dummy/config/credentials/test.yml.enc`, decrypted by gitignored
+`development.key` / `test.key` (same shared RecordingStudio_* key across RS
+repos — never commit keys). Key names match featured_in (`r2.*`) and Artifacts
 (`recording_studio_artifacts.cdn.*`) plus
 `recording_studio_attachable.direct_url_host` — see
 `test/dummy/config/credentials/development.yml.example`.
 
 ```bash
 cd test/dummy
-# development.key present locally; development.yml.enc already committed
+# development.key present locally; *.yml.enc already committed
 export RECORDING_STUDIO_ARTIFACTS_ENABLED=true
 bin/rails db:seed
 bin/dev
 ```
 
-Without the development key, dummy fallbacks (`cdn.example.test`, MemoryStorage)
-keep CI green. Full steps: [`test/dummy/README.md`](test/dummy/README.md).
+Without the env key / `RAILS_MASTER_KEY`, dummy fallbacks (`cdn.example.test`,
+MemoryStorage) keep CI green — no CI secret required for `test.yml.enc`. Full
+steps: [`test/dummy/README.md`](test/dummy/README.md).
 
 ## Cloud Agent boot
 

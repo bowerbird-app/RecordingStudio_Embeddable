@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Dummy committed encrypted `config/credentials/test.yml.enc` (same shared RS
+  key and shape as `development.yml.enc`). Gitignored `test.key` / `*.key` /
+  `master.key` stay local. CI boots without a key (`require_master_key = false`)
+  and keeps MemoryStorage + dummy hosts via `DummyDevCredentials`.
+
 ## [0.5.0] - 2026-10-08
 
 ### Added
