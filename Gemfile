@@ -13,7 +13,7 @@ gem "recording_studio_artifacts", "~> 0.4.0",
     github: "bowerbird-app/RecordingStudio_artifacts", tag: "v0.4.0"
 gem "recording_studio_attachable", "~> 0.13",
     github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.13.0"
-gem "recording_studio_publishable", "~> 0.4", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.4.2"
+gem "recording_studio_publishable", "~> 0.4", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.6.0"
 
 gem "devise"
 
