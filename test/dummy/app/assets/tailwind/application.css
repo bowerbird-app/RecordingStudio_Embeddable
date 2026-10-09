@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* Include RecordingStudioRootSwitchable engine views for Tailwind CSS */
+@source "../../../vendor/recording_studio_root_switchable/app/views/**/*.erb";
+@source "../../../vendor/bundle/**/recording_studio_root_switchable*/app/views/**/*.erb";
+@source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/recording_studio_root_switchable-*/app/views/**/*.erb";
+
+/* Include FlatPack component sources for Tailwind CSS */
+@source "../../../vendor/flat_pack/app/components/**/*.{rb,erb}";
+@source "../../../vendor/bundle/**/flat_pack*/app/components/**/*.{rb,erb}";
+@source "../../../vendor/bundle/**/flatpack*/app/components/**/*.{rb,erb}";
+@source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/flat_pack-*/app/components/**/*.{rb,erb}";
+@source "../../../../../../usr/local/bundle/ruby/**/bundler/gems/flatpack-*/app/components/**/*.{rb,erb}";
+
 /* Resolved FlatPack + Recording Studio paths written before each Tailwind build/watch. */
 @import "./gem_sources.css";
 

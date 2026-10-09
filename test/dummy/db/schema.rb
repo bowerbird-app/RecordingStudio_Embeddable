@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_08_083101) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_09_060408) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -41,6 +41,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_083101) do
     t.uuid "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "admin_roots", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "articles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -409,6 +415,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_083101) do
     t.index ["root_recording_id"], name: "index_rs_recordings_on_root_recording"
   end
 
+  create_table "recording_studio_root_switchable_selections", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "actor_type"
+    t.string "actor_id"
+    t.string "device_key", null: false
+    t.uuid "root_recording_id", null: false
+    t.string "scope_key", null: false
+    t.datetime "last_used_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "device_label", limit: 255
+    t.string "device_platform", limit: 255
+    t.string "device_browser", limit: 255
+    t.string "device_type", limit: 255
+    t.text "user_agent"
+    t.index ["actor_type", "actor_id", "device_key", "scope_key"], name: "idx_rs_root_switchable_actor_device_scope", unique: true, where: "(actor_id IS NOT NULL)"
+    t.index ["device_key", "scope_key"], name: "idx_rs_root_switchable_anonymous_device_scope", unique: true, where: "(actor_id IS NULL)"
+    t.index ["root_recording_id"], name: "idx_rs_root_switchable_root_recording"
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email", default: "", null: false
@@ -438,4 +463,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_083101) do
   add_foreign_key "recording_studio_publishable_publishables", "recording_studio_recordings", column: "social_image_attachment_recording_id", name: "fk_rs_publishables_social_image_attachment_recording"
   add_foreign_key "recording_studio_recordings", "recording_studio_recordings", column: "parent_recording_id"
   add_foreign_key "recording_studio_recordings", "recording_studio_recordings", column: "root_recording_id"
+  add_foreign_key "recording_studio_root_switchable_selections", "recording_studio_recordings", column: "root_recording_id", on_delete: :cascade
 end

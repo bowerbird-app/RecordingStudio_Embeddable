@@ -76,6 +76,26 @@ document_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
   recordable: document
 )
 
+# Site AdminRoot for RecordingStudioApi admin HTML (/recording_studio_api/admin_api*).
+# RootSwitchable defaults to this root when the actor can view it.
+admin_root = AdminRoot.find_or_create_by!(name: "Admin")
+admin_root_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
+  recordable: admin_root,
+  parent_recording_id: nil
+)
+unless RecordingStudioAccessible.authorized?(actor: user, recording: admin_root_recording, role: :admin)
+  admin_bootstrap = RecordingStudioAccessible.bootstrap_owner_access!(
+    recording: admin_root_recording,
+    actor: user
+  )
+  raise admin_bootstrap.error unless admin_bootstrap.success?
+end
+RecordingStudioApi::Admin::ApiAuthorization.recording_for(
+  api: :public,
+  root_recording: admin_root_recording,
+  create: true
+)
+
 # First admin on an empty owned root must bootstrap — grant_access alone fails
 # with "Not authorized to manage access" when nobody can manage yet.
 unless RecordingStudioAccessible.authorized?(actor: user, recording: root_recording, role: :admin)
@@ -200,6 +220,7 @@ seed_press_kit_on.call(article_recording)
 
 puts "Seeded: admin@admin.com / Password"
 puts "Seeded: viewer@admin.com / Password"
+puts "Seeded: AdminRoot 'Admin' with root recording ##{admin_root_recording.id}"
 puts "Seeded: Workspace '#{workspace.name}' with root recording ##{root_recording.id}"
 puts "Seeded: Folder '#{folder.name}' and page '#{page.title}'"
 puts "Seeded: Article '#{article.title}' (embeddable + publishable + Attachable)"

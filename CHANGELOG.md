@@ -13,6 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `master.key` stay local. CI boots without a key (`require_master_key = false`)
   and keeps MemoryStorage + dummy hosts via `DummyDevCredentials`.
 
+## [0.5.1] - 2026-10-09
+
+### Fixed
+- Dummy host wires `recording_studio_root_switchable` + `AdminRoot` so
+  RecordingStudioApi admin HTML (`/recording_studio_api/admin_api` and
+  settings / rate_limiting / requests / errors / logs) resolves
+  `current_root_recording` instead of raising `NameError`.
+
+### Upgrade notes
+- Dummy / hosts that mount RecordingStudioApi admin browser pages need
+  `recording_studio_root_switchable`, an `AdminRoot` recordable, Accessible
+  grants on that root, and RootSwitchable defaulting to AdminRoot (see
+  `test/dummy` and the API gem dummy). No engine API change.
+
 ## [0.5.0] - 2026-10-08
 
 ### Added

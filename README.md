@@ -155,6 +155,12 @@ When `recording_studio_api` is loaded, the engine soft-registers a member `:embe
 
 The dummy app mounts that public API at `/recording_studio_api` and allowlists `:embed` on Page. That is the HTTP proof for WordPress Plugin Demo clients. Named-API enablement for FlatPack hosts remains a later step.
 
+Admin HTML under `/recording_studio_api/admin_api` needs a host
+`current_root_recording` that is an `AdminRoot`. The dummy supplies that through
+`recording_studio_root_switchable` (ControllerSupport), a seeded AdminRoot with
+Accessible owner access, and a RootSwitchable default that prefers AdminRoot —
+the same contract as the RecordingStudio_api dummy.
+
 ### View logging policy
 
 Browser-payload and API embeds do **not** count as public iframe views. `CaptureView` stays on `EmbedsController` only. That avoids double-counting when the WordPress Plugin Demo SDK refreshes or previews a payload.
