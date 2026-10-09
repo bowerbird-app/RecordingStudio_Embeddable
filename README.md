@@ -201,7 +201,27 @@ cd test/dummy && bin/dev
 
 The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine. It pins Accessible `v0.11.1`, Publishable `v0.4.2`, Attachable `v0.7.1`, Admin `v2.0.4`, and Recording Studio API `v0.5.5` (held). It mounts the public API so GET `:embed` can be exercised over HTTP. Dummy grants access through Accessible's public services and shims `RecordingStudio::Access.roles` so API 0.5.5 can still authorize member actions against string roles.
 
-Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key. The dummy blob includes `recording_studio_artifacts.cdn` placeholders (`dev_placeholder`, fake `public_base_url`) so the key shape is visible; hosts set real `ARTIFACT_CDN_*` (or host credentials) themselves.
+Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key. The dummy blob includes `recording_studio_artifacts.cdn` placeholders (`dev_placeholder`, fake `public_base_url`) so the key shape is visible — **never real R2 secrets** (this repo is public).
+
+### Running the dummy against real dev R2
+
+For local publish against real Cloudflare R2 / Attachable direct URLs, copy key
+names from a `featured_in` checkout (`bin/rails credentials:show -e development`)
+into a **gitignored** file — never into commits, PR bodies, or chat:
+
+```bash
+cd test/dummy
+cp config/local_r2.yml.example config/local_r2.yml
+# or: cp .env.development.local.example .env.development.local
+# fill key names from featured_in (r2.*, ATTACHABLE_DIRECT_URL_HOST, ARTIFACT_CDN_*)
+export RECORDING_STUDIO_ARTIFACTS_ENABLED=true
+bin/rails db:seed
+bin/dev
+```
+
+Precedence per key: existing ENV → `.env.development.local` → `config/local_r2.yml`.
+Unset ENV keeps dummy fallbacks (`cdn.example.test`, MemoryStorage) so CI is
+unchanged. Full steps: [`test/dummy/README.md`](test/dummy/README.md).
 
 ## Cloud Agent boot
 

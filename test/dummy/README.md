@@ -31,6 +31,60 @@ Then open the app and sign in with:
 - Email: `admin@admin.com`
 - Password: `Password`
 
+## Running the dummy against real dev R2
+
+This repo is public. Committed credentials stay **dummy placeholders**
+(`cdn.example.test`, `artifacts.example.test`, `dev_placeholder`). Never put real
+R2 secrets in `credentials.yml.enc`, plaintext files that are tracked, PR bodies,
+or chat.
+
+Local development can load real values from ENV or a **gitignored** file:
+
+1. From a `featured_in` checkout, inspect key names only (do not paste secret
+   values into this repo):
+
+   ```bash
+   bin/rails credentials:show -e development
+   ```
+
+   Map these shapes (key names only):
+
+   - Active Storage R2: `r2.access_key_id`, `r2.secret_access_key`, `r2.endpoint`,
+     `r2.bucket` (and optional `r2.region`) — same keys as featured_in
+     `config/storage.yml`
+   - Attachable public host: `direct_url_host` → ENV `ATTACHABLE_DIRECT_URL_HOST`
+   - Artifacts CDN: `ARTIFACT_CDN_*` / `recording_studio_artifacts.cdn` keys
+     (`subdomain`, `domain`, `path_prefix`, `public_base_url`, `r2_*`,
+     `cloudflare_*`) — see [`docs/CDN.md`](../../docs/CDN.md)
+
+2. Copy a template and fill values **locally** (either file works):
+
+   ```bash
+   cd test/dummy
+   cp config/local_r2.yml.example config/local_r2.yml
+   # or:
+   cp .env.development.local.example .env.development.local
+   ```
+
+   Both paths are gitignored. Templates list **key names only**.
+
+3. Start the dummy with Artifacts usage on, reseed so Attachable uploads go to R2,
+   then publish:
+
+   ```bash
+   cd test/dummy
+   export RECORDING_STUDIO_ARTIFACTS_ENABLED=true
+   bin/rails db:seed
+   bin/dev
+   ```
+
+   Sign in as `admin@admin.com` / `Password`, open an embed’s management
+   Settings, set URL strategy to CDN if needed, save (triggers publish), then
+   open the Artifacts public URL.
+
+When ENV / local files are unset, the dummy keeps MemoryStorage +
+`cdn.example.test` / `artifacts.example.test` so CI is unchanged.
+
 ## Useful Routes
 
 - `/` - embeddable dummy index with a table of page recordings and edit/preview actions

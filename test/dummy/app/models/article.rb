@@ -1,6 +1,13 @@
 class Article < ApplicationRecord
   recording_studio_recordable label: "Article", root: false, allowed_parent_types: [ "Workspace", "Folder" ]
 
+  include RecordingStudio::Capabilities::Attachable.to(
+    allowed_content_types: [ "image/*" ],
+    max_file_size: 25.megabytes,
+    max_file_count: 20,
+    enabled_attachment_kinds: %i[image]
+  )
+
   include RecordingStudio::Capabilities::Embeddable.to(
     embed_controller: "articles",
     embed_action: :embed,

@@ -1,17 +1,19 @@
 # frozen_string_literal: true
 
-# When the request Host matches Attachable's direct_url_host, rewrite the path
-# to the dummy CDN controller so https://cdn.example.test/<blob key> works
-# against the local Rails process (hosts file / local DNS required).
+# When the request Host matches the dummy stand-in direct_url_host
+# (cdn.example.test), rewrite the path to DummyCdnController so local screenshots
+# and CI resolve blob bytes without real R2. Real ATTACHABLE_DIRECT_URL_HOST
+# values are never rewritten — those requests go to the real CDN edge.
 class DummyCdnHost
+  DUMMY_STAND_IN_HOST = "cdn.example.test"
+
   def initialize(app)
     @app = app
   end
 
   def call(env)
     host = env["HTTP_HOST"].to_s.split(":").first
-    direct_host = direct_url_host_name
-    if direct_host.present? && host == direct_host && !engine_path?(env["PATH_INFO"])
+    if stand_in_host?(host) && !engine_path?(env["PATH_INFO"])
       env = env.dup
       env["PATH_INFO"] = "/dummy_cdn#{env["PATH_INFO"]}"
       env["SCRIPT_NAME"] = ""
@@ -21,6 +23,16 @@ class DummyCdnHost
   end
 
   private
+
+  def stand_in_host?(host)
+    return false if host.blank?
+
+    direct_host = direct_url_host_name
+    return false if direct_host.blank?
+    return false unless direct_host == DUMMY_STAND_IN_HOST
+
+    host == DUMMY_STAND_IN_HOST
+  end
 
   def direct_url_host_name
     return unless defined?(RecordingStudioAttachable)

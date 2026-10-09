@@ -26,8 +26,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   are not ready after sync processing, publish **defers** and re-enqueues
   `PublishEmbedToCdnJob` (`config.cdn_variant_retry_wait`, default 15s).
 - Dummy Attachable pin `v0.9.0` with `direct_url_host = "cdn.example.test"`,
-  seed cover + gallery fixtures, and a dummy-only `DummyCdnController` /
-  `DummyCdnHost` middleware so direct URLs resolve locally for screenshots.
+  seed cover + gallery fixtures on **every** embeddable example (Page + Article),
+  and a dummy-only `DummyCdnController` / `DummyCdnHost` middleware so direct
+  URLs resolve locally for screenshots.
+- Dummy local R2 wiring without committing secrets: gitignored
+  `config/local_r2.yml` / `.env.development.local` (see `*.example` templates)
+  load `ARTIFACT_CDN_*`, Active Storage `:r2` key names, and
+  `ATTACHABLE_DIRECT_URL_HOST` in development; CI keeps dummy fallbacks.
 
 ### Changed
 - Version bump to `0.5.0`.

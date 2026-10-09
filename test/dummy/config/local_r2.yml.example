@@ -1,0 +1,37 @@
+# Copy to config/local_r2.yml (gitignored) for local dummy → real Cloudflare R2.
+# KEY NAMES ONLY — never commit real values.
+#
+# Source of truth for names (featured_in host app + RecordingStudio Artifacts):
+#   - Attachable: config.direct_url_host
+#   - Active Storage R2: credentials dig(:r2, ...) keys used in featured_in config/storage.yml
+#   - Artifacts CDN: ARTIFACT_CDN_* / recording_studio_artifacts.cdn (see docs/CDN.md)
+#
+# From a featured_in checkout (KEY NAMES only — do not paste secrets into git):
+#   bin/rails credentials:show -e development
+# Map values into the sections below, or export the matching ENV names instead.
+
+# Attachable public custom-domain host (DirectUrl: https://<host>/<blob key>)
+direct_url_host:
+
+# Active Storage R2 service (featured_in credentials shape: :r2)
+r2:
+  access_key_id:
+  secret_access_key:
+  endpoint:
+  bucket:
+  region: auto
+
+# Artifacts CDN / R2 publish (ENV ARTIFACT_CDN_* / credentials recording_studio_artifacts.cdn)
+artifact_cdn:
+  subdomain:
+  domain:
+  path_prefix: recording_studio_artifacts
+  public_base_url:
+  r2_account_id:
+  r2_access_key_id:
+  r2_secret_access_key:
+  r2_bucket:
+  r2_endpoint:
+  r2_region: auto
+  cloudflare_zone_id:
+  cloudflare_api_token:
