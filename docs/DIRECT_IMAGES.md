@@ -44,9 +44,17 @@ padded `figcaption` below the media (Flatpack Carousel pattern) so
 
 ## Dummy
 
-The dummy sets `direct_url_host = "cdn.example.test"` and serves blob keys via
-`DummyCdnController` / `DummyCdnHost` so local screenshots show real pictures
-without R2 credentials. That stand-in is dummy-only.
+By default the dummy sets `direct_url_host = "cdn.example.test"` and serves blob
+keys via `DummyCdnController` / `DummyCdnHost` so local screenshots show real
+pictures without R2 credentials. That stand-in is dummy-only and only rewrites
+the `cdn.example.test` host.
+
+To point development at a real Attachable custom domain + R2 bucket, set
+`ATTACHABLE_DIRECT_URL_HOST` and the Active Storage `:r2` / `ARTIFACT_CDN_*` keys
+via gitignored `config/local_r2.yml` or `.env.development.local` (see
+[`test/dummy/README.md`](../test/dummy/README.md) — “Running the dummy against
+real dev R2”). Seeds attach a hero + gallery on every embeddable example
+(Page and Article).
 
 Variant preprocessing (seeds and dummy integration tests) uses Active Storage’s
 `:vips` processor — install **libvips** locally and in CI (`libvips42` /
