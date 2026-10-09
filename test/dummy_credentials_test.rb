@@ -22,12 +22,20 @@ class DummyCredentialsTest < Minitest::Test
     cloudflare_api_token
   ].freeze
 
-  def test_only_dummy_credentials_file_is_committed
+  def test_only_dummy_credentials_files_are_committed
     tracked = Dir.chdir(File.expand_path("..", __dir__)) do
-      `git ls-files -- '*.yml.enc'`.split("\n").reject(&:empty?)
+      `git ls-files -- '*.yml.enc'`.split("\n").reject(&:empty?).sort
     end
 
-    assert_equal ["test/dummy/config/credentials.yml.enc"], tracked
+    assert_equal [
+      "test/dummy/config/credentials.yml.enc",
+      "test/dummy/config/credentials/development.yml.enc"
+    ], tracked
+
+    tracked_keys = Dir.chdir(File.expand_path("..", __dir__)) do
+      `git ls-files -- '**/credentials/*.key' '**/master.key'`.split("\n").reject(&:empty?)
+    end
+    assert_empty tracked_keys, "credential keys must never be committed"
   end
 
   def test_encrypted_credentials_file_is_present
