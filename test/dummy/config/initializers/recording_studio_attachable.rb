@@ -8,10 +8,13 @@ RecordingStudioAttachable.configure do |config|
   config.image_processing_quality = 0.85
 
   # Public custom-domain host for DirectUrl. Development may override via
-  # ATTACHABLE_DIRECT_URL_HOST (ENV / local_r2.yml). Default stays the dummy host.
+  # credentials dig(:recording_studio_attachable, :direct_url_host) when
+  # credentials/development.yml.enc + development.key are present.
+  # Default stays the dummy stand-in for CI / clones without the key.
   config.url_mode = :direct
   config.direct_url_host =
-    ENV.fetch("ATTACHABLE_DIRECT_URL_HOST", nil).presence || "cdn.example.test"
+    DummyDevCredentials.dig(:recording_studio_attachable, :direct_url_host).presence ||
+    "cdn.example.test"
 
   # Host-added custom variant. Leave preprocessed_variants unset so the default
   # (small/med/large + host-added names) includes :poster automatically.

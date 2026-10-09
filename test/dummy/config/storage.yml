@@ -6,16 +6,18 @@ local:
   service: Disk
   root: <%= Rails.root.join("storage") %>
 
-# featured_in shape: credentials dig(:r2, :access_key_id|:secret_access_key|:endpoint|:bucket).
-# Dummy reads the same key names from ENV (loaded from gitignored local_r2.yml /
-# .env.development.local). Values stay out of the public repo.
+# featured_in shape: Rails.application.credentials.dig(:r2, …)
+# Development reads real values from credentials/development.yml.enc when the
+# gitignored development.key is present. Absent credentials → blank ERB values;
+# Active Storage stays on :local (see development.rb) unless DummyDevCredentials
+# flips the service to :r2 after a successful dig.
 r2:
   service: S3
-  access_key_id: <%= ENV.fetch("R2_ACCESS_KEY_ID", nil).presence || ENV.fetch("ARTIFACT_CDN_R2_ACCESS_KEY_ID", nil) %>
-  secret_access_key: <%= ENV.fetch("R2_SECRET_ACCESS_KEY", nil).presence || ENV.fetch("ARTIFACT_CDN_R2_SECRET_ACCESS_KEY", nil) %>
-  endpoint: <%= ENV.fetch("R2_ENDPOINT", nil).presence || ENV.fetch("ARTIFACT_CDN_R2_ENDPOINT", nil) %>
-  bucket: <%= ENV.fetch("R2_BUCKET", nil).presence || ENV.fetch("ARTIFACT_CDN_R2_BUCKET", nil) %>
-  region: <%= ENV.fetch("R2_REGION", nil).presence || ENV.fetch("ARTIFACT_CDN_R2_REGION", nil).presence || "auto" %>
+  access_key_id: <%= DummyDevCredentials.dig(:r2, :access_key_id) %>
+  secret_access_key: <%= DummyDevCredentials.dig(:r2, :secret_access_key) %>
+  endpoint: <%= DummyDevCredentials.dig(:r2, :endpoint) %>
+  bucket: <%= DummyDevCredentials.dig(:r2, :bucket) %>
+  region: auto
   force_path_style: true
   request_checksum_calculation: when_required
   response_checksum_validation: when_required

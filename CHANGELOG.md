@@ -29,10 +29,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   seed cover + gallery fixtures on **every** embeddable example (Page + Article),
   and a dummy-only `DummyCdnController` / `DummyCdnHost` middleware so direct
   URLs resolve locally for screenshots.
-- Dummy local R2 wiring without committing secrets: gitignored
-  `config/local_r2.yml` / `.env.development.local` (see `*.example` templates)
-  load `ARTIFACT_CDN_*`, Active Storage `:r2` key names, and
-  `ATTACHABLE_DIRECT_URL_HOST` in development; CI keeps dummy fallbacks.
+- Dummy local R2 wiring without committing plaintext secrets: development reads
+  Active Storage `:r2`, `recording_studio_artifacts.cdn`, and
+  `recording_studio_attachable.direct_url_host` from committed encrypted
+  `config/credentials/development.yml.enc` (gitignored `development.key`);
+  CI / clones without the key keep dummy fallbacks.
 
 ### Changed
 - Version bump to `0.5.0`.

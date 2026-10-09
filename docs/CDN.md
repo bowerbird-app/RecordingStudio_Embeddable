@@ -107,17 +107,17 @@ never commit real R2 secrets in plaintext or encrypted form.
 
 ### Running the dummy against real dev R2
 
-Local development may load real R2 / `ARTIFACT_CDN_*` / Attachable
-`direct_url_host` from ENV or a gitignored file. Templates list key names only:
+Local development reads real R2 / Artifacts CDN / Attachable `direct_url_host`
+from Rails per-environment credentials:
 
-- `test/dummy/config/local_r2.yml.example` → copy to `config/local_r2.yml`
-- `test/dummy/.env.development.local.example` → copy to `.env.development.local`
+- `test/dummy/config/credentials/development.yml.enc` (committed, encrypted)
+- `test/dummy/config/credentials/development.key` (gitignored — never commit)
 
-Key names match featured_in Active Storage `:r2` (`access_key_id`,
-`secret_access_key`, `endpoint`, `bucket`) plus Artifacts `ARTIFACT_CDN_*` and
-`ATTACHABLE_DIRECT_URL_HOST`. From a featured_in checkout, inspect names with
-`bin/rails credentials:show -e development` — do not paste secret values into
-this repo. Then:
+Key names (see `development.yml.example`): featured_in `r2.*`, Artifacts
+`recording_studio_artifacts.cdn.*`, and
+`recording_studio_attachable.direct_url_host`. From a featured_in checkout,
+inspect names with `bin/rails credentials:show -e development` — do not paste
+secret values into this public repo. Then:
 
 ```bash
 cd test/dummy
@@ -126,8 +126,9 @@ bin/rails db:seed
 bin/dev
 ```
 
-When ENV is unset, development keeps `MemoryStorage` + dummy hosts so CI is
-unchanged. Step-by-step: [`test/dummy/README.md`](../test/dummy/README.md).
+Without `development.key`, development keeps `MemoryStorage` + dummy hosts so
+CI is unchanged. `ARTIFACT_CDN_*` ENV remains Artifacts’ built-in optional
+override. Step-by-step: [`test/dummy/README.md`](../test/dummy/README.md).
 
 Dummy / test apps keep Artifacts `MemoryStorage` plus a fake
 `cdn_public_base_url` so publish works without real R2. The dummy also serves

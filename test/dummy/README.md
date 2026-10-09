@@ -33,43 +33,56 @@ Then open the app and sign in with:
 
 ## Running the dummy against real dev R2
 
-This repo is public. Committed credentials stay **dummy placeholders**
-(`cdn.example.test`, `artifacts.example.test`, `dev_placeholder`). Never put real
-R2 secrets in `credentials.yml.enc`, plaintext files that are tracked, PR bodies,
-or chat.
+This repo is public. Shared `config/credentials.yml.enc` stays **dummy
+placeholders** only. Real Cloudflare R2 values for local development live in
+**per-environment** Rails credentials:
 
-Local development can load real values from ENV or a **gitignored** file:
+- Committed encrypted: `config/credentials/development.yml.enc`
+- Gitignored key: `config/credentials/development.key` (never commit)
 
-1. From a `featured_in` checkout, inspect key names only (do not paste secret
-   values into this repo):
+Key names match featured_in + RecordingStudio Artifacts (see
+`config/credentials/development.yml.example` — names only):
+
+```yaml
+secret_key_base:          # required — env credentials replace credentials.yml.enc
+r2:                       # featured_in Active Storage
+  access_key_id:
+  secret_access_key:
+  endpoint:
+  bucket:
+recording_studio_artifacts:
+  cdn:                    # Artifacts Credentials dig path
+    subdomain:
+    domain:
+    path_prefix:
+    public_base_url:
+    r2_account_id:
+    r2_access_key_id:
+    r2_secret_access_key:
+    r2_bucket:
+    r2_endpoint:
+    r2_region:
+    cloudflare_zone_id:
+    cloudflare_api_token:
+recording_studio_attachable:
+  direct_url_host:        # Attachable DirectUrl host
+```
+
+### Steps (Marco / local)
+
+1. From a `featured_in` checkout, inspect **key names only** (do not paste secret
+   values into chat or this public repo):
 
    ```bash
    bin/rails credentials:show -e development
    ```
 
-   Map these shapes (key names only):
+2. Put `config/credentials/development.key` locally (gitignored). Decrypt /
+   edit the committed `development.yml.enc` with those values under the key
+   paths above (`bin/rails credentials:edit --environment development` from
+   `test/dummy`).
 
-   - Active Storage R2: `r2.access_key_id`, `r2.secret_access_key`, `r2.endpoint`,
-     `r2.bucket` (and optional `r2.region`) — same keys as featured_in
-     `config/storage.yml`
-   - Attachable public host: `direct_url_host` → ENV `ATTACHABLE_DIRECT_URL_HOST`
-   - Artifacts CDN: `ARTIFACT_CDN_*` / `recording_studio_artifacts.cdn` keys
-     (`subdomain`, `domain`, `path_prefix`, `public_base_url`, `r2_*`,
-     `cloudflare_*`) — see [`docs/CDN.md`](../../docs/CDN.md)
-
-2. Copy a template and fill values **locally** (either file works):
-
-   ```bash
-   cd test/dummy
-   cp config/local_r2.yml.example config/local_r2.yml
-   # or:
-   cp .env.development.local.example .env.development.local
-   ```
-
-   Both paths are gitignored. Templates list **key names only**.
-
-3. Start the dummy with Artifacts usage on, reseed so Attachable uploads go to R2,
-   then publish:
+3. Start the dummy with Artifacts usage on, reseed, publish:
 
    ```bash
    cd test/dummy
@@ -82,8 +95,9 @@ Local development can load real values from ENV or a **gitignored** file:
    Settings, set URL strategy to CDN if needed, save (triggers publish), then
    open the Artifacts public URL.
 
-When ENV / local files are unset, the dummy keeps MemoryStorage +
-`cdn.example.test` / `artifacts.example.test` so CI is unchanged.
+Without `development.key`, the dummy keeps MemoryStorage +
+`cdn.example.test` / `artifacts.example.test` so CI is unchanged. Artifacts’
+built-in `ARTIFACT_CDN_*` ENV resolve remains a harmless optional override.
 
 ## Useful Routes
 

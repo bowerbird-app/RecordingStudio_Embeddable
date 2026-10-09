@@ -205,23 +205,24 @@ Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with t
 
 ### Running the dummy against real dev R2
 
-For local publish against real Cloudflare R2 / Attachable direct URLs, copy key
-names from a `featured_in` checkout (`bin/rails credentials:show -e development`)
-into a **gitignored** file — never into commits, PR bodies, or chat:
+Real local R2 values live in committed encrypted
+`test/dummy/config/credentials/development.yml.enc`, decrypted by gitignored
+`test/dummy/config/credentials/development.key` (never commit the key). Key
+names match featured_in (`r2.*`) and Artifacts
+(`recording_studio_artifacts.cdn.*`) plus
+`recording_studio_attachable.direct_url_host` — see
+`test/dummy/config/credentials/development.yml.example`.
 
 ```bash
 cd test/dummy
-cp config/local_r2.yml.example config/local_r2.yml
-# or: cp .env.development.local.example .env.development.local
-# fill key names from featured_in (r2.*, ATTACHABLE_DIRECT_URL_HOST, ARTIFACT_CDN_*)
+# development.key present locally; development.yml.enc already committed
 export RECORDING_STUDIO_ARTIFACTS_ENABLED=true
 bin/rails db:seed
 bin/dev
 ```
 
-Precedence per key: existing ENV → `.env.development.local` → `config/local_r2.yml`.
-Unset ENV keeps dummy fallbacks (`cdn.example.test`, MemoryStorage) so CI is
-unchanged. Full steps: [`test/dummy/README.md`](test/dummy/README.md).
+Without the development key, dummy fallbacks (`cdn.example.test`, MemoryStorage)
+keep CI green. Full steps: [`test/dummy/README.md`](test/dummy/README.md).
 
 ## Cloud Agent boot
 
