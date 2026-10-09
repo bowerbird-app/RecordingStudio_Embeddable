@@ -62,8 +62,14 @@ class DummyCredentialsTest < Minitest::Test
     assert_includes gitignore, "test/dummy/config/credentials/development.key"
     assert_includes gitignore, "test/dummy/config/credentials/test.key"
 
+    key_paths = %w[
+      config/master.key
+      test/dummy/config/master.key
+      test/dummy/config/credentials/development.key
+      test/dummy/config/credentials/test.key
+    ]
     tracked = Dir.chdir(File.expand_path("..", __dir__)) do
-      `git ls-files -- config/master.key test/dummy/config/master.key test/dummy/config/credentials/development.key test/dummy/config/credentials/test.key`.strip
+      `git ls-files -- #{key_paths.join(" ")}`.strip
     end
     assert_equal "", tracked, "master.key and credentials/*.key must not be committed"
   end
