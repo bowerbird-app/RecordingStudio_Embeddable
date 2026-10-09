@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  mount RecordingStudioRootSwitchable::Engine, at: "/recording_studio_root_switchable"
   require "recording_studio_attachable"
   require "recording_studio_publishable"
   require "recording_studio_api"

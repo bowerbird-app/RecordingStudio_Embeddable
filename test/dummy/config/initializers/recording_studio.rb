@@ -8,6 +8,7 @@ RecordingStudio.configure do |config|
     "Page",
     "Article",
     "Document",
+    "AdminRoot",
     "RecordingStudioEmbeddable::Embed",
     "RecordingStudioPublishable::Publishable",
     "RecordingStudioAttachable::Attachment"

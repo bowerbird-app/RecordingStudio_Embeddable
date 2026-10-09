@@ -6,6 +6,8 @@ class HostEmbedDirectImagesTest < ActionDispatch::IntegrationTest
   include Devise::Test::IntegrationHelpers
 
   setup do
+    @original_url_mode = RecordingStudioAttachable.configuration.url_mode
+    @original_direct_url_host = RecordingStudioAttachable.configuration.direct_url_host
     RecordingStudioAttachable.configuration.url_mode = :direct
     RecordingStudioAttachable.configuration.direct_url_host = "cdn.example.test"
 
@@ -54,6 +56,11 @@ class HostEmbedDirectImagesTest < ActionDispatch::IntegrationTest
     @page_recording.images(per_page: 10).each do |image_recording|
       RecordingStudioAttachable::PreprocessVariantsJob.perform_now(image_recording.recordable.id)
     end
+  end
+
+  teardown do
+    RecordingStudioAttachable.configuration.url_mode = @original_url_mode
+    RecordingStudioAttachable.configuration.direct_url_host = @original_direct_url_host
   end
 
   test "host pages embed action renders Attachable direct images" do
