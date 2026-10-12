@@ -157,9 +157,10 @@ The dummy app mounts that public API at `/recording_studio_api` and allowlists `
 
 Admin HTML under `/recording_studio_api/admin_api` needs a host
 `current_root_recording` that is an `AdminRoot`. The dummy supplies that through
-`recording_studio_root_switchable` (ControllerSupport), a seeded AdminRoot with
-Accessible owner access, and a RootSwitchable default that prefers AdminRoot —
-the same contract as the RecordingStudio_api dummy.
+`recording_studio_root_switchable` (ControllerSupport; dummy pin `v0.8.0`, plus
+`recording_studio_metrics` `v0.2.0` for the 0.7+ dependency), a seeded AdminRoot
+with Accessible owner access, and a RootSwitchable default that prefers
+AdminRoot — the same contract as the RecordingStudio_api dummy.
 
 ### View logging policy
 

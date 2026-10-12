@@ -16,9 +16,13 @@ gem "recording_studio_api", github: "bowerbird-app/RecordingStudio_api", tag: "v
 gem "recording_studio_admin", github: "bowerbird-app/RecordingStudio_admin", tag: "v2.1.0"
 # Admin API HTML pages require current_root_recording via RootSwitchable::ControllerSupport
 # (RecordingStudioApi::ApplicationController includes it when this gem is loaded).
+# RootSwitchable 0.7+ depends on recording_studio_metrics (~> 0.2); pin from GitHub.
+gem "recording_studio_metrics",
+    github: "bowerbird-app/RecordingStudio_metrics",
+    tag: "v0.2.0"
 gem "recording_studio_root_switchable",
     github: "bowerbird-app/RecordingStudio_root_switchable",
-    tag: "v0.6.0"
+    tag: "v0.8.0"
 
 # Devise authentication
 gem "devise"
