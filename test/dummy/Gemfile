@@ -5,7 +5,7 @@ gem "recording_studio_embeddable", path: "../.."
 
 # RecordingStudio engine
 gem "recording_studio", github: "bowerbird-app/RecordingStudio", tag: "v4.5.0"
-gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.13.0"
+gem "recording_studio_accessible", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.15.0"
 gem "recording_studio_artifacts", "~> 0.4.0",
     github: "bowerbird-app/RecordingStudio_artifacts", tag: "v0.4.0"
 gem "recording_studio_attachable", "~> 0.13",
