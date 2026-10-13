@@ -30,8 +30,7 @@ module RecordingStudioEmbeddable
         if @embed.persist_changes
           redirect_to floating_management_embed_path(@embed),
                       notice: t("recording_studio.embeddable.flashes.launcher_updated",
-                                label: floating_label,
-                                default: "%{label} updated.")
+                                label: floating_label)
         else
           build_floating_state
           render :floating, status: :unprocessable_entity
