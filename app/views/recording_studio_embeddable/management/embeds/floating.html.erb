@@ -1,9 +1,10 @@
 <% recordable = @recording&.recordable %>
 <% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || t("recording_studio.embeddable.common.embedded_recording", default: "Embedded recording") %>
 <% settings = @floating || @embed.floating_settings %>
+<% floating_label = recording_studio_floating_label(@recording) %>
 
 <% recording_studio_page_nav(
-  title: t("recording_studio.embeddable.management.floating.title", default: "Launcher"),
+  title: t("recording_studio.embeddable.management.floating.title", label: floating_label, default: "%{label}"),
   page_nav_back_url: edit_management_embed_path(@embed),
   page_nav_back_label: t("recording_studio.embeddable.common.embed", default: "Embed"),
   page_nav_anchor_url: main_app.root_path,
@@ -12,7 +13,7 @@
 
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
-    title: t("recording_studio.embeddable.management.floating.title", default: "Launcher"),
+    title: t("recording_studio.embeddable.management.floating.title", label: floating_label, default: "%{label}"),
     subtitle: t("recording_studio.embeddable.management.floating.subtitle", default: "Colours come from Style."),
     variant: :h1
   ) %>
@@ -34,7 +35,7 @@
 
         <%= render FlatPack::Switch::Component.new(
           name: "embed[floating_enabled]",
-          label: t("recording_studio.embeddable.management.floating.enabled", default: "Show the button"),
+          label: t("recording_studio.embeddable.management.floating.enabled", label: floating_label, default: "Show the %{label}"),
           checked: @embed.floating_enabled
         ) %>
 
@@ -49,7 +50,7 @@
         ) %>
 
         <%= render FlatPack::Button::Component.new(
-          text: t("recording_studio.embeddable.management.floating.save", default: "Save launcher"),
+          text: t("recording_studio.embeddable.management.floating.save", label: floating_label, default: "Save %{label}"),
           style: :primary,
           type: "submit"
         ) %>
@@ -58,8 +59,8 @@
       <% if snippet.present? %>
         <div class="space-y-4">
           <div class="space-y-1">
-            <h2 class="text-base font-semibold"><%= t("recording_studio.embeddable.management.floating.snippet_heading", default: "Launcher snippet") %></h2>
-            <p class="text-sm text-(--text-muted-color)"><%= t("recording_studio.embeddable.management.floating.snippet_help", default: "Paste this where the button should appear.") %></p>
+            <h2 class="text-base font-semibold"><%= t("recording_studio.embeddable.management.floating.snippet_heading", label: floating_label, default: "%{label} snippet") %></h2>
+            <p class="text-sm text-(--text-muted-color)"><%= t("recording_studio.embeddable.management.floating.snippet_help", label: floating_label, default: "Paste this where the %{label} should appear.") %></p>
           </div>
           <%= render FlatPack::TextArea::Component.new(
             name: "launcher_snippet",
@@ -75,7 +76,7 @@
 
     <div>
       <%= render FlatPack::PageTitle::Component.new(
-        title: t("recording_studio.embeddable.management.floating.preview_title", default: "Visitors see this"),
+        title: t("recording_studio.embeddable.management.floating.preview_title", label: floating_label, default: "Visitors see this %{label}"),
         subtitle: recordable_title,
         variant: :h2
       ) %>

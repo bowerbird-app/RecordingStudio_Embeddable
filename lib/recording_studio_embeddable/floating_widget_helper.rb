@@ -3,6 +3,10 @@
 module RecordingStudioEmbeddable
   # Local launcher markup. Uses the same JSON document as the public endpoint.
   module FloatingWidgetHelper
+    def recording_studio_floating_label(recording)
+      Floating::HostSettings.for(recording).fetch("label")
+    end
+
     def recording_studio_floating_widget(recording:, preview: false)
       embed = floating_widget_embed(recording)
       return "".html_safe unless embed

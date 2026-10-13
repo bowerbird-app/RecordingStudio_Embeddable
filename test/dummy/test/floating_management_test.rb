@@ -40,7 +40,11 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     get recording_studio_embeddable.floating_management_embed_path(@embed)
     assert_response :success
     refute_includes response.body, "launcher_snippet"
-    assert_includes response.body, "Show the button"
+    assert_includes response.body, ">Chat button<"
+    assert_includes response.body, "Show the Chat button"
+    assert_includes response.body, "Save Chat button"
+    assert_includes response.body, "Visitors see this Chat button"
+    refute_includes response.body, ">Launcher<"
     refute_includes response.body, "Edge spacing"
     refute_includes response.body, "Panel width"
     refute_includes response.body, "Panel height"
@@ -51,13 +55,13 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     assert_select "input[type=radio][name=?][value=?][checked]", "embed[floating][position]", "bottom-right"
     assert_select "input[type=radio][name=?][value=?]", "embed[floating][position]", "bottom-left"
     assert_select "select[name=?]", "embed[floating][position]", count: 0
-    assert_includes response.body, "Visitors see this"
     assert_includes response.body, "data-config="
     assert_includes response.body, "data-preview-root="
 
     get recording_studio_embeddable.edit_management_embed_path(@embed)
     assert_response :success
-    assert_includes response.body, ">Launcher<"
+    assert_includes response.body, ">Chat button<"
+    refute_includes response.body, ">Launcher<"
     refute_includes response.body, "launcher_snippet"
 
     patch recording_studio_embeddable.floating_management_embed_path(@embed),
@@ -76,10 +80,13 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
           }
 
     assert_response :redirect
+    assert_equal "Chat button updated.", flash[:notice]
     follow_redirect!
     assert_response :success
     assert_includes response.body, "launcher_snippet"
-    assert_includes response.body, "Launcher snippet"
+    assert_includes response.body, "Chat button snippet"
+    assert_includes response.body, "Paste this where the Chat button should appear."
+    refute_includes response.body, ">Launcher<"
     assert_includes response.body, "widget.js"
     assert_includes response.body, "copyFromButton"
     @embed.reload
@@ -89,6 +96,41 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     refute_includes @embed.floating.to_json, "edge_spacing"
     refute_includes @embed.floating.to_json, "icon_url"
     refute_includes @embed.floating.to_json, "popup_url"
+  end
+
+  test "a locale wraps the host label" do
+    previous = I18n.available_locales
+    I18n.available_locales = previous | [:fr]
+    I18n.backend.store_translations(
+      :fr,
+      recording_studio: {
+        embeddable: {
+          common: { launcher: "Onglet %{label}" },
+          management: {
+            floating: {
+              title: "Page %{label}",
+              enabled: "Montrer %{label}",
+              save: "Enregistrer %{label}",
+              preview_title: "Aperçu %{label}"
+            }
+          }
+        }
+      }
+    )
+
+    I18n.with_locale(:fr) do
+      get recording_studio_embeddable.floating_management_embed_path(@embed)
+    end
+
+    assert_response :success
+    assert_includes response.body, "Onglet Chat button"
+    assert_includes response.body, "Page Chat button"
+    assert_includes response.body, "Montrer Chat button"
+    assert_includes response.body, "Enregistrer Chat button"
+    assert_includes response.body, "Aperçu Chat button"
+    refute_includes response.body, ">Launcher<"
+  ensure
+    I18n.available_locales = previous if previous
   end
 
   test "widget preview renders the widget" do

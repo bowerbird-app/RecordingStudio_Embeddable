@@ -117,13 +117,15 @@ module RecordingStudioEmbeddable
       # Hosts that may supply a launcher icon. Attachable direct URLs on the
       # parent recording are allowed as well. Anything else is rejected.
       @floating_icon_hosts = []
-      # App-wide launcher spacing, panel size, and icon. A type can override
-      # these with floating_options: on Embeddable.to. Not editable per embed.
+      # App-wide launcher spacing, panel size, icon, and management label.
+      # A type can override these with floating_options: on Embeddable.to.
+      # Not editable per embed. +label+ is the word on the management screen.
       @floating_defaults = {
         "edge_spacing" => 20,
         "popup_width" => 380,
         "popup_height" => 560,
-        "icon_url" => nil
+        "icon_url" => nil,
+        "label" => "Floating button"
       }
       @hooks = Hooks.new
     end

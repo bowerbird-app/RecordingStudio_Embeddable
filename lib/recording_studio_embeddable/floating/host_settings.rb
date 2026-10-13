@@ -2,14 +2,15 @@
 
 module RecordingStudioEmbeddable
   module Floating
-    # Edge spacing, panel size, and the icon are chosen by the host app.
-    # Capability +floating_options+ override +config.floating_defaults+.
-    # Invalid values fall back to the previous layer. They are never stored
-    # on the embed.
+    # Edge spacing, panel size, the icon, and the management label are chosen
+    # by the host app. Capability +floating_options+ override
+    # +config.floating_defaults+. Invalid values fall back to the previous
+    # layer. They are never stored on the embed.
     class HostSettings
       EDGE_SPACING_RANGE = (0..64)
       POPUP_WIDTH_RANGE = (280..440)
       POPUP_HEIGHT_RANGE = (360..720)
+      LABEL_MAX = 40
       RANGES = {
         "edge_spacing" => EDGE_SPACING_RANGE,
         "popup_width" => POPUP_WIDTH_RANGE,
@@ -19,7 +20,8 @@ module RecordingStudioEmbeddable
         "edge_spacing" => 20,
         "popup_width" => 380,
         "popup_height" => 560,
-        "icon_url" => nil
+        "icon_url" => nil,
+        "label" => "Floating button"
       }.freeze
 
       def self.for(recording)
@@ -58,6 +60,9 @@ module RecordingStudioEmbeddable
 
         icon = cast_icon(raw)
         resolved["icon_url"] = icon unless icon == :skip
+
+        label = cast_label(raw)
+        resolved["label"] = label unless label == :skip
       end
 
       def cast_number(raw, key, range)
@@ -75,6 +80,18 @@ module RecordingStudioEmbeddable
         return icon if IconUrl.allowed?(icon, recording: recording)
 
         :skip
+      end
+
+      def cast_label(raw)
+        return :skip unless present?(raw, "label")
+
+        value = fetch(raw, "label")
+        return :skip unless value.is_a?(String) || value.is_a?(Symbol)
+
+        label = value.to_s.squish
+        return :skip if label.blank? || label.length > LABEL_MAX
+
+        label
       end
 
       def present?(raw, key)

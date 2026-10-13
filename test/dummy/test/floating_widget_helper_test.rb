@@ -65,12 +65,13 @@ class FloatingWidgetHelperTest < ActionDispatch::IntegrationTest
     get recording_studio_embeddable.edit_management_embed_path(@embed)
     assert_response :success
     refute_includes response.body, "launcher_snippet"
-    refute_includes response.body, "Launcher snippet"
+    refute_includes response.body, "Chat button snippet"
+    assert_includes response.body, ">Chat button<"
 
     get recording_studio_embeddable.floating_management_embed_path(@embed)
     assert_response :success
     assert_includes response.body, "launcher_snippet"
-    assert_includes response.body, "Launcher snippet"
+    assert_includes response.body, "Chat button snippet"
     assert_includes response.body, @embed.token
     assert_includes response.body, "widget.js"
     assert_includes response.body, "copyFromButton"

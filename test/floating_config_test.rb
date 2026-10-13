@@ -96,6 +96,24 @@ class FloatingConfigTest < Minitest::Test
     assert_equal "https://images.example.com/launcher.png", host["icon_url"]
   end
 
+  def test_host_settings_label_uses_defaults_then_the_type
+    plain = RecordingStudioEmbeddable::Floating::HostSettings.for(recording_with(floating: true))
+    assert_equal "Floating button", plain["label"]
+
+    RecordingStudioEmbeddable.configuration.floating_defaults = { label: "Help bubble" }
+    from_config = RecordingStudioEmbeddable::Floating::HostSettings.for(recording_with(floating: true))
+    assert_equal "Help bubble", from_config["label"]
+
+    custom = recording_with(floating: true, floating_options: { label: "  Chat button  " })
+    assert_equal "Chat button", RecordingStudioEmbeddable::Floating::HostSettings.for(custom)["label"]
+
+    blank = recording_with(floating: true, floating_options: { label: "   " })
+    assert_equal "Help bubble", RecordingStudioEmbeddable::Floating::HostSettings.for(blank)["label"]
+
+    too_long = recording_with(floating: true, floating_options: { label: "x" * 41 })
+    assert_equal "Help bubble", RecordingStudioEmbeddable::Floating::HostSettings.for(too_long)["label"]
+  end
+
   def test_host_settings_drop_a_disallowed_icon
     RecordingStudioEmbeddable.configuration.floating_defaults = {
       "icon_url" => "javascript:alert(1)"

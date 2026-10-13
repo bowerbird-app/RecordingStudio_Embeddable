@@ -36,6 +36,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `floating_options` on `Embeddable.to`, falling back to
   `config.floating_defaults`. They are not stored on the embed and not shown
   on the launcher form. Launcher JSON still emits the host values.
+- The management name for the launcher is host configuration too: `label` on
+  `floating_options`, then `config.floating_defaults`, then "Floating button".
+  Tab, heading, form copy, snippet section, preview title, and the save flash
+  interpolate `%{label}`. Routes and form ids stay `launcher`.
 
 ### Upgrade notes
 - Bump to `recording_studio_embeddable` `0.7.0` and run migrations. New columns:
@@ -49,6 +53,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Set spacing, panel size, and `icon_url` with `floating_options:` or
   `config.floating_defaults`. The strip migration deletes those keys from
   existing `floating` jsonb. The launcher form no longer edits them.
+- Optional `label` on `floating_options` or `config.floating_defaults` names
+  the launcher on the management screen. The default word is "Floating button".
 - `RenderPayload`, `HtmlSanitizer`, and CDN publish ignore floating settings.
 
 ## [0.6.0] - 2026-10-13

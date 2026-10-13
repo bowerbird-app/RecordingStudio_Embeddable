@@ -28,6 +28,7 @@ RecordingStudioEmbeddable.configure do |config|
     "edge_spacing" => 20,
     "popup_width" => 380,
     "popup_height" => 560,
-    "icon_url" => nil
+    "icon_url" => nil,
+    "label" => "Floating button"
   }
 end

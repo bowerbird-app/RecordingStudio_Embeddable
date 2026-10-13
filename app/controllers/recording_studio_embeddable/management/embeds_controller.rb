@@ -29,7 +29,9 @@ module RecordingStudioEmbeddable
         @embed.floating = checked.valid? ? checked.settings : submitted
         if @embed.persist_changes
           redirect_to floating_management_embed_path(@embed),
-                      notice: t("recording_studio.embeddable.flashes.launcher_updated", default: "Launcher updated.")
+                      notice: t("recording_studio.embeddable.flashes.launcher_updated",
+                                label: floating_label,
+                                default: "%{label} updated.")
         else
           build_floating_state
           render :floating, status: :unprocessable_entity
@@ -175,6 +177,10 @@ module RecordingStudioEmbeddable
 
       def floating_screen?
         @embed.parent_recording.respond_to?(:floating_capable?) && @embed.parent_recording.floating_capable?
+      end
+
+      def floating_label
+        Floating::HostSettings.for(@embed.parent_recording).fetch("label")
       end
 
       def build_floating_state

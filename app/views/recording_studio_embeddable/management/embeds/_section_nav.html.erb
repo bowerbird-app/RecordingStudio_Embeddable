@@ -18,8 +18,9 @@
     aria: (disable_management_actions ? { disabled: true } : {})
   ) %>
   <% if @embed.parent_recording.respond_to?(:floating_capable?) && @embed.parent_recording.floating_capable? %>
+    <% floating_label = recording_studio_floating_label(@embed.parent_recording) %>
     <%= render FlatPack::Button::Component.new(
-      text: t("recording_studio.embeddable.common.launcher", default: "Launcher"),
+      text: t("recording_studio.embeddable.common.launcher", label: floating_label, default: "%{label}"),
       style: :secondary,
       size: :md,
       href: disable_management_actions ? nil : floating_management_embed_path(@embed),

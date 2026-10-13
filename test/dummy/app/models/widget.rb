@@ -10,6 +10,7 @@ class Widget < ApplicationRecord
     floating: true,
     floating_popup: { controller: "widget_popups", action: :show },
     floating_options: {
+      label: "Chat button",
       edge_spacing: 24,
       popup_width: 400,
       popup_height: 640
