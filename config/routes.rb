@@ -8,6 +8,8 @@ RecordingStudioEmbeddable::Engine.routes.draw do
         get :styling
         patch :styling, action: :update_styling
         get :settings
+        get :floating
+        patch :floating, action: :update_floating
         get :stats
       end
     end

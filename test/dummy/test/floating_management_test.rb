@@ -1,0 +1,94 @@
+# frozen_string_literal: true
+
+require "test_helper"
+require "devise/test/integration_helpers"
+
+class FloatingManagementTest < ActionDispatch::IntegrationTest
+  include Devise::Test::IntegrationHelpers
+
+  setup do
+    @previous_hosts = RecordingStudioEmbeddable.configuration.floating_icon_hosts
+    RecordingStudioEmbeddable.configuration.floating_icon_hosts = ["images.example.com"]
+    @user = User.find_or_create_by!(email: "admin@admin.com") do |record|
+      record.password = "Password"
+      record.password_confirmation = "Password"
+    end
+    sign_in @user
+    Current.actor = @user
+
+    workspace = Workspace.create!(name: "Manage #{SecureRandom.hex(4)}")
+    root = RecordingStudio.root_recording_for(workspace)
+    @widget = root.record(Widget, actor: @user) { |widget| widget.title = "Hello widget" }
+    @embed = @widget.ensure_embed!(floating_enabled: false, floating: { "position" => "bottom-right" })
+    @page = root.record(Page, actor: @user) { |record| record.title = "Inline page" }
+    @page_embed = @page.ensure_embed!(enabled: true)
+  end
+
+  teardown do
+    RecordingStudioEmbeddable.configuration.floating_icon_hosts = @previous_hosts
+    Current.actor = nil
+  end
+
+  test "launcher screen is only for capable types and saves settings" do
+    get recording_studio_embeddable.floating_management_embed_path(@page_embed)
+    assert_response :not_found
+
+    get recording_studio_embeddable.edit_management_embed_path(@page_embed)
+    assert_response :success
+    refute_includes response.body, ">Launcher<"
+
+    get recording_studio_embeddable.floating_management_embed_path(@embed)
+    assert_response :success
+    assert_includes response.body, "Show the button"
+    assert_includes response.body, "Visitors see this"
+    assert_includes response.body, "data-config="
+    assert_includes response.body, "data-preview-root="
+
+    get recording_studio_embeddable.edit_management_embed_path(@embed)
+    assert_response :success
+    assert_includes response.body, ">Launcher<"
+
+    patch recording_studio_embeddable.floating_management_embed_path(@embed),
+          params: {
+            embed: {
+              floating_enabled: "1",
+              floating: {
+                position: "bottom-left",
+                edge_spacing: "12",
+                popup_width: "320",
+                popup_height: "480",
+                icon_url: "https://images.example.com/icon.png",
+                popup_url: "https://evil.example/widget"
+              }
+            }
+          }
+
+    assert_response :redirect
+    @embed.reload
+    assert_equal true, @embed.floating_enabled
+    assert_equal "bottom-left", @embed.floating["position"]
+    assert_equal 12, @embed.floating["edge_spacing"]
+    assert_equal "https://images.example.com/icon.png", @embed.floating["icon_url"]
+    refute_includes @embed.floating.to_json, "popup_url"
+  end
+
+  test "a disallowed icon is rejected" do
+    patch recording_studio_embeddable.floating_management_embed_path(@embed),
+          params: {
+            embed: {
+              floating_enabled: "1",
+              floating: {
+                position: "bottom-right",
+                edge_spacing: "20",
+                popup_width: "380",
+                popup_height: "560",
+                icon_url: "javascript:alert(1)"
+              }
+            }
+          }
+
+    assert_response :unprocessable_entity
+    assert_equal false, @embed.reload.floating_enabled
+    refute_includes @embed.floating.to_json, "javascript"
+  end
+end

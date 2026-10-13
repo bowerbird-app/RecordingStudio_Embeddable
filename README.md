@@ -130,6 +130,23 @@ Include `RecordingStudioEmbeddable::FloatingWidget::Interactive` on the host con
 
 The popup HTML is a live host response. It is not an Artifact and `PublishEmbedToCdn` does not upload it. A static popup can be plain HTML. An interactive one, such as the dummy contact form, posts back to the host with the widget CSRF cookie.
 
+### Management screen
+
+Capable types get a Launcher screen next to Style. It turns the button on, picks bottom-left or bottom-right, sets edge spacing and panel size, and accepts an icon URL. A preview on that screen uses the same helper as a host page. Style still owns the accent colours. Types that did not opt in do not get the screen.
+
+### Options
+
+| Setting | Where | Notes |
+| --- | --- | --- |
+| `floating: true` | recordable capability | Opt in. Off types never float. |
+| `floating_popup` | capability | `{ controller:, action: }`. Route accepts `:token`. |
+| `floating_enabled` | embed column | Launcher switch. Independent of `enabled`. |
+| `floating` | embed jsonb | `position`, `edge_spacing` (0–64), `popup_width` (280–440), `popup_height` (360–720), optional `icon_url`. |
+| `config.floating_icon_hosts` | initializer | Extra icon hosts. Attachable direct URLs are also allowed. |
+| Accent colours | existing theme | `accent_color` and `accent_text_color`. No launcher colour editor. |
+
+`popup_url` is computed on each request from `floating_popup` and `embed.token`. It is not stored.
+
 Run the new migration (`floating_enabled`, `floating`) after you upgrade.
 
 ## Iframe mode

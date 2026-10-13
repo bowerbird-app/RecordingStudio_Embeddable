@@ -17,6 +17,17 @@
     class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
     aria: (disable_management_actions ? { disabled: true } : {})
   ) %>
+  <% if @embed.parent_recording.respond_to?(:floating_capable?) && @embed.parent_recording.floating_capable? %>
+    <%= render FlatPack::Button::Component.new(
+      text: t("recording_studio.embeddable.common.launcher", default: "Launcher"),
+      style: :secondary,
+      size: :md,
+      href: disable_management_actions ? nil : floating_management_embed_path(@embed),
+      type: "button",
+      class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
+      aria: (disable_management_actions ? { disabled: true } : {})
+    ) %>
+  <% end %>
   <%= render FlatPack::Button::Component.new(
     text: t("recording_studio.embeddable.common.settings", default: "Settings"),
     style: :secondary,

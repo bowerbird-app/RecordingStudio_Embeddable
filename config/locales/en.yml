@@ -9,6 +9,7 @@ en:
         apply: "Apply"
         clear: "Clear"
         preview: "Preview"
+        launcher: "Launcher"
         styling: "Styling"
         settings: "Settings"
         stats: "Stats"
@@ -33,6 +34,22 @@ en:
           blocked_domains: "Blocked domains (one per line)"
           blocked_domains_placeholder: "bad-domain.example"
           save_changes: "Save changes"
+        floating:
+          title: "Launcher"
+          subtitle: "Colours come from Style."
+          enabled: "Show the button"
+          position: "Corner"
+          bottom_right: "Bottom right"
+          bottom_left: "Bottom left"
+          edge_spacing: "Edge spacing"
+          edge_help: "Pixels from the corner."
+          width: "Panel width"
+          height: "Panel height"
+          icon: "Icon link"
+          icon_help: "An image you attached, or a host you allow."
+          save: "Save launcher"
+          preview_title: "Visitors see this"
+          preview_help: "The button updates as you change the form."
         styling:
           title: "Style"
           disabled_notice: "Custom styling is currently disabled for this embed. You can still review the resolved values below."
@@ -75,6 +92,7 @@ en:
           mono: "Mono"
       flashes:
         settings_updated: "Embed settings updated."
+        launcher_updated: "Launcher updated."
         styling_updated: "Embed styling updated."
         styling_disabled: "Custom styling is disabled for this embed."
       errors:

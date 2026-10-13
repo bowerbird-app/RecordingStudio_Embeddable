@@ -14,6 +14,28 @@ module RecordingStudioEmbeddable
 
       def settings; end
 
+      def floating
+        return head(:not_found) unless floating_screen?
+
+        build_floating_state
+      end
+
+      def update_floating
+        return head(:not_found) unless floating_screen?
+
+        @embed.floating_enabled = ActiveModel::Type::Boolean.new.cast(params.dig(:embed, :floating_enabled))
+        submitted = floating_settings_params
+        checked = Floating::Schema.validate(submitted, @embed.parent_recording)
+        @embed.floating = checked.valid? ? checked.settings : submitted
+        if @embed.persist_changes
+          redirect_to floating_management_embed_path(@embed),
+                      notice: t("recording_studio.embeddable.flashes.launcher_updated", default: "Launcher updated.")
+        else
+          build_floating_state
+          render :floating, status: :unprocessable_entity
+        end
+      end
+
       def stats
         build_stats_chart_state
       end
@@ -149,6 +171,31 @@ module RecordingStudioEmbeddable
           cache_settings: {},
           logging_settings: {}
         )
+      end
+
+      def floating_screen?
+        @embed.parent_recording.respond_to?(:floating_capable?) && @embed.parent_recording.floating_capable?
+      end
+
+      def build_floating_state
+        @recording = @embed.parent_recording
+        @floating = @embed.floating_settings
+      end
+
+      def floating_settings_params
+        raw = params.fetch(:embed, {}).fetch(:floating, {})
+        permitted = if raw.respond_to?(:permit)
+                      raw.permit(:position, :edge_spacing, :popup_width, :popup_height, :icon_url)
+                    else
+                      {}
+                    end
+        {
+          "position" => permitted[:position].to_s.presence,
+          "edge_spacing" => permitted[:edge_spacing].to_s.presence,
+          "popup_width" => permitted[:popup_width].to_s.presence,
+          "popup_height" => permitted[:popup_height].to_s.presence,
+          "icon_url" => permitted[:icon_url].to_s.strip.presence
+        }.compact
       end
 
       def styling_appearance_params

@@ -23,4 +23,5 @@ RecordingStudioEmbeddable.configure do |config|
   config.embed_url_strategy = :dedicated
   config.cdn_withhold_snippet_until_published = false
   config.cdn_publish_queue = :default
+  config.floating_icon_hosts = ["images.example.com"]
 end

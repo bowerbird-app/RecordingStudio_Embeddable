@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   rate limit, and a path-scoped `SameSite=None; Secure; Partitioned` CSRF cookie
   that does not use the host session. `widget_bridge.js` posts close and resize
   to an explicit parent origin. Popups are not published to Artifacts.
+- Launcher management screen for types that opt in: enable, corner, spacing,
+  panel size, icon, and a live preview. Style still owns accent colours.
 
 ### Upgrade notes
 - Bump to `recording_studio_embeddable` `0.7.0` and run migrations. New columns:
