@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html data-theme="rounded">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title><%= @widget&.title.presence || "Note" %></title>
+    <%= recording_studio_widget_bridge_tag(parent_origin: recording_studio_widget_parent_origin) %>
+    <%= stylesheet_link_tag "flat_pack/variables" %>
+    <%= stylesheet_link_tag "flat_pack/application" %>
+    <%= stylesheet_link_tag "tailwind" %>
+  </head>
+  <body style="margin: 0;">
+    <main style="padding: 1.25rem;">
+      <%= yield %>
+    </main>
+  </body>
+</html>

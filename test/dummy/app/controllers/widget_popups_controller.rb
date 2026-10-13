@@ -1,12 +1,28 @@
 # frozen_string_literal: true
 
-# Public popup target for a floating launcher. Phase 3 replaces this with the
-# interactive concern. It stays off the host session on purpose.
+# Popup document for the floating launcher. Interactive, and not the host session.
 class WidgetPopupsController < ActionController::Base
-  def show
-    embed = RecordingStudioEmbeddable::Embed.find_by(token: params[:token].to_s)
-    return head(:not_found) unless embed&.floating_enabled?
+  include RecordingStudioEmbeddable::FloatingWidget::Interactive
 
-    head :ok
+  layout "widget_popup"
+
+  def show
+    @widget = recording_studio_widget_recording.recordable
+  end
+
+  def create
+    @widget = recording_studio_widget_recording.recordable
+    @inquiry = WidgetInquiry.new(inquiry_params.merge(widget_token: params[:token]))
+    if @inquiry.save
+      render :thanks
+    else
+      render :show, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def inquiry_params
+    params.require(:inquiry).permit(:name, :email, :message)
   end
 end

@@ -29,6 +29,16 @@ module RecordingStudioEmbeddable
       )
     end
 
+    def recording_studio_widget_bridge_tag(parent_origin:)
+      origin = parent_origin.to_s
+      return "".html_safe if origin.blank? || origin == "*"
+
+      tags = []
+      tags << tag.meta(name: "recording-studio-widget-parent-origin", content: origin)
+      tags << content_tag(:script, "", src: RecordingStudioEmbeddable::Engine.routes.url_helpers.widget_bridge_path)
+      safe_join(tags)
+    end
+
     def recording_studio_floating_widget_snippet(recording:, host: nil, protocol: nil)
       embed = floating_widget_embed(recording)
       return "" unless embed&.floating_enabled?

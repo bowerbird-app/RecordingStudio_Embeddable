@@ -119,6 +119,17 @@ On a host page, render the same launcher without the iframe embed code:
 
 That helper inlines the same JSON the endpoint would return, so a same-origin page does not depend on a cross-origin fetch. Copy the external snippet from the embed edit screen with `recording_studio_floating_widget_snippet` when the launcher is on. Inline `enabled` and the launcher stay independent: a page can float while the public document is off, and a Page or Article never gets either control.
 
+### Interactive popup
+
+Include `RecordingStudioEmbeddable::FloatingWidget::Interactive` on the host controller that renders `floating_popup`. Inherit `ActionController::Base` (or another controller that does not load the host session). The concern:
+
+- Sets `Content-Security-Policy: frame-ancestors` from the embed domain allowlist and drops `X-Frame-Options`.
+- Sets `Cache-Control: private, no-store` and rate limits the popup.
+- Issues `recording_studio_embeddable_widget_csrf` (`HttpOnly`, `Secure`, `SameSite=None`, `Partitioned`), path-scoped to the popup. It does not read or write the host session cookie.
+- Renders `recording_studio_widget_bridge_tag` so the iframe can `postMessage` `close` and `resize` to the parent origin only. The target origin is never `*`.
+
+The popup HTML is a live host response. It is not an Artifact and `PublishEmbedToCdn` does not upload it. A static popup can be plain HTML. An interactive one, such as the dummy contact form, posts back to the host with the widget CSRF cookie.
+
 Run the new migration (`floating_enabled`, `floating`) after you upgrade.
 
 ## Iframe mode

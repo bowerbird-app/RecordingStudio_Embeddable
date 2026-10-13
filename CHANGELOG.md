@@ -23,6 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stable `GET /recording_studio_embeddable/widget.js` launcher script, plus
   `recording_studio_floating_widget` and `recording_studio_floating_widget_snippet`.
   The local helper renders the same JSON as the endpoint. The snippet does not.
+- `RecordingStudioEmbeddable::FloatingWidget::Interactive` for host popup
+  controllers: frame-ancestors from the domain allowlist, private no-store,
+  rate limit, and a path-scoped `SameSite=None; Secure; Partitioned` CSRF cookie
+  that does not use the host session. `widget_bridge.js` posts close and resize
+  to an explicit parent origin. Popups are not published to Artifacts.
 
 ### Upgrade notes
 - Bump to `recording_studio_embeddable` `0.7.0` and run migrations. New columns:

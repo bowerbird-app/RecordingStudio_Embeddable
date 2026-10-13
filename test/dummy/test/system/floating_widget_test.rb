@@ -43,6 +43,10 @@ class FloatingWidgetTest < ApplicationSystemTestCase
     assert_selector "[data-recording-studio-widget][data-open='true']"
     frame = find("[data-recording-studio-widget-frame]")
     assert_includes frame["src"], "/widgets/#{@right_embed.token}"
+    within_frame(frame) do
+      assert_text "Name"
+      assert_button "Send"
+    end
 
     page.send_keys :escape
     assert_no_selector "[data-recording-studio-widget][data-open='true']"

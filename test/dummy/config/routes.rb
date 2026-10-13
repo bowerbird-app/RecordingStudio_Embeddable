@@ -51,6 +51,7 @@ Rails.application.routes.draw do
   get "widgets/on_site", to: "widget_sites#local", as: :widget_on_site
   get "widgets/installed", to: "widget_sites#installed", as: :widget_installed
   get "widgets/:token", to: "widget_popups#show", as: :widget_popup
+  post "widgets/:token/inquiries", to: "widget_popups#create", as: :widget_inquiries
   get "/dummy/pages/new", to: "dummy_pages#new", as: :new_dummy_page
   post "/dummy/pages", to: "dummy_pages#create", as: :dummy_pages
   get "/dummy/pages/:id/edit", to: "dummy_pages#edit", as: :edit_dummy_page
