@@ -233,6 +233,23 @@ Without the env key / `RAILS_MASTER_KEY`, dummy fallbacks (`cdn.example.test`,
 MemoryStorage) keep CI green — no CI secret required for `test.yml.enc`. Full
 steps: [`test/dummy/README.md`](test/dummy/README.md).
 
+## Internationalization
+
+Customer-facing copy in this gem resolves through Rails I18n under
+`recording_studio.embeddable.*`. The gem ships English only in
+`config/locales/en.yml`. Every lookup passes an English `default:` so a host
+locale without a fallback never shows "translation missing".
+
+Hosts override by defining the same nested keys in their own `config/locales`.
+Do not add an explicit `i18n.load_path` initializer for this gem, and do not
+add `recording_studio_internationalization` as a dependency of this gem.
+
+Recordable labels, OpenAPI strings, generator CLI text, developer errors,
+helpers that return data, CDN unavailable HTML, and CDN/published embed
+document chrome (layout title, rich-body fallbacks, Gallery heading) stay
+English literals so published HTML is stable across locales and host overrides.
+Translate management and flash copy at render sites.
+
 ## Cloud Agent boot
 
 Cloud Agent Builds run `.cursor/install.sh`, then `.cursor/fetch-skills.sh`.

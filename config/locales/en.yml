@@ -1,0 +1,82 @@
+en:
+  recording_studio:
+    embeddable:
+      common:
+        close: "Close"
+        embed: "Embed"
+        save: "Save"
+        reset: "Reset"
+        apply: "Apply"
+        clear: "Clear"
+        preview: "Preview"
+        styling: "Styling"
+        settings: "Settings"
+        stats: "Stats"
+        embedded_recording: "Embedded recording"
+      management:
+        edit:
+          title: "Embed"
+          embeddable_label: "Embeddable"
+          embed_code_heading: "Embed code"
+          embed_code_help: "Paste this into your page."
+          unavailable_title: "Embeddable unavailable"
+          unavailable_description: "You need to publish this page before you can enable embeddable."
+          publish_settings: "Publish Settings"
+          off_title: "Embeddable is off"
+          off_description: "Turn on Embeddable above to reveal the embed code."
+        settings:
+          title: "Embed settings"
+          allowed_domains: "Allowed domains (one per line)"
+          allowed_domains_placeholder: "example.com"
+          blocked_domains: "Blocked domains (one per line)"
+          blocked_domains_placeholder: "bad-domain.example"
+          save_changes: "Save changes"
+        styling:
+          title: "Style"
+          disabled_notice: "Custom styling is currently disabled for this embed. You can still review the resolved values below."
+          width: "Width"
+          width_auto: "Auto"
+          width_custom: "Custom"
+          width_help: "% or px"
+          preview_title: "Embed preview"
+          font_fallback: "Font"
+        stats:
+          title: "Stats"
+          views: "Views"
+          range: "Range"
+          from: "From"
+          to: "To"
+          countries: "Countries"
+          country: "Country"
+          unique_views: "Unique views"
+          human_views: "Human views"
+          bot_views: "Bot views"
+          empty_geo: "No geo access data for this filter and date range."
+          unknown_country: "Unknown"
+          week_of: "Week of %{date}"
+          ranges:
+            seven_days: "Last 7 days"
+            thirty_days: "Last 30 days"
+            ninety_days: "Last 90 days"
+          granularities:
+            day: "Per day"
+            week: "Per week"
+            month: "Per month"
+          viewers:
+            all: "All views"
+            unique: "Unique views"
+            humans: "Humans only"
+            bots: "Bots only"
+        fonts:
+          sans: "Sans"
+          serif: "Serif"
+          mono: "Mono"
+      flashes:
+        settings_updated: "Embed settings updated."
+        styling_updated: "Embed styling updated."
+        styling_disabled: "Custom styling is disabled for this embed."
+      errors:
+        invalid_embedder_domain: "Invalid embedder domain: %{domain}"
+      public:
+        oops: "Oops"
+        not_found_description: "This embed is gone, or the link is wrong. Check the address and try again."

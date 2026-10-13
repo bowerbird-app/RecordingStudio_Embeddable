@@ -7,11 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-10-13
+
 ### Added
 - Dummy committed encrypted `config/credentials/test.yml.enc` (same shared RS
   key and shape as `development.yml.enc`). Gitignored `test.key` / `*.key` /
   `master.key` stay local. CI boots without a key (`require_master_key = false`)
   and keeps MemoryStorage + dummy hosts via `DummyDevCredentials`.
+- English Rails I18n under `recording_studio.embeddable` in `config/locales/en.yml`.
+  Every `t(...)` / `I18n.t(...)` passes English `default:` so a host locale
+  without a fallback never shows "translation missing".
+- Host English override coverage: test-only fixture
+  `test/dummy/test/locales/embeddable_host_override.en.yml` plus a real-page
+  assert; always-loaded boot-order guard
+  `test/dummy/config/locales/recording_studio_embeddable_host.en.yml` for the
+  rarely shown `flashes.styling_disabled` key.
+- Locale regression: every `lib/**/*.rb` file must not mention `i18n.load_path` /
+  `I18n.load_path`. Engine exposes `config/locales/en.yml` without an explicit
+  load-path initializer.
+- Validation i18n coverage for the string-typed invalid-domain error: English
+  `errors.details` stays byte-identical to main; non-English locales and host
+  overrides carry the translated string as the error type.
+
+### Changed
+- Management views, flashes, stats filter labels, public not-found empty state,
+  and domain validation copy resolve through `t(..., default: <main English>)`
+  (English output unchanged).
+- Version bump to `0.6.0`.
+
+### Upgrade notes
+- Bump to `recording_studio_embeddable` `0.6.0`. No migration.
+- English hosts need no change. Override by defining the same nested keys under
+  `recording_studio.embeddable` in host `config/locales`.
+- No dependency on `recording_studio_internationalization`.
+- Recordable `label` / `plural_label`, OpenAPI strings, generator CLI text,
+  developer `ArgumentError`s / service failures, CDN unavailable HTML
+  (`UNAVAILABLE_HTML`), CDN/published embed document chrome (layout `<title>`,
+  rich-body fallbacks and Gallery heading — English literals as on main), and
+  public helpers that return data (including `embed_code` iframe title default)
+  stay English literals so published HTML is locale- and host-override-stable.
+- For the string-typed `Invalid embedder domain: …` validation, `errors.details`
+  carries the translated string in non-English locales (English unchanged).
 
 ## [0.5.1] - 2026-10-09
 
@@ -285,7 +321,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.6.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.3.0
 [0.2.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.2.1
 [0.2.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.2.0

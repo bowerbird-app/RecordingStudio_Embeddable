@@ -23,9 +23,13 @@ module RecordingStudioEmbeddable
         apply_embed_params
         if @embed.save
           if form_context == "settings"
-            redirect_to settings_management_embed_path(@embed), notice: "Embed settings updated."
+            redirect_to settings_management_embed_path(@embed),
+                        notice: t("recording_studio.embeddable.flashes.settings_updated",
+                                  default: "Embed settings updated.")
           else
-            redirect_to edit_management_embed_path(@embed), notice: "Embed settings updated."
+            redirect_to edit_management_embed_path(@embed),
+                        notice: t("recording_studio.embeddable.flashes.settings_updated",
+                                  default: "Embed settings updated.")
           end
         elsif form_context == "settings"
           render :settings, status: :unprocessable_entity
@@ -161,20 +165,20 @@ module RecordingStudioEmbeddable
         @stats_granularity = stats_granularity
         @stats_viewer_filter = stats_viewer_filter
         @stats_range_options = {
-          "7d" => "Last 7 days",
-          "30d" => "Last 30 days",
-          "90d" => "Last 90 days"
+          "7d" => t("recording_studio.embeddable.management.stats.ranges.seven_days", default: "Last 7 days"),
+          "30d" => t("recording_studio.embeddable.management.stats.ranges.thirty_days", default: "Last 30 days"),
+          "90d" => t("recording_studio.embeddable.management.stats.ranges.ninety_days", default: "Last 90 days")
         }
         @stats_granularity_options = {
-          "day" => "Per day",
-          "week" => "Per week",
-          "month" => "Per month"
+          "day" => t("recording_studio.embeddable.management.stats.granularities.day", default: "Per day"),
+          "week" => t("recording_studio.embeddable.management.stats.granularities.week", default: "Per week"),
+          "month" => t("recording_studio.embeddable.management.stats.granularities.month", default: "Per month")
         }
         @stats_viewer_options = {
-          "all" => "All views",
-          "unique" => "Unique views",
-          "humans" => "Humans only",
-          "bots" => "Bots only"
+          "all" => t("recording_studio.embeddable.management.stats.viewers.all", default: "All views"),
+          "unique" => t("recording_studio.embeddable.management.stats.viewers.unique", default: "Unique views"),
+          "humans" => t("recording_studio.embeddable.management.stats.viewers.humans", default: "Humans only"),
+          "bots" => t("recording_studio.embeddable.management.stats.viewers.bots", default: "Bots only")
         }
 
         @stats_from_date = parse_stats_date(params[:from])
@@ -314,7 +318,11 @@ module RecordingStudioEmbeddable
       def stats_bucket_label(bucket, granularity)
         case granularity
         when "week"
-          "Week of #{bucket.strftime('%b %-d')}"
+          t(
+            "recording_studio.embeddable.management.stats.week_of",
+            date: bucket.strftime("%b %-d"),
+            default: "Week of %{date}" # rubocop:disable Style/FormatStringToken -- I18n interpolation
+          )
         when "month"
           bucket.strftime("%b %Y")
         else
@@ -394,14 +402,18 @@ module RecordingStudioEmbeddable
 
       def persist_embed_overrides(cleaned_values)
         unless @styling_editable
-          redirect_to styling_management_embed_path(@embed), alert: "Custom styling is disabled for this embed."
+          redirect_to styling_management_embed_path(@embed),
+                      alert: t("recording_studio.embeddable.flashes.styling_disabled",
+                               default: "Custom styling is disabled for this embed.")
           return
         end
 
         @embed.appearance = merge_styling_hash(@embed.appearance.to_h.stringify_keys, cleaned_values)
 
         if @embed.save
-          redirect_to styling_management_embed_path(@embed), notice: "Embed styling updated."
+          redirect_to styling_management_embed_path(@embed),
+                      notice: t("recording_studio.embeddable.flashes.styling_updated",
+                                default: "Embed styling updated.")
         else
           @styling_errors = @embed.errors.to_hash
           render :styling, status: :unprocessable_entity

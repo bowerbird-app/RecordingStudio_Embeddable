@@ -1,24 +1,24 @@
 <% parent_recording = @embed.parent_recording %>
 <% recordable = parent_recording&.recordable %>
-<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
+<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || t("recording_studio.embeddable.common.embedded_recording", default: "Embedded recording") %>
 
 <% recording_studio_page_nav(
-  title: "Stats",
+  title: t("recording_studio.embeddable.management.stats.title", default: "Stats"),
   page_nav_back_url: edit_management_embed_path(@embed),
-  page_nav_back_label: "Embed",
+  page_nav_back_label: t("recording_studio.embeddable.common.embed", default: "Embed"),
   page_nav_anchor_url: main_app.root_path,
-  page_nav_anchor_label: "Close"
+  page_nav_anchor_label: t("recording_studio.embeddable.common.close", default: "Close")
 ) %>
 
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
-    title: "Stats",
+    title: t("recording_studio.embeddable.management.stats.title", default: "Stats"),
     subtitle: recordable_title,
     variant: :h1
   ) %>
 
   <%= render FlatPack::Chart::Component.new(
-    title: "Views",
+    title: t("recording_studio.embeddable.management.stats.views", default: "Views"),
     type: :line,
     height: 320,
     series: @stats_chart_series,
@@ -35,7 +35,7 @@
     <% chart.actions do %>
       <%= render FlatPack::ChartButtons::Component.new do |controls| %>
         <% controls.dropdown(
-          text: (@stats_range_picker == "custom" ? "Range" : @stats_range_options.fetch(@stats_range)),
+          text: (@stats_range_picker == "custom" ? t("recording_studio.embeddable.management.stats.range", default: "Range") : @stats_range_options.fetch(@stats_range)),
           options: @stats_range_options.map do |key, label|
             {
               text: label,
@@ -45,7 +45,7 @@
             }
           end + [
             {
-              text: "Range",
+              text: t("recording_studio.embeddable.management.stats.range", default: "Range"),
               url: stats_management_embed_path(@embed, range: "custom", viewer: @stats_viewer_filter,
                                                        granularity: @stats_granularity),
               selected: @stats_range_picker == "custom"
@@ -99,20 +99,20 @@
           <%= hidden_field_tag :granularity, @stats_granularity %>
           <%= render FlatPack::DateInput::Component.new(
             name: :from,
-            label: "From",
+            label: t("recording_studio.embeddable.management.stats.from", default: "From"),
             value: @stats_from_date&.iso8601,
             max: @stats_to_date&.iso8601
           ) %>
           <%= render FlatPack::DateInput::Component.new(
             name: :to,
-            label: "To",
+            label: t("recording_studio.embeddable.management.stats.to", default: "To"),
             value: @stats_to_date&.iso8601,
             min: @stats_from_date&.iso8601
           ) %>
-          <%= render FlatPack::Button::Component.new(text: "Apply", style: :secondary, size: :sm, type: "submit") %>
+          <%= render FlatPack::Button::Component.new(text: t("recording_studio.embeddable.common.apply", default: "Apply"), style: :secondary, size: :sm, type: "submit") %>
           <% if @stats_custom_range %>
             <%= render FlatPack::Button::Component.new(
-              text: "Clear",
+              text: t("recording_studio.embeddable.common.clear", default: "Clear"),
               style: :secondary,
               size: :sm,
               href: stats_management_embed_path(@embed, range: "custom", viewer: @stats_viewer_filter,
@@ -126,25 +126,25 @@
 
   <section class="overflow-hidden rounded-lg border border-(--surface-border-color) bg-(--surface-background-color)">
     <div class="border-b border-(--surface-border-color) px-4 py-3">
-      <h2 class="text-sm font-semibold text-(--surface-content-color)">Countries</h2>
+      <h2 class="text-sm font-semibold text-(--surface-content-color)"><%= t("recording_studio.embeddable.management.stats.countries", default: "Countries") %></h2>
     </div>
 
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b border-(--surface-border-color) text-left text-(--surface-muted-content-color)">
-            <th class="px-4 py-2 font-medium">Country</th>
-            <th class="px-4 py-2 font-medium">Views</th>
-            <th class="px-4 py-2 font-medium">Unique views</th>
-            <th class="px-4 py-2 font-medium">Human views</th>
-            <th class="px-4 py-2 font-medium">Bot views</th>
+            <th class="px-4 py-2 font-medium"><%= t("recording_studio.embeddable.management.stats.country", default: "Country") %></th>
+            <th class="px-4 py-2 font-medium"><%= t("recording_studio.embeddable.management.stats.views", default: "Views") %></th>
+            <th class="px-4 py-2 font-medium"><%= t("recording_studio.embeddable.management.stats.unique_views", default: "Unique views") %></th>
+            <th class="px-4 py-2 font-medium"><%= t("recording_studio.embeddable.management.stats.human_views", default: "Human views") %></th>
+            <th class="px-4 py-2 font-medium"><%= t("recording_studio.embeddable.management.stats.bot_views", default: "Bot views") %></th>
           </tr>
         </thead>
         <tbody>
           <% if @stats_geo_rows.present? %>
             <% @stats_geo_rows.each do |row| %>
               <tr class="border-b border-(--surface-border-color) last:border-b-0">
-                <td class="px-4 py-2 text-(--surface-content-color)"><%= row[:country] %></td>
+                <td class="px-4 py-2 text-(--surface-content-color)"><%= row[:country] == "Unknown" ? t("recording_studio.embeddable.management.stats.unknown_country", default: "Unknown") : row[:country] %></td>
                 <td class="px-4 py-2 text-(--surface-content-color)"><%= row[:views] %></td>
                 <td class="px-4 py-2 text-(--surface-content-color)"><%= row[:unique_views] %></td>
                 <td class="px-4 py-2 text-(--surface-content-color)"><%= row[:human_views] %></td>
@@ -154,7 +154,7 @@
           <% else %>
             <tr>
               <td colspan="5" class="px-4 py-4 text-(--surface-muted-content-color)">
-                No geo access data for this filter and date range.
+                <%= t("recording_studio.embeddable.management.stats.empty_geo", default: "No geo access data for this filter and date range.") %>
               </td>
             </tr>
           <% end %>

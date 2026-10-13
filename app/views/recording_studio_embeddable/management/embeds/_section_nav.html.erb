@@ -2,14 +2,14 @@
 
 <div class="flex flex-wrap items-center gap-2">
   <%= render FlatPack::Button::Component.new(
-    text: "Preview",
+    text: t("recording_studio.embeddable.common.preview", default: "Preview"),
     style: :secondary,
     size: :md,
     href: preview_management_embed_path(@embed),
     data: { turbo: false }
   ) %>
   <%= render FlatPack::Button::Component.new(
-    text: "Styling",
+    text: t("recording_studio.embeddable.common.styling", default: "Styling"),
     style: :secondary,
     size: :md,
     href: disable_management_actions ? nil : styling_management_embed_path(@embed),
@@ -18,7 +18,7 @@
     aria: (disable_management_actions ? { disabled: true } : {})
   ) %>
   <%= render FlatPack::Button::Component.new(
-    text: "Settings",
+    text: t("recording_studio.embeddable.common.settings", default: "Settings"),
     style: :secondary,
     size: :md,
     href: disable_management_actions ? nil : settings_management_embed_path(@embed),
@@ -27,7 +27,7 @@
     aria: (disable_management_actions ? { disabled: true } : {})
   ) %>
   <%= render FlatPack::Button::Component.new(
-    text: "Stats",
+    text: t("recording_studio.embeddable.common.stats", default: "Stats"),
     style: :secondary,
     size: :md,
     href: disable_management_actions ? nil : stats_management_embed_path(@embed),
