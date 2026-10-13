@@ -321,7 +321,7 @@ module RecordingStudioEmbeddable
           t(
             "recording_studio.embeddable.management.stats.week_of",
             date: bucket.strftime("%b %-d"),
-            default: "Week of %{date}"
+            default: "Week of %{date}" # rubocop:disable Style/FormatStringToken -- I18n interpolation
           )
         when "month"
           bucket.strftime("%b %Y")

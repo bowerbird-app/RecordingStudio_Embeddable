@@ -215,7 +215,7 @@ module RecordingStudioEmbeddable
           I18n.t(
             "recording_studio.embeddable.errors.invalid_embedder_domain",
             domain: domain,
-            default: "Invalid embedder domain: %{domain}"
+            default: "Invalid embedder domain: %{domain}" # rubocop:disable Style/FormatStringToken -- I18n interpolation
           )
         )
       end

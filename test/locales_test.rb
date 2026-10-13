@@ -108,8 +108,8 @@ class LocalesTest < Minitest::Test
 
   private
 
-  def t(key, **options)
-    I18n.t("recording_studio.embeddable.#{key}", **options)
+  def t(key, **)
+    I18n.t("recording_studio.embeddable.#{key}", **)
   end
 
   def engine_locales_dir
