@@ -84,6 +84,3 @@ en:
         embedded_page: "Embedded page"
         gallery: "Gallery"
         gallery_subtitle: "More shots from this page"
-      cdn:
-        unavailable_title: "Embed unavailable"
-        unavailable_body: "This embed is not available."

@@ -70,8 +70,6 @@ class LocalesTest < Minitest::Test
         "Invalid embedder domain: bad!",
         t("errors.invalid_embedder_domain", domain: "bad!")
       )
-      assert_equal "Embed unavailable", t("cdn.unavailable_title")
-      assert_equal "This embed is not available.", t("cdn.unavailable_body")
       assert_equal "Sans", t("management.fonts.sans")
     end
   end
