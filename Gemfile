@@ -13,7 +13,7 @@ gem "recording_studio_artifacts", "~> 0.4.0",
     github: "bowerbird-app/RecordingStudio_artifacts", tag: "v0.4.0"
 gem "recording_studio_attachable", "~> 0.13",
     github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.15.0"
-gem "recording_studio_cache", "~> 0.5.0",
+gem "recording_studio_cache", "~> 0.5",
     github: "bowerbird-app/RecordingStudio_cache", tag: "v0.5.0"
 # Attachable 0.14+ depends on recording_studio_metrics (~> 0.2); pin from GitHub.
 gem "recording_studio_metrics",

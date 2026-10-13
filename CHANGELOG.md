@@ -31,6 +31,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.7.0] - 2026-10-13
 
+## [0.8.0] - 2026-10-14
+
+### Changed
+- Public embed rate limiting now uses shared
+  `RecordingStudioCache::RateLimiter` (`recording_studio_cache` `~> 0.5`,
+  git tag `v0.5.0`). Host config keys stay the same (`rate_limiter`, `redis`,
+  `rate_limit`, `rate_limit_window`, `rate_limit_fail_closed`,
+  `rate_limiting_enabled`). `RateLimiters::{Null,RailsCache,Redis}` remain as
+  thin adapters (same `allow?(key:, limit:, window:)` surface). Fixed-window
+  keys stay `recording_studio_embeddable:rate:<key>:<bucket>`; HTTP `429` still
+  sets `Retry-After` to `rate_limit_window`; backend errors still follow
+  `rate_limit_fail_closed` via `rescue_errors: [StandardError]`.
+  `:rails_cache` still uses `Rails.cache` (main had no gem `cache_store`
+  setting — not `RecordingStudioCache.store`).
+- Adapters keep main's edge-case outcomes that the shared limiter does not:
+  `limit.to_i <= 0` (including `nil` / `""`) still **blocks** (main compared
+  `count.to_i <= limit.to_i`; shared treats `limit <= 0` as disabled/allow);
+  non-positive / blank windows still follow `rate_limit_fail_closed` (main
+  raised `ZeroDivisionError` on `window.to_i` in the key, then rescued).
+  String windows/limits such as `"60"` / `"5"` still work via `.to_i`.
+  Blank keys raise `ArgumentError` from the shared limiter; adapters map that
+  through `rate_limit_fail_closed` (outer rescue). Redis clients that only
+  implement `incr` / `expire` (no `eval`) still raise `ArgumentError`.
+- Key TTL: main already applied `expires_in` (rails_cache) and `EXPIRE`
+  (redis). Shared still TTLs keys — this is not a new TTL where none existed.
+  Redis TTL is no longer refreshed on every hit (Lua sets `EXPIRE` when
+  `count == 1` or `TTL == -1`); fixed-window bucket keys still expire with the
+  window.
+- Version bump to `0.8.0`.
+
+### Upgrade notes
+- Bump to `recording_studio_embeddable` `0.8.0` and add
+  `recording_studio_cache` `~> 0.5` (pin git tag `v0.5.0` until published).
+  No migration.
+- Redis rate-limiter clients must respond to `eval` (Lua). Clients that only
+  implement `incr` / `expire` now raise `ArgumentError` from the shared
+  limiter. Pass a full Redis client via `config.redis` (or as
+  `config.rate_limiter` when that object responds to `incr`, as before).
+  This is the deliberate parity break vs main's `incr`/`expire` path.
+
+## [0.7.0] - 2026-10-13
+
 ### Added
 - Opt-in floating launcher for embeddable types via
   `RecordingStudio::Capabilities::Embeddable.to(floating: true, floating_popup: { controller:, action: })`.
@@ -396,7 +438,9 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.7.0...v0.8.0
+[0.7.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.6.0
 [0.3.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.3.0
 [0.2.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.2.1

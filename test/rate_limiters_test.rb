@@ -9,6 +9,7 @@ class RateLimitersTest < Minitest::Test
 
   def setup
     RecordingStudioEmbeddable.reset_configuration!
+    RecordingStudioCache.reset_configuration!
     @previous_cache = Rails.cache if defined?(Rails) && Rails.respond_to?(:cache)
     @memory = ActiveSupport::Cache::MemoryStore.new
     Rails.cache = @memory
@@ -17,6 +18,7 @@ class RateLimitersTest < Minitest::Test
   def teardown
     travel_back
     Rails.cache = @previous_cache if defined?(Rails) && Rails.respond_to?(:cache=)
+    RecordingStudioCache.reset_configuration!
     RecordingStudioEmbeddable.reset_configuration!
   end
 
@@ -82,6 +84,75 @@ class RateLimitersTest < Minitest::Test
     )
   end
 
+  def test_rails_cache_non_positive_limit_blocks_like_main
+    # Main: count.to_i <= limit.to_i (first hit count=1). Shared would allow.
+    [0, -1, nil, "", "0"].each do |limit|
+      refute RecordingStudioEmbeddable::RateLimiters::RailsCache.allow?(
+        key: "limit-#{limit.inspect}", limit: limit, window: 60
+      ), "expected limit=#{limit.inspect} to block"
+    end
+  end
+
+  def test_rails_cache_string_limit_and_window_coerce_like_main
+    travel_to Time.parse("2026-10-13 12:00:30 UTC")
+    key = "string-coerce"
+    bucket = Time.current.to_i / "60".to_i
+
+    assert RecordingStudioEmbeddable::RateLimiters::RailsCache.allow?(
+      key: key, limit: "2", window: "60"
+    )
+    assert RecordingStudioEmbeddable::RateLimiters::RailsCache.allow?(
+      key: key, limit: "2", window: "60"
+    )
+    refute RecordingStudioEmbeddable::RateLimiters::RailsCache.allow?(
+      key: key, limit: "2", window: "60"
+    )
+
+    assert @memory.exist?("recording_studio_embeddable:rate:#{key}:#{bucket}")
+  end
+
+  def test_rails_cache_non_positive_window_follows_fail_closed_like_main
+    # Main: ZeroDivisionError on Time.current.to_i / window.to_i, then rescue.
+    RecordingStudioEmbeddable.configuration.rate_limit_fail_closed = false
+    [0, nil, "", "abc"].each do |window|
+      assert RecordingStudioEmbeddable::RateLimiters::RailsCache.allow?(
+        key: "win-open-#{window.inspect}", limit: 1, window: window
+      ), "expected window=#{window.inspect} to fail open"
+    end
+
+    RecordingStudioEmbeddable.configuration.rate_limit_fail_closed = true
+    [0, nil, "", "abc"].each do |window|
+      refute RecordingStudioEmbeddable::RateLimiters::RailsCache.allow?(
+        key: "win-closed-#{window.inspect}", limit: 1, window: window
+      ), "expected window=#{window.inspect} to fail closed"
+    end
+  end
+
+  def test_rails_cache_missing_store_allows_like_main
+    Rails.cache = nil
+    assert RecordingStudioEmbeddable::RateLimiters::RailsCache.allow?(
+      key: "no-store", limit: 1, window: 60
+    )
+  end
+
+  def test_rails_cache_uses_rails_cache_not_recording_studio_cache_store
+    # Main had no configurable rate-limit cache_store — only Rails.cache.
+    # Prove we do not silently follow RecordingStudioCache.configuration.cache_store.
+    other = ActiveSupport::Cache::MemoryStore.new
+    RecordingStudioCache.configuration.cache_store = other
+
+    travel_to Time.parse("2026-10-13 12:00:30 UTC")
+    key = "store-source"
+    bucket = Time.current.to_i / 60
+    expected = "recording_studio_embeddable:rate:#{key}:#{bucket}"
+
+    assert RecordingStudioEmbeddable::RateLimiters::RailsCache.allow?(
+      key: key, limit: 5, window: 60
+    )
+    assert @memory.exist?(expected), "expected hit on Rails.cache"
+    refute other.exist?(expected), "must not write RecordingStudioCache.store"
+  end
+
   def test_redis_adapter_uses_eval_client_and_config_redis
     redis = FakeEvalRedis.new
     RecordingStudioEmbeddable.configuration.redis = redis
@@ -126,6 +197,63 @@ class RateLimitersTest < Minitest::Test
       )
     end
     assert_match(/responds to eval/, error.message)
+  end
+
+  def test_redis_non_positive_limit_blocks_like_main
+    RecordingStudioEmbeddable.configuration.redis = FakeEvalRedis.new
+    RecordingStudioEmbeddable.configuration.rate_limiter = :redis
+
+    [0, -1, nil, "", "0"].each do |limit|
+      refute RecordingStudioEmbeddable::RateLimiters::Redis.allow?(
+        key: "redis-limit-#{limit.inspect}", limit: limit, window: 60
+      ), "expected limit=#{limit.inspect} to block"
+    end
+  end
+
+  def test_redis_string_limit_and_window_coerce_like_main
+    redis = FakeEvalRedis.new
+    RecordingStudioEmbeddable.configuration.redis = redis
+    RecordingStudioEmbeddable.configuration.rate_limiter = :redis
+
+    travel_to Time.parse("2026-10-13 12:00:30 UTC")
+    key = "redis-string"
+    bucket = Time.current.to_i / "60".to_i
+
+    assert RecordingStudioEmbeddable::RateLimiters::Redis.allow?(
+      key: key, limit: "1", window: "60"
+    )
+    refute RecordingStudioEmbeddable::RateLimiters::Redis.allow?(
+      key: key, limit: "1", window: "60"
+    )
+    assert_equal ["recording_studio_embeddable:rate:#{key}:#{bucket}"], redis.keys
+  end
+
+  def test_redis_non_positive_window_follows_fail_closed_like_main
+    RecordingStudioEmbeddable.configuration.redis = FakeEvalRedis.new
+    RecordingStudioEmbeddable.configuration.rate_limiter = :redis
+
+    RecordingStudioEmbeddable.configuration.rate_limit_fail_closed = false
+    [0, nil, "", "abc"].each do |window|
+      assert RecordingStudioEmbeddable::RateLimiters::Redis.allow?(
+        key: "redis-win-open-#{window.inspect}", limit: 1, window: window
+      ), "expected window=#{window.inspect} to fail open"
+    end
+
+    RecordingStudioEmbeddable.configuration.rate_limit_fail_closed = true
+    [0, nil, "", "abc"].each do |window|
+      refute RecordingStudioEmbeddable::RateLimiters::Redis.allow?(
+        key: "redis-win-closed-#{window.inspect}", limit: 1, window: window
+      ), "expected window=#{window.inspect} to fail closed"
+    end
+  end
+
+  def test_redis_missing_client_allows_like_main
+    RecordingStudioEmbeddable.configuration.redis = nil
+    RecordingStudioEmbeddable.configuration.rate_limiter = :redis
+
+    assert RecordingStudioEmbeddable::RateLimiters::Redis.allow?(
+      key: "no-redis", limit: 1, window: 60
+    )
   end
 
   def test_instance_allow_delegates_to_class
