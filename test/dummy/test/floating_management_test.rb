@@ -39,6 +39,7 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
 
     get recording_studio_embeddable.floating_management_embed_path(@embed)
     assert_response :success
+    refute_includes response.body, "launcher_snippet"
     assert_includes response.body, "Show the button"
     assert_includes response.body, "Position"
     refute_includes response.body, ">Corner<"
@@ -53,6 +54,7 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     get recording_studio_embeddable.edit_management_embed_path(@embed)
     assert_response :success
     assert_includes response.body, ">Launcher<"
+    refute_includes response.body, "launcher_snippet"
 
     patch recording_studio_embeddable.floating_management_embed_path(@embed),
           params: {
@@ -70,6 +72,12 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
           }
 
     assert_response :redirect
+    follow_redirect!
+    assert_response :success
+    assert_includes response.body, "launcher_snippet"
+    assert_includes response.body, "Launcher snippet"
+    assert_includes response.body, "widget.js"
+    assert_includes response.body, "copyFromButton"
     @embed.reload
     assert_equal true, @embed.floating_enabled
     assert_equal "bottom-left", @embed.floating["position"]

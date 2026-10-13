@@ -117,7 +117,7 @@ On a host page, render the same launcher without the iframe embed code:
 <%= recording_studio_floating_widget(recording: recording) %>
 ```
 
-That helper inlines the same JSON the endpoint would return, so a same-origin page does not depend on a cross-origin fetch. Copy the external snippet from the embed edit screen with `recording_studio_floating_widget_snippet` when the launcher is on. Inline `enabled` and the launcher stay independent: a page can float while the public document is off, and a Page or Article never gets either control.
+That helper inlines the same JSON the endpoint would return, so a same-origin page does not depend on a cross-origin fetch. Copy the external snippet from the Launcher screen with `recording_studio_floating_widget_snippet` when the launcher is on. The Embed screen keeps only the inline embed code. Inline `enabled` and the launcher stay independent: a page can float while the public document is off, and a Page or Article never gets either control.
 
 ### Interactive popup
 
@@ -132,7 +132,7 @@ The popup HTML is a live host response. It is not an Artifact and `PublishEmbedT
 
 ### Management screen
 
-Capable types get a Launcher screen next to Style. It turns the button on, chooses Position with Bottom left or Bottom right (Bottom right when unset), sets edge spacing and panel size, and accepts an icon URL. Fields use the same vertical rhythm as the other management forms. A preview on that screen uses the same helper as a host page. Style still owns the accent colours. Types that did not opt in do not get the screen.
+Capable types get a Launcher screen next to Style. It turns the button on, chooses Position with Bottom left or Bottom right (Bottom right when unset), sets edge spacing and panel size, and accepts an icon URL. When the button is on, that screen also shows the install snippet and its copy control. Fields use the same vertical rhythm as the other management forms. A preview on that screen uses the same helper as a host page. Style still owns the accent colours. The Embed screen does not show the launcher snippet. Types that did not opt in do not get the screen.
 
 ### Options
 

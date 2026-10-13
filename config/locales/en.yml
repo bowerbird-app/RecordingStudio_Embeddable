@@ -25,8 +25,6 @@ en:
           publish_settings: "Publish Settings"
           off_title: "Embeddable is off"
           off_description: "Turn on Embeddable above to reveal the embed code."
-          launcher_heading: "Launcher snippet"
-          launcher_help: "Paste this where the button should appear."
         settings:
           title: "Embed settings"
           allowed_domains: "Allowed domains (one per line)"
@@ -48,6 +46,8 @@ en:
           icon: "Icon link"
           icon_help: "An image you attached, or a host you allow."
           save: "Save launcher"
+          snippet_heading: "Launcher snippet"
+          snippet_help: "Paste this where the button should appear."
           preview_title: "Visitors see this"
           preview_help: "The button updates as you change the form."
         styling:

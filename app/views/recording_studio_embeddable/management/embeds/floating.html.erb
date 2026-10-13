@@ -19,8 +19,14 @@
 
   <%= render "section_nav" %>
 
+  <% snippet = recording_studio_floating_widget_snippet(
+    recording: @recording,
+    host: request.host_with_port,
+    protocol: request.protocol.delete_suffix("://")
+  ) %>
+
   <%= render FlatPack::Grid::Component.new(cols: 2) do %>
-    <div>
+    <div class="space-y-6">
       <%= form_with model: @embed, url: floating_management_embed_path(@embed), method: :patch, class: "space-y-6", html: { id: "launcher-settings" } do %>
         <% if @embed.errors.any? %>
           <p role="alert"><%= @embed.errors.full_messages.to_sentence %></p>
@@ -82,6 +88,23 @@
           style: :primary,
           type: "submit"
         ) %>
+      <% end %>
+
+      <% if snippet.present? %>
+        <div class="space-y-4">
+          <div class="space-y-1">
+            <h2 class="text-base font-semibold"><%= t("recording_studio.embeddable.management.floating.snippet_heading", default: "Launcher snippet") %></h2>
+            <p class="text-sm text-(--text-muted-color)"><%= t("recording_studio.embeddable.management.floating.snippet_help", default: "Paste this where the button should appear.") %></p>
+          </div>
+          <%= render FlatPack::TextArea::Component.new(
+            name: "launcher_snippet",
+            id: "launcher_snippet",
+            value: snippet,
+            rows: 4,
+            autogrow: true,
+            quick_copy: true
+          ) %>
+        </div>
       <% end %>
     </div>
 

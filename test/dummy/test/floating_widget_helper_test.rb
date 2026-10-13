@@ -54,7 +54,7 @@ class FloatingWidgetHelperTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "widget.js"
   end
 
-  test "install snippet fetches config and the edit screen can copy it" do
+  test "install snippet fetches config and the launcher screen can copy it" do
     get widget_installed_path(token: @embed.token)
 
     assert_response :success
@@ -64,9 +64,16 @@ class FloatingWidgetHelperTest < ActionDispatch::IntegrationTest
 
     get recording_studio_embeddable.edit_management_embed_path(@embed)
     assert_response :success
+    refute_includes response.body, "launcher_snippet"
+    refute_includes response.body, "Launcher snippet"
+
+    get recording_studio_embeddable.floating_management_embed_path(@embed)
+    assert_response :success
     assert_includes response.body, "launcher_snippet"
+    assert_includes response.body, "Launcher snippet"
     assert_includes response.body, @embed.token
     assert_includes response.body, "widget.js"
+    assert_includes response.body, "copyFromButton"
 
     publish = RecordingStudioPublishable::Services::Publishables::Update.call(
       parent_recording: @page,
