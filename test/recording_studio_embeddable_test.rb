@@ -128,7 +128,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.6.0", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.8.0", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -551,8 +551,31 @@ class RecordingStudioEmbeddableTest < Minitest::Test
                                            __dir__))
 
     assert_includes migration, "index_rs_unique_active_embed_per_parent"
+    # Partial index stays on unqualified trashed_at IS NULL (Trashable mapping:
+    # do not pass nil to kept_sql for this WHERE).
     assert_includes migration, "AND trashed_at IS NULL"
+    refute_includes migration, "recording_studio_trashable_kept_sql"
     refute_includes migration, "column_exists?(:recording_studio_recordings, :trashed_at)"
+  end
+
+  def test_embed_lookups_use_trashable_active_scope
+    recording_methods = File.read(
+      File.expand_path("../lib/recording_studio_embeddable/recording_methods.rb", __dir__)
+    )
+    embed_model = File.read(
+      File.expand_path("../app/models/recording_studio_embeddable/embed.rb", __dir__)
+    )
+    gemspec = File.read(File.expand_path("../recording_studio_embeddable.gemspec", __dir__))
+
+    assert_includes gemspec, 'recording_studio_trashable", "~> 0.9"'
+    assert_includes recording_methods, "recording_studio_trashable_active"
+    assert_includes embed_model, "recording_studio_trashable_active"
+    # Hash-key trashed_at: nil filters are reserved for the boot fallback only.
+    assert_equal 1, recording_methods.scan("trashed_at: nil").size
+    assert_equal 1, embed_model.scan("trashed_at: nil").size
+    refute_includes recording_methods, "void_recording!"
+    refute_includes embed_model, "void_recording!"
+    refute_includes recording_methods, "update_columns"
   end
 
   def test_view_log_migration_uses_postgresql_safe_index_names

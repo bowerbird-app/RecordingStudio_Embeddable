@@ -50,11 +50,15 @@ module RecordingStudioEmbeddable
     def recording
       return unless defined?(RecordingStudio::Recording)
 
-      RecordingStudio::Recording.where(
-        recordable_type: self.class.name,
-        recordable_id: id,
-        trashed_at: nil
-      ).first
+      # Trashable owns trashed_at filtering (sibling mapping). Fall back when the
+      # gem or RecordingScopes are not installed yet so hosts still boot.
+      scope = RecordingStudio::Recording
+      scope = if scope.respond_to?(:recording_studio_trashable_active)
+                scope.recording_studio_trashable_active
+              else
+                scope.where(trashed_at: nil)
+              end
+      scope.where(recordable_type: self.class.name, recordable_id: id).first
     end
 
     def parent_recording

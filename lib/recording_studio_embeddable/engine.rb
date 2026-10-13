@@ -13,6 +13,7 @@ module RecordingStudioEmbeddable
       require "recording_studio_accessible"
       require "recording_studio_publishable"
       require "recording_studio_attachable"
+      require "recording_studio_trashable"
       require "flat_pack"
 
       RecordingStudio.register_capability(
@@ -57,6 +58,8 @@ module RecordingStudioEmbeddable
 
         require_dependency "recording_studio_embeddable/recording_methods"
         ActiveRecord::Base.include RecordingStudioEmbeddable::Recordable
+
+        RecordingStudioTrashable.install_recording_capabilities! if defined?(RecordingStudioTrashable)
 
         if defined?(RecordingStudio::Recording)
           RecordingStudio::Recording.include RecordingStudioEmbeddable::RecordingMethods

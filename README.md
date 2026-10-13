@@ -27,6 +27,9 @@ Two delivery modes ship in this gem:
   `config.artifacts_enabled`, default off).
 - `recording_studio_attachable` `~> 0.9` for direct image URLs on rich embeds
   (`url_mode: :direct` + `direct_url_host`).
+- `recording_studio_trashable` `~> 0.9` for sibling `trashed_at` ownership
+  (`recording_studio_trashable_active` on embed child lookups). Partial indexes
+  keep unqualified `trashed_at IS NULL`.
 
 ## Install
 

@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-13
+
+### Changed
+- Embed child lookups (`RecordingMethods#embed_child_recording`, `Embed#recording`)
+  use `RecordingStudio::Recording.recording_studio_trashable_active` from
+  [`recording_studio_trashable` `v0.9.0`](https://github.com/bowerbird-app/RecordingStudio_trashable)
+  (git tag `v0.9.0`, commit `20275de`) instead of a raw `trashed_at: nil` hash
+  filter. When Trashable scopes are not installed yet, the previous
+  `where(trashed_at: nil)` filter remains as a boot fallback.
+- New hard dependency: `recording_studio_trashable ~> 0.9` (Gemfile / dummy pin
+  `tag: "v0.9.0"`).
+- Version bump to `0.8.0` (minor). Open draft PRs [#29](https://github.com/bowerbird-app/RecordingStudio_Embeddable/pull/29)
+  and [#30](https://github.com/bowerbird-app/RecordingStudio_Embeddable/pull/30)
+  both target `0.7.0`; this release takes the next free minor.
+
+### Notes
+- The unique partial index on active embed children keeps the unqualified
+  `trashed_at IS NULL` literal (Trashable mapping: do not pass `nil` to
+  `kept_sql` for that WHERE).
+- Embeddable does not soft-void recordings itself; hosts that need a single-row
+  soft-void should call `RecordingStudioTrashable.void_recording!` (or
+  `recording_studio_trashable_void!`). User-facing subtree trash stays on
+  `recording_studio_trashable_trash!`.
+- Shared `recording_studio_trashable_active` is `unscope(where: :trashed_at).where(trashed_at: nil)`.
+  Without a host `default_scope` on `trashed_at`, SQL matches main. With a host
+  default scope, the shared scope still returns only kept rows (unscope then
+  re-filter), which is the Trashable-owned behavior.
+
+### Upgrade notes
+- Bump to `recording_studio_embeddable` `0.8.0` and add
+  `recording_studio_trashable ~> 0.9` (git tag `v0.9.0` if unresolved from
+  RubyGems). No Embeddable migration.
+- Hosts that already install Trashable need no further change. Embeddable now
+  requires it for sibling `trashed_at` ownership.
+
 ## [0.6.0] - 2026-10-13
 
 ### Added

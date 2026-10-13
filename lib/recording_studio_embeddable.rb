@@ -45,6 +45,12 @@ rescue LoadError
   # Hard gemspec dependency; LoadError only surfaces in incomplete bundles.
 end
 
+begin
+  require "recording_studio_trashable"
+rescue LoadError
+  # Hard gemspec dependency; LoadError only surfaces in incomplete bundles.
+end
+
 module RecordingStudioEmbeddable
   class << self
     def configuration

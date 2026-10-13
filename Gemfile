@@ -18,6 +18,8 @@ gem "recording_studio_metrics",
     github: "bowerbird-app/RecordingStudio_metrics",
     tag: "v0.2.0"
 gem "recording_studio_publishable", "~> 0.4", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.8.0"
+gem "recording_studio_trashable", "~> 0.9",
+    github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.9.0"
 
 gem "devise"
 
