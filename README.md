@@ -144,7 +144,7 @@ The popup HTML is a live host response. It is not an Artifact and `PublishEmbedT
 
 ### Management screen
 
-Capable types get a screen next to Style. Its tab, heading, form labels, snippet section, preview title, and save flash all use `label`. It turns the button on and chooses Position with Bottom left or Bottom right (Bottom right when unset). When the button is on, that screen also shows the install snippet and its copy control. Spacing, panel size, and the icon are not on this form. The preview is the same kind of iframe frame as Style, and it loads `widget.js` — the production launcher — open, at the host size and colours. Position radios move that launcher inside the frame. The button closes and reopens the popup. Style still owns the accent colours. The Embed screen does not show the launcher snippet. Types that did not opt in do not get the screen.
+Capable types get a screen next to Style. Its tab, heading, form labels, snippet section, and save flash all use `label`. It turns the button on and chooses Position with Bottom left or Bottom right (Bottom right when unset). When the button is on, that screen also shows the install snippet and its copy control. Spacing, panel size, and the icon are not on this form. The preview is the same kind of iframe frame as Style, and it loads `widget.js` — the production launcher — open, at the host size and colours. Position radios move that launcher inside the frame. The button closes and reopens the popup. Style still owns the accent colours. The Embed screen does not show the launcher snippet. Types that did not opt in do not get the screen.
 
 ### Options
 

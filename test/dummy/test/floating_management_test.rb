@@ -43,7 +43,8 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     assert_includes response.body, ">Chat button<"
     assert_includes response.body, "Show the Chat button"
     assert_includes response.body, "Save Chat button"
-    assert_includes response.body, "Visitors see this Chat button"
+    refute_includes response.body, "Visitors see this"
+    refute_includes response.body, ">Hello widget<"
     refute_includes response.body, ">Launcher<"
     refute_includes response.body, "Edge spacing"
     refute_includes response.body, "Panel width"
@@ -146,8 +147,7 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
             floating: {
               title: "Page %{label}",
               enabled: "Montrer %{label}",
-              save: "Enregistrer %{label}",
-              preview_title: "Aperçu %{label}"
+              save: "Enregistrer %{label}"
             }
           }
         }
@@ -163,7 +163,8 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Page Chat button"
     assert_includes response.body, "Montrer Chat button"
     assert_includes response.body, "Enregistrer Chat button"
-    assert_includes response.body, "Aperçu Chat button"
+    refute_includes response.body, "Aperçu Chat button"
+    refute_includes response.body, "Visitors see this"
     refute_includes response.body, ">Launcher<"
   ensure
     I18n.available_locales = previous if previous

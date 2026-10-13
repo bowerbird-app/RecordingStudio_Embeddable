@@ -38,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   on the launcher form. Launcher JSON still emits the host values.
 - The management name for the launcher is host configuration too: `label` on
   `floating_options`, then `config.floating_defaults`, then "Floating button".
-  Tab, heading, form copy, snippet section, preview title, and the save flash
+  Tab, heading, form copy, snippet section, and the save flash
   interpolate `%{label}`. Routes and form ids stay `launcher`.
 - The launcher management preview uses the same iframe frame as Style and
   loads the production `widget.js`. The popup starts open, at the host size,

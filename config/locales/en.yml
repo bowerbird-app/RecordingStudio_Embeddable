@@ -42,8 +42,6 @@ en:
           save: "Save %{label}"
           snippet_heading: "%{label} snippet"
           snippet_help: "Paste this where the %{label} should appear."
-          preview_title: "Visitors see this %{label}"
-          preview_help: "The button updates as you change the form."
         styling:
           title: "Style"
           disabled_notice: "Custom styling is currently disabled for this embed. You can still review the resolved values below."

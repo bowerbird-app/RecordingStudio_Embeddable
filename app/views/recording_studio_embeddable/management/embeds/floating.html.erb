@@ -1,5 +1,3 @@
-<% recordable = @recording&.recordable %>
-<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || t("recording_studio.embeddable.common.embedded_recording", default: "Embedded recording") %>
 <% settings = @floating || @embed.floating_settings %>
 <% floating_label = recording_studio_floating_label(@recording) %>
 
@@ -75,15 +73,10 @@
     </div>
 
     <div>
-      <%= render FlatPack::PageTitle::Component.new(
-        title: t("recording_studio.embeddable.management.floating.preview_title", label: floating_label, default: "Visitors see this %{label}"),
-        subtitle: recordable_title,
-        variant: :h2
-      ) %>
       <iframe
         id="embed-floating-preview"
         src="<%= floating_preview_management_embed_path(@embed) %>"
-        title="<%= t("recording_studio.embeddable.management.floating.preview_title", label: floating_label, default: "Visitors see this %{label}") %>"
+        title="<%= floating_label %>"
         loading="eager"
         referrerpolicy="strict-origin-when-cross-origin"
         class="border-0"
