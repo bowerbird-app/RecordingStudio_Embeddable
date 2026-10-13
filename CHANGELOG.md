@@ -30,8 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   overrides carry the translated string as the error type.
 
 ### Changed
-- Management views, flashes, stats filter labels, public empty states, and
-  domain validation copy resolve through `t(..., default: <main English>)`
+- Management views, flashes, stats filter labels, public not-found empty state,
+  and domain validation copy resolve through `t(..., default: <main English>)`
   (English output unchanged).
 - Version bump to `0.6.0`.
 
@@ -42,8 +42,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No dependency on `recording_studio_internationalization`.
 - Recordable `label` / `plural_label`, OpenAPI strings, generator CLI text,
   developer `ArgumentError`s / service failures, CDN unavailable HTML
-  (`UNAVAILABLE_HTML`), and public helpers that return data (including
-  `embed_code` iframe title default) stay English literals.
+  (`UNAVAILABLE_HTML`), CDN/published embed document chrome (layout `<title>`,
+  rich-body fallbacks and Gallery heading — English literals as on main), and
+  public helpers that return data (including `embed_code` iframe title default)
+  stay English literals so published HTML is locale- and host-override-stable.
 - For the string-typed `Invalid embedder domain: …` validation, `errors.details`
   carries the translated string in non-English locales (English unchanged).
 

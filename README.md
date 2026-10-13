@@ -244,9 +244,11 @@ Hosts override by defining the same nested keys in their own `config/locales`.
 Do not add an explicit `i18n.load_path` initializer for this gem, and do not
 add `recording_studio_internationalization` as a dependency of this gem.
 
-Recordable labels, OpenAPI strings, generator CLI text, developer errors, and
-helpers that return data stay English literals. Translate only at render /
-flash sites.
+Recordable labels, OpenAPI strings, generator CLI text, developer errors,
+helpers that return data, CDN unavailable HTML, and CDN/published embed
+document chrome (layout title, rich-body fallbacks, Gallery heading) stay
+English literals so published HTML is stable across locales and host overrides.
+Translate management and flash copy at render sites.
 
 ## Cloud Agent boot
 

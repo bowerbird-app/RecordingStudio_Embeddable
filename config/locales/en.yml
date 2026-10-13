@@ -80,7 +80,3 @@ en:
       public:
         oops: "Oops"
         not_found_description: "This embed is gone, or the link is wrong. Check the address and try again."
-        no_description: "No description provided."
-        embedded_page: "Embedded page"
-        gallery: "Gallery"
-        gallery_subtitle: "More shots from this page"

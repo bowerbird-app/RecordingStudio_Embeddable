@@ -57,6 +57,8 @@ class EmbeddableHostLocaleOverrideTest < ActionDispatch::IntegrationTest
 
     assert_response :redirect
     assert_equal HOST_STYLING_DISABLED, flash[:alert]
+    follow_redirect!
+    assert_includes response.body, HOST_STYLING_DISABLED
   end
 
   # Test-only fixture applied via backend.load_translations(file) on top of the
