@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-class TrashableActiveScopeParityTest < Minitest::Test
+class TrashableKeptSqlParityTest < Minitest::Test
   class BaseFakeRecordingRelation
     attr_reader :calls
 
@@ -12,9 +12,14 @@ class TrashableActiveScopeParityTest < Minitest::Test
       @filters = {}
     end
 
-    def where(**attrs)
-      @calls << [:where, attrs]
-      dup_with(filters: @filters.merge(attrs))
+    def where(*args, **attrs)
+      if args.any?
+        @calls << [:where_sql, args.first]
+        dup_with(filters: @filters.merge(trashed_at: nil))
+      else
+        @calls << [:where, attrs]
+        dup_with(filters: @filters.merge(attrs))
+      end
     end
 
     def first
@@ -32,9 +37,8 @@ class TrashableActiveScopeParityTest < Minitest::Test
   end
 
   class TrashableAwareRecordingRelation < BaseFakeRecordingRelation
-    def recording_studio_trashable_active
-      @calls << :recording_studio_trashable_active
-      dup_with(filters: @filters.merge(trashed_at: nil))
+    def recording_studio_trashable_kept_sql(table = "recording_studio_recordings")
+      %("#{table}"."trashed_at" IS NULL)
     end
   end
 
@@ -63,29 +67,34 @@ class TrashableActiveScopeParityTest < Minitest::Test
     RecordingStudio.const_set(:Recording, @previous_recording) if @had_recording
   end
 
-  def test_embed_child_recording_prefers_trashable_active_over_hash_filter
+  def test_embed_child_recording_uses_kept_sql_where_not_active_scope
     relation = TrashableAwareRecordingRelation.new(rows_for("parent-1"))
     replace_recording_const(relation)
 
     child = HostRecording.new("parent-1").embed_child_recording
 
-    assert_includes relation.calls, :recording_studio_trashable_active
-    assert(relation.calls.any? do |call|
-      call == [:where, { parent_recording_id: "parent-1",
-                         recordable_type: "RecordingStudioEmbeddable::Embed" }]
-    end)
-    refute(relation.calls.any? { |call| call.is_a?(Array) && call.last.key?(:trashed_at) })
+    assert_includes relation.calls,
+                    [:where, { parent_recording_id: "parent-1",
+                               recordable_type: "RecordingStudioEmbeddable::Embed" }]
+    assert_equal :where_sql, relation.calls.last.first
+    assert_includes relation.calls.last.last, "trashed_at"
+    refute_includes relation.calls, :recording_studio_trashable_active
     assert_equal "kept-child", child[:id]
   end
 
-  def test_embed_child_recording_falls_back_to_trashed_at_nil_without_trashable_scope
+  def test_embed_child_recording_falls_back_to_trashed_at_nil_without_kept_sql
     relation = LegacyRecordingRelation.new(rows_for("parent-2"))
     replace_recording_const(relation)
-    refute relation.respond_to?(:recording_studio_trashable_active)
+    refute relation.respond_to?(:recording_studio_trashable_kept_sql)
 
     child = HostRecording.new("parent-2").embed_child_recording
 
-    assert_equal [:where, { trashed_at: nil }], relation.calls.first
+    assert_equal(
+      [:where, { parent_recording_id: "parent-2",
+                 recordable_type: "RecordingStudioEmbeddable::Embed" }],
+      relation.calls.first
+    )
+    assert_equal [:where, { trashed_at: nil }], relation.calls.last
     assert_equal "kept-child", child[:id]
   end
 

@@ -558,7 +558,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes migration, "column_exists?(:recording_studio_recordings, :trashed_at)"
   end
 
-  def test_embed_lookups_use_trashable_active_scope
+  def test_embed_lookups_use_trashable_kept_sql_not_active_scope
     recording_methods = File.read(
       File.expand_path("../lib/recording_studio_embeddable/recording_methods.rb", __dir__)
     )
@@ -568,11 +568,14 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     gemspec = File.read(File.expand_path("../recording_studio_embeddable.gemspec", __dir__))
 
     assert_includes gemspec, 'recording_studio_trashable", "~> 0.9"'
-    assert_includes recording_methods, "recording_studio_trashable_active"
-    assert_includes embed_model, "recording_studio_trashable_active"
+    assert_includes recording_methods, "recording_studio_trashable_kept_sql"
+    assert_includes embed_model, "recording_studio_trashable_kept_sql"
+    # Comments may mention the active scope; call sites must not chain it.
+    refute_match(/\.recording_studio_trashable_active\b/, recording_methods)
+    refute_match(/\.recording_studio_trashable_active\b/, embed_model)
     # Hash-key trashed_at: nil filters are reserved for the boot fallback only.
-    assert_equal 1, recording_methods.scan("trashed_at: nil").size
-    assert_equal 1, embed_model.scan("trashed_at: nil").size
+    assert_equal 1, recording_methods.scan(/\.where\(trashed_at: nil\)/).size
+    assert_equal 1, embed_model.scan(/\.where\(trashed_at: nil\)/).size
     refute_includes recording_methods, "void_recording!"
     refute_includes embed_model, "void_recording!"
     refute_includes recording_methods, "update_columns"

@@ -13,15 +13,20 @@ module RecordingStudioEmbeddable
     def embed_child_recording
       return unless defined?(RecordingStudio::Recording)
 
-      # Trashable owns trashed_at filtering (sibling mapping). Fall back when the
-      # gem or RecordingScopes are not installed yet so hosts still boot.
-      scope = RecordingStudio::Recording
-      scope = if scope.respond_to?(:recording_studio_trashable_active)
-                scope.recording_studio_trashable_active
+      # Use kept_sql in WHERE (additive) so hosts with a trashed_at default_scope
+      # match main's where(trashed_at: nil). Do not use recording_studio_trashable_active
+      # here — that scope unscopes trashed_at first.
+      recording = RecordingStudio::Recording
+      scope = recording.where(
+        parent_recording_id: id,
+        recordable_type: "RecordingStudioEmbeddable::Embed"
+      )
+      scope = if recording.respond_to?(:recording_studio_trashable_kept_sql)
+                scope.where(recording.recording_studio_trashable_kept_sql)
               else
                 scope.where(trashed_at: nil)
               end
-      scope.where(parent_recording_id: id, recordable_type: "RecordingStudioEmbeddable::Embed").first
+      scope.first
     end
 
     def ensure_embed!(actor: nil, **attributes)
