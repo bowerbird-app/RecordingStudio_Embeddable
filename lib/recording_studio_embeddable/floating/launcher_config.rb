@@ -4,18 +4,20 @@ module RecordingStudioEmbeddable
   module Floating
     # JSON document for the launcher. Public id is the embed token.
     class LauncherConfig
-      def self.call(embed:, recording:, request:)
-        new(embed: embed, recording: recording, request: request).call
+      def self.call(embed:, recording:, request:, preview: false)
+        new(embed: embed, recording: recording, request: request, preview: preview).call
       end
 
-      def initialize(embed:, recording:, request:)
+      def initialize(embed:, recording:, request:, preview: false)
         @embed = embed
         @recording = recording
         @request = request
+        @preview = preview
       end
 
       def call
-        return unless embed&.floating_enabled?
+        return unless embed
+        return unless preview || embed.floating_enabled?
         return unless capability.enabled?
 
         validated = Schema.validate(embed.read_attribute(:floating), recording: recording)
@@ -40,7 +42,7 @@ module RecordingStudioEmbeddable
 
       private
 
-      attr_reader :embed, :recording, :request
+      attr_reader :embed, :recording, :request, :preview
 
       def capability
         @capability ||= Capability.for(recording)

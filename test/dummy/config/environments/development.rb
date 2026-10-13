@@ -75,6 +75,8 @@ Rails.application.configure do
 
   # Dummy Attachable direct_url_host stand-in (see DummyCdnHost middleware).
   config.hosts << "cdn.example.test"
+  config.hosts << "www.example.test"
+  config.hosts << "partner.example.test"
 
   # Codespaces environment configuration
   if ENV["CODESPACES"] == "true"

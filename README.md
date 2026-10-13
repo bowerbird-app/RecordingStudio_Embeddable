@@ -101,6 +101,24 @@ The JSON `id` is `embed.token`. Browsers must send an `Origin` header. The respo
 
 `RenderPayload`, `HtmlSanitizer`, and `PublishEmbedToCdn` do not read floating settings. Turning the launcher on does not change the inline document or the CDN object.
 
+### Script and local helper
+
+Partners install one classic script. The URL is not fingerprinted:
+
+```html
+<script async src="https://example.com/recording_studio_embeddable/widget.js" data-embed="TOKEN"></script>
+```
+
+`TOKEN` is `embed.token`. The script reads `document.currentScript` and fetches the launcher JSON. It draws the button and opens an iframe to `popup_url`. Several tokens on one page each get their own button.
+
+On a host page, render the same launcher without the iframe embed code:
+
+```erb
+<%= recording_studio_floating_widget(recording: recording) %>
+```
+
+That helper inlines the same JSON the endpoint would return, so a same-origin page does not depend on a cross-origin fetch. Copy the external snippet from the embed edit screen with `recording_studio_floating_widget_snippet` when the launcher is on. Inline `enabled` and the launcher stay independent: a page can float while the public document is off, and a Page or Article never gets either control.
+
 Run the new migration (`floating_enabled`, `floating`) after you upgrade.
 
 ## Iframe mode

@@ -13,6 +13,7 @@ RecordingStudioEmbeddable::Engine.routes.draw do
     end
   end
 
+  get "widget.js", to: "widget_scripts#show", as: :widget_script
   get "embeds/:token", to: "embeds#show", as: :embed
   get "embeds/:token/launcher", to: "launchers#show", as: :embed_launcher
   match "embeds/:token/launcher", to: "launchers#preflight", via: :options

@@ -20,6 +20,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Public id is `embed.token`. CORS echoes an allowlisted `Origin`, never `*`,
   and fails closed when `Origin` is missing. `popup_url` is built per request
   and is not stored.
+- Stable `GET /recording_studio_embeddable/widget.js` launcher script, plus
+  `recording_studio_floating_widget` and `recording_studio_floating_widget_snippet`.
+  The local helper renders the same JSON as the endpoint. The snippet does not.
 
 ### Upgrade notes
 - Bump to `recording_studio_embeddable` `0.7.0` and run migrations. New columns:

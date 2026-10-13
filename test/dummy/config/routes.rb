@@ -48,6 +48,8 @@ Rails.application.routes.draw do
   get "articles/:id/embed", to: "articles#embed", as: :article_embed
   get "documents/:id", to: "documents#show", as: :document
   get "pages/:id/embed", to: "pages#embed", as: :page_embed
+  get "widgets/on_site", to: "widget_sites#local", as: :widget_on_site
+  get "widgets/installed", to: "widget_sites#installed", as: :widget_installed
   get "widgets/:token", to: "widget_popups#show", as: :widget_popup
   get "/dummy/pages/new", to: "dummy_pages#new", as: :new_dummy_page
   post "/dummy/pages", to: "dummy_pages#create", as: :dummy_pages

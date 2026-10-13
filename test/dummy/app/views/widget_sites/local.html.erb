@@ -1,0 +1,9 @@
+<%= render FlatPack::PageTitle::Component.new(
+  title: "Say hello",
+  subtitle: "The button sits on this page.",
+  variant: :h1
+) %>
+
+<% @recordings.each do |recording| %>
+  <%= recording_studio_floating_widget(recording: recording) %>
+<% end %>

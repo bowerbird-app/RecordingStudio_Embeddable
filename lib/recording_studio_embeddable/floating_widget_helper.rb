@@ -1,0 +1,74 @@
+# frozen_string_literal: true
+
+module RecordingStudioEmbeddable
+  # Local launcher markup. Uses the same JSON document as the public endpoint.
+  module FloatingWidgetHelper
+    def recording_studio_floating_widget(recording:, preview: false)
+      embed = floating_widget_embed(recording)
+      return "".html_safe unless embed
+      return "".html_safe unless preview || embed.floating_enabled?
+
+      payload = Floating::LauncherConfig.call(
+        embed: embed,
+        recording: recording,
+        request: request,
+        preview: preview
+      )
+      return "".html_safe if payload.blank?
+
+      stage_id = "recording-studio-widget-stage-#{embed.token}"
+      script = recording_studio_widget_script_tag(payload, preview_root: (preview ? "##{stage_id}" : nil))
+      return script unless preview
+
+      content_tag(
+        :div,
+        script,
+        id: stage_id,
+        data: { recording_studio_widget_stage: embed.token },
+        style: "position:relative;min-height:28rem;"
+      )
+    end
+
+    def recording_studio_floating_widget_snippet(recording:, host: nil, protocol: nil)
+      embed = floating_widget_embed(recording)
+      return "" unless embed&.floating_enabled?
+
+      source = recording_studio_widget_script_source(host: host, protocol: protocol)
+      escaped_source = ERB::Util.html_escape(source)
+      escaped_token = ERB::Util.html_escape(embed.token)
+      %(<script async src="#{escaped_source}" data-embed="#{escaped_token}"></script>).html_safe
+    end
+
+    private
+
+    def floating_widget_embed(recording)
+      return unless recording.respond_to?(:floating_capable?) && recording.floating_capable?
+      return unless recording.respond_to?(:embed)
+
+      recording.embed
+    end
+
+    def recording_studio_widget_script_tag(payload, preview_root:)
+      data = { embed: payload.fetch("id"), config: payload.to_json }
+      data[:preview_root] = preview_root if preview_root.present?
+      content_tag(
+        :script,
+        "",
+        src: recording_studio_widget_script_source,
+        async: true,
+        data: data
+      )
+    end
+
+    def recording_studio_widget_script_source(host: nil, protocol: nil)
+      options = {}
+      if host.present?
+        options[:host] = host
+        options[:protocol] = protocol if protocol.present?
+        RecordingStudioEmbeddable::Engine.routes.url_helpers.widget_script_url(**options)
+      else
+        RecordingStudioEmbeddable::Engine.routes.url_helpers.widget_script_path
+      end
+    end
+  end
+end
