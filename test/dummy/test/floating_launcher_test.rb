@@ -40,12 +40,7 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
       enabled: false,
       floating_enabled: true,
       allowed_embedder_domains: ["partner.example.com"],
-      floating: {
-        "position" => "bottom-left",
-        "edge_spacing" => 16,
-        "popup_width" => 320,
-        "popup_height" => 480
-      }
+      floating: { "position" => "bottom-left" }
     )
 
     @page_recording = root.record(Page, actor: @user) { |record| record.title = "Inline only page" }
@@ -74,7 +69,11 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
     assert_equal @widget_embed.token, body.fetch("id")
     refute_includes response.body, @widget_embed.id
     assert_equal "bottom-left", body.fetch("position")
-    assert_equal 16, body.fetch("edge_spacing")
+    assert_equal 24, body.fetch("edge_spacing")
+    assert_equal 400, body.fetch("popup_width")
+    assert_equal 640, body.fetch("popup_height")
+    assert_nil body.fetch("icon_url")
+    refute @widget_embed.reload.floating.key?("edge_spacing")
     assert_equal "#111827", body.dig("colors", "background")
     assert_equal "http://www.example.com/widgets/#{@widget_embed.token}", body.fetch("popup_url")
     refute_includes @widget_embed.reload.floating.to_json, "popup_url"

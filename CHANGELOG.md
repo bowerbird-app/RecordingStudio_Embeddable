@@ -29,10 +29,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   that does not use the host session. `widget_bridge.js` posts close and resize
   to an explicit parent origin. Popups are not published to Artifacts.
 - Launcher management screen for types that opt in: enable, Position radios
-  (Bottom left or Bottom right, default Bottom right when unset), spacing,
-  panel size, icon, the install snippet with its copy control, and a live
-  preview. The Embed screen keeps only the inline embed code. Style still
-  owns accent colours.
+  (Bottom left or Bottom right, default Bottom right when unset), the install
+  snippet with its copy control, and a live preview. The Embed screen keeps
+  only the inline embed code. Style still owns accent colours.
+- Edge spacing, panel size, and the icon are host configuration:
+  `floating_options` on `Embeddable.to`, falling back to
+  `config.floating_defaults`. They are not stored on the embed and not shown
+  on the launcher form. Launcher JSON still emits the host values.
 
 ### Upgrade notes
 - Bump to `recording_studio_embeddable` `0.7.0` and run migrations. New columns:
@@ -43,6 +46,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Host popup routes must accept `:token` and match `floating_popup`.
 - Optional `config.floating_icon_hosts` allowlists icon URL hosts. Attachable
   direct URLs on the parent recording are allowed without that list.
+- Set spacing, panel size, and `icon_url` with `floating_options:` or
+  `config.floating_defaults`. The strip migration deletes those keys from
+  existing `floating` jsonb. The launcher form no longer edits them.
 - `RenderPayload`, `HtmlSanitizer`, and CDN publish ignore floating settings.
 
 ## [0.6.0] - 2026-10-13

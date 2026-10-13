@@ -26,15 +26,15 @@ module RecordingStudioEmbeddable
         popup_url = PopupUrl.call(recording: recording, token: embed.token, request: request)
         return if popup_url.blank?
 
-        settings = validated.settings
+        host = HostSettings.for(recording)
         {
           "id" => embed.token,
           "title" => title,
-          "position" => settings["position"],
-          "edge_spacing" => settings["edge_spacing"],
-          "popup_width" => settings["popup_width"],
-          "popup_height" => settings["popup_height"],
-          "icon_url" => settings["icon_url"],
+          "position" => validated.settings["position"],
+          "edge_spacing" => host["edge_spacing"],
+          "popup_width" => host["popup_width"],
+          "popup_height" => host["popup_height"],
+          "icon_url" => host["icon_url"],
           "colors" => Colors.call(recording: recording, embed: embed),
           "popup_url" => popup_url
         }

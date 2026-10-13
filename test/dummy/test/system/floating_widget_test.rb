@@ -14,12 +14,12 @@ class FloatingWidgetTest < ApplicationSystemTestCase
     @right = root.record(Widget, actor: @user) { |widget| widget.title = "Right chat" }
     @right_embed = @right.ensure_embed!(
       floating_enabled: true,
-      floating: { "position" => "bottom-right", "edge_spacing" => 20 }
+      floating: { "position" => "bottom-right" }
     )
     @left = root.record(Widget, actor: @user) { |widget| widget.title = "Left chat" }
     @left_embed = @left.ensure_embed!(
       floating_enabled: true,
-      floating: { "position" => "bottom-left", "edge_spacing" => 28, "popup_width" => 320, "popup_height" => 420 }
+      floating: { "position" => "bottom-left" }
     )
   end
 

@@ -9,6 +9,11 @@ class Widget < ApplicationRecord
     require_publishable: false,
     floating: true,
     floating_popup: { controller: "widget_popups", action: :show },
+    floating_options: {
+      edge_spacing: 24,
+      popup_width: 400,
+      popup_height: 640
+    },
     customizable_embed_styles: {
       background_color: {
         label: "Background color",

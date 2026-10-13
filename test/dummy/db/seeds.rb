@@ -90,10 +90,7 @@ if widget_recording.respond_to?(:ensure_embed!)
     floating_enabled: true,
     allowed_embedder_domains: ["partner.example.test", "example.com"],
     floating: {
-      "position" => "bottom-right",
-      "edge_spacing" => 20,
-      "popup_width" => 380,
-      "popup_height" => 560
+      "position" => "bottom-right"
     }
   )
 end

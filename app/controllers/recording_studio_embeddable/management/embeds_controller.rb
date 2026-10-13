@@ -185,17 +185,11 @@ module RecordingStudioEmbeddable
       def floating_settings_params
         raw = params.fetch(:embed, {}).fetch(:floating, {})
         permitted = if raw.respond_to?(:permit)
-                      raw.permit(:position, :edge_spacing, :popup_width, :popup_height, :icon_url)
+                      raw.permit(:position)
                     else
                       {}
                     end
-        {
-          "position" => permitted[:position].to_s.presence,
-          "edge_spacing" => permitted[:edge_spacing].to_s.presence,
-          "popup_width" => permitted[:popup_width].to_s.presence,
-          "popup_height" => permitted[:popup_height].to_s.presence,
-          "icon_url" => permitted[:icon_url].to_s.strip.presence
-        }.compact
+        { "position" => permitted[:position].to_s.presence }.compact
       end
 
       def styling_appearance_params

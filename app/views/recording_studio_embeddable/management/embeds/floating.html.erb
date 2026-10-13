@@ -48,41 +48,6 @@
           ]
         ) %>
 
-        <%= render FlatPack::NumberInput::Component.new(
-          name: "embed[floating][edge_spacing]",
-          label: t("recording_studio.embeddable.management.floating.edge_spacing", default: "Edge spacing"),
-          help_text: t("recording_studio.embeddable.management.floating.edge_help", default: "Pixels from the corner."),
-          value: settings["edge_spacing"],
-          min: 0,
-          max: 64,
-          step: 1
-        ) %>
-
-        <%= render FlatPack::NumberInput::Component.new(
-          name: "embed[floating][popup_width]",
-          label: t("recording_studio.embeddable.management.floating.width", default: "Panel width"),
-          value: settings["popup_width"],
-          min: 280,
-          max: 440,
-          step: 1
-        ) %>
-
-        <%= render FlatPack::NumberInput::Component.new(
-          name: "embed[floating][popup_height]",
-          label: t("recording_studio.embeddable.management.floating.height", default: "Panel height"),
-          value: settings["popup_height"],
-          min: 360,
-          max: 720,
-          step: 1
-        ) %>
-
-        <%= render FlatPack::TextInput::Component.new(
-          name: "embed[floating][icon_url]",
-          label: t("recording_studio.embeddable.management.floating.icon", default: "Icon link"),
-          help_text: t("recording_studio.embeddable.management.floating.icon_help", default: "An image you attached, or a host you allow."),
-          value: settings["icon_url"]
-        ) %>
-
         <%= render FlatPack::Button::Component.new(
           text: t("recording_studio.embeddable.management.floating.save", default: "Save launcher"),
           style: :primary,
@@ -125,17 +90,10 @@
     if (!widget) return;
 
     const form = document.getElementById("launcher-settings");
-    const value = (name) => form?.querySelector(`[name="${name}"]`)?.value;
     const position = form?.querySelector('input[name="embed[floating][position]"]:checked')?.value;
     if (position === "bottom-left" || position === "bottom-right") {
       widget.setAttribute("data-position", position);
     }
-    const edge = Number(value("embed[floating][edge_spacing]"));
-    const width = Number(value("embed[floating][popup_width]"));
-    const height = Number(value("embed[floating][popup_height]"));
-    if (Number.isFinite(edge)) widget.style.setProperty("--rsw-edge", `${edge}px`);
-    if (Number.isFinite(width)) widget.style.setProperty("--rsw-width", `${width}px`);
-    if (Number.isFinite(height)) widget.style.setProperty("--rsw-height", `${height}px`);
   };
 
   document.getElementById("launcher-settings")?.addEventListener("input", syncLauncherPreview);

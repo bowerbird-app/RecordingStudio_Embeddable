@@ -43,37 +43,69 @@ class FloatingConfigTest < Minitest::Test
     assert_equal true, sanitized[:floating_enabled]
   end
 
-  def test_schema_defaults_and_rejects_unknown_or_out_of_range
+  def test_schema_stores_position_only
     result = RecordingStudioEmbeddable::Floating::Schema.validate({})
     assert_predicate result, :valid?
-    assert_equal "bottom-right", result.settings["position"]
-    assert_equal 20, result.settings["edge_spacing"]
-    assert_nil result.settings["icon_url"]
+    assert_equal({ "position" => "bottom-right" }, result.settings)
+
+    left = RecordingStudioEmbeddable::Floating::Schema.validate("position" => "bottom-left")
+    assert_predicate left, :valid?
+    assert_equal "bottom-left", left.settings["position"]
+    refute left.settings.key?("edge_spacing")
 
     rejected = RecordingStudioEmbeddable::Floating::Schema.validate(
       "position" => "top-left",
       "popup_url" => "https://evil.example/widget",
-      "edge_spacing" => 400
+      "edge_spacing" => 16,
+      "popup_width" => 320,
+      "icon_url" => "https://images.example.com/launcher.png"
     )
     refute_predicate rejected, :valid?
     assert_includes rejected.errors.join(" "), "unknown"
     assert_includes rejected.errors.join(" "), "position"
   end
 
-  def test_schema_accepts_bottom_left_and_allowlisted_icon
+  def test_host_settings_use_gem_defaults_then_capability_options
+    RecordingStudioEmbeddable.configuration.floating_defaults = {
+      "edge_spacing" => 12,
+      "popup_width" => 300,
+      "popup_height" => 400,
+      "icon_url" => nil
+    }
+    plain = recording_with(floating: true)
+    resolved = RecordingStudioEmbeddable::Floating::HostSettings.for(plain)
+    assert_equal 12, resolved["edge_spacing"]
+    assert_equal 300, resolved["popup_width"]
+    assert_equal 400, resolved["popup_height"]
+    assert_nil resolved["icon_url"]
+
     RecordingStudioEmbeddable.configuration.floating_icon_hosts = ["images.example.com"]
-    result = RecordingStudioEmbeddable::Floating::Schema.validate(
-      "position" => "bottom-left",
-      "edge_spacing" => "16",
-      "popup_width" => 320,
-      "popup_height" => 480,
-      "icon_url" => "https://images.example.com/launcher.png"
+    overridden = recording_with(
+      floating: true,
+      floating_options: {
+        edge_spacing: "24",
+        popup_width: 400,
+        popup_height: 900,
+        icon_url: "https://images.example.com/launcher.png"
+      }
+    )
+    host = RecordingStudioEmbeddable::Floating::HostSettings.for(overridden)
+    assert_equal 24, host["edge_spacing"]
+    assert_equal 400, host["popup_width"]
+    assert_equal 400, host["popup_height"]
+    assert_equal "https://images.example.com/launcher.png", host["icon_url"]
+  end
+
+  def test_host_settings_drop_a_disallowed_icon
+    RecordingStudioEmbeddable.configuration.floating_defaults = {
+      "icon_url" => "javascript:alert(1)"
+    }
+    host = RecordingStudioEmbeddable::Floating::HostSettings.for(
+      recording_with(floating: true, floating_options: { icon_url: "https://cdn.evil.example/icon.png" })
     )
 
-    assert_predicate result, :valid?
-    assert_equal "bottom-left", result.settings["position"]
-    assert_equal 16, result.settings["edge_spacing"]
-    assert_equal "https://images.example.com/launcher.png", result.settings["icon_url"]
+    assert_nil host["icon_url"]
+    assert_equal 20, host["edge_spacing"]
   end
 
   def test_icon_url_rejects_scripts_and_unlisted_hosts
@@ -126,6 +158,13 @@ class FloatingConfigTest < Minitest::Test
     assert_includes migration, "floating_enabled"
     assert_includes migration, "t.jsonb :floating"
     refute_includes migration, "popup_url"
+
+    strip = File.read(
+      File.expand_path("../db/migrate/20261013140000_strip_host_settings_from_embed_floating.rb", __dir__)
+    )
+    %w[edge_spacing popup_width popup_height icon_url].each do |key|
+      assert_includes strip, key
+    end
   end
 
   def test_document_pipeline_ignores_floating
@@ -154,9 +193,10 @@ class FloatingConfigTest < Minitest::Test
     RecordingStudioEmbeddable::Floating::Capability.for(recording)
   end
 
-  def recording_with(floating:)
+  def recording_with(floating:, floating_options: nil)
     options = { enabled: true }
     options[:floating] = true if floating
+    options[:floating_options] = floating_options if floating_options
     recording = Object.new
     recording.extend(RecordingStudioEmbeddable::RecordingMethods)
     recordable = recordable_with(options)

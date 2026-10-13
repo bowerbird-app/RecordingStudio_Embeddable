@@ -48,7 +48,8 @@ module RecordingStudioEmbeddable
       :cdn_variant_retry_wait,
       :cdn_storage,
       :cdn_purger,
-      :floating_icon_hosts
+      :floating_icon_hosts,
+      :floating_defaults
     )
     attr_reader :hooks
 
@@ -116,6 +117,14 @@ module RecordingStudioEmbeddable
       # Hosts that may supply a launcher icon. Attachable direct URLs on the
       # parent recording are allowed as well. Anything else is rejected.
       @floating_icon_hosts = []
+      # App-wide launcher spacing, panel size, and icon. A type can override
+      # these with floating_options: on Embeddable.to. Not editable per embed.
+      @floating_defaults = {
+        "edge_spacing" => 20,
+        "popup_width" => 380,
+        "popup_height" => 560,
+        "icon_url" => nil
+      }
       @hooks = Hooks.new
     end
 
@@ -155,6 +164,7 @@ module RecordingStudioEmbeddable
         prune_views_after: prune_views_after,
         cdn_withhold_snippet_until_published: cdn_withhold_snippet_until_published,
         floating_icon_hosts: floating_icon_hosts,
+        floating_defaults: floating_defaults,
         hooks_registered: hooks.instance_variable_get(:@registry).transform_values(&:size)
       }
     end

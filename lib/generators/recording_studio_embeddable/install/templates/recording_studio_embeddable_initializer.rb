@@ -37,6 +37,14 @@ RecordingStudioEmbeddable.configure do |config|
   config.view_log_raw_referer = false
   # Launcher icon URLs must be Attachable direct URLs, or http(s) on these hosts.
   config.floating_icon_hosts = []
+  # App-wide launcher spacing, panel size, and icon. A type overrides these
+  # with floating_options: on Embeddable.to. People do not edit them per embed.
+  config.floating_defaults = {
+    "edge_spacing" => 20,
+    "popup_width" => 380,
+    "popup_height" => 560,
+    "icon_url" => nil
+  }
 
   # CDN via RecordingStudioArtifacts (only when artifacts_enabled). Host owns
   # ARTIFACT_CDN_* / R2 / DNS. Install Artifacts before enabling.

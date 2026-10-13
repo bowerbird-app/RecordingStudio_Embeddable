@@ -41,6 +41,10 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     assert_response :success
     refute_includes response.body, "launcher_snippet"
     assert_includes response.body, "Show the button"
+    refute_includes response.body, "Edge spacing"
+    refute_includes response.body, "Panel width"
+    refute_includes response.body, "Panel height"
+    refute_includes response.body, "Icon link"
     assert_includes response.body, "Position"
     refute_includes response.body, ">Corner<"
     assert_select "form#launcher-settings.space-y-6"
@@ -81,8 +85,9 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     @embed.reload
     assert_equal true, @embed.floating_enabled
     assert_equal "bottom-left", @embed.floating["position"]
-    assert_equal 12, @embed.floating["edge_spacing"]
-    assert_equal "https://images.example.com/icon.png", @embed.floating["icon_url"]
+    assert_equal ["position"], @embed.floating.keys
+    refute_includes @embed.floating.to_json, "edge_spacing"
+    refute_includes @embed.floating.to_json, "icon_url"
     refute_includes @embed.floating.to_json, "popup_url"
   end
 
@@ -107,7 +112,7 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     assert_select "input[type=radio][name=?][value=?][checked]", "embed[floating][position]", "bottom-left", count: 0
   end
 
-  test "a disallowed icon is rejected" do
+  test "posted host settings are not stored on the embed" do
     patch recording_studio_embeddable.floating_management_embed_path(@embed),
           params: {
             embed: {
@@ -122,8 +127,10 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
             }
           }
 
-    assert_response :unprocessable_entity
-    assert_equal false, @embed.reload.floating_enabled
+    assert_response :redirect
+    @embed.reload
+    assert_equal true, @embed.floating_enabled
+    assert_equal({ "position" => "bottom-right" }, @embed.floating.to_h)
     refute_includes @embed.floating.to_json, "javascript"
   end
 end

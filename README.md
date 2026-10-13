@@ -78,18 +78,26 @@ Inline embeds and the floating launcher are separate. `enabled` still switches t
 include RecordingStudio::Capabilities::Embeddable.to(
   floating: true,
   floating_popup: { controller: "widget_popups", action: :show },
+  floating_options: {
+    edge_spacing: 24,
+    popup_width: 400,
+    popup_height: 640,
+    icon_url: "https://images.example.com/launcher.png"
+  },
   require_publishable: false
 )
 ```
 
 `floating_popup` is the host route that renders inside the panel. The route must accept `:token`. The gem builds `popup_url` from that controller, action, and `embed.token` on each request. It is not stored.
 
-Launcher settings live in the `floating` jsonb column and are checked against the gem schema:
+People choose whether the button is on, and which corner it sits in. The embed stores only `position` (`bottom-left` or `bottom-right`). New embeds, and embeds with no position stored, use `bottom-right`.
 
-- `position`: `bottom-left` or `bottom-right`. New embeds, and embeds with no position stored, use `bottom-right`.
-- `edge_spacing`: pixels from the screen edge
-- `popup_width` and `popup_height`: panel size in pixels
-- `icon_url`: optional, and only an Attachable direct URL for that recording or an `http(s)` URL on `config.floating_icon_hosts`
+Spacing, panel size, and the icon are host configuration. `floating_options` on the capability wins. Anything it omits falls back to `config.floating_defaults`:
+
+- `edge_spacing`: pixels from the screen edge, 0–64 (default 20)
+- `popup_width`: 280–440 (default 380)
+- `popup_height`: 360–720 (default 560)
+- `icon_url`: optional. An Attachable direct URL for that recording, or an `http(s)` URL on `config.floating_icon_hosts`. A script URL or an unlisted host is dropped.
 
 Launcher colours are the embed theme accent (`accent_color`, `accent_text_color` via `ResolveTheme`). There is no second colour editor.
 
@@ -132,7 +140,7 @@ The popup HTML is a live host response. It is not an Artifact and `PublishEmbedT
 
 ### Management screen
 
-Capable types get a Launcher screen next to Style. It turns the button on, chooses Position with Bottom left or Bottom right (Bottom right when unset), sets edge spacing and panel size, and accepts an icon URL. When the button is on, that screen also shows the install snippet and its copy control. Fields use the same vertical rhythm as the other management forms. A preview on that screen uses the same helper as a host page. Style still owns the accent colours. The Embed screen does not show the launcher snippet. Types that did not opt in do not get the screen.
+Capable types get a Launcher screen next to Style. It turns the button on and chooses Position with Bottom left or Bottom right (Bottom right when unset). When the button is on, that screen also shows the install snippet and its copy control. Spacing, panel size, and the icon are not on this form. A preview on that screen uses the same helper as a host page. Style still owns the accent colours. The Embed screen does not show the launcher snippet. Types that did not opt in do not get the screen.
 
 ### Options
 
@@ -140,14 +148,16 @@ Capable types get a Launcher screen next to Style. It turns the button on, choos
 | --- | --- | --- |
 | `floating: true` | recordable capability | Opt in. Off types never float. |
 | `floating_popup` | capability | `{ controller:, action: }`. Route accepts `:token`. |
+| `floating_options` | capability | `edge_spacing`, `popup_width`, `popup_height`, optional `icon_url`. Overrides `config.floating_defaults` for that type. |
 | `floating_enabled` | embed column | Launcher switch. Independent of `enabled`. |
-| `floating` | embed jsonb | `position`, `edge_spacing` (0–64), `popup_width` (280–440), `popup_height` (360–720), optional `icon_url`. |
+| `floating` | embed jsonb | `position` only. |
+| `config.floating_defaults` | initializer | App-wide spacing, panel size, and icon. |
 | `config.floating_icon_hosts` | initializer | Extra icon hosts. Attachable direct URLs are also allowed. |
 | Accent colours | existing theme | `accent_color` and `accent_text_color`. No launcher colour editor. |
 
 `popup_url` is computed on each request from `floating_popup` and `embed.token`. It is not stored.
 
-Run the new migration (`floating_enabled`, `floating`) after you upgrade.
+Run the migrations after you upgrade. `floating_enabled` and `floating` are new columns. A later migration removes `edge_spacing`, `popup_width`, `popup_height`, and `icon_url` from existing `floating` documents. Set those on `floating_options` or `config.floating_defaults`.
 
 ## Iframe mode
 

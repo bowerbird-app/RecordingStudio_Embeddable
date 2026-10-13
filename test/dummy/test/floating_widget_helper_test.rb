@@ -20,7 +20,7 @@ class FloatingWidgetHelperTest < ActionDispatch::IntegrationTest
     @embed = @widget.ensure_embed!(
       enabled: false,
       floating_enabled: true,
-      floating: { "position" => "bottom-right", "edge_spacing" => 24 }
+      floating: { "position" => "bottom-right" }
     )
     @page = root.record(Page, actor: @user) { |record| record.title = "Plain page" }
     @page_embed = @page.ensure_embed!(enabled: true)

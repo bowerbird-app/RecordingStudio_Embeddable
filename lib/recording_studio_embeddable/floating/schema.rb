@@ -2,20 +2,13 @@
 
 module RecordingStudioEmbeddable
   module Floating
-    # Launcher settings stored on the embed. Unknown keys are rejected.
-    # Popup URLs are never part of this document.
+    # Position stored on the embed. Spacing, panel size, and the icon are
+    # host configuration (see HostSettings) and are rejected here.
     class Schema
       POSITIONS = %w[bottom-left bottom-right].freeze
-      KEYS = %w[position edge_spacing popup_width popup_height icon_url].freeze
-      EDGE_SPACING_RANGE = (0..64)
-      POPUP_WIDTH_RANGE = (280..440)
-      POPUP_HEIGHT_RANGE = (360..720)
+      KEYS = %w[position].freeze
       DEFAULTS = {
-        "position" => "bottom-right",
-        "edge_spacing" => 20,
-        "popup_width" => 380,
-        "popup_height" => 560,
-        "icon_url" => nil
+        "position" => "bottom-right"
       }.freeze
 
       Result = Struct.new(:settings, :errors, keyword_init: true) do
@@ -35,6 +28,7 @@ module RecordingStudioEmbeddable
 
       def initialize(value, recording: nil)
         @value = value
+        # Callers still pass the parent recording. Position does not read it.
         @recording = recording
       end
 
@@ -57,11 +51,6 @@ module RecordingStudioEmbeddable
           end
         end
 
-        cast_range(raw, settings, errors, "edge_spacing", EDGE_SPACING_RANGE)
-        cast_range(raw, settings, errors, "popup_width", POPUP_WIDTH_RANGE)
-        cast_range(raw, settings, errors, "popup_height", POPUP_HEIGHT_RANGE)
-        cast_icon(raw, settings, errors)
-
         Result.new(settings: errors.empty? ? settings : {}, errors: errors)
       end
 
@@ -78,37 +67,6 @@ module RecordingStudioEmbeddable
 
       def fetch(raw, key)
         raw.key?(key) ? raw[key] : raw[key.to_sym]
-      end
-
-      def present_key?(raw, key)
-        raw.key?(key) || raw.key?(key.to_sym)
-      end
-
-      def cast_range(raw, settings, errors, key, range)
-        return unless present_key?(raw, key)
-
-        number = Integer(fetch(raw, key), exception: false)
-        if number && range.cover?(number)
-          settings[key] = number
-        else
-          errors << "#{key.tr('_', ' ')} must be between #{range.min} and #{range.max}"
-        end
-      end
-
-      def cast_icon(raw, settings, errors)
-        return unless present_key?(raw, "icon_url")
-
-        icon = fetch(raw, "icon_url").to_s.strip
-        if icon.blank?
-          settings["icon_url"] = nil
-          return
-        end
-
-        if IconUrl.allowed?(icon, recording: recording)
-          settings["icon_url"] = icon
-        else
-          errors << "icon must be an allowlisted or attached image"
-        end
       end
     end
   end
