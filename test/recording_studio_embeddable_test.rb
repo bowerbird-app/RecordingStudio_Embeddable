@@ -574,8 +574,8 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_match(/\.recording_studio_trashable_active\b/, recording_methods)
     refute_match(/\.recording_studio_trashable_active\b/, embed_model)
     # Hash-key trashed_at: nil filters are reserved for the boot fallback only.
-    assert_equal 1, recording_methods.scan(/\.where\(trashed_at: nil\)/).size
-    assert_equal 1, embed_model.scan(/\.where\(trashed_at: nil\)/).size
+    assert_equal 1, recording_methods.scan(".where(trashed_at: nil)").size
+    assert_equal 1, embed_model.scan(".where(trashed_at: nil)").size
     refute_includes recording_methods, "void_recording!"
     refute_includes embed_model, "void_recording!"
     refute_includes recording_methods, "update_columns"
