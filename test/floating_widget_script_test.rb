@@ -11,6 +11,9 @@ class FloatingWidgetScriptTest < ActiveSupport::TestCase
     assert_includes source, "currentScript"
     assert_includes source, "data-embed"
     assert_includes source, "data-config"
+    assert_includes source, "data-preview-open"
+    assert_includes source, 'widget.setAttribute("data-preview", "true")'
+    assert_includes source, "openWidget(widget, frame, popupUrl.href, launcher)"
     refute_match(/postMessage\(\s*[^,\n]+,\s*["']\*["']\s*\)/, source)
     refute_includes source, "from \"react\""
     refute_includes source, "from 'react'"

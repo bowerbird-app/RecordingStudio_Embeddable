@@ -40,6 +40,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `floating_options`, then `config.floating_defaults`, then "Floating button".
   Tab, heading, form copy, snippet section, preview title, and the save flash
   interpolate `%{label}`. Routes and form ids stay `launcher`.
+- The launcher management preview uses the same iframe frame as Style and
+  loads the production `widget.js`. The popup starts open, at the host size,
+  and stays inside the frame. Position radios move it. The button toggles it.
 
 ### Upgrade notes
 - Bump to `recording_studio_embeddable` `0.7.0` and run migrations. New columns:

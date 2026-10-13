@@ -80,14 +80,27 @@
         subtitle: recordable_title,
         variant: :h2
       ) %>
-      <%= recording_studio_floating_widget(recording: @recording, preview: true) %>
+      <iframe
+        id="embed-floating-preview"
+        src="<%= floating_preview_management_embed_path(@embed) %>"
+        title="<%= t("recording_studio.embeddable.management.floating.preview_title", label: floating_label, default: "Visitors see this %{label}") %>"
+        loading="eager"
+        referrerpolicy="strict-origin-when-cross-origin"
+        class="border-0"
+        style="width: 100%; height: <%= RecordingStudioEmbeddable::Floating::HostSettings.preview_frame_height(@recording) %>px; min-height: 20rem; max-width: 100%;"
+        data-floating-preview="true"
+        data-role="floating-preview-frame"
+      ></iframe>
     </div>
   <% end %>
 </div>
 
 <script>
+  const floatingPreviewFrame = () => document.getElementById("embed-floating-preview");
+
   const syncLauncherPreview = () => {
-    const widget = document.querySelector("[data-recording-studio-widget-stage] [data-recording-studio-widget]");
+    const doc = floatingPreviewFrame()?.contentDocument;
+    const widget = doc?.querySelector("[data-recording-studio-widget]");
     if (!widget) return;
 
     const form = document.getElementById("launcher-settings");
@@ -97,6 +110,23 @@
     }
   };
 
+  const watchFloatingPreview = () => {
+    const frame = floatingPreviewFrame();
+    if (!frame) return;
+
+    const watchDocument = () => {
+      syncLauncherPreview();
+      const doc = frame.contentDocument;
+      if (!doc || doc.documentElement.dataset.floatingPreviewWatch === "true") return;
+      doc.documentElement.dataset.floatingPreviewWatch = "true";
+      new MutationObserver(syncLauncherPreview).observe(doc.documentElement, { childList: true, subtree: true });
+    };
+
+    frame.addEventListener("load", watchDocument);
+    if (frame.contentDocument?.readyState === "complete") watchDocument();
+  };
+
   document.getElementById("launcher-settings")?.addEventListener("input", syncLauncherPreview);
   document.getElementById("launcher-settings")?.addEventListener("change", syncLauncherPreview);
+  watchFloatingPreview();
 </script>

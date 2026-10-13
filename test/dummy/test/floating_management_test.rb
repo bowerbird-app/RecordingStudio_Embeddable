@@ -55,8 +55,20 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     assert_select "input[type=radio][name=?][value=?][checked]", "embed[floating][position]", "bottom-right"
     assert_select "input[type=radio][name=?][value=?]", "embed[floating][position]", "bottom-left"
     assert_select "select[name=?]", "embed[floating][position]", count: 0
-    assert_includes response.body, "data-config="
-    assert_includes response.body, "data-preview-root="
+    assert_select "iframe#embed-floating-preview.border-0[data-role=floating-preview-frame]"
+    assert_select "iframe#embed-floating-preview[src=?]", recording_studio_embeddable.floating_preview_management_embed_path(@embed)
+    assert_select "iframe#embed-floating-preview" do |nodes|
+      style = nodes.first["style"]
+      assert_includes style, "width: 100%"
+      assert_includes style, "height: 772px"
+      assert_includes style, "min-height: 20rem"
+      assert_includes style, "max-width: 100%"
+    end
+    assert_includes response.body, 'referrerpolicy="strict-origin-when-cross-origin"'
+    assert_includes response.body, "contentDocument"
+    refute_includes response.body, "data-preview-root="
+    refute_includes response.body, "data-recording-studio-widget-stage"
+    refute_includes response.body, "data-widget-launcher"
 
     get recording_studio_embeddable.edit_management_embed_path(@embed)
     assert_response :success
@@ -96,6 +108,30 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     refute_includes @embed.floating.to_json, "edge_spacing"
     refute_includes @embed.floating.to_json, "icon_url"
     refute_includes @embed.floating.to_json, "popup_url"
+  end
+
+  test "floating preview frame serves the real launcher open" do
+    get recording_studio_embeddable.floating_preview_management_embed_path(@page_embed)
+    assert_response :not_found
+
+    get recording_studio_embeddable.floating_preview_management_embed_path(@embed)
+    assert_response :success
+    assert_equal "frame-ancestors 'self'", response.headers["Content-Security-Policy"]
+    assert_nil response.headers["X-Frame-Options"]
+    assert_includes response.body, "widget.js"
+    assert_includes response.body, 'data-preview-open="true"'
+    assert_includes response.body, "data-config="
+    refute_includes response.body, "data-widget-launcher"
+    refute_includes response.body, "data-preview-root="
+
+    config = JSON.parse(CGI.unescapeHTML(response.body[/data-config="([^"]+)"/, 1]))
+    assert_equal @embed.token, config["id"]
+    assert_equal "bottom-right", config["position"]
+    assert_equal 24, config["edge_spacing"]
+    assert_equal 400, config["popup_width"]
+    assert_equal 640, config["popup_height"]
+    assert_includes config["popup_url"], "/widgets/#{@embed.token}"
+    assert config["colors"]["background"].present?
   end
 
   test "a locale wraps the host label" do

@@ -96,6 +96,18 @@ class FloatingConfigTest < Minitest::Test
     assert_equal "https://images.example.com/launcher.png", host["icon_url"]
   end
 
+  def test_preview_frame_height_fits_the_host_popup
+    plain = recording_with(floating: true)
+    assert_equal 560 + 56 + 12 + (20 * 2) + 16,
+                 RecordingStudioEmbeddable::Floating::HostSettings.preview_frame_height(plain)
+
+    custom = recording_with(
+      floating: true,
+      floating_options: { popup_height: 640, edge_spacing: 24 }
+    )
+    assert_equal 772, RecordingStudioEmbeddable::Floating::HostSettings.preview_frame_height(custom)
+  end
+
   def test_host_settings_label_uses_defaults_then_the_type
     plain = RecordingStudioEmbeddable::Floating::HostSettings.for(recording_with(floating: true))
     assert_equal "Floating button", plain["label"]

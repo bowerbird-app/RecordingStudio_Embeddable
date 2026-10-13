@@ -20,6 +20,15 @@ module RecordingStudioEmbeddable
         build_floating_state
       end
 
+      def floating_preview
+        return head(:not_found) unless floating_screen?
+
+        @recording = @embed.parent_recording
+        response.delete_header("X-Frame-Options")
+        response.set_header("Content-Security-Policy", "frame-ancestors 'self'")
+        render layout: false
+      end
+
       def update_floating
         return head(:not_found) unless floating_screen?
 

@@ -7,7 +7,7 @@ module RecordingStudioEmbeddable
       Floating::HostSettings.for(recording).fetch("label")
     end
 
-    def recording_studio_floating_widget(recording:, preview: false)
+    def recording_studio_floating_widget(recording:, preview: false, open: false)
       embed = floating_widget_embed(recording)
       return "".html_safe unless embed
       return "".html_safe unless preview || embed.floating_enabled?
@@ -20,17 +20,7 @@ module RecordingStudioEmbeddable
       )
       return "".html_safe if payload.blank?
 
-      stage_id = "recording-studio-widget-stage-#{embed.token}"
-      script = recording_studio_widget_script_tag(payload, preview_root: (preview ? "##{stage_id}" : nil))
-      return script unless preview
-
-      content_tag(
-        :div,
-        script,
-        id: stage_id,
-        data: { recording_studio_widget_stage: embed.token },
-        style: "position:relative;min-height:28rem;"
-      )
+      recording_studio_widget_script_tag(payload, open: open && preview)
     end
 
     def recording_studio_widget_bridge_tag(parent_origin:)
@@ -62,9 +52,9 @@ module RecordingStudioEmbeddable
       recording.embed
     end
 
-    def recording_studio_widget_script_tag(payload, preview_root:)
+    def recording_studio_widget_script_tag(payload, open:)
       data = { embed: payload.fetch("id"), config: payload.to_json }
-      data[:preview_root] = preview_root if preview_root.present?
+      data[:preview_open] = "true" if open
       content_tag(
         :script,
         "",

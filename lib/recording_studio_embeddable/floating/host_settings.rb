@@ -11,6 +11,12 @@ module RecordingStudioEmbeddable
       POPUP_WIDTH_RANGE = (280..440)
       POPUP_HEIGHT_RANGE = (360..720)
       LABEL_MAX = 40
+      # Mirrors the launcher button, the gap above it, and a little room for
+      # the shadow in widget.js. The preview frame is this tall so the open
+      # popup stays inside it at the host size.
+      PREVIEW_LAUNCHER_SIZE = 56
+      PREVIEW_POPUP_GAP = 12
+      PREVIEW_SHADOW = 16
       RANGES = {
         "edge_spacing" => EDGE_SPACING_RANGE,
         "popup_width" => POPUP_WIDTH_RANGE,
@@ -26,6 +32,12 @@ module RecordingStudioEmbeddable
 
       def self.for(recording)
         new(recording).to_h
+      end
+
+      def self.preview_frame_height(recording)
+        host = self.for(recording)
+        host["popup_height"] + PREVIEW_LAUNCHER_SIZE + PREVIEW_POPUP_GAP +
+          (host["edge_spacing"] * 2) + PREVIEW_SHADOW
       end
 
       def initialize(recording)
