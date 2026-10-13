@@ -86,7 +86,7 @@ include RecordingStudio::Capabilities::Embeddable.to(
 
 Launcher settings live in the `floating` jsonb column and are checked against the gem schema:
 
-- `position`: `bottom-left` or `bottom-right`
+- `position`: `bottom-left` or `bottom-right`. New embeds, and embeds with no position stored, use `bottom-right`.
 - `edge_spacing`: pixels from the screen edge
 - `popup_width` and `popup_height`: panel size in pixels
 - `icon_url`: optional, and only an Attachable direct URL for that recording or an `http(s)` URL on `config.floating_icon_hosts`
@@ -132,7 +132,7 @@ The popup HTML is a live host response. It is not an Artifact and `PublishEmbedT
 
 ### Management screen
 
-Capable types get a Launcher screen next to Style. It turns the button on, picks bottom-left or bottom-right, sets edge spacing and panel size, and accepts an icon URL. A preview on that screen uses the same helper as a host page. Style still owns the accent colours. Types that did not opt in do not get the screen.
+Capable types get a Launcher screen next to Style. It turns the button on, chooses Position with Bottom left or Bottom right (Bottom right when unset), sets edge spacing and panel size, and accepts an icon URL. Fields use the same vertical rhythm as the other management forms. A preview on that screen uses the same helper as a host page. Style still owns the accent colours. Types that did not opt in do not get the screen.
 
 ### Options
 

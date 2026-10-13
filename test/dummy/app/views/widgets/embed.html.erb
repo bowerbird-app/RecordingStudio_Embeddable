@@ -1,0 +1,8 @@
+<% widget = @parent_recordable || @recordable %>
+<div class="mx-auto w-full max-w-[var(--embed-max-width,48rem)] px-[var(--embed-padding,1rem)] py-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: widget.try(:title).presence || "Widget",
+    subtitle: widget.try(:prompt).presence,
+    variant: :h1
+  ) %>
+</div>

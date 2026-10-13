@@ -40,6 +40,12 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     get recording_studio_embeddable.floating_management_embed_path(@embed)
     assert_response :success
     assert_includes response.body, "Show the button"
+    assert_includes response.body, "Position"
+    refute_includes response.body, ">Corner<"
+    assert_select "form#launcher-settings.space-y-6"
+    assert_select "input[type=radio][name=?][value=?][checked]", "embed[floating][position]", "bottom-right"
+    assert_select "input[type=radio][name=?][value=?]", "embed[floating][position]", "bottom-left"
+    assert_select "select[name=?]", "embed[floating][position]", count: 0
     assert_includes response.body, "Visitors see this"
     assert_includes response.body, "data-config="
     assert_includes response.body, "data-preview-root="
@@ -70,6 +76,27 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     assert_equal 12, @embed.floating["edge_spacing"]
     assert_equal "https://images.example.com/icon.png", @embed.floating["icon_url"]
     refute_includes @embed.floating.to_json, "popup_url"
+  end
+
+  test "widget preview renders the widget" do
+    get recording_studio_embeddable.preview_management_embed_path(@embed)
+
+    assert_response :success
+    assert_includes response.body, "Hello widget"
+    refute_includes response.body, "Template is missing"
+  end
+
+  test "an unset position renders bottom right" do
+    RecordingStudioEmbeddable::Embed.where(id: @embed.id).update_all(floating: {})
+
+    get recording_studio_embeddable.floating_management_embed_path(@embed)
+
+    assert_response :success
+    assert_select "legend", text: "Position"
+    assert_select "label", text: "Bottom left"
+    assert_select "label", text: "Bottom right"
+    assert_select "input[type=radio][name=?][value=?][checked]", "embed[floating][position]", "bottom-right"
+    assert_select "input[type=radio][name=?][value=?][checked]", "embed[floating][position]", "bottom-left", count: 0
   end
 
   test "a disallowed icon is rejected" do

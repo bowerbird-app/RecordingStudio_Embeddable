@@ -38,7 +38,7 @@ en:
           title: "Launcher"
           subtitle: "Colours come from Style."
           enabled: "Show the button"
-          position: "Corner"
+          position: "Position"
           bottom_right: "Bottom right"
           bottom_left: "Bottom left"
           edge_spacing: "Edge spacing"

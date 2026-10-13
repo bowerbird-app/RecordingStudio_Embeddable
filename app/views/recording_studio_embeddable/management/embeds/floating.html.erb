@@ -21,7 +21,7 @@
 
   <%= render FlatPack::Grid::Component.new(cols: 2) do %>
     <div>
-      <%= form_with model: @embed, url: floating_management_embed_path(@embed), method: :patch, html: { id: "launcher-settings" } do %>
+      <%= form_with model: @embed, url: floating_management_embed_path(@embed), method: :patch, class: "space-y-6", html: { id: "launcher-settings" } do %>
         <% if @embed.errors.any? %>
           <p role="alert"><%= @embed.errors.full_messages.to_sentence %></p>
         <% end %>
@@ -32,13 +32,13 @@
           checked: @embed.floating_enabled
         ) %>
 
-        <%= render FlatPack::Select::Component.new(
+        <%= render FlatPack::RadioGroup::Component.new(
           name: "embed[floating][position]",
-          label: t("recording_studio.embeddable.management.floating.position", default: "Corner"),
-          value: settings["position"],
+          label: t("recording_studio.embeddable.management.floating.position", default: "Position"),
+          value: settings["position"].presence || "bottom-right",
           options: [
-            [t("recording_studio.embeddable.management.floating.bottom_right", default: "Bottom right"), "bottom-right"],
-            [t("recording_studio.embeddable.management.floating.bottom_left", default: "Bottom left"), "bottom-left"]
+            [t("recording_studio.embeddable.management.floating.bottom_left", default: "Bottom left"), "bottom-left"],
+            [t("recording_studio.embeddable.management.floating.bottom_right", default: "Bottom right"), "bottom-right"]
           ]
         ) %>
 
@@ -103,7 +103,7 @@
 
     const form = document.getElementById("launcher-settings");
     const value = (name) => form?.querySelector(`[name="${name}"]`)?.value;
-    const position = value("embed[floating][position]");
+    const position = form?.querySelector('input[name="embed[floating][position]"]:checked')?.value;
     if (position === "bottom-left" || position === "bottom-right") {
       widget.setAttribute("data-position", position);
     }
