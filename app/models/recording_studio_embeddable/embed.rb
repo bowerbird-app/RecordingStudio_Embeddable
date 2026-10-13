@@ -210,7 +210,14 @@ module RecordingStudioEmbeddable
       (allowed_domains + blocked_domains).each do |domain|
         next if Security::DomainPolicy.valid_domain?(domain)
 
-        errors.add(:base, "Invalid embedder domain: #{domain}")
+        errors.add(
+          :base,
+          I18n.t(
+            "recording_studio.embeddable.errors.invalid_embedder_domain",
+            domain: domain,
+            default: "Invalid embedder domain: %{domain}"
+          )
+        )
       end
     end
 

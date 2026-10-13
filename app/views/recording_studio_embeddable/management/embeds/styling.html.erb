@@ -1,28 +1,38 @@
 <% parent_recording = @embed.parent_recording %>
 <% recordable = parent_recording&.recordable %>
-<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
+<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || t("recording_studio.embeddable.common.embedded_recording", default: "Embedded recording") %>
 <% color_definitions = @styling_definitions.select { |_key, definition| definition[:type] == :color } %>
 <% font_definition = @styling_definitions[:font_family] || @styling_definitions["font_family"] %>
-<% font_swatch_options = @font_swatch_options.presence || RecordingStudioEmbeddable::Styling::Tokens::FONT_SWATCH_OPTIONS %>
+<% font_swatch_options_raw = @font_swatch_options.presence || RecordingStudioEmbeddable::Styling::Tokens::FONT_SWATCH_OPTIONS %>
+<% font_swatch_options = font_swatch_options_raw.map do |label, css|
+     key = label.to_s.downcase
+     [
+       t("recording_studio.embeddable.management.fonts.#{key}", default: label.to_s),
+       css
+     ]
+   end %>
 <% current_font_override = @styling_overrides["font_family"].to_s.strip %>
 <% resolved_font = @resolved_theme["font_family"].to_s.strip %>
 <% default_font = @recordable_style_defaults["font_family"].to_s.strip %>
 <% font_source = current_font_override.presence || resolved_font.presence || default_font.presence || "sans" %>
 <% current_font_css = RecordingStudioEmbeddable::Styling::Tokens.font_swatch_css_for(font_source) %>
 <% reset_font_css = RecordingStudioEmbeddable::Styling::Tokens.font_swatch_css_for(resolved_font.presence || default_font.presence || "sans") %>
-<% font_tooltip = RecordingStudioEmbeddable::Styling::Tokens.font_swatch_label_for(font_source) %>
+<% font_tooltip_raw = RecordingStudioEmbeddable::Styling::Tokens.font_swatch_label_for(font_source) %>
+<% font_tooltip = t("recording_studio.embeddable.management.fonts.#{font_tooltip_raw.to_s.downcase}", default: font_tooltip_raw) %>
+<% font_label_fallback = t("recording_studio.embeddable.management.styling.font_fallback", default: "Font") %>
+<% width_label = t("recording_studio.embeddable.management.styling.width", default: "Width") %>
 
 <% recording_studio_page_nav(
-  title: "Style",
+  title: t("recording_studio.embeddable.management.styling.title", default: "Style"),
   page_nav_back_url: edit_management_embed_path(@embed),
-  page_nav_back_label: "Embed",
+  page_nav_back_label: t("recording_studio.embeddable.common.embed", default: "Embed"),
   page_nav_anchor_url: main_app.root_path,
-  page_nav_anchor_label: "Close"
+  page_nav_anchor_label: t("recording_studio.embeddable.common.close", default: "Close")
 ) %>
 
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
-    title: "Style",
+    title: t("recording_studio.embeddable.management.styling.title", default: "Style"),
     subtitle: recordable_title,
     variant: :h1
   ) %>
@@ -31,7 +41,7 @@
     <div class="space-y-4">
       <% unless @styling_editable %>
         <p class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-          Custom styling is currently disabled for this embed. You can still review the resolved values below.
+          <%= t("recording_studio.embeddable.management.styling.disabled_notice", default: "Custom styling is currently disabled for this embed. You can still review the resolved values below.") %>
         </p>
       <% end %>
 
@@ -41,17 +51,17 @@
         </p>
       <% end %>
 
-      <%= form_with model: @embed, url: styling_management_embed_path(@embed), method: :patch, class: "space-y-4", data: { styling_form: true } do |_form| %>
+      <%= form_with model: @embed, url: styling_management_embed_path(@embed), method: :patch, class: "space-y-4", data: { styling_form: true, font_label_fallback: font_label_fallback } do |_form| %>
         <div class="flex flex-wrap items-center gap-3">
           <%= render FlatPack::Button::Component.new(
-            text: "Save",
+            text: t("recording_studio.embeddable.common.save", default: "Save"),
             style: :primary,
             size: :md,
             type: "submit",
             disabled: !@styling_editable
           ) %>
           <%= render FlatPack::Button::Component.new(
-            text: "Reset",
+            text: t("recording_studio.embeddable.common.reset", default: "Reset"),
             style: :secondary,
             size: :md,
             type: "button",
@@ -78,7 +88,7 @@
             ) %>
           <% end %>
 
-          <%= render FlatPack::Tooltip::Component.new(text: "Width", placement: :top) do %>
+          <%= render FlatPack::Tooltip::Component.new(text: width_label, placement: :top) do %>
             <%= render FlatPack::Button::Component.new(
               icon: "arrows-right-left",
               icon_only: true,
@@ -88,7 +98,7 @@
               class: "rounded-full",
               id: "embed-width-trigger",
               disabled: !@styling_editable,
-              aria: { label: "Width", expanded: false, haspopup: "dialog" },
+              aria: { label: width_label, expanded: false, haspopup: "dialog" },
               data: { role: "width-trigger" }
             ) %>
           <% end %>
@@ -119,21 +129,21 @@
         <%= render FlatPack::Popover::Component.new(trigger_id: "embed-width-trigger", placement: :bottom) do |popover| %>
           <% popover.popover_content do %>
             <div class="space-y-3" data-style-width-popover="true">
-              <h3 class="text-sm font-semibold">Width</h3>
+              <h3 class="text-sm font-semibold"><%= width_label %></h3>
               <%= render FlatPack::Tabs::Component.new(
                 default_tab: (@width_mode == "custom" ? 1 : 0),
                 variant: :underline,
                 data: { style_width_tabs: true }
               ) do |tabs| %>
-                <% tabs.tab(label: "Auto", id: "style-width-auto") do %>
+                <% tabs.tab(label: t("recording_studio.embeddable.management.styling.width_auto", default: "Auto"), id: "style-width-auto") do %>
                   <%= tag.div %>
                 <% end %>
-                <% tabs.tab(label: "Custom", id: "style-width-custom") do %>
+                <% tabs.tab(label: t("recording_studio.embeddable.management.styling.width_custom", default: "Custom"), id: "style-width-custom") do %>
                   <%= render FlatPack::TextInput::Component.new(
                     name: "custom_width_display",
                     id: "embed_custom_width_display",
                     value: @custom_width_value,
-                    help_text: "% or px",
+                    help_text: t("recording_studio.embeddable.management.styling.width_help", default: "% or px"),
                     disabled: !@styling_editable,
                     data: { style_custom_width_input: true }
                   ) %>
@@ -146,7 +156,7 @@
         <iframe
           id="embed-styling-preview"
           src="<%= preview_management_embed_path(@embed) %>"
-          title="Embed preview"
+          title="<%= t("recording_studio.embeddable.management.styling.preview_title", default: "Embed preview") %>"
           loading="lazy"
           referrerpolicy="strict-origin-when-cross-origin"
           class="border-0"
@@ -277,7 +287,7 @@
             option.setAttribute("aria-selected", (option.dataset.value === defaultFont).toString());
           });
 
-          const label = (root.querySelector(`[data-flat-pack--font-swatch-target="option"][data-value="${CSS.escape(defaultFont)}"]`)?.dataset.label) || "Font";
+          const label = (root.querySelector(`[data-flat-pack--font-swatch-target="option"][data-value="${CSS.escape(defaultFont)}"]`)?.dataset.label) || form.dataset.fontLabelFallback || "Font";
           const trigger = root.querySelector('[data-flat-pack--font-swatch-target="trigger"]');
           if (trigger) trigger.setAttribute("aria-label", label);
           const tooltip = root.querySelector('[role="tooltip"]');

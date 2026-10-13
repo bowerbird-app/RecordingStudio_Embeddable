@@ -1,5 +1,5 @@
 <%= render FlatPack::EmptyState::Component.new(
-  title: "Oops",
-  description: "This embed is gone, or the link is wrong. Check the address and try again.",
+  title: t("recording_studio.embeddable.public.oops", default: "Oops"),
+  description: t("recording_studio.embeddable.public.not_found_description", default: "This embed is gone, or the link is wrong. Check the address and try again."),
   icon: "exclamation-circle"
 ) %>

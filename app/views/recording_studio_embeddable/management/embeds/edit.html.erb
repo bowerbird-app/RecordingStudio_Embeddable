@@ -1,6 +1,6 @@
 <% parent_recording = @embed.parent_recording %>
 <% recordable = parent_recording&.recordable %>
-<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || "Embedded recording" %>
+<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || t("recording_studio.embeddable.common.embedded_recording", default: "Embedded recording") %>
 <% embed_code = parent_recording&.embed_code(host: request.host_with_port, protocol: request.protocol.delete_suffix("://")) %>
 <% embed_options = RecordingStudioEmbeddable::Renderer.options_for(parent_recording) %>
 <% publishable_required = ActiveModel::Type::Boolean.new.cast(embed_options.fetch(:require_publishable, RecordingStudioEmbeddable.configuration.require_publishable)) %>
@@ -18,14 +18,14 @@
 <% disable_management_actions = show_unpublished_warning %>
 
 <% recording_studio_page_nav(
-  title: "Embed",
+  title: t("recording_studio.embeddable.management.edit.title", default: "Embed"),
   page_nav_anchor_url: main_app.root_path,
-  page_nav_anchor_label: "Close"
+  page_nav_anchor_label: t("recording_studio.embeddable.common.close", default: "Close")
 ) %>
 
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
-    title: "Embed",
+    title: t("recording_studio.embeddable.management.edit.title", default: "Embed"),
     subtitle: recordable_title,
     variant: :h1
   ) %>
@@ -34,12 +34,12 @@
 
   <% if show_unpublished_warning %>
     <%= render FlatPack::EmptyState::Component.new(
-      title: "Embeddable unavailable",
-      description: "You need to publish this page before you can enable embeddable."
+      title: t("recording_studio.embeddable.management.edit.unavailable_title", default: "Embeddable unavailable"),
+      description: t("recording_studio.embeddable.management.edit.unavailable_description", default: "You need to publish this page before you can enable embeddable.")
     ) do |empty| %>
       <% empty.actions do %>
         <% if publish_page_url.present? %>
-          <%= render FlatPack::Button::Component.new(text: "Publish Settings", style: :primary, href: publish_page_url) %>
+          <%= render FlatPack::Button::Component.new(text: t("recording_studio.embeddable.management.edit.publish_settings", default: "Publish Settings"), style: :primary, href: publish_page_url) %>
         <% end %>
       <% end %>
     <% end %>
@@ -50,7 +50,7 @@
           <input type="hidden" name="embed[enabled]" value="0">
           <%= render FlatPack::Switch::Component.new(
             name: "embed[enabled]",
-            label: "Embeddable",
+            label: t("recording_studio.embeddable.management.edit.embeddable_label", default: "Embeddable"),
             checked: @embed.enabled,
             disabled: show_unpublished_warning,
             data: { autosave_embed_enabled: true }
@@ -60,8 +60,8 @@
         <% if @embed.enabled %>
           <div class="space-y-4">
             <div class="space-y-1">
-              <h2 class="text-base font-semibold">Embed code</h2>
-              <p class="text-sm text-(--text-muted-color)">Paste this into your page.</p>
+              <h2 class="text-base font-semibold"><%= t("recording_studio.embeddable.management.edit.embed_code_heading", default: "Embed code") %></h2>
+              <p class="text-sm text-(--text-muted-color)"><%= t("recording_studio.embeddable.management.edit.embed_code_help", default: "Paste this into your page.") %></p>
             </div>
 
             <%= render FlatPack::TextArea::Component.new(
@@ -75,8 +75,8 @@
           </div>
         <% else %>
           <%= render FlatPack::EmptyState::Component.new(
-            title: "Embeddable is off",
-            description: "Turn on Embeddable above to reveal the embed code."
+            title: t("recording_studio.embeddable.management.edit.off_title", default: "Embeddable is off"),
+            description: t("recording_studio.embeddable.management.edit.off_description", default: "Turn on Embeddable above to reveal the embed code.")
           ) %>
         <% end %>
       </div>

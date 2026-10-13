@@ -79,8 +79,34 @@ module RecordingStudioEmbeddable
         Security::DomainPolicy.new(embed: embed, options: options).frame_ancestors
       end
 
+      # Keep UNAVAILABLE_HTML as the English public constant; resolve at call time
+      # so English stays byte-identical to that constant via default:.
+      def unavailable_html
+        title = I18n.t(
+          "recording_studio.embeddable.cdn.unavailable_title",
+          default: "Embed unavailable"
+        )
+        body = I18n.t(
+          "recording_studio.embeddable.cdn.unavailable_body",
+          default: "This embed is not available."
+        )
+        <<~HTML
+          <!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8">
+              <meta name="robots" content="noindex, nofollow">
+              <title>#{title}</title>
+            </head>
+            <body>
+              <p>#{body}</p>
+            </body>
+          </html>
+        HTML
+      end
+
       def render_html(recording, frame_ancestors, available:)
-        return inject_unavailable_csp(UNAVAILABLE_HTML, frame_ancestors: frame_ancestors) unless available
+        return inject_unavailable_csp(unavailable_html, frame_ancestors: frame_ancestors) unless available
 
         result = RenderEmbedDocument.call(
           recording: recording,

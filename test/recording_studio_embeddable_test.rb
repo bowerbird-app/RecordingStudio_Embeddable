@@ -128,7 +128,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.5.1", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.6.0", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -641,10 +641,10 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
     assert_includes source, "FlatPack::Grid::Component.new(cols: 2)"
     assert_includes source, "FlatPack::TextArea::Component.new("
-    assert_includes source, "Paste this into your page."
+    assert_includes source, 'default: "Paste this into your page."'
     refute_includes source, "Copy the code below"
     refute_includes source, "FlatPack::TextInput::Component"
-    assert_includes source, 'title: "Embed"'
+    assert_includes source, 'default: "Embed"'
     assert_includes source, "subtitle: recordable_title"
     refute_includes source, "large_subtitle"
     assert_includes source, "section_nav"
@@ -673,7 +673,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     )
 
     refute_includes settings, "section_nav"
-    assert_includes settings, 'title: "Embed settings"'
+    assert_includes settings, 'default: "Embed settings"'
     assert_includes settings, "subtitle: recordable_title"
     refute_includes settings, "large_subtitle"
     assert_includes settings, "FlatPack::Grid::Component.new(cols: 2)"
@@ -688,25 +688,25 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes settings, "Iframe width"
     refute_includes settings, "Iframe height"
 
-    assert_includes styling, 'title: "Style"'
+    assert_includes styling, 'default: "Style"'
     assert_includes styling, "FlatPack::Grid::Component.new(cols: 2)"
     assert_includes styling, "FlatPack::ColorSwatch::Component"
     assert_includes styling, "FlatPack::FontSwatch::Component"
     assert_includes styling, "FlatPack::OverflowRow::Component.new(gap: :md)"
     assert_includes styling, "FlatPack::Popover::Component.new(trigger_id: \"embed-width-trigger\""
-    assert_includes styling, 'FlatPack::Tooltip::Component.new(text: "Width"'
+    assert_includes styling, "FlatPack::Tooltip::Component.new(text: width_label"
     assert_includes styling, 'id: "embed-width-trigger"'
     assert_includes styling, 'icon: "arrows-right-left"'
     assert_includes styling, "icon_only: true"
     assert_includes styling, 'class: "rounded-full"'
-    assert_includes styling, '<h3 class="text-sm font-semibold">Width</h3>'
+    assert_includes styling, 'default: "Width"'
     assert_includes styling, "FlatPack::Tabs::Component.new("
     assert_includes styling, "variant: :underline"
-    assert_includes styling, 'label: "Auto"'
-    assert_includes styling, 'label: "Custom"'
+    assert_includes styling, 'default: "Auto"'
+    assert_includes styling, 'default: "Custom"'
     assert_includes styling, 'id: "style-width-auto"'
     assert_includes styling, 'id: "style-width-custom"'
-    assert_includes styling, 'help_text: "% or px"'
+    assert_includes styling, 'default: "% or px"'
     assert_includes styling, 'name="embed[sizing][width]"'
     assert_includes styling, 'name="embed[sizing][height]"'
     assert_includes styling, 'value="auto"'
@@ -774,7 +774,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes auto_panel, "TextInput"
     refute_includes auto_panel, "help_text"
 
-    assert_includes stats, 'title: "Stats"'
+    assert_includes stats, 'default: "Stats"'
     refute_includes stats, "Embed Stats"
   end
 
@@ -784,9 +784,9 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     )
 
     assert_includes source, 'class="flex flex-wrap items-center gap-3"'
-    assert_includes source, 'text: "Save"'
+    assert_includes source, 'default: "Save"'
     assert_includes source, "style: :primary"
-    assert_includes source, 'text: "Reset"'
+    assert_includes source, 'default: "Reset"'
     refute_includes source, 'text: "Preview"'
     refute_includes source, "ButtonGroup"
     refute_includes source, "flex-col items-start"

@@ -9,8 +9,8 @@
 <% images = embed_cover_and_gallery(recording) %>
 <% cover = images[:cover] %>
 <% gallery = images[:gallery] %>
-<% body_text = recordable&.try(:description).presence || "No description provided." %>
-<% title_text = recordable&.try(:title).presence || recordable&.try(:recordable_name).presence || "Embedded page" %>
+<% body_text = recordable&.try(:description).presence || t("recording_studio.embeddable.public.no_description", default: "No description provided.") %>
+<% title_text = recordable&.try(:title).presence || recordable&.try(:recordable_name).presence || t("recording_studio.embeddable.public.embedded_page", default: "Embedded page") %>
 
 <div class="mx-auto w-full max-w-[var(--embed-max-width,48rem)] px-[var(--embed-padding,1rem)] py-6">
   <%= render FlatPack::PageTitle::Component.new(
@@ -40,8 +40,8 @@
 
   <% if gallery.any? %>
     <%= render FlatPack::SectionTitle::Component.new(
-      title: "Gallery",
-      subtitle: "More shots from this page"
+      title: t("recording_studio.embeddable.public.gallery", default: "Gallery"),
+      subtitle: t("recording_studio.embeddable.public.gallery_subtitle", default: "More shots from this page")
     ) %>
     <%= render FlatPack::Grid::Component.new(cols: 2, gap: :md) do %>
       <% gallery.each do |image| %>
