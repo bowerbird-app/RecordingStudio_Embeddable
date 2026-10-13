@@ -22,6 +22,7 @@ module RecordingStudioEmbeddable
       raise NotEmbeddableError, "recording is not embeddable" unless embeddable?
       return embed if embed
 
+      attributes = sanitize_floating_attributes(attributes)
       RecordingStudioEmbeddable::Embed.transaction do
         existing = embed
         return existing if existing
@@ -38,6 +39,10 @@ module RecordingStudioEmbeddable
     def embeddable?
       options = RecordingStudioEmbeddable::Renderer.options_for(self)
       options[:enabled] == true
+    end
+
+    def floating_capable?
+      Floating::Capability.for(self).enabled?
     end
 
     def embed_enabled?
@@ -77,9 +82,11 @@ module RecordingStudioEmbeddable
     end
 
     def update_embed!(actor: nil, **attributes)
-      ensure_embed!.update!(attributes)
-      log_embeddable_event("embeddable.embed.updated", actor: actor, embed: embed)
-      embed
+      record = ensure_embed!
+      record.assign_attributes(sanitize_floating_attributes(attributes))
+      record.persist_changes!
+      log_embeddable_event("embeddable.embed.updated", actor: actor, embed: record)
+      record
     end
 
     def disable_embed!(actor: nil)
@@ -96,6 +103,13 @@ module RecordingStudioEmbeddable
     end
 
     private
+
+    def sanitize_floating_attributes(attributes)
+      attrs = attributes.symbolize_keys
+      return attrs if floating_capable?
+
+      attrs.except(:floating_enabled, :floating)
+    end
 
     def withhold_cdn_snippet?
       return false unless embed.respond_to?(:cdn_url_strategy?) && embed.cdn_url_strategy?

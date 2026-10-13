@@ -1,0 +1,125 @@
+<% settings = @floating || @embed.floating_settings %>
+<% floating_label = recording_studio_floating_label(@recording) %>
+
+<% recording_studio_page_nav(
+  title: t("recording_studio.embeddable.management.floating.title", label: floating_label, default: "%{label}"),
+  page_nav_back_url: edit_management_embed_path(@embed),
+  page_nav_back_label: t("recording_studio.embeddable.common.embed", default: "Embed"),
+  page_nav_anchor_url: main_app.root_path,
+  page_nav_anchor_label: t("recording_studio.embeddable.common.close", default: "Close")
+) %>
+
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: t("recording_studio.embeddable.management.floating.title", label: floating_label, default: "%{label}"),
+    subtitle: t("recording_studio.embeddable.management.floating.subtitle", default: "Colours come from Style."),
+    variant: :h1
+  ) %>
+
+  <%= render "section_nav" %>
+
+  <% snippet = recording_studio_floating_widget_snippet(
+    recording: @recording,
+    host: request.host_with_port,
+    protocol: request.protocol.delete_suffix("://")
+  ) %>
+
+  <%= render FlatPack::Grid::Component.new(cols: 2) do %>
+    <div class="space-y-6">
+      <%= form_with model: @embed, url: floating_management_embed_path(@embed), method: :patch, class: "space-y-6", html: { id: "launcher-settings" } do %>
+        <% if @embed.errors.any? %>
+          <p role="alert"><%= @embed.errors.full_messages.to_sentence %></p>
+        <% end %>
+
+        <%= render FlatPack::Switch::Component.new(
+          name: "embed[floating_enabled]",
+          label: t("recording_studio.embeddable.management.floating.enabled", label: floating_label, default: "Show the %{label}"),
+          checked: @embed.floating_enabled
+        ) %>
+
+        <%= render FlatPack::RadioGroup::Component.new(
+          name: "embed[floating][position]",
+          label: t("recording_studio.embeddable.management.floating.position", default: "Position"),
+          value: settings["position"].presence || "bottom-right",
+          options: [
+            [t("recording_studio.embeddable.management.floating.bottom_left", default: "Bottom left"), "bottom-left"],
+            [t("recording_studio.embeddable.management.floating.bottom_right", default: "Bottom right"), "bottom-right"]
+          ]
+        ) %>
+
+        <%= render FlatPack::Button::Component.new(
+          text: t("recording_studio.embeddable.management.floating.save", label: floating_label, default: "Save %{label}"),
+          style: :primary,
+          type: "submit"
+        ) %>
+      <% end %>
+
+      <% if snippet.present? %>
+        <div class="space-y-4">
+          <div class="space-y-1">
+            <h2 class="text-base font-semibold"><%= t("recording_studio.embeddable.management.floating.snippet_heading", label: floating_label, default: "%{label} snippet") %></h2>
+            <p class="text-sm text-(--text-muted-color)"><%= t("recording_studio.embeddable.management.floating.snippet_help", label: floating_label, default: "Paste this where the %{label} should appear.") %></p>
+          </div>
+          <%= render FlatPack::TextArea::Component.new(
+            name: "launcher_snippet",
+            id: "launcher_snippet",
+            value: snippet,
+            rows: 4,
+            autogrow: true,
+            quick_copy: true
+          ) %>
+        </div>
+      <% end %>
+    </div>
+
+    <div>
+      <iframe
+        id="embed-floating-preview"
+        src="<%= floating_preview_management_embed_path(@embed) %>"
+        title="<%= floating_label %>"
+        loading="eager"
+        referrerpolicy="strict-origin-when-cross-origin"
+        class="border-0"
+        style="width: 100%; height: <%= RecordingStudioEmbeddable::Floating::HostSettings.preview_frame_height(@recording) %>px; min-height: 20rem; max-width: 100%;"
+        data-floating-preview="true"
+        data-role="floating-preview-frame"
+      ></iframe>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  const floatingPreviewFrame = () => document.getElementById("embed-floating-preview");
+
+  const syncLauncherPreview = () => {
+    const doc = floatingPreviewFrame()?.contentDocument;
+    const widget = doc?.querySelector("[data-recording-studio-widget]");
+    if (!widget) return;
+
+    const form = document.getElementById("launcher-settings");
+    const position = form?.querySelector('input[name="embed[floating][position]"]:checked')?.value;
+    if (position === "bottom-left" || position === "bottom-right") {
+      widget.setAttribute("data-position", position);
+    }
+  };
+
+  const watchFloatingPreview = () => {
+    const frame = floatingPreviewFrame();
+    if (!frame) return;
+
+    const watchDocument = () => {
+      syncLauncherPreview();
+      const doc = frame.contentDocument;
+      if (!doc || doc.documentElement.dataset.floatingPreviewWatch === "true") return;
+      doc.documentElement.dataset.floatingPreviewWatch = "true";
+      new MutationObserver(syncLauncherPreview).observe(doc.documentElement, { childList: true, subtree: true });
+    };
+
+    frame.addEventListener("load", watchDocument);
+    if (frame.contentDocument?.readyState === "complete") watchDocument();
+  };
+
+  document.getElementById("launcher-settings")?.addEventListener("input", syncLauncherPreview);
+  document.getElementById("launcher-settings")?.addEventListener("change", syncLauncherPreview);
+  watchFloatingPreview();
+</script>

@@ -59,5 +59,13 @@ Rails.application.configure do
   # Dummy Attachable direct_url_host stand-in (see DummyCdnHost middleware).
   # Touching config.hosts replaces Rails' implicit test allowlist, so name both
   # the integration-test default host and the CDN hostname.
-  config.hosts = ["www.example.com", "example.com", "cdn.example.test", "127.0.0.1", "localhost"]
+  config.hosts = [
+    "www.example.com",
+    "example.com",
+    "cdn.example.test",
+    "www.example.test",
+    "partner.example.test",
+    "127.0.0.1",
+    "localhost"
+  ]
 end

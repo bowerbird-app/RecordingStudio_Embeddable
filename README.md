@@ -70,6 +70,99 @@ article.embed_public_url(host: "example.com")
 article.embed_code(host: "example.com")
 ```
 
+## Floating launcher
+
+Inline embeds and the floating launcher are separate. `enabled` still switches the public document (iframe or CDN). `floating_enabled` switches the launcher. Types that do not opt in never float and never show launcher controls. Page and Article in the dummy app stay inline-only.
+
+```ruby
+include RecordingStudio::Capabilities::Embeddable.to(
+  floating: true,
+  floating_popup: { controller: "widget_popups", action: :show },
+  floating_options: {
+    label: "Chat button",
+    edge_spacing: 24,
+    popup_width: 400,
+    popup_height: 640,
+    icon_url: "https://images.example.com/launcher.png"
+  },
+  require_publishable: false
+)
+```
+
+`floating_popup` is the host route that renders inside the panel. The route must accept `:token`. The gem builds `popup_url` from that controller, action, and `embed.token` on each request. It is not stored.
+
+People choose whether the button is on, and which corner it sits in. The embed stores only `position` (`bottom-left` or `bottom-right`). New embeds, and embeds with no position stored, use `bottom-right`.
+
+Spacing, panel size, the icon, and the management label are host configuration. `floating_options` on the capability wins. Anything it omits falls back to `config.floating_defaults` (string or symbol keys):
+
+- `label`: the word on the management screen (default "Floating button"). Blank or longer than 40 characters is ignored. Routes, form ids, and the script stay `launcher`.
+- `edge_spacing`: pixels from the screen edge, 0–64 (default 20)
+- `popup_width`: 280–440 (default 380)
+- `popup_height`: 360–720 (default 560)
+- `icon_url`: optional. An Attachable direct URL for that recording, or an `http(s)` URL on `config.floating_icon_hosts`. A script URL or an unlisted host is dropped.
+
+Management copy lives under `recording_studio.embeddable` and interpolates `%{label}`. A locale translates the sentence. It does not translate the host's word.
+
+Launcher colours are the embed theme accent (`accent_color`, `accent_text_color` via `ResolveTheme`). There is no second colour editor.
+
+The public config endpoint is:
+
+`GET /recording_studio_embeddable/embeds/:token/launcher`
+
+The JSON `id` is `embed.token`. Browsers must send an `Origin` header. The response echoes that exact origin in `Access-Control-Allow-Origin` when the domain policy allows it, and never `*`. A missing or rejected origin fails closed, with no credential header. The endpoint is rate limited. Management forms are the only place that can turn floating on; the public embed request cannot.
+
+`RenderPayload`, `HtmlSanitizer`, and `PublishEmbedToCdn` do not read floating settings. Turning the launcher on does not change the inline document or the CDN object.
+
+### Script and local helper
+
+Partners install one classic script. The URL is not fingerprinted:
+
+```html
+<script async src="https://example.com/recording_studio_embeddable/widget.js" data-embed="TOKEN"></script>
+```
+
+`TOKEN` is `embed.token`. The script reads `document.currentScript` and fetches the launcher JSON. It draws the button and opens an iframe to `popup_url`. Several tokens on one page each get their own button.
+
+On a host page, render the same launcher without the iframe embed code:
+
+```erb
+<%= recording_studio_floating_widget(recording: recording) %>
+```
+
+That helper inlines the same JSON the endpoint would return, so a same-origin page does not depend on a cross-origin fetch. Copy the external snippet from the floating screen with `recording_studio_floating_widget_snippet` when the launcher is on. The Embed screen keeps only the inline embed code. Inline `enabled` and the launcher stay independent: a page can float while the public document is off, and a Page or Article never gets either control.
+
+### Interactive popup
+
+Include `RecordingStudioEmbeddable::FloatingWidget::Interactive` on the host controller that renders `floating_popup`. Inherit `ActionController::Base` (or another controller that does not load the host session). The concern:
+
+- Sets `Content-Security-Policy: frame-ancestors` from the embed domain allowlist and drops `X-Frame-Options`.
+- Sets `Cache-Control: private, no-store` and rate limits the popup.
+- Issues `recording_studio_embeddable_widget_csrf` (`HttpOnly`, `Secure`, `SameSite=None`, `Partitioned`), path-scoped to the popup. It does not read or write the host session cookie.
+- Renders `recording_studio_widget_bridge_tag` so the iframe can `postMessage` `close` and `resize` to the parent origin only. The target origin is never `*`.
+
+The popup HTML is a live host response. It is not an Artifact and `PublishEmbedToCdn` does not upload it. A static popup can be plain HTML. An interactive one, such as the dummy contact form, posts back to the host with the widget CSRF cookie.
+
+### Management screen
+
+Capable types get a screen next to Style. Its tab, heading, form labels, snippet section, and save flash all use `label`. It turns the button on and chooses Position with Bottom left or Bottom right (Bottom right when unset). When the button is on, that screen also shows the install snippet and its copy control. Spacing, panel size, and the icon are not on this form. The preview is the same kind of iframe frame as Style, and it loads `widget.js` — the production launcher — open, at the host size and colours. Position radios move that launcher inside the frame. The button closes and reopens the popup. Style still owns the accent colours. The Embed screen does not show the launcher snippet. Types that did not opt in do not get the screen.
+
+### Options
+
+| Setting | Where | Notes |
+| --- | --- | --- |
+| `floating: true` | recordable capability | Opt in. Off types never float. |
+| `floating_popup` | capability | `{ controller:, action: }`. Route accepts `:token`. |
+| `floating_options` | capability | `label`, `edge_spacing`, `popup_width`, `popup_height`, optional `icon_url`. Overrides `config.floating_defaults` for that type. |
+| `floating_enabled` | embed column | Show switch. Independent of `enabled`. |
+| `floating` | embed jsonb | `position` only. |
+| `config.floating_defaults` | initializer | App-wide label, spacing, panel size, and icon. `label` defaults to "Floating button". |
+| `config.floating_icon_hosts` | initializer | Extra icon hosts. Attachable direct URLs are also allowed. |
+| Accent colours | existing theme | `accent_color` and `accent_text_color`. No launcher colour editor. |
+
+`popup_url` is computed on each request from `floating_popup` and `embed.token`. It is not stored.
+
+Run the migrations after you upgrade. `floating_enabled` and `floating` are new columns. A later migration removes `edge_spacing`, `popup_width`, `popup_height`, and `icon_url` from existing `floating` documents. Set those on `floating_options` or `config.floating_defaults`.
+
 ## Iframe mode
 
 ### Dedicated (default)

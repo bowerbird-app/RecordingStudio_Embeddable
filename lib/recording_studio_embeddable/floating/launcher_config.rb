@@ -1,0 +1,57 @@
+# frozen_string_literal: true
+
+module RecordingStudioEmbeddable
+  module Floating
+    # JSON document for the launcher. Public id is the embed token.
+    class LauncherConfig
+      def self.call(embed:, recording:, request:, preview: false)
+        new(embed: embed, recording: recording, request: request, preview: preview).call
+      end
+
+      def initialize(embed:, recording:, request:, preview: false)
+        @embed = embed
+        @recording = recording
+        @request = request
+        @preview = preview
+      end
+
+      def call
+        return unless embed
+        return unless preview || embed.floating_enabled?
+        return unless capability.enabled?
+
+        validated = Schema.validate(embed.read_attribute(:floating), recording: recording)
+        return unless validated.valid?
+
+        popup_url = PopupUrl.call(recording: recording, token: embed.token, request: request)
+        return if popup_url.blank?
+
+        host = HostSettings.for(recording)
+        {
+          "id" => embed.token,
+          "title" => title,
+          "position" => validated.settings["position"],
+          "edge_spacing" => host["edge_spacing"],
+          "popup_width" => host["popup_width"],
+          "popup_height" => host["popup_height"],
+          "icon_url" => host["icon_url"],
+          "colors" => Colors.call(recording: recording, embed: embed),
+          "popup_url" => popup_url
+        }
+      end
+
+      private
+
+      attr_reader :embed, :recording, :request, :preview
+
+      def capability
+        @capability ||= Capability.for(recording)
+      end
+
+      def title
+        recordable = recording.respond_to?(:recordable) ? recording.recordable : nil
+        recordable.try(:title).presence || recordable.try(:name).presence || "Chat"
+      end
+    end
+  end
+end

@@ -1,0 +1,8 @@
+<h1>Partner site</h1>
+<p>This page only has the install snippet.</p>
+<% script_host = Rails.env.local? ? params[:script_host].presence : nil %>
+<%= recording_studio_floating_widget_snippet(
+  recording: @recording,
+  host: script_host || request.host_with_port,
+  protocol: request.protocol.delete_suffix("://")
+) %>

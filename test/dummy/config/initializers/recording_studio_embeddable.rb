@@ -23,4 +23,12 @@ RecordingStudioEmbeddable.configure do |config|
   config.embed_url_strategy = :dedicated
   config.cdn_withhold_snippet_until_published = false
   config.cdn_publish_queue = :default
+  config.floating_icon_hosts = ["images.example.com"]
+  config.floating_defaults = {
+    "edge_spacing" => 20,
+    "popup_width" => 380,
+    "popup_height" => 560,
+    "icon_url" => nil,
+    "label" => "Floating button"
+  }
 end

@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-13
+
+### Added
+- Opt-in floating launcher for embeddable types via
+  `RecordingStudio::Capabilities::Embeddable.to(floating: true, floating_popup: { controller:, action: })`.
+  Types that do not opt in (Page, Article) never float.
+- `floating_enabled` and `floating` jsonb on embeds. Launcher settings are
+  validated (position, edge spacing, popup size, allowlisted or Attachable icon).
+  Launcher colours come from the existing embed theme.
+- `GET /recording_studio_embeddable/embeds/:token/launcher` returns JSON config.
+  Public id is `embed.token`. CORS echoes an allowlisted `Origin`, never `*`,
+  and fails closed when `Origin` is missing. `popup_url` is built per request
+  and is not stored.
+- Stable `GET /recording_studio_embeddable/widget.js` launcher script, plus
+  `recording_studio_floating_widget` and `recording_studio_floating_widget_snippet`.
+  The local helper renders the same JSON as the endpoint. The snippet does not.
+- `RecordingStudioEmbeddable::FloatingWidget::Interactive` for host popup
+  controllers: frame-ancestors from the domain allowlist, private no-store,
+  rate limit, and a path-scoped `SameSite=None; Secure; Partitioned` CSRF cookie
+  that does not use the host session. `widget_bridge.js` posts close and resize
+  to an explicit parent origin. Popups are not published to Artifacts.
+- Launcher management screen for types that opt in: enable, Position radios
+  (Bottom left or Bottom right, default Bottom right when unset), the install
+  snippet with its copy control, and a live preview. The Embed screen keeps
+  only the inline embed code. Style still owns accent colours.
+- Edge spacing, panel size, and the icon are host configuration:
+  `floating_options` on `Embeddable.to`, falling back to
+  `config.floating_defaults`. They are not stored on the embed and not shown
+  on the launcher form. Launcher JSON still emits the host values.
+- The management name for the launcher is host configuration too: `label` on
+  `floating_options`, then `config.floating_defaults`, then "Floating button".
+  Tab, heading, form copy, snippet section, and the save flash
+  interpolate `%{label}`. Routes and form ids stay `launcher`.
+- The launcher management preview uses the same iframe frame as Style and
+  loads the production `widget.js`. The popup starts open, at the host size,
+  and stays inside the frame. Position radios move it. The button toggles it.
+
+### Upgrade notes
+- Bump to `recording_studio_embeddable` `0.7.0` and run migrations. New columns:
+  `recording_studio_embeddable_embeds.floating_enabled` (boolean, default false)
+  and `floating` (jsonb, default `{}`).
+- No compatibility shim. Existing inline embeds stay inline until a type opts in
+  and a person enables the launcher.
+- Host popup routes must accept `:token` and match `floating_popup`.
+- Optional `config.floating_icon_hosts` allowlists icon URL hosts. Attachable
+  direct URLs on the parent recording are allowed without that list.
+- Set spacing, panel size, and `icon_url` with `floating_options:` or
+  `config.floating_defaults`. The strip migration deletes those keys from
+  existing `floating` jsonb. The launcher form no longer edits them.
+- Optional `label` on `floating_options` or `config.floating_defaults` names
+  the launcher on the management screen. The default word is "Floating button".
+- `RenderPayload`, `HtmlSanitizer`, and CDN publish ignore floating settings.
+
 ## [0.6.0] - 2026-10-13
 
 ### Added

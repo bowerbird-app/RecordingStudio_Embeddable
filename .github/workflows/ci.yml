@@ -62,6 +62,13 @@ jobs:
       env:
         DATABASE_URL: postgres://postgres:postgres@localhost:5432/recording_studio_embeddable_test
 
+    - name: Build dummy Tailwind CSS
+      run: bundle exec rake tailwindcss:build
+      working-directory: test/dummy
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/recording_studio_embeddable_test
+        RAILS_ENV: test
+
     - name: Run RuboCop
       run: bundle exec rubocop
 
@@ -69,6 +76,11 @@ jobs:
       run: bundle exec rake test
       env:
         DATABASE_URL: postgres://postgres:postgres@localhost:5432/recording_studio_embeddable_test
+
+    - name: Install Chrome for system tests
+      uses: browser-actions/setup-chrome@v1
+      with:
+        chrome-version: stable
 
     - name: Run dummy tests
       run: bundle exec rake test:dummy

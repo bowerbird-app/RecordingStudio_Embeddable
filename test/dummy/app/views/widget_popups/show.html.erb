@@ -1,0 +1,31 @@
+<%= render FlatPack::PageTitle::Component.new(
+  title: @widget.title.presence || "Say hello",
+  subtitle: @widget.prompt.presence || "Send a note. We read every one.",
+  variant: :h1
+) %>
+
+<%= form_with url: widget_inquiries_path(params[:token]), scope: :inquiry, class: "space-y-4" do %>
+  <%= render FlatPack::TextInput::Component.new(
+    name: "inquiry[name]",
+    label: "Name",
+    value: @inquiry&.name,
+    required: true,
+    error: @inquiry&.errors&.[](:name)&.first
+  ) %>
+  <%= render FlatPack::TextInput::Component.new(
+    name: "inquiry[email]",
+    label: "Email",
+    value: @inquiry&.email,
+    required: true,
+    error: @inquiry&.errors&.[](:email)&.first
+  ) %>
+  <%= render FlatPack::TextArea::Component.new(
+    name: "inquiry[message]",
+    label: "Message",
+    value: @inquiry&.message,
+    rows: 4,
+    required: true,
+    error: @inquiry&.errors&.[](:message)&.first
+  ) %>
+  <%= render FlatPack::Button::Component.new(text: "Send", style: :primary, type: "submit") %>
+<% end %>

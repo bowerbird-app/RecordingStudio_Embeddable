@@ -14,6 +14,38 @@ module RecordingStudioEmbeddable
 
       def settings; end
 
+      def floating
+        return head(:not_found) unless floating_screen?
+
+        build_floating_state
+      end
+
+      def floating_preview
+        return head(:not_found) unless floating_screen?
+
+        @recording = @embed.parent_recording
+        response.delete_header("X-Frame-Options")
+        response.set_header("Content-Security-Policy", "frame-ancestors 'self'")
+        render layout: false
+      end
+
+      def update_floating
+        return head(:not_found) unless floating_screen?
+
+        @embed.floating_enabled = ActiveModel::Type::Boolean.new.cast(params.dig(:embed, :floating_enabled))
+        submitted = floating_settings_params
+        checked = Floating::Schema.validate(submitted, @embed.parent_recording)
+        @embed.floating = checked.valid? ? checked.settings : submitted
+        if @embed.persist_changes
+          redirect_to floating_management_embed_path(@embed),
+                      notice: t("recording_studio.embeddable.flashes.launcher_updated",
+                                label: floating_label)
+        else
+          build_floating_state
+          render :floating, status: :unprocessable_entity
+        end
+      end
+
       def stats
         build_stats_chart_state
       end
@@ -21,7 +53,7 @@ module RecordingStudioEmbeddable
       def update
         form_context = params[:form_context].to_s
         apply_embed_params
-        if @embed.save
+        if @embed.persist_changes
           if form_context == "settings"
             redirect_to settings_management_embed_path(@embed),
                         notice: t("recording_studio.embeddable.flashes.settings_updated",
@@ -149,6 +181,29 @@ module RecordingStudioEmbeddable
           cache_settings: {},
           logging_settings: {}
         )
+      end
+
+      def floating_screen?
+        @embed.parent_recording.respond_to?(:floating_capable?) && @embed.parent_recording.floating_capable?
+      end
+
+      def floating_label
+        Floating::HostSettings.for(@embed.parent_recording).fetch("label")
+      end
+
+      def build_floating_state
+        @recording = @embed.parent_recording
+        @floating = @embed.floating_settings
+      end
+
+      def floating_settings_params
+        raw = params.fetch(:embed, {}).fetch(:floating, {})
+        permitted = if raw.respond_to?(:permit)
+                      raw.permit(:position)
+                    else
+                      {}
+                    end
+        { "position" => permitted[:position].to_s.presence }.compact
       end
 
       def styling_appearance_params
@@ -410,7 +465,7 @@ module RecordingStudioEmbeddable
 
         @embed.appearance = merge_styling_hash(@embed.appearance.to_h.stringify_keys, cleaned_values)
 
-        if @embed.save
+        if @embed.persist_changes
           redirect_to styling_management_embed_path(@embed),
                       notice: t("recording_studio.embeddable.flashes.styling_updated",
                                 default: "Embed styling updated.")

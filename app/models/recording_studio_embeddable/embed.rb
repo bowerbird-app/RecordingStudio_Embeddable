@@ -24,7 +24,10 @@ module RecordingStudioEmbeddable
 
     validates :token, presence: true, uniqueness: true
     validates :enabled, inclusion: { in: [true, false] }
+    validates :floating_enabled, inclusion: { in: [true, false] }, if: -> { has_attribute?(:floating_enabled) }
     validate :domains_are_valid
+    validate :floating_settings_are_valid, if: -> { has_attribute?(:floating) }
+    validate :floating_enabled_matches_capability, if: -> { has_attribute?(:floating_enabled) && floating_enabled? }
 
     scope :enabled, -> { where(enabled: true) }
 
@@ -182,7 +185,47 @@ module RecordingStudioEmbeddable
       self[:appearance] = (value || {}).to_h
     end
 
+    def floating
+      raw = has_attribute?(:floating) ? self[:floating] : {}
+      raw.is_a?(Hash) ? raw.with_indifferent_access : {}.with_indifferent_access
+    end
+
+    def floating=(value)
+      self[:floating] = value.is_a?(Hash) ? value.to_h : {}
+    end
+
+    def floating_settings
+      Floating::Schema.with_defaults(self[:floating])
+    end
+
+    # Recordables are readonly once saved. Validate, then write columns in place
+    # so the public token stays on this row. +update_all+ skips callbacks, so CDN
+    # republish is enqueued here when the strategy needs it.
+    def persist_changes
+      return unless valid?
+
+      write_validated_changes
+      self
+    end
+
+    def persist_changes!
+      persist_changes || raise(ActiveRecord::RecordInvalid, self)
+    end
+
     private
+
+    def write_validated_changes
+      return unless persisted?
+
+      payload = {}
+      changes.each_key { |name| payload[name] = read_attribute(name) }
+      return if payload.empty?
+
+      payload["updated_at"] = Time.current
+      self.class.where(id: id).update_all(payload)
+      clear_changes_information
+      enqueue_cdn_publish_if_needed
+    end
 
     def ensure_token
       self.token = self.class.generate_token if token.blank?
@@ -204,6 +247,8 @@ module RecordingStudioEmbeddable
       self.cache_settings ||= {} if has_attribute?(:cache_settings)
       self.logging_settings ||= {} if has_attribute?(:logging_settings)
       self.metadata ||= {} if has_attribute?(:metadata)
+      self.floating_enabled = false if has_attribute?(:floating_enabled) && floating_enabled.nil?
+      self[:floating] = {} if has_attribute?(:floating) && self[:floating].nil?
     end
 
     def domains_are_valid
@@ -233,6 +278,36 @@ module RecordingStudioEmbeddable
     def cdn_metadata
       raw = metadata.is_a?(Hash) ? metadata : {}
       (raw["cdn"] || raw[:cdn] || {}).stringify_keys
+    end
+
+    def floating_settings_are_valid
+      result = Floating::Schema.validate(self[:floating], recording: parent_recording)
+      return if result.valid?
+
+      result.errors.each do |message|
+        errors.add(
+          :floating,
+          I18n.t(
+            "recording_studio.embeddable.errors.floating_invalid",
+            message: message,
+            default: message
+          )
+        )
+      end
+    end
+
+    def floating_enabled_matches_capability
+      parent = parent_recording
+      return if parent.nil?
+      return if parent.respond_to?(:floating_capable?) && parent.floating_capable?
+
+      errors.add(
+        :floating_enabled,
+        I18n.t(
+          "recording_studio.embeddable.errors.floating_unavailable",
+          default: "is not available for this type"
+        )
+      )
     end
 
     def enqueue_cdn_publish_if_needed

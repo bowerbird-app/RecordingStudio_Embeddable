@@ -9,6 +9,7 @@ en:
         apply: "Apply"
         clear: "Clear"
         preview: "Preview"
+        launcher: "%{label}"
         styling: "Styling"
         settings: "Settings"
         stats: "Stats"
@@ -31,6 +32,16 @@ en:
           blocked_domains: "Blocked domains (one per line)"
           blocked_domains_placeholder: "bad-domain.example"
           save_changes: "Save changes"
+        floating:
+          title: "%{label}"
+          subtitle: "Colours come from Style."
+          enabled: "Show the %{label}"
+          position: "Position"
+          bottom_right: "Bottom right"
+          bottom_left: "Bottom left"
+          save: "Save %{label}"
+          snippet_heading: "%{label} snippet"
+          snippet_help: "Paste this where the %{label} should appear."
         styling:
           title: "Style"
           disabled_notice: "Custom styling is currently disabled for this embed. You can still review the resolved values below."
@@ -73,10 +84,13 @@ en:
           mono: "Mono"
       flashes:
         settings_updated: "Embed settings updated."
+        launcher_updated: "%{label} updated."
         styling_updated: "Embed styling updated."
         styling_disabled: "Custom styling is disabled for this embed."
       errors:
         invalid_embedder_domain: "Invalid embedder domain: %{domain}"
+        floating_unavailable: "is not available for this type"
+        floating_invalid: "%{message}"
       public:
         oops: "Oops"
         not_found_description: "This embed is gone, or the link is wrong. Check the address and try again."
