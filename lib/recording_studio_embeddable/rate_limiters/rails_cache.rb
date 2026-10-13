@@ -2,15 +2,24 @@
 
 module RecordingStudioEmbeddable
   module RateLimiters
+    # Thin adapter over RecordingStudioCache::RateLimiter (:rails_cache backend).
+    #
+    # Preserves Embeddable config keys (+rate_limit+, +rate_limit_window+,
+    # +rate_limit_fail_closed+) and the fixed-window key shape
+    # +recording_studio_embeddable:rate:<key>:<bucket>+.
     class RailsCache
       def self.allow?(key:, limit:, window:)
-        return true unless defined?(Rails) && Rails.respond_to?(:cache) && Rails.cache
-
-        cache_key = "recording_studio_embeddable:rate:#{key}:#{Time.current.to_i / window.to_i}"
-        count = Rails.cache.increment(cache_key, 1, expires_in: window.to_i.seconds)
-        count.to_i <= limit.to_i
-      rescue StandardError
-        !RecordingStudioEmbeddable.configuration.rate_limit_fail_closed
+        RecordingStudioCache::RateLimiter.allow?(
+          key: key,
+          limit: limit,
+          window: window,
+          backend: :rails_cache,
+          strategy: :fixed,
+          store: Rails.cache,
+          fail_closed: RecordingStudioEmbeddable.configuration.rate_limit_fail_closed,
+          prefix: "recording_studio_embeddable:rate",
+          rescue_errors: [StandardError]
+        )
       end
 
       def allow?(**)
