@@ -21,7 +21,7 @@ module RecordingStudioEmbeddable
       def update
         form_context = params[:form_context].to_s
         apply_embed_params
-        if @embed.save
+        if @embed.persist_changes
           if form_context == "settings"
             redirect_to settings_management_embed_path(@embed),
                         notice: t("recording_studio.embeddable.flashes.settings_updated",
@@ -410,7 +410,7 @@ module RecordingStudioEmbeddable
 
         @embed.appearance = merge_styling_hash(@embed.appearance.to_h.stringify_keys, cleaned_values)
 
-        if @embed.save
+        if @embed.persist_changes
           redirect_to styling_management_embed_path(@embed),
                       notice: t("recording_studio.embeddable.flashes.styling_updated",
                                 default: "Embed styling updated.")

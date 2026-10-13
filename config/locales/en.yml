@@ -77,6 +77,8 @@ en:
         styling_disabled: "Custom styling is disabled for this embed."
       errors:
         invalid_embedder_domain: "Invalid embedder domain: %{domain}"
+        floating_unavailable: "is not available for this type"
+        floating_invalid: "%{message}"
       public:
         oops: "Oops"
         not_found_description: "This embed is gone, or the link is wrong. Check the address and try again."

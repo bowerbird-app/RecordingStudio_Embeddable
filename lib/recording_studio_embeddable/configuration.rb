@@ -47,7 +47,8 @@ module RecordingStudioEmbeddable
       :cdn_withhold_snippet_until_published,
       :cdn_variant_retry_wait,
       :cdn_storage,
-      :cdn_purger
+      :cdn_purger,
+      :floating_icon_hosts
     )
     attr_reader :hooks
 
@@ -112,6 +113,9 @@ module RecordingStudioEmbeddable
       @cdn_variant_retry_wait = 15.respond_to?(:seconds) ? 15.seconds : 15
       @cdn_storage = nil
       @cdn_purger = nil
+      # Hosts that may supply a launcher icon. Attachable direct URLs on the
+      # parent recording are allowed as well. Anything else is rejected.
+      @floating_icon_hosts = []
       @hooks = Hooks.new
     end
 
@@ -150,6 +154,7 @@ module RecordingStudioEmbeddable
         token_bytes: token_bytes,
         prune_views_after: prune_views_after,
         cdn_withhold_snippet_until_published: cdn_withhold_snippet_until_published,
+        floating_icon_hosts: floating_icon_hosts,
         hooks_registered: hooks.instance_variable_get(:@registry).transform_values(&:size)
       }
     end

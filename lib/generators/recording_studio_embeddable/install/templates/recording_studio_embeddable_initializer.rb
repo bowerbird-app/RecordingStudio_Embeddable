@@ -35,6 +35,8 @@ RecordingStudioEmbeddable.configure do |config|
   config.view_log_raw_ip = false
   config.view_log_raw_user_agent = false
   config.view_log_raw_referer = false
+  # Launcher icon URLs must be Attachable direct URLs, or http(s) on these hosts.
+  config.floating_icon_hosts = []
 
   # CDN via RecordingStudioArtifacts (only when artifacts_enabled). Host owns
   # ARTIFACT_CDN_* / R2 / DNS. Install Artifacts before enabling.

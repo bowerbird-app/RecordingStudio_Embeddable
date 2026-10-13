@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-10-13
+
+### Added
+- Opt-in floating launcher for embeddable types via
+  `RecordingStudio::Capabilities::Embeddable.to(floating: true, floating_popup: { controller:, action: })`.
+  Types that do not opt in (Page, Article) never float.
+- `floating_enabled` and `floating` jsonb on embeds. Launcher settings are
+  validated (position, edge spacing, popup size, allowlisted or Attachable icon).
+  Launcher colours come from the existing embed theme.
+- `GET /recording_studio_embeddable/embeds/:token/launcher` returns JSON config.
+  Public id is `embed.token`. CORS echoes an allowlisted `Origin`, never `*`,
+  and fails closed when `Origin` is missing. `popup_url` is built per request
+  and is not stored.
+
+### Upgrade notes
+- Bump to `recording_studio_embeddable` `0.7.0` and run migrations. New columns:
+  `recording_studio_embeddable_embeds.floating_enabled` (boolean, default false)
+  and `floating` (jsonb, default `{}`).
+- No compatibility shim. Existing inline embeds stay inline until a type opts in
+  and a person enables the launcher.
+- Host popup routes must accept `:token` and match `floating_popup`.
+- Optional `config.floating_icon_hosts` allowlists icon URL hosts. Attachable
+  direct URLs on the parent recording are allowed without that list.
+- `RenderPayload`, `HtmlSanitizer`, and CDN publish ignore floating settings.
+
 ## [0.6.0] - 2026-10-13
 
 ### Added

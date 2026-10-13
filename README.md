@@ -70,6 +70,39 @@ article.embed_public_url(host: "example.com")
 article.embed_code(host: "example.com")
 ```
 
+## Floating launcher
+
+Inline embeds and the floating launcher are separate. `enabled` still switches the public document (iframe or CDN). `floating_enabled` switches the launcher. Types that do not opt in never float and never show launcher controls. Page and Article in the dummy app stay inline-only.
+
+```ruby
+include RecordingStudio::Capabilities::Embeddable.to(
+  floating: true,
+  floating_popup: { controller: "widget_popups", action: :show },
+  require_publishable: false
+)
+```
+
+`floating_popup` is the host route that renders inside the panel. The route must accept `:token`. The gem builds `popup_url` from that controller, action, and `embed.token` on each request. It is not stored.
+
+Launcher settings live in the `floating` jsonb column and are checked against the gem schema:
+
+- `position`: `bottom-left` or `bottom-right`
+- `edge_spacing`: pixels from the screen edge
+- `popup_width` and `popup_height`: panel size in pixels
+- `icon_url`: optional, and only an Attachable direct URL for that recording or an `http(s)` URL on `config.floating_icon_hosts`
+
+Launcher colours are the embed theme accent (`accent_color`, `accent_text_color` via `ResolveTheme`). There is no second colour editor.
+
+The public config endpoint is:
+
+`GET /recording_studio_embeddable/embeds/:token/launcher`
+
+The JSON `id` is `embed.token`. Browsers must send an `Origin` header. The response echoes that exact origin in `Access-Control-Allow-Origin` when the domain policy allows it, and never `*`. A missing or rejected origin fails closed, with no credential header. The endpoint is rate limited. Management forms are the only place that can turn floating on; the public embed request cannot.
+
+`RenderPayload`, `HtmlSanitizer`, and `PublishEmbedToCdn` do not read floating settings. Turning the launcher on does not change the inline document or the CDN object.
+
+Run the new migration (`floating_enabled`, `floating`) after you upgrade.
+
 ## Iframe mode
 
 ### Dedicated (default)
