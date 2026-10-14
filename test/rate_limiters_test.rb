@@ -135,6 +135,24 @@ class RateLimitersTest < Minitest::Test
     )
   end
 
+  def test_rails_cache_blank_key_follows_fail_closed
+    # Shared RateLimiter raises ArgumentError for blank keys during initialize;
+    # the adapter maps that through rate_limit_fail_closed (outer rescue).
+    RecordingStudioEmbeddable.configuration.rate_limit_fail_closed = false
+    ["", "   ", nil].each do |key|
+      assert RecordingStudioEmbeddable::RateLimiters::RailsCache.allow?(
+        key: key, limit: 1, window: 60
+      ), "expected blank key=#{key.inspect} to fail open"
+    end
+
+    RecordingStudioEmbeddable.configuration.rate_limit_fail_closed = true
+    ["", "   ", nil].each do |key|
+      refute RecordingStudioEmbeddable::RateLimiters::RailsCache.allow?(
+        key: key, limit: 1, window: 60
+      ), "expected blank key=#{key.inspect} to fail closed"
+    end
+  end
+
   def test_rails_cache_uses_rails_cache_not_recording_studio_cache_store
     # Main had no configurable rate-limit cache_store — only Rails.cache.
     # Prove we do not silently follow RecordingStudioCache.configuration.cache_store.
@@ -197,6 +215,25 @@ class RateLimitersTest < Minitest::Test
       )
     end
     assert_match(/responds to eval/, error.message)
+  end
+
+  def test_redis_blank_key_follows_fail_closed
+    RecordingStudioEmbeddable.configuration.redis = FakeEvalRedis.new
+    RecordingStudioEmbeddable.configuration.rate_limiter = :redis
+
+    RecordingStudioEmbeddable.configuration.rate_limit_fail_closed = false
+    ["", "   ", nil].each do |key|
+      assert RecordingStudioEmbeddable::RateLimiters::Redis.allow?(
+        key: key, limit: 1, window: 60
+      ), "expected blank key=#{key.inspect} to fail open"
+    end
+
+    RecordingStudioEmbeddable.configuration.rate_limit_fail_closed = true
+    ["", "   ", nil].each do |key|
+      refute RecordingStudioEmbeddable::RateLimiters::Redis.allow?(
+        key: key, limit: 1, window: 60
+      ), "expected blank key=#{key.inspect} to fail closed"
+    end
   end
 
   def test_redis_non_positive_limit_blocks_like_main

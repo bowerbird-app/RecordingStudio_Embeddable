@@ -7,31 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.8.0] - 2026-10-15
-
-### Added
-- Optional modal for embed management. `recording_studio_embeddable_management_modal(recording:, tab: :styling)` opens Embed, Preview, Embed style, Settings, the floating screen, or Stats in a Flatpack modal.
-- The modal uses Flatpack `scroll: :page` and `body_height_mode: :auto`, so the dialog follows the content. Close it with the Flatpack X, Escape, or the backdrop.
-- Management responses for Turbo Frame `recording_studio_embeddable_management`, `?variant=modal`, or `?modal=1` render inside that frame, without the page back and close bar. Tab links and forms stay in the frame. A successful save redirects inside the frame. A 422 re-renders the frame with the errors.
-- Embed style is two columns. Controls and Save are on the left. The live preview is on the right. Save sits under the controls. Colour swatches wrap onto the next line (`flex flex-wrap`) instead of scrolling sideways.
-- Every management screen has a tab: Embed, Preview, Embed style, Chat button (when the type floats), Settings, and Stats. The open screen's tab is a primary button. The others stay secondary. That row is on the full page and in the modal. Switching tabs renders that screen again, so the primary tab moves with the screen.
-- Preview is the management screen: the embed document sits in a frame under those tabs. The document itself is the same path with `?document=1`. Embed style's live preview uses that document URL. The document still forces a full load (`turbo-visit-control`) and allows same-origin framing.
-- The dummy app shows the modal for a Page and for the floating Widget at `/embed-modals`.
-
-### Changed
-- The floating snippet tells people to add it on every page, just before the closing `</head>` tag.
-- The Embed screen tells people to put the iframe markup in the page HTML where the recording should appear.
-- Neither help text mentions Squarespace, Wix, or WordPress.
-
-### Upgrade notes
-- Bump to `recording_studio_embeddable` `0.8.0`. No migration and no compatibility shim.
-- Full-page Embed style, Settings, Stats, and Preview show the same tab row as the modal. Opening Preview shows that screen. The bare embed document is `?document=1` on the preview path.
-- The styling tab uses `management.styling.title` ("Embed style").
-- Call `ensure_embed!` before the helper. `tab` accepts `:edit`, `:preview`, `:styling`, `:settings`, `:floating`, and `:stats`.
-
-## [0.7.0] - 2026-10-13
-
-## [0.8.0] - 2026-10-14
+## [0.9.0] - 2026-10-16
 
 ### Changed
 - Public embed rate limiting now uses shared
@@ -59,10 +35,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Redis TTL is no longer refreshed on every hit (Lua sets `EXPIRE` when
   `count == 1` or `TTL == -1`); fixed-window bucket keys still expire with the
   window.
-- Version bump to `0.8.0`.
+- Version bump to `0.9.0`.
 
 ### Upgrade notes
-- Bump to `recording_studio_embeddable` `0.8.0` and add
+- Bump to `recording_studio_embeddable` `0.9.0` and add
   `recording_studio_cache` `~> 0.5` (pin git tag `v0.5.0` until published).
   No migration.
 - Redis rate-limiter clients must respond to `eval` (Lua). Clients that only
@@ -70,6 +46,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   limiter. Pass a full Redis client via `config.redis` (or as
   `config.rate_limiter` when that object responds to `incr`, as before).
   This is the deliberate parity break vs main's `incr`/`expire` path.
+
+## [0.8.0] - 2026-10-15
+
+### Added
+- Optional modal for embed management. `recording_studio_embeddable_management_modal(recording:, tab: :styling)` opens Embed, Preview, Embed style, Settings, the floating screen, or Stats in a Flatpack modal.
+- The modal uses Flatpack `scroll: :page` and `body_height_mode: :auto`, so the dialog follows the content. Close it with the Flatpack X, Escape, or the backdrop.
+- Management responses for Turbo Frame `recording_studio_embeddable_management`, `?variant=modal`, or `?modal=1` render inside that frame, without the page back and close bar. Tab links and forms stay in the frame. A successful save redirects inside the frame. A 422 re-renders the frame with the errors.
+- Embed style is two columns. Controls and Save are on the left. The live preview is on the right. Save sits under the controls. Colour swatches wrap onto the next line (`flex flex-wrap`) instead of scrolling sideways.
+- Every management screen has a tab: Embed, Preview, Embed style, Chat button (when the type floats), Settings, and Stats. The open screen's tab is a primary button. The others stay secondary. That row is on the full page and in the modal. Switching tabs renders that screen again, so the primary tab moves with the screen.
+- Preview is the management screen: the embed document sits in a frame under those tabs. The document itself is the same path with `?document=1`. Embed style's live preview uses that document URL. The document still forces a full load (`turbo-visit-control`) and allows same-origin framing.
+- The dummy app shows the modal for a Page and for the floating Widget at `/embed-modals`.
+
+### Changed
+- The floating snippet tells people to add it on every page, just before the closing `</head>` tag.
+- The Embed screen tells people to put the iframe markup in the page HTML where the recording should appear.
+- Neither help text mentions Squarespace, Wix, or WordPress.
+
+### Upgrade notes
+- Bump to `recording_studio_embeddable` `0.8.0`. No migration and no compatibility shim.
+- Full-page Embed style, Settings, Stats, and Preview show the same tab row as the modal. Opening Preview shows that screen. The bare embed document is `?document=1` on the preview path.
+- The styling tab uses `management.styling.title` ("Embed style").
+- Call `ensure_embed!` before the helper. `tab` accepts `:edit`, `:preview`, `:styling`, `:settings`, `:floating`, and `:stats`.
 
 ## [0.7.0] - 2026-10-13
 
@@ -438,7 +436,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/releases/tag/v0.6.0

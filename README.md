@@ -27,7 +27,7 @@ Two delivery modes ship in this gem:
   `config.artifacts_enabled`, default off).
 - `recording_studio_attachable` `~> 0.9` for direct image URLs on rich embeds
   (`url_mode: :direct` + `direct_url_host`).
-- `recording_studio_cache` `~> 0.5.0` for the shared public-embed rate limiter.
+- `recording_studio_cache` `~> 0.5` (git tag `v0.5.0`) for the shared public-embed rate limiter.
 
 ## Install
 
