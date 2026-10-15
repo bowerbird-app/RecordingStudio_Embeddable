@@ -49,9 +49,11 @@ module RecordingStudioEmbeddable
         require_dependency "recording_studio_embeddable/embed_layout_helper"
         require_dependency "recording_studio_embeddable/direct_image_helper"
         require_dependency "recording_studio_embeddable/floating_widget_helper"
+        require_dependency "recording_studio_embeddable/management_modal_helper"
         include RecordingStudioEmbeddable::EmbedLayoutHelper
         include RecordingStudioEmbeddable::DirectImageHelper
         include RecordingStudioEmbeddable::FloatingWidgetHelper
+        include RecordingStudioEmbeddable::ManagementModalHelper
       end
 
       config.to_prepare do

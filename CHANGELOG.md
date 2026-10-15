@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-10-15
+
+### Added
+- Optional modal for embed management. `recording_studio_embeddable_management_modal(recording:, tab: :styling)` opens Embed, Preview, Styling, Settings, the floating screen, or Stats in a Flatpack modal.
+- Management responses for Turbo Frame `recording_studio_embeddable_management`, `?variant=modal`, or `?modal=1` render inside that frame, without the page back and close bar. Tab links and forms stay in the frame. A successful save redirects inside the frame. A 422 re-renders the frame with the errors.
+- The dummy app shows the modal for a Page and for the floating Widget at `/embed-modals`.
+
+### Upgrade notes
+- Bump to `recording_studio_embeddable` `0.8.0`. No migration and no compatibility shim.
+- Full-page management is unchanged when the request is not a modal frame or `variant`/`modal` param.
+- Call `ensure_embed!` before the helper. `tab` accepts `:edit`, `:preview`, `:styling`, `:settings`, `:floating`, and `:stats`.
+
 ## [0.7.0] - 2026-10-13
 
 ### Added

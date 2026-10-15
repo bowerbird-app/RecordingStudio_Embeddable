@@ -37,6 +37,10 @@
     variant: :h1
   ) %>
 
+  <% if recording_studio_embeddable_management_modal_tabs? %>
+    <%= render "section_nav" %>
+  <% end %>
+
   <%= render FlatPack::Grid::Component.new(cols: 2) do %>
     <div class="space-y-4">
       <% unless @styling_editable %>
@@ -51,7 +55,8 @@
         </p>
       <% end %>
 
-      <%= form_with model: @embed, url: styling_management_embed_path(@embed), method: :patch, class: "space-y-4", data: { styling_form: true, font_label_fallback: font_label_fallback } do |_form| %>
+      <%= form_with model: @embed, url: recording_studio_embeddable_management_screen_path(@embed, :styling), method: :patch, class: "space-y-4", data: { styling_form: true, font_label_fallback: font_label_fallback }.merge(recording_studio_embeddable_management_form_data) do |_form| %>
+        <%= recording_studio_embeddable_management_variant_field %>
         <div class="flex flex-wrap items-center gap-3">
           <%= render FlatPack::Button::Component.new(
             text: t("recording_studio.embeddable.common.save", default: "Save"),
@@ -183,6 +188,7 @@
 </script>
 
 <script>
+(() => {
   const AUTO_WIDTH = "100%";
 
   const styleWidthHiddenInput = () => document.getElementById("embed_sizing_width");
@@ -377,10 +383,23 @@
     form.addEventListener("font-swatch:change", () => applyStylingPreviewFromForm(form));
   };
 
-  document.addEventListener("turbo:load", initializeStylingReset);
-  document.addEventListener("DOMContentLoaded", initializeStylingReset);
-  document.addEventListener("turbo:load", initializeStyleWidthControls);
-  document.addEventListener("DOMContentLoaded", initializeStyleWidthControls);
-  document.addEventListener("turbo:load", initializeStylingLivePreview);
-  document.addEventListener("DOMContentLoaded", initializeStylingLivePreview);
+  const bootStylingControls = () => {
+    initializeStylingReset();
+    initializeStyleWidthControls();
+    initializeStylingLivePreview();
+  };
+
+  if (!window.recordingStudioEmbeddableStylingBoot) {
+    window.recordingStudioEmbeddableStylingBoot = true;
+    const run = (event) => {
+      if (event?.type === "turbo:frame-load" && event.target?.id !== "recording_studio_embeddable_management") return;
+      bootStylingControls();
+    };
+    document.addEventListener("turbo:load", run);
+    document.addEventListener("DOMContentLoaded", run);
+    document.addEventListener("turbo:frame-load", run);
+  }
+
+  bootStylingControls();
+})();
 </script>

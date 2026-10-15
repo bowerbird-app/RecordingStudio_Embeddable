@@ -46,7 +46,8 @@
   <% else %>
     <%= render FlatPack::Grid::Component.new(cols: 2) do %>
       <div class="space-y-6">
-        <%= form_with model: @embed, url: management_embed_path(@embed), method: :patch, class: "embed-enabled-switch" do |_form| %>
+        <%= form_with model: @embed, url: recording_studio_embeddable_management_screen_path(@embed, :update), method: :patch, class: "embed-enabled-switch", data: recording_studio_embeddable_management_form_data do |_form| %>
+          <%= recording_studio_embeddable_management_variant_field %>
           <input type="hidden" name="embed[enabled]" value="0">
           <%= render FlatPack::Switch::Component.new(
             name: "embed[enabled]",
@@ -95,19 +96,31 @@
 </style>
 
 <script>
-  const initializeEmbedToggleAutosave = () => {
-    document.querySelectorAll('input[data-autosave-embed-enabled="true"]').forEach((input) => {
-      if (input.dataset.autosaveBound === "true") {
-        return;
-      }
+  (() => {
+    const initializeEmbedToggleAutosave = () => {
+      document.querySelectorAll('input[data-autosave-embed-enabled="true"]').forEach((input) => {
+        if (input.dataset.autosaveBound === "true") {
+          return;
+        }
 
-      input.dataset.autosaveBound = "true";
-      input.addEventListener("change", () => {
-        input.form?.requestSubmit();
+        input.dataset.autosaveBound = "true";
+        input.addEventListener("change", () => {
+          input.form?.requestSubmit();
+        });
       });
-    });
-  };
+    };
 
-  document.addEventListener("turbo:load", initializeEmbedToggleAutosave);
-  document.addEventListener("DOMContentLoaded", initializeEmbedToggleAutosave);
+    if (!window.recordingStudioEmbeddableEmbedToggle) {
+      window.recordingStudioEmbeddableEmbedToggle = true;
+      const run = (event) => {
+        if (event?.type === "turbo:frame-load" && event.target?.id !== "recording_studio_embeddable_management") return;
+        initializeEmbedToggleAutosave();
+      };
+      document.addEventListener("turbo:load", run);
+      document.addEventListener("DOMContentLoaded", run);
+      document.addEventListener("turbo:frame-load", run);
+    }
+
+    initializeEmbedToggleAutosave();
+  })();
 </script>

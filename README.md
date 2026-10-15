@@ -288,6 +288,23 @@ The engine also ships management routes for embed editors and operators. From th
 
 Studio/management screens use core `recording_studio/default_layout` via `RecordingStudio::UsesDefaultLayout`. Do not wrap them in a second application shell. Core still puts `data-theme` on `<body>`; this gem copies FlatPack `rounded` onto `<html>` through `app/views/recording_studio/_default_layout_head.html.erb`. Hosts that already provide that partial should keep it. The public iframe at `/recording_studio_embeddable/embeds/:token` stays on the chrome-free embed layout.
 
+### Open management in a modal
+
+Full pages stay the default. A host can open the same screens in a Flatpack modal. Tab changes, saves, validation errors, and the success message stay in that modal.
+
+Call the helper once for the shell, then again for each extra opener. The second call adds a button and reuses the modal.
+
+```erb
+<%= recording_studio_embeddable_management_modal(recording: page_recording, tab: :styling, label: "Page embed") %>
+<%= recording_studio_embeddable_management_modal(recording: widget_recording, tab: :floating, label: "Chat button") %>
+```
+
+`recording` is the parent recording. It must already have an embed (`ensure_embed!`). `tab` is one of `:edit`, `:preview`, `:styling`, `:settings`, `:floating`, or `:stats`.
+
+The modal body is a Turbo Frame, `recording_studio_embeddable_management`. The host page has to load Turbo (`import "@hotwired/turbo-rails"`). A request for that frame, `?variant=modal`, or `?modal=1` renders the frame without the page back and close bar. The modal draws its own close control. Leave those off and the screen still renders in `recording_studio/default_layout`.
+
+Copy buttons, the Style preview, and the Chat button preview run again when the frame loads. The dummy app shows both openers at `/embed-modals`.
+
 ## Development
 
 For local development in this repository:

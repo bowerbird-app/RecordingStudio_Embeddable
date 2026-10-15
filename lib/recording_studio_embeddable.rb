@@ -57,6 +57,10 @@ rescue LoadError
 end
 
 module RecordingStudioEmbeddable
+  MANAGEMENT_FRAME_ID = "recording_studio_embeddable_management"
+  MANAGEMENT_MODAL_ID = "recording-studio-embeddable-management"
+  MODAL_VARIANT = "modal"
+
   class << self
     def configuration
       @configuration ||= Configuration.new

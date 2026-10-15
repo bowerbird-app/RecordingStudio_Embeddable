@@ -15,6 +15,10 @@ en:
         stats: "Stats"
         embedded_recording: "Embedded recording"
       management:
+        modal:
+          title: "Embed"
+          open: "Embed"
+          loading: "Loading…"
         edit:
           title: "Embed"
           embeddable_label: "Embeddable"

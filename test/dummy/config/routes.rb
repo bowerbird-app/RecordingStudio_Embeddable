@@ -38,6 +38,7 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
+  get "embed-modals", to: "embed_modals#show", as: :embed_modals
   get "docs/install", to: "docs#install", as: :docs_install
   get "docs/config", to: "docs#configuration", as: :docs_config
   get "docs/recordable_types", to: "docs#recordable_types", as: :docs_recordable_types

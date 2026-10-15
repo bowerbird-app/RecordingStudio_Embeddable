@@ -18,6 +18,12 @@
       size: :md,
       href: new_dummy_page_path
     ) %>
+    <%= render FlatPack::Button::Component.new(
+      text: "Manage embeds",
+      style: :secondary,
+      size: :md,
+      href: embed_modals_path
+    ) %>
   </div>
 
   <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>

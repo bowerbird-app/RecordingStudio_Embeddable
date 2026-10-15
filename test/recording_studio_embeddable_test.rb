@@ -128,7 +128,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.7.0", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.8.0", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -440,11 +440,15 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     nav = File.read(
       File.expand_path("../app/views/recording_studio_embeddable/management/embeds/_section_nav.html.erb", __dir__)
     )
+    helper = File.read(
+      File.expand_path("../app/helpers/recording_studio_embeddable/management_modal_helper.rb", __dir__)
+    )
     layout = File.read(
       File.expand_path("../app/views/layouts/recording_studio_embeddable/embed.html.erb", __dir__)
     )
 
-    assert_includes nav, "data: { turbo: false }"
+    assert_includes helper, "{ turbo: false }"
+    assert_includes nav, "recording_studio_embeddable_management_preview_data"
     assert_includes layout, 'name="turbo-visit-control"'
     assert_includes layout, 'content="reload"'
   end
@@ -656,7 +660,8 @@ class RecordingStudioEmbeddableTest < Minitest::Test
         File.expand_path("../app/views/recording_studio_embeddable/management/embeds/#{action}.html.erb", __dir__)
       )
 
-      refute_includes source, "section_nav"
+      assert_includes source, "recording_studio_embeddable_management_modal_tabs?"
+      assert_includes source, 'render "section_nav"'
       refute_includes source, "large_subtitle"
       refute_includes source, "Getting Started"
       assert_includes source, "subtitle: recordable_title"
@@ -672,7 +677,8 @@ class RecordingStudioEmbeddableTest < Minitest::Test
       File.expand_path("../app/views/recording_studio_embeddable/management/embeds/stats.html.erb", __dir__)
     )
 
-    refute_includes settings, "section_nav"
+    assert_includes settings, "recording_studio_embeddable_management_modal_tabs?"
+    assert_includes settings, 'render "section_nav"'
     assert_includes settings, 'default: "Embed settings"'
     assert_includes settings, "subtitle: recordable_title"
     refute_includes settings, "large_subtitle"

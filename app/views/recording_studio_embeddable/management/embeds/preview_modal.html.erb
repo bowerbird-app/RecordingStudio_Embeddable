@@ -1,0 +1,22 @@
+<% parent_recording = @embed.parent_recording %>
+<% recordable = parent_recording&.recordable %>
+<% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || t("recording_studio.embeddable.common.embedded_recording", default: "Embedded recording") %>
+
+<div class="flex w-full flex-col gap-6">
+  <%= render FlatPack::PageTitle::Component.new(
+    title: t("recording_studio.embeddable.common.preview", default: "Preview"),
+    subtitle: recordable_title,
+    variant: :h1
+  ) %>
+
+  <%= render "section_nav" %>
+
+  <iframe
+    src="<%= preview_management_embed_path(@embed) %>"
+    title="<%= t("recording_studio.embeddable.management.styling.preview_title", default: "Embed preview") %>"
+    class="w-full border-0"
+    style="min-height: 32rem;"
+    loading="eager"
+    referrerpolicy="strict-origin-when-cross-origin"
+  ></iframe>
+</div>
