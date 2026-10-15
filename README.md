@@ -284,9 +284,11 @@ The initializer generator writes a working starting point at `config/initializer
 The engine also ships management routes for embed editors and operators. From there you can:
 
 - Edit embed settings.
-- Preview the rendered embed.
+- Preview the embed in a frame, with the same tabs as the other screens.
 - Adjust styling overrides.
 - Review summary and stats views.
+
+Each screen has a tab: Embed, Preview, Embed style, Chat button (when the type floats), Settings, and Stats. The open screen's tab is a primary button on the full page and in the modal.
 
 Studio/management screens use core `recording_studio/default_layout` via `RecordingStudio::UsesDefaultLayout`. Do not wrap them in a second application shell. Core still puts `data-theme` on `<body>`; this gem copies FlatPack `rounded` onto `<html>` through `app/views/recording_studio/_default_layout_head.html.erb`. Hosts that already provide that partial should keep it. The public iframe at `/recording_studio_embeddable/embeds/:token` stays on the chrome-free embed layout.
 
@@ -305,7 +307,7 @@ Call the helper once for the shell, then again for each extra opener. The second
 
 The modal body is a Turbo Frame, `recording_studio_embeddable_management`. The host page has to load Turbo (`import "@hotwired/turbo-rails"`). A request for that frame, `?variant=modal`, or `?modal=1` renders the frame without the page back and close bar. The modal uses Flatpack `scroll: :page` and `body_height_mode: :auto`, so the dialog grows with the screen. Close it with the Flatpack X, Escape, or the backdrop. Leave the modal params off and the screen still renders in `recording_studio/default_layout`.
 
-Embed style is two columns: the controls and Save sit on the left, the live preview on the right. The tab for the open screen uses a primary button. The other tabs stay secondary. A tab change renders that screen again, in the frame or on the full page, so the primary tab moves with it. Copy buttons, the Embed style preview, and the Chat button preview run again when the frame loads. The dummy app shows both openers at `/embed-modals`.
+Embed style is two columns: the controls and Save sit on the left, the live preview on the right. Preview shows that same embed document in a frame, without the style controls. The Chat button preview is separate: it loads the launcher, not the inline embed. A tab change renders that screen again, in the frame or on the full page, so the primary tab moves with it. Copy buttons, the Embed style preview, and the Chat button preview run again when the frame loads. The dummy app shows both openers at `/embed-modals`.
 
 ## Development
 

@@ -175,12 +175,14 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     I18n.available_locales = previous if previous
   end
 
-  test "widget preview renders the widget" do
-    get recording_studio_embeddable.preview_management_embed_path(@embed)
+  test "widget preview document renders the widget" do
+    get recording_studio_embeddable.preview_management_embed_path(@embed, document: 1)
 
     assert_response :success
+    assert_includes response.body, 'name="turbo-visit-control"'
     assert_includes response.body, "Hello widget"
     refute_includes response.body, "Template is missing"
+    refute_includes response.body, RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID
   end
 
   test "an unset position renders bottom right" do

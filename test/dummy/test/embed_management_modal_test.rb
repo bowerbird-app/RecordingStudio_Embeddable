@@ -36,8 +36,9 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_select "nav[aria-label='Page navigation']", count: 1
     assert_select "turbo-frame##{RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID}", count: 0
     assert_primary_tab "Chat button"
+    assert_secondary_tab "Embed"
     assert_secondary_tab "Preview"
-    assert_secondary_tab "Styling"
+    assert_secondary_tab "Embed style"
     assert_secondary_tab "Settings"
     assert_secondary_tab "Stats"
 
@@ -45,7 +46,9 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
         headers: frame_headers
 
     assert_modal_frame
-    assert_primary_tab "Styling"
+    assert_primary_tab "Embed style"
+    assert_secondary_tab "Embed"
+    assert_secondary_tab "Preview"
     assert_secondary_tab "Chat button"
     assert_secondary_tab "Settings"
 
@@ -54,7 +57,7 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
 
     assert_modal_frame
     assert_primary_tab "Settings"
-    assert_secondary_tab "Styling"
+    assert_secondary_tab "Embed style"
     assert_secondary_tab "Chat button"
   end
 
@@ -66,15 +69,21 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame##{RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID}", count: 0
     assert_includes response.body, "Embed style"
     refute_includes response.body, "variant=modal"
-    refute_includes response.body, ">Settings<"
+    assert_primary_tab "Embed style"
+    assert_secondary_tab "Embed"
+    assert_secondary_tab "Preview"
+    assert_secondary_tab "Settings"
+    assert_secondary_tab "Stats"
 
     get recording_studio_embeddable.edit_management_embed_path(@page_embed)
 
     assert_response :success
     assert_select "nav[aria-label='Page navigation']", count: 1
     assert_select "turbo-frame##{RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID}", count: 0
-    assert_select "a[data-turbo=false][href=?]",
-      recording_studio_embeddable.preview_management_embed_path(@page_embed)
+    assert_primary_tab "Embed"
+    assert_secondary_tab "Preview"
+    assert_select "a[href=?]", recording_studio_embeddable.preview_management_embed_path(@page_embed)
+    assert_select "a[data-turbo=false]", count: 0
     refute_includes response.body, "variant=modal"
   end
 
@@ -105,19 +114,35 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Stats"
   end
 
-  test "full page preview stays a document and modal preview stays in the frame" do
+  test "preview screen marks preview primary and the document stays framable" do
+    document_path = recording_studio_embeddable.preview_management_embed_path(@page_embed, document: 1)
+
     get recording_studio_embeddable.preview_management_embed_path(@page_embed)
+
+    assert_response :success
+    assert_select "nav[aria-label='Page navigation']", count: 1
+    assert_select "turbo-frame##{RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID}", count: 0
+    assert_primary_tab "Preview"
+    assert_secondary_tab "Embed"
+    assert_secondary_tab "Embed style"
+    assert_select "iframe[src=?]", document_path
+    refute_includes response.body, 'name="turbo-visit-control"'
+
+    get document_path
 
     assert_response :success
     assert_includes response.body, 'name="turbo-visit-control"'
     refute_includes response.body, RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID
+    assert_equal "frame-ancestors 'self'", response.headers["Content-Security-Policy"]
+    assert_nil response.headers["X-Frame-Options"]
 
     get recording_studio_embeddable.preview_management_embed_path(@page_embed),
         headers: frame_headers
 
     assert_modal_frame
-    assert_includes response.body, "Preview"
-    assert_select "iframe[src=?]", recording_studio_embeddable.preview_management_embed_path(@page_embed)
+    assert_primary_tab "Preview"
+    assert_secondary_tab "Embed"
+    assert_select "iframe[src=?]", document_path
   end
 
   test "settings validation error and successful save stay in the frame" do
@@ -130,7 +155,7 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Invalid embedder domain: localhost"
     assert_includes response.body, "Embed settings"
     assert_primary_tab "Settings"
-    assert_secondary_tab "Styling"
+    assert_secondary_tab "Embed style"
 
     patch recording_studio_embeddable.management_embed_path(@widget_embed),
           params: settings_params("partner.example"),
@@ -160,6 +185,7 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "nav[aria-label='Page navigation']", count: 1
     assert_includes response.body, "Embed settings updated."
+    assert_primary_tab "Settings"
   end
 
   test "floating screen renders in the modal frame" do
@@ -185,7 +211,7 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_modal_frame
     assert_includes response.body, "Text color must be a valid hex color"
-    assert_primary_tab "Styling"
+    assert_primary_tab "Embed style"
     assert_secondary_tab "Settings"
   end
 

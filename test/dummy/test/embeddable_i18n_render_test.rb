@@ -48,7 +48,7 @@ class EmbeddableI18nRenderTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Custom code"
     refute_includes response.body, "Paste this into your page."
     assert_includes response.body, "Preview"
-    assert_includes response.body, "Styling"
+    assert_includes response.body, "Embed style"
     assert_includes response.body, "Settings"
     assert_includes response.body, "Stats"
     refute_includes response.body, "translation missing"

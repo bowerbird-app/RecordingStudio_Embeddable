@@ -30,9 +30,7 @@
     variant: :h1
   ) %>
 
-  <% if recording_studio_embeddable_management_modal_tabs? %>
-    <%= render "section_nav" %>
-  <% end %>
+  <%= render "section_nav" %>
 
   <% if show_unpublished_warning %>
     <%= render FlatPack::EmptyState::Component.new(

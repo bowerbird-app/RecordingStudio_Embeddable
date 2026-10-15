@@ -437,7 +437,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute RecordingStudioEmbeddable::Security::DomainPolicy.new(embed: embed, origin: "https://blocked.example.com").allowed?
   end
 
-  def test_preview_nav_disables_turbo_for_full_document_load
+  def test_preview_tab_opens_the_screen_and_the_embed_document_reloads
     nav = File.read(
       File.expand_path("../app/views/recording_studio_embeddable/management/embeds/_section_nav.html.erb", __dir__)
     )
@@ -447,15 +447,24 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     layout = File.read(
       File.expand_path("../app/views/layouts/recording_studio_embeddable/embed.html.erb", __dir__)
     )
+    controller = File.read(
+      File.expand_path("../app/controllers/recording_studio_embeddable/management/embeds_controller.rb", __dir__)
+    )
 
-    assert_includes helper, "{ turbo: false }"
-    assert_includes nav, "recording_studio_embeddable_management_preview_data"
+    assert_includes nav, "recording_studio_embeddable_management_tab_style(:edit)"
     assert_includes nav, "recording_studio_embeddable_management_tab_style(:preview)"
     assert_includes nav, "recording_studio_embeddable_management_tab_style(:styling)"
     assert_includes nav, "recording_studio_embeddable_management_tab_style(:floating)"
     assert_includes nav, "recording_studio_embeddable_management_tab_style(:settings)"
     assert_includes nav, "recording_studio_embeddable_management_tab_style(:stats)"
+    assert_includes nav, 'default: "Embed style"'
+    assert_includes nav, "recording_studio_embeddable_management_tab_data"
+    refute_includes nav, "recording_studio_embeddable_management_preview_data"
     refute_includes nav, "style: :secondary"
+    refute_includes helper, "{ turbo: false }"
+    assert_includes helper, "document: 1"
+    assert_includes controller, "params[:document]"
+    assert_includes controller, "render_embed_document"
     assert_includes layout, 'name="turbo-visit-control"'
     assert_includes layout, 'content="reload"'
   end
@@ -484,9 +493,14 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_equal :floating, helper.recording_studio_embeddable_management_current_tab
 
     helper.use_screen("edit")
+    assert_equal :primary, helper.recording_studio_embeddable_management_tab_style(:edit)
     %i[preview styling floating settings stats].each do |screen|
       assert_equal :secondary, helper.recording_studio_embeddable_management_tab_style(screen)
     end
+
+    helper.use_screen("preview")
+    assert_equal :primary, helper.recording_studio_embeddable_management_tab_style(:preview)
+    assert_equal :secondary, helper.recording_studio_embeddable_management_tab_style(:edit)
   end
 
   def test_publishable_gate_fails_closed_without_helper
@@ -700,7 +714,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
         File.expand_path("../app/views/recording_studio_embeddable/management/embeds/#{action}.html.erb", __dir__)
       )
 
-      assert_includes source, "recording_studio_embeddable_management_modal_tabs?"
+      refute_includes source, "recording_studio_embeddable_management_modal_tabs?"
       assert_includes source, 'render "section_nav"'
       refute_includes source, "large_subtitle"
       refute_includes source, "Getting Started"
@@ -717,7 +731,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
       File.expand_path("../app/views/recording_studio_embeddable/management/embeds/stats.html.erb", __dir__)
     )
 
-    assert_includes settings, "recording_studio_embeddable_management_modal_tabs?"
+    refute_includes settings, "recording_studio_embeddable_management_modal_tabs?"
     assert_includes settings, 'render "section_nav"'
     assert_includes settings, 'default: "Embed settings"'
     assert_includes settings, "subtitle: recordable_title"
@@ -762,7 +776,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, 'data-controller~="flat-pack--font-swatch"'
     assert_includes styling, 'id: "embed_appearance_font_family"'
     assert_includes styling, 'id="embed-styling-preview"'
-    assert_includes styling, "preview_management_embed_path(@embed)"
+    assert_includes styling, "recording_studio_embeddable_management_embed_document_path(@embed)"
     assert_includes styling, 'style="width: <%= @preview_width %>; height: auto; min-height: 20rem; max-width: 100%;"'
     assert_includes styling, "selectStyleWidthMode"
     refute_includes styling, "data-style-width-controls"

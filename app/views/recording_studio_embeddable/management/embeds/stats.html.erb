@@ -17,9 +17,7 @@
     variant: :h1
   ) %>
 
-  <% if recording_studio_embeddable_management_modal_tabs? %>
-    <%= render "section_nav" %>
-  <% end %>
+  <%= render "section_nav" %>
 
   <%= render FlatPack::Chart::Component.new(
     title: t("recording_studio.embeddable.management.stats.views", default: "Views"),

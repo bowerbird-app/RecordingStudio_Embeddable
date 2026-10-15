@@ -45,8 +45,6 @@ module RecordingStudioEmbeddable
       update: :management_embed_path
     }.freeze
 
-    SCREENS_WITH_OWN_TABS = %w[edit floating].freeze
-
     def recording_studio_embeddable_management_modal(recording:, tab: :edit, label: nil, style: :primary)
       embed = recording_studio_embeddable_management_embed_for(recording)
       return "".html_safe if embed.blank?
@@ -98,17 +96,12 @@ module RecordingStudioEmbeddable
       end
     end
 
-    def recording_studio_embeddable_management_preview_data
-      if recording_studio_embeddable_management_modal_request?
-        { turbo_frame: RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID }
-      else
-        { turbo: false }
-      end
-    end
-
-    def recording_studio_embeddable_management_modal_tabs?
-      recording_studio_embeddable_management_modal_request? &&
-        SCREENS_WITH_OWN_TABS.exclude?(action_name)
+    def recording_studio_embeddable_management_embed_document_path(embed)
+      recording_studio_embeddable_management_router.public_send(
+        SCREEN_ROUTES.fetch(:preview),
+        embed,
+        document: 1
+      )
     end
 
     private

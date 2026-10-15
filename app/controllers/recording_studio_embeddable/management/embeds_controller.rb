@@ -75,22 +75,11 @@ module RecordingStudioEmbeddable
       end
 
       def preview
-        if recording_studio_embeddable_management_modal_request?
+        if ActiveModel::Type::Boolean.new.cast(params[:document])
+          render_embed_document
+        else
           @recording = @embed.parent_recording
-          render :preview_modal
-          return
         end
-
-        @recording = @embed.parent_recording
-        @parent_recordable = @recording&.recordable if @recording.respond_to?(:recordable)
-        @recordable = @parent_recordable
-        assign_recordable_instance_variable
-        @embed_theme = Renderer.embed_theme_for(@recording, embed: @embed)
-        # Same-origin styling iframe + Turbo full-page Preview both need framing allowed.
-        response.delete_header("X-Frame-Options")
-        response.set_header("Content-Security-Policy", "frame-ancestors 'self'")
-        render Renderer.resolve(@recording, @embed),
-               layout: Renderer.layout_for(@recording, @embed)
       end
 
       def update_styling
@@ -114,6 +103,18 @@ module RecordingStudioEmbeddable
       end
 
       private
+
+      def render_embed_document
+        @recording = @embed.parent_recording
+        @parent_recordable = @recording&.recordable if @recording.respond_to?(:recordable)
+        @recordable = @parent_recordable
+        assign_recordable_instance_variable
+        @embed_theme = Renderer.embed_theme_for(@recording, embed: @embed)
+        response.delete_header("X-Frame-Options")
+        response.set_header("Content-Security-Policy", "frame-ancestors 'self'")
+        render Renderer.resolve(@recording, @embed),
+               layout: Renderer.layout_for(@recording, @embed)
+      end
 
       def management_layout
         if recording_studio_embeddable_management_modal_request?

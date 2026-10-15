@@ -1,18 +1,25 @@
 <% disable_management_actions = local_assigns.fetch(:disable_management_actions, false) %>
 <% tab_link_data = recording_studio_embeddable_management_tab_data %>
-<% preview_link_data = recording_studio_embeddable_management_preview_data %>
 
 <div class="flex flex-wrap items-center gap-2">
+  <%= render FlatPack::Button::Component.new(
+    text: t("recording_studio.embeddable.common.embed", default: "Embed"),
+    style: recording_studio_embeddable_management_tab_style(:edit),
+    size: :md,
+    href: recording_studio_embeddable_management_screen_path(@embed, :edit),
+    aria: recording_studio_embeddable_management_tab_aria(:edit),
+    data: tab_link_data
+  ) %>
   <%= render FlatPack::Button::Component.new(
     text: t("recording_studio.embeddable.common.preview", default: "Preview"),
     style: recording_studio_embeddable_management_tab_style(:preview),
     size: :md,
     href: recording_studio_embeddable_management_screen_path(@embed, :preview),
     aria: recording_studio_embeddable_management_tab_aria(:preview),
-    data: preview_link_data
+    data: tab_link_data
   ) %>
   <%= render FlatPack::Button::Component.new(
-    text: t("recording_studio.embeddable.common.styling", default: "Styling"),
+    text: t("recording_studio.embeddable.management.styling.title", default: "Embed style"),
     style: recording_studio_embeddable_management_tab_style(:styling),
     size: :md,
     href: disable_management_actions ? nil : recording_studio_embeddable_management_screen_path(@embed, :styling),

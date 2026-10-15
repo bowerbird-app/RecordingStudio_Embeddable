@@ -37,9 +37,7 @@
     variant: :h1
   ) %>
 
-  <% if recording_studio_embeddable_management_modal_tabs? %>
-    <%= render "section_nav" %>
-  <% end %>
+  <%= render "section_nav" %>
 
   <%= render FlatPack::Grid::Component.new(cols: 2) do %>
     <div class="space-y-4">
@@ -173,7 +171,7 @@
     <div>
       <iframe
         id="embed-styling-preview"
-        src="<%= preview_management_embed_path(@embed) %>"
+        src="<%= recording_studio_embeddable_management_embed_document_path(@embed) %>"
         title="<%= t("recording_studio.embeddable.management.styling.preview_title", default: "Embed preview") %>"
         loading="lazy"
         referrerpolicy="strict-origin-when-cross-origin"
