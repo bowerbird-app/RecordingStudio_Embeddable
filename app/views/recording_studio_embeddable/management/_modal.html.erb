@@ -1,21 +1,13 @@
 <%= render FlatPack::Modal::Component.new(
   id: RecordingStudioEmbeddable::MANAGEMENT_MODAL_ID,
-  title: title,
   size: :"2xl",
-  scroll: :body
+  scroll: :page,
+  body_height_mode: :auto
 ) do |modal| %>
   <% modal.body do %>
-    <%= turbo_frame_tag RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID, loading: :eager, class: "block min-h-40 w-full" do %>
+    <%= turbo_frame_tag RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID, loading: :eager, class: "block w-full" do %>
       <p class="text-sm text-(--text-muted-color)"><%= t("recording_studio.embeddable.management.modal.loading", default: "Loading…") %></p>
     <% end %>
-  <% end %>
-  <% modal.footer do %>
-    <%= render FlatPack::Button::Component.new(
-      text: t("recording_studio.embeddable.common.close", default: "Close"),
-      style: :secondary,
-      type: "button",
-      data: { action: "click->flat-pack--modal#close" }
-    ) %>
   <% end %>
 <% end %>
 

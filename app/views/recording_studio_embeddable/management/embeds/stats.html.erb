@@ -114,7 +114,7 @@
             value: @stats_to_date&.iso8601,
             min: @stats_from_date&.iso8601
           ) %>
-          <%= render FlatPack::Button::Component.new(text: t("recording_studio.embeddable.common.apply", default: "Apply"), style: :secondary, size: :sm, type: "submit") %>
+          <%= render FlatPack::Button::Component.new(text: t("recording_studio.embeddable.common.apply", default: "Apply"), style: :primary, size: :sm, type: "submit") %>
           <% if @stats_custom_range %>
             <%= render FlatPack::Button::Component.new(
               text: t("recording_studio.embeddable.common.clear", default: "Clear"),

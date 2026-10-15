@@ -59,7 +59,7 @@ class EmbeddableI18nRenderTest < ActionDispatch::IntegrationTest
 
     get recording_studio_embeddable.styling_management_embed_path(@embed)
     assert_response :success
-    assert_includes response.body, "Style"
+    assert_includes response.body, "Embed style"
     assert_includes response.body, "Save"
     assert_includes response.body, "Reset"
     assert_includes response.body, "Width"

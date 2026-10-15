@@ -35,7 +35,7 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "nav[aria-label='Page navigation']", count: 1
     assert_select "turbo-frame##{RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID}", count: 0
-    assert_includes response.body, "Style"
+    assert_includes response.body, "Embed style"
     refute_includes response.body, "variant=modal"
     refute_includes response.body, ">Settings<"
 
@@ -54,7 +54,9 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
         headers: frame_headers
 
     assert_modal_frame
-    assert_includes response.body, "Style"
+    assert_includes response.body, "Embed style"
+    assert_operator response.body.index(">Save<"), :<, response.body.index('id="embed-styling-preview"')
+    assert_operator response.body.index("</form>"), :<, response.body.index('id="embed-styling-preview"')
     assert_includes response.body, "variant=modal"
     assert_includes response.body, ">Settings<"
     assert_select "a[data-turbo=false]", count: 0
@@ -160,6 +162,11 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "##{RecordingStudioEmbeddable::MANAGEMENT_MODAL_ID}", count: 1
+    assert_select ".flat-pack-modal__header", count: 0
+    assert_select ".flat-pack-modal__footer", count: 0
+    assert_select ".flat-pack-modal__close button", count: 1
+    assert_select "[data-fp-modal-scroll=page]", count: 1
+    refute_includes response.body, "fp-modal-dialog-cap"
     assert_select "turbo-frame##{RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID}", count: 1
     assert_select "[data-recording-studio-embeddable-management-src]", count: 2
     assert_select "button", text: "Page embed"

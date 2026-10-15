@@ -16,7 +16,6 @@ en:
         embedded_recording: "Embedded recording"
       management:
         modal:
-          title: "Embed"
           open: "Embed"
           loading: "Loading…"
         edit:
@@ -47,7 +46,7 @@ en:
           snippet_heading: "%{label} snippet"
           snippet_help: "Paste this where the %{label} should appear."
         styling:
-          title: "Style"
+          title: "Embed style"
           disabled_notice: "Custom styling is currently disabled for this embed. You can still review the resolved values below."
           width: "Width"
           width_auto: "Auto"

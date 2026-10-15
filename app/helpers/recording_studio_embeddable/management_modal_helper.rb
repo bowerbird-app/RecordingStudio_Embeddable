@@ -14,7 +14,7 @@ module RecordingStudioEmbeddable
 
     SCREENS_WITH_OWN_TABS = %w[edit floating].freeze
 
-    def recording_studio_embeddable_management_modal(recording:, tab: :edit, label: nil, title: nil, style: :primary)
+    def recording_studio_embeddable_management_modal(recording:, tab: :edit, label: nil, style: :primary)
       embed = recording_studio_embeddable_management_embed_for(recording)
       return "".html_safe if embed.blank?
 
@@ -24,13 +24,7 @@ module RecordingStudioEmbeddable
       ]
       unless recording_studio_embeddable_management_modal_shell_rendered?
         @_recording_studio_embeddable_management_modal_shell = true
-        parts << render(
-          "recording_studio_embeddable/management/modal",
-          title: title.presence || t(
-            "recording_studio.embeddable.management.modal.title",
-            default: "Embed"
-          )
-        )
+        parts << render("recording_studio_embeddable/management/modal")
       end
       safe_join(parts)
     end

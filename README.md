@@ -301,9 +301,9 @@ Call the helper once for the shell, then again for each extra opener. The second
 
 `recording` is the parent recording. It must already have an embed (`ensure_embed!`). `tab` is one of `:edit`, `:preview`, `:styling`, `:settings`, `:floating`, or `:stats`.
 
-The modal body is a Turbo Frame, `recording_studio_embeddable_management`. The host page has to load Turbo (`import "@hotwired/turbo-rails"`). A request for that frame, `?variant=modal`, or `?modal=1` renders the frame without the page back and close bar. The modal draws its own close control. Leave those off and the screen still renders in `recording_studio/default_layout`.
+The modal body is a Turbo Frame, `recording_studio_embeddable_management`. The host page has to load Turbo (`import "@hotwired/turbo-rails"`). A request for that frame, `?variant=modal`, or `?modal=1` renders the frame without the page back and close bar. The modal uses Flatpack `scroll: :page` and `body_height_mode: :auto`, so the dialog grows with the screen. Close it with the Flatpack X, Escape, or the backdrop. Leave the modal params off and the screen still renders in `recording_studio/default_layout`.
 
-Copy buttons, the Style preview, and the Chat button preview run again when the frame loads. The dummy app shows both openers at `/embed-modals`.
+Embed style is two columns: the controls and Save sit on the left, the live preview on the right. Copy buttons, that preview, and the Chat button preview run again when the frame loads. The dummy app shows both openers at `/embed-modals`.
 
 ## Development
 

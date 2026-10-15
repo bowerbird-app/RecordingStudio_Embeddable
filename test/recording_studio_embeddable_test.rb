@@ -694,7 +694,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes settings, "Iframe width"
     refute_includes settings, "Iframe height"
 
-    assert_includes styling, 'default: "Style"'
+    assert_includes styling, 'default: "Embed style"'
     assert_includes styling, "FlatPack::Grid::Component.new(cols: 2)"
     assert_includes styling, "FlatPack::ColorSwatch::Component"
     assert_includes styling, "FlatPack::FontSwatch::Component"
@@ -775,12 +775,17 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_operator popover_index, :<, auto_tab_index
     assert_operator auto_tab_index, :<, custom_tab_index
     assert_operator custom_tab_index, :<, field_index
+    save_index = styling.index('default: "Save"')
+    assert save_index, "expected Save on Style screen"
+    assert_operator color_swatch_index, :<, save_index
+    assert_operator save_index, :<, preview_index
     assert_operator field_index, :<, preview_index
     auto_panel = styling[auto_tab_index...custom_tab_index]
     refute_includes auto_panel, "TextInput"
     refute_includes auto_panel, "help_text"
 
     assert_includes stats, 'default: "Stats"'
+    assert_includes stats, 'default: "Apply"), style: :primary'
     refute_includes stats, "Embed Stats"
   end
 

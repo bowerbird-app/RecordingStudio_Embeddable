@@ -26,7 +26,7 @@ class EmbedManagementModalTest < ApplicationSystemTestCase
     click_button "Page embed"
 
     within_management_frame do
-      assert_selector "h1", exact_text: "Style"
+      assert_selector "h1", exact_text: "Embed style"
       assert_selector "[data-styling-form='true'][data-live-preview-bound='true']"
       click_on "Settings"
       assert_selector "h1", exact_text: "Embed settings"
@@ -41,7 +41,7 @@ class EmbedManagementModalTest < ApplicationSystemTestCase
 
     assert_current_path embed_modals_path
     within "[role=dialog]" do
-      find(".flat-pack-modal__footer").click_button "Close"
+      find(".flat-pack-modal__close button").click
     end
     assert_selector "##{RecordingStudioEmbeddable::MANAGEMENT_MODAL_ID}[aria-hidden='true']", visible: :all
   end
