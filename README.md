@@ -70,6 +70,8 @@ article.embed_public_url(host: "example.com")
 article.embed_code(host: "example.com")
 ```
 
+`embed_code` is the iframe markup. Put it in the page HTML where the recording should appear, such as inside a page or a blog post. The floating launcher is separate and belongs in the page head.
+
 ## Floating launcher
 
 Inline embeds and the floating launcher are separate. `enabled` still switches the public document (iframe or CDN). `floating_enabled` switches the launcher. Types that do not opt in never float and never show launcher controls. Page and Article in the dummy app stay inline-only.
@@ -115,7 +117,7 @@ The JSON `id` is `embed.token`. Browsers must send an `Origin` header. The respo
 
 ### Script and local helper
 
-Partners install one classic script. The URL is not fingerprinted:
+Partners install one classic script on every page where the button should appear. Paste it just before the closing `</head>` tag. The URL is not fingerprinted:
 
 ```html
 <script async src="https://example.com/recording_studio_embeddable/widget.js" data-embed="TOKEN"></script>
@@ -144,7 +146,7 @@ The popup HTML is a live host response. It is not an Artifact and `PublishEmbedT
 
 ### Management screen
 
-Capable types get a screen next to Style. Its tab, heading, form labels, snippet section, and save flash all use `label`. It turns the button on and chooses Position with Bottom left or Bottom right (Bottom right when unset). When the button is on, that screen also shows the install snippet and its copy control. Spacing, panel size, and the icon are not on this form. The preview is the same kind of iframe frame as Style, and it loads `widget.js` — the production launcher — open, at the host size and colours. Position radios move that launcher inside the frame. The button closes and reopens the popup. Style still owns the accent colours. The Embed screen does not show the launcher snippet. Types that did not opt in do not get the screen.
+Capable types get a screen next to Style. Its tab, heading, form labels, snippet section, and save flash all use `label`. It turns the button on and chooses Position with Bottom left or Bottom right (Bottom right when unset). When the button is on, that screen also shows the install snippet and its copy control. The snippet goes on every page, just before the closing `</head>` tag. Spacing, panel size, and the icon are not on this form. The preview is the same kind of iframe frame as Style, and it loads `widget.js` — the production launcher — open, at the host size and colours. Position radios move that launcher inside the frame. The button closes and reopens the popup. Style still owns the accent colours. The Embed screen does not show the launcher snippet. Types that did not opt in do not get the screen.
 
 ### Options
 
@@ -282,11 +284,30 @@ The initializer generator writes a working starting point at `config/initializer
 The engine also ships management routes for embed editors and operators. From there you can:
 
 - Edit embed settings.
-- Preview the rendered embed.
+- Preview the embed in a frame, with the same tabs as the other screens.
 - Adjust styling overrides.
 - Review summary and stats views.
 
+Each screen has a tab: Embed, Preview, Embed style, Chat button (when the type floats), Settings, and Stats. The open screen's tab is a primary button on the full page and in the modal.
+
 Studio/management screens use core `recording_studio/default_layout` via `RecordingStudio::UsesDefaultLayout`. Do not wrap them in a second application shell. Core still puts `data-theme` on `<body>`; this gem copies FlatPack `rounded` onto `<html>` through `app/views/recording_studio/_default_layout_head.html.erb`. Hosts that already provide that partial should keep it. The public iframe at `/recording_studio_embeddable/embeds/:token` stays on the chrome-free embed layout.
+
+### Open management in a modal
+
+Full pages stay the default. A host can open the same screens in a Flatpack modal. Tab changes, saves, validation errors, and the success message stay in that modal.
+
+Call the helper once for the shell, then again for each extra opener. The second call adds a button and reuses the modal.
+
+```erb
+<%= recording_studio_embeddable_management_modal(recording: page_recording, tab: :styling, label: "Page embed") %>
+<%= recording_studio_embeddable_management_modal(recording: widget_recording, tab: :floating, label: "Chat button") %>
+```
+
+`recording` is the parent recording. It must already have an embed (`ensure_embed!`). `tab` is one of `:edit`, `:preview`, `:styling`, `:settings`, `:floating`, or `:stats`.
+
+The modal body is a Turbo Frame, `recording_studio_embeddable_management`. The host page has to load Turbo (`import "@hotwired/turbo-rails"`). A request for that frame, `?variant=modal`, or `?modal=1` renders the frame without the page back and close bar. The modal uses Flatpack `scroll: :page` and `body_height_mode: :auto`, so the dialog grows with the screen. Close it with the Flatpack X, Escape, or the backdrop. Leave the modal params off and the screen still renders in `recording_studio/default_layout`.
+
+Embed style is two columns: the controls and Save sit on the left, the live preview on the right. Colour swatches wrap onto the next line when they do not fit. Preview shows that same embed document in a frame, without the style controls. The Chat button preview is separate: it loads the launcher, not the inline embed. A tab change renders that screen again, in the frame or on the full page, so the primary tab moves with it. Copy buttons, the Embed style preview, and the Chat button preview run again when the frame loads. The dummy app shows both openers at `/embed-modals`.
 
 ## Development
 

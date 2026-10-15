@@ -98,7 +98,12 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "launcher_snippet"
     assert_includes response.body, "Chat button snippet"
-    assert_includes response.body, "Paste this where the Chat button should appear."
+    assert_includes response.body, "Add this code to every page of your website where you want the Chat button to appear."
+    assert_includes response.body, "<code>&lt;/head&gt;</code>"
+    refute_includes response.body, "<code></head></code>"
+    refute_includes response.body, "Using Squarespace, Wix or WordPress?"
+    refute_includes response.body, "Header code injection"
+    refute_includes response.body, "Paste this where the Chat button should appear."
     refute_includes response.body, ">Launcher<"
     assert_includes response.body, "widget.js"
     assert_includes response.body, "copyFromButton"
@@ -170,12 +175,14 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     I18n.available_locales = previous if previous
   end
 
-  test "widget preview renders the widget" do
-    get recording_studio_embeddable.preview_management_embed_path(@embed)
+  test "widget preview document renders the widget" do
+    get recording_studio_embeddable.preview_management_embed_path(@embed, document: 1)
 
     assert_response :success
+    assert_includes response.body, 'name="turbo-visit-control"'
     assert_includes response.body, "Hello widget"
     refute_includes response.body, "Template is missing"
+    refute_includes response.body, RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID
   end
 
   test "an unset position renders bottom right" do

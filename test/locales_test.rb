@@ -74,6 +74,22 @@ class LocalesTest < Minitest::Test
     end
   end
 
+  def test_install_help_describes_where_to_paste_the_code
+    I18n.with_locale(:en) do
+      embed_help = "Add this code to your website wherever you want this to appear, " \
+                   "for example inside a page or blog post. " \
+                   "Paste it into the page's HTML, or ask your web developer to add it."
+      assert_equal embed_help, t("management.edit.embed_code_help")
+      assert_nil t("management.edit.embed_code_platforms", default: nil)
+      assert_nil t("management.floating.snippet_platforms", default: nil)
+
+      snippet_help = "Add this code to every page of your website where you want the Chat button to appear. " \
+                     "Paste it just before the closing <code>&lt;/head&gt;</code> tag, " \
+                     "or ask your web developer to add it."
+      assert_equal snippet_help, t("management.floating.snippet_help_html", label: "Chat button")
+    end
+  end
+
   def test_yes_no_on_off_locale_keys_resolve_without_default
     yes_no_keys = collect_yes_no_on_off_keys(
       locale_tree(File.join(engine_locales_dir, "en.yml"), "en")

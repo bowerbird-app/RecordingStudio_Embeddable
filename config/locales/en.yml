@@ -15,11 +15,14 @@ en:
         stats: "Stats"
         embedded_recording: "Embedded recording"
       management:
+        modal:
+          open: "Embed"
+          loading: "Loading…"
         edit:
           title: "Embed"
           embeddable_label: "Embeddable"
           embed_code_heading: "Embed code"
-          embed_code_help: "Paste this into your page."
+          embed_code_help: "Add this code to your website wherever you want this to appear, for example inside a page or blog post. Paste it into the page's HTML, or ask your web developer to add it."
           unavailable_title: "Embeddable unavailable"
           unavailable_description: "You need to publish this page before you can enable embeddable."
           publish_settings: "Publish Settings"
@@ -41,9 +44,9 @@ en:
           bottom_left: "Bottom left"
           save: "Save %{label}"
           snippet_heading: "%{label} snippet"
-          snippet_help: "Paste this where the %{label} should appear."
+          snippet_help_html: "Add this code to every page of your website where you want the %{label} to appear. Paste it just before the closing <code>&lt;/head&gt;</code> tag, or ask your web developer to add it."
         styling:
-          title: "Style"
+          title: "Embed style"
           disabled_notice: "Custom styling is currently disabled for this embed. You can still review the resolved values below."
           width: "Width"
           width_auto: "Auto"

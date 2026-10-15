@@ -26,7 +26,8 @@
 
   <%= render FlatPack::Grid::Component.new(cols: 2) do %>
     <div class="space-y-6">
-      <%= form_with model: @embed, url: floating_management_embed_path(@embed), method: :patch, class: "space-y-6", html: { id: "launcher-settings" } do %>
+      <%= form_with model: @embed, url: recording_studio_embeddable_management_screen_path(@embed, :floating), method: :patch, class: "space-y-6", html: { id: "launcher-settings" }, data: recording_studio_embeddable_management_form_data do %>
+        <%= recording_studio_embeddable_management_variant_field %>
         <% if @embed.errors.any? %>
           <p role="alert"><%= @embed.errors.full_messages.to_sentence %></p>
         <% end %>
@@ -58,7 +59,11 @@
         <div class="space-y-4">
           <div class="space-y-1">
             <h2 class="text-base font-semibold"><%= t("recording_studio.embeddable.management.floating.snippet_heading", label: floating_label, default: "%{label} snippet") %></h2>
-            <p class="text-sm text-(--text-muted-color)"><%= t("recording_studio.embeddable.management.floating.snippet_help", label: floating_label, default: "Paste this where the %{label} should appear.") %></p>
+            <p class="text-sm text-(--text-muted-color)"><%= t(
+              "recording_studio.embeddable.management.floating.snippet_help_html",
+              label: floating_label,
+              default: "Add this code to every page of your website where you want the %{label} to appear. Paste it just before the closing <code>&lt;/head&gt;</code> tag, or ask your web developer to add it."
+            ) %></p>
           </div>
           <%= render FlatPack::TextArea::Component.new(
             name: "launcher_snippet",
@@ -89,37 +94,62 @@
 </div>
 
 <script>
-  const floatingPreviewFrame = () => document.getElementById("embed-floating-preview");
+  (() => {
+    const floatingPreviewFrame = () => document.getElementById("embed-floating-preview");
 
-  const syncLauncherPreview = () => {
-    const doc = floatingPreviewFrame()?.contentDocument;
-    const widget = doc?.querySelector("[data-recording-studio-widget]");
-    if (!widget) return;
+    const syncLauncherPreview = () => {
+      const doc = floatingPreviewFrame()?.contentDocument;
+      const widget = doc?.querySelector("[data-recording-studio-widget]");
+      if (!widget) return;
 
-    const form = document.getElementById("launcher-settings");
-    const position = form?.querySelector('input[name="embed[floating][position]"]:checked')?.value;
-    if (position === "bottom-left" || position === "bottom-right") {
-      widget.setAttribute("data-position", position);
-    }
-  };
-
-  const watchFloatingPreview = () => {
-    const frame = floatingPreviewFrame();
-    if (!frame) return;
-
-    const watchDocument = () => {
-      syncLauncherPreview();
-      const doc = frame.contentDocument;
-      if (!doc || doc.documentElement.dataset.floatingPreviewWatch === "true") return;
-      doc.documentElement.dataset.floatingPreviewWatch = "true";
-      new MutationObserver(syncLauncherPreview).observe(doc.documentElement, { childList: true, subtree: true });
+      const form = document.getElementById("launcher-settings");
+      const position = form?.querySelector('input[name="embed[floating][position]"]:checked')?.value;
+      if (position === "bottom-left" || position === "bottom-right") {
+        widget.setAttribute("data-position", position);
+      }
     };
 
-    frame.addEventListener("load", watchDocument);
-    if (frame.contentDocument?.readyState === "complete") watchDocument();
-  };
+    const watchFloatingPreview = () => {
+      const frame = floatingPreviewFrame();
+      if (!frame || frame.dataset.floatingWatchBound === "true") return;
+      frame.dataset.floatingWatchBound = "true";
 
-  document.getElementById("launcher-settings")?.addEventListener("input", syncLauncherPreview);
-  document.getElementById("launcher-settings")?.addEventListener("change", syncLauncherPreview);
-  watchFloatingPreview();
+      const watchDocument = () => {
+        syncLauncherPreview();
+        const doc = frame.contentDocument;
+        if (!doc || doc.documentElement.dataset.floatingPreviewWatch === "true") return;
+        doc.documentElement.dataset.floatingPreviewWatch = "true";
+        new MutationObserver(syncLauncherPreview).observe(doc.documentElement, { childList: true, subtree: true });
+      };
+
+      frame.addEventListener("load", watchDocument);
+      if (frame.contentDocument?.readyState === "complete") watchDocument();
+    };
+
+    const bindLauncherForm = () => {
+      const form = document.getElementById("launcher-settings");
+      if (!form || form.dataset.floatingPreviewBound === "true") return;
+      form.dataset.floatingPreviewBound = "true";
+      form.addEventListener("input", syncLauncherPreview);
+      form.addEventListener("change", syncLauncherPreview);
+    };
+
+    const bootFloatingPreview = () => {
+      bindLauncherForm();
+      watchFloatingPreview();
+    };
+
+    if (!window.recordingStudioEmbeddableFloatingBoot) {
+      window.recordingStudioEmbeddableFloatingBoot = true;
+      const run = (event) => {
+        if (event?.type === "turbo:frame-load" && event.target?.id !== "recording_studio_embeddable_management") return;
+        bootFloatingPreview();
+      };
+      document.addEventListener("turbo:load", run);
+      document.addEventListener("DOMContentLoaded", run);
+      document.addEventListener("turbo:frame-load", run);
+    }
+
+    bootFloatingPreview();
+  })();
 </script>

@@ -17,6 +17,8 @@
     variant: :h1
   ) %>
 
+  <%= render "section_nav" %>
+
   <%= render FlatPack::Chart::Component.new(
     title: t("recording_studio.embeddable.management.stats.views", default: "Views"),
     type: :line,
@@ -39,14 +41,14 @@
           options: @stats_range_options.map do |key, label|
             {
               text: label,
-              url: stats_management_embed_path(@embed, range: key, viewer: @stats_viewer_filter,
+              url: recording_studio_embeddable_management_screen_path(@embed, :stats, range: key, viewer: @stats_viewer_filter,
                                                        granularity: @stats_granularity),
               selected: @stats_range_picker == key
             }
           end + [
             {
               text: t("recording_studio.embeddable.management.stats.range", default: "Range"),
-              url: stats_management_embed_path(@embed, range: "custom", viewer: @stats_viewer_filter,
+              url: recording_studio_embeddable_management_screen_path(@embed, :stats, range: "custom", viewer: @stats_viewer_filter,
                                                        granularity: @stats_granularity),
               selected: @stats_range_picker == "custom"
             }
@@ -66,7 +68,7 @@
                     end
             {
               text: label,
-              url: stats_management_embed_path(@embed, query),
+              url: recording_studio_embeddable_management_screen_path(@embed, :stats, **query),
               selected: @stats_viewer_filter == key
             }
           end
@@ -85,7 +87,7 @@
                     end
             {
               text: label,
-              url: stats_management_embed_path(@embed, query),
+              url: recording_studio_embeddable_management_screen_path(@embed, :stats, **query),
               selected: @stats_granularity == key
             }
           end
@@ -93,7 +95,8 @@
       <% end %>
 
       <% if @stats_range_picker == "custom" %>
-        <%= form_with url: stats_management_embed_path(@embed), method: :get, local: true, class: "mt-2 flex flex-col items-start gap-3" do %>
+        <%= form_with url: recording_studio_embeddable_management_screen_path(@embed, :stats), method: :get, local: !recording_studio_embeddable_management_modal_request?, class: "mt-2 flex flex-col items-start gap-3", data: recording_studio_embeddable_management_form_data do %>
+          <%= recording_studio_embeddable_management_variant_field %>
           <%= hidden_field_tag :viewer, @stats_viewer_filter %>
           <%= hidden_field_tag :range, "custom" %>
           <%= hidden_field_tag :granularity, @stats_granularity %>
@@ -109,13 +112,13 @@
             value: @stats_to_date&.iso8601,
             min: @stats_from_date&.iso8601
           ) %>
-          <%= render FlatPack::Button::Component.new(text: t("recording_studio.embeddable.common.apply", default: "Apply"), style: :secondary, size: :sm, type: "submit") %>
+          <%= render FlatPack::Button::Component.new(text: t("recording_studio.embeddable.common.apply", default: "Apply"), style: :primary, size: :sm, type: "submit") %>
           <% if @stats_custom_range %>
             <%= render FlatPack::Button::Component.new(
               text: t("recording_studio.embeddable.common.clear", default: "Clear"),
               style: :secondary,
               size: :sm,
-              href: stats_management_embed_path(@embed, range: "custom", viewer: @stats_viewer_filter,
+              href: recording_studio_embeddable_management_screen_path(@embed, :stats, range: "custom", viewer: @stats_viewer_filter,
                                                        granularity: @stats_granularity)
             ) %>
           <% end %>

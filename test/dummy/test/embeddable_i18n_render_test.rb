@@ -42,9 +42,12 @@ class EmbeddableI18nRenderTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_includes response.body, "Embed"
-    assert_includes response.body, "Paste this into your page."
+    assert_includes response.body, "Add this code to your website wherever you want this to appear, for example inside a page or blog post."
+    assert_includes response.body, "Paste it into the page&#39;s HTML, or ask your web developer to add it."
+    refute_includes response.body, "Using Squarespace, Wix or WordPress?"
+    refute_includes response.body, "Paste this into your page."
     assert_includes response.body, "Preview"
-    assert_includes response.body, "Styling"
+    assert_includes response.body, "Embed style"
     assert_includes response.body, "Settings"
     assert_includes response.body, "Stats"
     refute_includes response.body, "translation missing"
@@ -59,7 +62,7 @@ class EmbeddableI18nRenderTest < ActionDispatch::IntegrationTest
 
     get recording_studio_embeddable.styling_management_embed_path(@embed)
     assert_response :success
-    assert_includes response.body, "Style"
+    assert_includes response.body, "Embed style"
     assert_includes response.body, "Save"
     assert_includes response.body, "Reset"
     assert_includes response.body, "Width"

@@ -3,6 +3,7 @@
 require "test_helper"
 require "active_record"
 require_relative "../app/helpers/recording_studio_embeddable/embed_layout_helper"
+require_relative "../app/helpers/recording_studio_embeddable/management_modal_helper"
 require_relative "../app/models/recording_studio_embeddable/application_record"
 require_relative "../app/models/recording_studio_embeddable/embeddable_view_log"
 require_relative "../app/models/recording_studio_embeddable/embed"
@@ -128,7 +129,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.7.0", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.8.0", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -436,17 +437,70 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute RecordingStudioEmbeddable::Security::DomainPolicy.new(embed: embed, origin: "https://blocked.example.com").allowed?
   end
 
-  def test_preview_nav_disables_turbo_for_full_document_load
+  def test_preview_tab_opens_the_screen_and_the_embed_document_reloads
     nav = File.read(
       File.expand_path("../app/views/recording_studio_embeddable/management/embeds/_section_nav.html.erb", __dir__)
+    )
+    helper = File.read(
+      File.expand_path("../app/helpers/recording_studio_embeddable/management_modal_helper.rb", __dir__)
     )
     layout = File.read(
       File.expand_path("../app/views/layouts/recording_studio_embeddable/embed.html.erb", __dir__)
     )
+    controller = File.read(
+      File.expand_path("../app/controllers/recording_studio_embeddable/management/embeds_controller.rb", __dir__)
+    )
 
-    assert_includes nav, "data: { turbo: false }"
+    assert_includes nav, "recording_studio_embeddable_management_tab_style(:edit)"
+    assert_includes nav, "recording_studio_embeddable_management_tab_style(:preview)"
+    assert_includes nav, "recording_studio_embeddable_management_tab_style(:styling)"
+    assert_includes nav, "recording_studio_embeddable_management_tab_style(:floating)"
+    assert_includes nav, "recording_studio_embeddable_management_tab_style(:settings)"
+    assert_includes nav, "recording_studio_embeddable_management_tab_style(:stats)"
+    assert_includes nav, 'default: "Embed style"'
+    assert_includes nav, "recording_studio_embeddable_management_tab_data"
+    refute_includes nav, "recording_studio_embeddable_management_preview_data"
+    refute_includes nav, "style: :secondary"
+    refute_includes helper, "{ turbo: false }"
+    assert_includes helper, "document: 1"
+    assert_includes controller, "params[:document]"
+    assert_includes controller, "render_embed_document"
     assert_includes layout, 'name="turbo-visit-control"'
     assert_includes layout, 'content="reload"'
+  end
+
+  def test_current_management_tab_is_primary_and_other_tabs_stay_secondary
+    helper = Object.new.extend(RecordingStudioEmbeddable::ManagementModalHelper)
+    helper.define_singleton_method(:action_name) { @action_name }
+    helper.define_singleton_method(:params) { @params || {} }
+    helper.define_singleton_method(:use_screen) do |action, form_context: nil|
+      @action_name = action
+      @params = form_context ? { form_context: form_context } : {}
+    end
+
+    helper.use_screen("styling")
+    assert_equal :primary, helper.recording_studio_embeddable_management_tab_style(:styling)
+    assert_equal :secondary, helper.recording_studio_embeddable_management_tab_style(:settings)
+    assert_equal({ current: "page" }, helper.recording_studio_embeddable_management_tab_aria(:styling))
+
+    helper.use_screen("update_styling")
+    assert_equal :styling, helper.recording_studio_embeddable_management_current_tab
+
+    helper.use_screen("update", form_context: "settings")
+    assert_equal :settings, helper.recording_studio_embeddable_management_current_tab
+
+    helper.use_screen("update_floating")
+    assert_equal :floating, helper.recording_studio_embeddable_management_current_tab
+
+    helper.use_screen("edit")
+    assert_equal :primary, helper.recording_studio_embeddable_management_tab_style(:edit)
+    %i[preview styling floating settings stats].each do |screen|
+      assert_equal :secondary, helper.recording_studio_embeddable_management_tab_style(screen)
+    end
+
+    helper.use_screen("preview")
+    assert_equal :primary, helper.recording_studio_embeddable_management_tab_style(:preview)
+    assert_equal :secondary, helper.recording_studio_embeddable_management_tab_style(:edit)
   end
 
   def test_publishable_gate_fails_closed_without_helper
@@ -641,7 +695,11 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
     assert_includes source, "FlatPack::Grid::Component.new(cols: 2)"
     assert_includes source, "FlatPack::TextArea::Component.new("
-    assert_includes source, 'default: "Paste this into your page."'
+    assert_includes source, "embed_code_help"
+    assert_includes source, "for example inside a page or blog post"
+    refute_includes source, "embed_code_platforms"
+    refute_includes source, "Squarespace"
+    refute_includes source, 'default: "Paste this into your page."'
     refute_includes source, "Copy the code below"
     refute_includes source, "FlatPack::TextInput::Component"
     assert_includes source, 'default: "Embed"'
@@ -656,7 +714,8 @@ class RecordingStudioEmbeddableTest < Minitest::Test
         File.expand_path("../app/views/recording_studio_embeddable/management/embeds/#{action}.html.erb", __dir__)
       )
 
-      refute_includes source, "section_nav"
+      refute_includes source, "recording_studio_embeddable_management_modal_tabs?"
+      assert_includes source, 'render "section_nav"'
       refute_includes source, "large_subtitle"
       refute_includes source, "Getting Started"
       assert_includes source, "subtitle: recordable_title"
@@ -672,7 +731,8 @@ class RecordingStudioEmbeddableTest < Minitest::Test
       File.expand_path("../app/views/recording_studio_embeddable/management/embeds/stats.html.erb", __dir__)
     )
 
-    refute_includes settings, "section_nav"
+    refute_includes settings, "recording_studio_embeddable_management_modal_tabs?"
+    assert_includes settings, 'render "section_nav"'
     assert_includes settings, 'default: "Embed settings"'
     assert_includes settings, "subtitle: recordable_title"
     refute_includes settings, "large_subtitle"
@@ -688,11 +748,12 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes settings, "Iframe width"
     refute_includes settings, "Iframe height"
 
-    assert_includes styling, 'default: "Style"'
+    assert_includes styling, 'default: "Embed style"'
     assert_includes styling, "FlatPack::Grid::Component.new(cols: 2)"
     assert_includes styling, "FlatPack::ColorSwatch::Component"
     assert_includes styling, "FlatPack::FontSwatch::Component"
-    assert_includes styling, "FlatPack::OverflowRow::Component.new(gap: :md)"
+    assert_includes styling, "flex flex-wrap items-start gap-[var(--stack-gap-md)]"
+    refute_includes styling, "FlatPack::OverflowRow::Component"
     assert_includes styling, "FlatPack::Popover::Component.new(trigger_id: \"embed-width-trigger\""
     assert_includes styling, "FlatPack::Tooltip::Component.new(text: width_label"
     assert_includes styling, 'id: "embed-width-trigger"'
@@ -716,7 +777,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, 'data-controller~="flat-pack--font-swatch"'
     assert_includes styling, 'id: "embed_appearance_font_family"'
     assert_includes styling, 'id="embed-styling-preview"'
-    assert_includes styling, "preview_management_embed_path(@embed)"
+    assert_includes styling, "recording_studio_embeddable_management_embed_document_path(@embed)"
     assert_includes styling, 'style="width: <%= @preview_width %>; height: auto; min-height: 20rem; max-width: 100%;"'
     assert_includes styling, "selectStyleWidthMode"
     refute_includes styling, "data-style-width-controls"
@@ -735,7 +796,6 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes styling, 'title: "Styling"'
     refute_includes styling, "FlatPack::Select::Component"
     refute_includes styling, "SegmentedButtons"
-    refute_includes styling, "flex flex-wrap items-start gap-[var(--stack-gap-md)]"
     refute_includes styling, "overflow-x-auto"
     refute_includes styling, "data-styling-color-swatch"
     refute_includes styling, "data-color-picker-trigger-name"
@@ -769,12 +829,17 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_operator popover_index, :<, auto_tab_index
     assert_operator auto_tab_index, :<, custom_tab_index
     assert_operator custom_tab_index, :<, field_index
+    save_index = styling.index('default: "Save"')
+    assert save_index, "expected Save on Style screen"
+    assert_operator color_swatch_index, :<, save_index
+    assert_operator save_index, :<, preview_index
     assert_operator field_index, :<, preview_index
     auto_panel = styling[auto_tab_index...custom_tab_index]
     refute_includes auto_panel, "TextInput"
     refute_includes auto_panel, "help_text"
 
     assert_includes stats, 'default: "Stats"'
+    assert_includes stats, 'default: "Apply"), style: :primary'
     refute_includes stats, "Embed Stats"
   end
 

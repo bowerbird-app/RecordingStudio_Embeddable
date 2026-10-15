@@ -23,7 +23,7 @@
 <% width_label = t("recording_studio.embeddable.management.styling.width", default: "Width") %>
 
 <% recording_studio_page_nav(
-  title: t("recording_studio.embeddable.management.styling.title", default: "Style"),
+  title: t("recording_studio.embeddable.management.styling.title", default: "Embed style"),
   page_nav_back_url: edit_management_embed_path(@embed),
   page_nav_back_label: t("recording_studio.embeddable.common.embed", default: "Embed"),
   page_nav_anchor_url: main_app.root_path,
@@ -32,10 +32,12 @@
 
 <div class="flex w-full flex-col gap-6">
   <%= render FlatPack::PageTitle::Component.new(
-    title: t("recording_studio.embeddable.management.styling.title", default: "Style"),
+    title: t("recording_studio.embeddable.management.styling.title", default: "Embed style"),
     subtitle: recordable_title,
     variant: :h1
   ) %>
+
+  <%= render "section_nav" %>
 
   <%= render FlatPack::Grid::Component.new(cols: 2) do %>
     <div class="space-y-4">
@@ -51,26 +53,10 @@
         </p>
       <% end %>
 
-      <%= form_with model: @embed, url: styling_management_embed_path(@embed), method: :patch, class: "space-y-4", data: { styling_form: true, font_label_fallback: font_label_fallback } do |_form| %>
-        <div class="flex flex-wrap items-center gap-3">
-          <%= render FlatPack::Button::Component.new(
-            text: t("recording_studio.embeddable.common.save", default: "Save"),
-            style: :primary,
-            size: :md,
-            type: "submit",
-            disabled: !@styling_editable
-          ) %>
-          <%= render FlatPack::Button::Component.new(
-            text: t("recording_studio.embeddable.common.reset", default: "Reset"),
-            style: :secondary,
-            size: :md,
-            type: "button",
-            disabled: !@styling_editable,
-            data: { reset_styling_fields: true }
-          ) %>
-        </div>
+      <%= form_with model: @embed, url: recording_studio_embeddable_management_screen_path(@embed, :styling), method: :patch, class: "space-y-4", data: { styling_form: true, font_label_fallback: font_label_fallback }.merge(recording_studio_embeddable_management_form_data) do |_form| %>
+        <%= recording_studio_embeddable_management_variant_field %>
 
-        <%= render FlatPack::OverflowRow::Component.new(gap: :md) do %>
+        <div class="flex flex-wrap items-start gap-[var(--stack-gap-md)]">
           <% if font_definition.present? && current_font_css.present? %>
             <%= render FlatPack::FontSwatch::Component.new(
               font: current_font_css,
@@ -124,7 +110,7 @@
               }
             ) %>
           <% end %>
-        <% end %>
+        </div>
 
         <%= render FlatPack::Popover::Component.new(trigger_id: "embed-width-trigger", placement: :bottom) do |popover| %>
           <% popover.popover_content do %>
@@ -153,18 +139,6 @@
           <% end %>
         <% end %>
 
-        <iframe
-          id="embed-styling-preview"
-          src="<%= preview_management_embed_path(@embed) %>"
-          title="<%= t("recording_studio.embeddable.management.styling.preview_title", default: "Embed preview") %>"
-          loading="lazy"
-          referrerpolicy="strict-origin-when-cross-origin"
-          class="border-0"
-          style="width: <%= @preview_width %>; height: auto; min-height: 20rem; max-width: 100%;"
-          data-styling-preview="true"
-          data-role="style-preview-frame"
-        ></iframe>
-
         <input type="hidden" name="embed[sizing][height]" value="auto" id="embed_sizing_height">
         <input
           type="hidden"
@@ -173,7 +147,39 @@
           value="<%= @preview_width %>"
           data-default-width="100%"
         >
+
+        <div class="flex flex-wrap items-center gap-3">
+          <%= render FlatPack::Button::Component.new(
+            text: t("recording_studio.embeddable.common.save", default: "Save"),
+            style: :primary,
+            size: :md,
+            type: "submit",
+            disabled: !@styling_editable
+          ) %>
+          <%= render FlatPack::Button::Component.new(
+            text: t("recording_studio.embeddable.common.reset", default: "Reset"),
+            style: :secondary,
+            size: :md,
+            type: "button",
+            disabled: !@styling_editable,
+            data: { reset_styling_fields: true }
+          ) %>
+        </div>
       <% end %>
+    </div>
+
+    <div>
+      <iframe
+        id="embed-styling-preview"
+        src="<%= recording_studio_embeddable_management_embed_document_path(@embed) %>"
+        title="<%= t("recording_studio.embeddable.management.styling.preview_title", default: "Embed preview") %>"
+        loading="lazy"
+        referrerpolicy="strict-origin-when-cross-origin"
+        class="border-0"
+        style="width: <%= @preview_width %>; height: auto; min-height: 20rem; max-width: 100%;"
+        data-styling-preview="true"
+        data-role="style-preview-frame"
+      ></iframe>
     </div>
   <% end %>
 </div>
@@ -183,6 +189,7 @@
 </script>
 
 <script>
+(() => {
   const AUTO_WIDTH = "100%";
 
   const styleWidthHiddenInput = () => document.getElementById("embed_sizing_width");
@@ -377,10 +384,23 @@
     form.addEventListener("font-swatch:change", () => applyStylingPreviewFromForm(form));
   };
 
-  document.addEventListener("turbo:load", initializeStylingReset);
-  document.addEventListener("DOMContentLoaded", initializeStylingReset);
-  document.addEventListener("turbo:load", initializeStyleWidthControls);
-  document.addEventListener("DOMContentLoaded", initializeStyleWidthControls);
-  document.addEventListener("turbo:load", initializeStylingLivePreview);
-  document.addEventListener("DOMContentLoaded", initializeStylingLivePreview);
+  const bootStylingControls = () => {
+    initializeStylingReset();
+    initializeStyleWidthControls();
+    initializeStylingLivePreview();
+  };
+
+  if (!window.recordingStudioEmbeddableStylingBoot) {
+    window.recordingStudioEmbeddableStylingBoot = true;
+    const run = (event) => {
+      if (event?.type === "turbo:frame-load" && event.target?.id !== "recording_studio_embeddable_management") return;
+      bootStylingControls();
+    };
+    document.addEventListener("turbo:load", run);
+    document.addEventListener("DOMContentLoaded", run);
+    document.addEventListener("turbo:frame-load", run);
+  }
+
+  bootStylingControls();
+})();
 </script>

@@ -3,8 +3,12 @@
 module RecordingStudioEmbeddable
   module Management
     class EmbedsController < RecordingStudioEmbeddable::ApplicationController
+      include RecordingStudioEmbeddable::ManagementModalHelper
+
       before_action :authorize_management!
       before_action :load_embed
+
+      layout :management_layout
 
       def edit; end
 
@@ -37,7 +41,7 @@ module RecordingStudioEmbeddable
         checked = Floating::Schema.validate(submitted, @embed.parent_recording)
         @embed.floating = checked.valid? ? checked.settings : submitted
         if @embed.persist_changes
-          redirect_to floating_management_embed_path(@embed),
+          redirect_to recording_studio_embeddable_management_screen_path(@embed, :floating),
                       notice: t("recording_studio.embeddable.flashes.launcher_updated",
                                 label: floating_label)
         else
@@ -55,11 +59,11 @@ module RecordingStudioEmbeddable
         apply_embed_params
         if @embed.persist_changes
           if form_context == "settings"
-            redirect_to settings_management_embed_path(@embed),
+            redirect_to recording_studio_embeddable_management_screen_path(@embed, :settings),
                         notice: t("recording_studio.embeddable.flashes.settings_updated",
                                   default: "Embed settings updated.")
           else
-            redirect_to edit_management_embed_path(@embed),
+            redirect_to recording_studio_embeddable_management_screen_path(@embed, :edit),
                         notice: t("recording_studio.embeddable.flashes.settings_updated",
                                   default: "Embed settings updated.")
           end
@@ -71,16 +75,11 @@ module RecordingStudioEmbeddable
       end
 
       def preview
-        @recording = @embed.parent_recording
-        @parent_recordable = @recording&.recordable if @recording.respond_to?(:recordable)
-        @recordable = @parent_recordable
-        assign_recordable_instance_variable
-        @embed_theme = Renderer.embed_theme_for(@recording, embed: @embed)
-        # Same-origin styling iframe + Turbo full-page Preview both need framing allowed.
-        response.delete_header("X-Frame-Options")
-        response.set_header("Content-Security-Policy", "frame-ancestors 'self'")
-        render Renderer.resolve(@recording, @embed),
-               layout: Renderer.layout_for(@recording, @embed)
+        if ActiveModel::Type::Boolean.new.cast(params[:document])
+          render_embed_document
+        else
+          @recording = @embed.parent_recording
+        end
       end
 
       def update_styling
@@ -104,6 +103,26 @@ module RecordingStudioEmbeddable
       end
 
       private
+
+      def render_embed_document
+        @recording = @embed.parent_recording
+        @parent_recordable = @recording&.recordable if @recording.respond_to?(:recordable)
+        @recordable = @parent_recordable
+        assign_recordable_instance_variable
+        @embed_theme = Renderer.embed_theme_for(@recording, embed: @embed)
+        response.delete_header("X-Frame-Options")
+        response.set_header("Content-Security-Policy", "frame-ancestors 'self'")
+        render Renderer.resolve(@recording, @embed),
+               layout: Renderer.layout_for(@recording, @embed)
+      end
+
+      def management_layout
+        if recording_studio_embeddable_management_modal_request?
+          "recording_studio_embeddable/management_modal"
+        else
+          "recording_studio/default_layout"
+        end
+      end
 
       def authorize_management!
         authorizer = RecordingStudioEmbeddable.configuration.management_authorizer
@@ -457,7 +476,7 @@ module RecordingStudioEmbeddable
 
       def persist_embed_overrides(cleaned_values)
         unless @styling_editable
-          redirect_to styling_management_embed_path(@embed),
+          redirect_to recording_studio_embeddable_management_screen_path(@embed, :styling),
                       alert: t("recording_studio.embeddable.flashes.styling_disabled",
                                default: "Custom styling is disabled for this embed.")
           return
@@ -466,7 +485,7 @@ module RecordingStudioEmbeddable
         @embed.appearance = merge_styling_hash(@embed.appearance.to_h.stringify_keys, cleaned_values)
 
         if @embed.persist_changes
-          redirect_to styling_management_embed_path(@embed),
+          redirect_to recording_studio_embeddable_management_screen_path(@embed, :styling),
                       notice: t("recording_studio.embeddable.flashes.styling_updated",
                                 default: "Embed styling updated.")
         else

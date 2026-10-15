@@ -101,13 +101,12 @@ If a recordable does not declare a field default and an embed does not override 
 
 Style owns fonts, colours, and embed width (not domains).
 
-- Font, colour, and width share one FlatPack `OverflowRow` (`gap: :md`): `FontSwatch` first, then a round FlatPack `Button` for width, then `ColorSwatch` circles.
-- The row never wraps. When swatches overflow, OverflowRow scrolls sideways with a hidden scrollbar and a soft trailing fade while more remains to the right (fade clears at the end).
+- Font, colour, and width share one wrapping row: `FontSwatch` first, then a round FlatPack `Button` for width, then `ColorSwatch` circles. The row is `flex flex-wrap items-start gap-[var(--stack-gap-md)]`. Extra swatches wrap onto the next line. The row does not scroll sideways.
 - Colour names, the font name, and Width are tooltip-only (no label under the circle). The width Button composes `FlatPack::Tooltip::Component` (`text: "Width"`).
 - Clicking a colour circle opens the native colour picker; clicking FontSwatch opens its FlatPack Popover menu (tooltip hides while open).
 - Save posts ColorSwatch colour inputs and FontSwatch’s hidden `name` with the form (`embed[appearance][...]`).
-- A live embed preview iframe sits below the swatch row (management preview). There is no separate Preview button on this screen.
-- Width is a round FlatPack `Button` in the OverflowRow. It opens a FlatPack `Popover` titled Width (heading in the popover content) with FlatPack `Tabs` (`variant: :underline`) for Auto (`100%` fill, no field) and Custom (one `TextInput` with help_text `% or px`). There is no Width field under the preview. Height is always `auto` (no height field). Style save posts `embed[sizing][width]` and `embed[sizing][height]=auto`. The snippet and live preview use `style="width:…"` with `max-width: 100%`.
+- A live embed preview iframe sits in the column beside the controls (management preview). There is no separate Preview button on this screen. The Preview tab is its own screen.
+- Width is a round FlatPack `Button` in that wrapping row. It opens a FlatPack `Popover` titled Width (heading in the popover content) with FlatPack `Tabs` (`variant: :underline`) for Auto (`100%` fill, no field) and Custom (one `TextInput` with help_text `% or px`). There is no Width field under the preview. Height is always `auto` (no height field). Style save posts `embed[sizing][width]` and `embed[sizing][height]=auto`. The snippet and live preview use `style="width:…"` with `max-width: 100%`.
 - Padding, radius, and other non-font fields are not shown on this screen.
 - Save and Reset are separate FlatPack Buttons in one row (Save primary).
 - Reset restores each ColorSwatch colour and the FontSwatch font to resolved/default values, resets width to Auto (`100%`), and refreshes the live preview.
@@ -116,12 +115,12 @@ Style owns fonts, colours, and embed width (not domains).
 
 Settings owns allowed/blocked domains and Save. Width and height are not edited on Settings.
 
-Require FlatPack `~> 0.1.198` (GitHub tag `v0.1.198`) for `FlatPack::ColorSwatch::Component`, `FlatPack::FontSwatch::Component`, `FlatPack::OverflowRow::Component`, `FlatPack::Button::Component`, and `FlatPack::Popover::Component`.
+Require FlatPack `~> 0.1.198` (GitHub tag `v0.1.198`) for `FlatPack::ColorSwatch::Component`, `FlatPack::FontSwatch::Component`, `FlatPack::Button::Component`, and `FlatPack::Popover::Component`.
 
 Example composition:
 
 ```erb
-<%= render FlatPack::OverflowRow::Component.new(gap: :md) do %>
+<div class="flex flex-wrap items-start gap-[var(--stack-gap-md)]">
   <%= render FlatPack::FontSwatch::Component.new(
     font: current_css_family,
     options: [
@@ -151,7 +150,7 @@ Example composition:
     name: "embed[appearance][background_color]",
     size: :lg
   ) %>
-<% end %>
+</div>
 ```
 
 ## Practical Guidance

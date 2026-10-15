@@ -1,0 +1,31 @@
+<%= render FlatPack::Modal::Component.new(
+  id: RecordingStudioEmbeddable::MANAGEMENT_MODAL_ID,
+  size: :"2xl",
+  scroll: :page,
+  body_height_mode: :auto
+) do |modal| %>
+  <% modal.body do %>
+    <%= turbo_frame_tag RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID, loading: :eager, class: "block w-full" do %>
+      <p class="text-sm text-(--text-muted-color)"><%= t("recording_studio.embeddable.management.modal.loading", default: "Loading…") %></p>
+    <% end %>
+  <% end %>
+<% end %>
+
+<%= javascript_tag nonce: true do %>
+  if (!window.recordingStudioEmbeddableManagementModal) {
+    window.recordingStudioEmbeddableManagementModal = true;
+    document.addEventListener("click", (event) => {
+      const trigger = event.target.closest("[data-recording-studio-embeddable-management-src]");
+      if (!trigger) return;
+
+      const src = trigger.getAttribute("data-recording-studio-embeddable-management-src");
+      const frame = document.getElementById("recording_studio_embeddable_management");
+      if (!frame || !src) return;
+      if (frame.getAttribute("src") === src) {
+        if (frame.hasAttribute("complete")) return;
+        frame.removeAttribute("src");
+      }
+      frame.setAttribute("src", src);
+    });
+  }
+<% end %>
