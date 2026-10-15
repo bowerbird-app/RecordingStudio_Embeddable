@@ -1,7 +1,40 @@
 # frozen_string_literal: true
 
 module RecordingStudioEmbeddable
+  module ManagementTabHelper
+    TAB_FOR_ACTION = {
+      "edit" => :edit,
+      "preview" => :preview,
+      "styling" => :styling,
+      "update_styling" => :styling,
+      "settings" => :settings,
+      "floating" => :floating,
+      "update_floating" => :floating,
+      "stats" => :stats
+    }.freeze
+
+    def recording_studio_embeddable_management_tab_style(screen)
+      recording_studio_embeddable_management_current_tab == screen.to_sym ? :primary : :secondary
+    end
+
+    def recording_studio_embeddable_management_tab_aria(screen, disabled: false)
+      aria = {}
+      aria[:disabled] = true if disabled
+      aria[:current] = "page" if recording_studio_embeddable_management_current_tab == screen.to_sym
+      aria
+    end
+
+    def recording_studio_embeddable_management_current_tab
+      return :settings if action_name == "update" && params[:form_context].to_s == "settings"
+      return :edit if action_name == "update"
+
+      TAB_FOR_ACTION[action_name]
+    end
+  end
+
   module ManagementModalHelper
+    include ManagementTabHelper
+
     SCREEN_ROUTES = {
       edit: :edit_management_embed_path,
       preview: :preview_management_embed_path,

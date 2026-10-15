@@ -3,6 +3,7 @@
 require "test_helper"
 require "active_record"
 require_relative "../app/helpers/recording_studio_embeddable/embed_layout_helper"
+require_relative "../app/helpers/recording_studio_embeddable/management_modal_helper"
 require_relative "../app/models/recording_studio_embeddable/application_record"
 require_relative "../app/models/recording_studio_embeddable/embeddable_view_log"
 require_relative "../app/models/recording_studio_embeddable/embed"
@@ -449,8 +450,43 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
     assert_includes helper, "{ turbo: false }"
     assert_includes nav, "recording_studio_embeddable_management_preview_data"
+    assert_includes nav, "recording_studio_embeddable_management_tab_style(:preview)"
+    assert_includes nav, "recording_studio_embeddable_management_tab_style(:styling)"
+    assert_includes nav, "recording_studio_embeddable_management_tab_style(:floating)"
+    assert_includes nav, "recording_studio_embeddable_management_tab_style(:settings)"
+    assert_includes nav, "recording_studio_embeddable_management_tab_style(:stats)"
+    refute_includes nav, "style: :secondary"
     assert_includes layout, 'name="turbo-visit-control"'
     assert_includes layout, 'content="reload"'
+  end
+
+  def test_current_management_tab_is_primary_and_other_tabs_stay_secondary
+    helper = Object.new.extend(RecordingStudioEmbeddable::ManagementModalHelper)
+    helper.define_singleton_method(:action_name) { @action_name }
+    helper.define_singleton_method(:params) { @params || {} }
+    helper.define_singleton_method(:use_screen) do |action, form_context: nil|
+      @action_name = action
+      @params = form_context ? { form_context: form_context } : {}
+    end
+
+    helper.use_screen("styling")
+    assert_equal :primary, helper.recording_studio_embeddable_management_tab_style(:styling)
+    assert_equal :secondary, helper.recording_studio_embeddable_management_tab_style(:settings)
+    assert_equal({ current: "page" }, helper.recording_studio_embeddable_management_tab_aria(:styling))
+
+    helper.use_screen("update_styling")
+    assert_equal :styling, helper.recording_studio_embeddable_management_current_tab
+
+    helper.use_screen("update", form_context: "settings")
+    assert_equal :settings, helper.recording_studio_embeddable_management_current_tab
+
+    helper.use_screen("update_floating")
+    assert_equal :floating, helper.recording_studio_embeddable_management_current_tab
+
+    helper.use_screen("edit")
+    %i[preview styling floating settings stats].each do |screen|
+      assert_equal :secondary, helper.recording_studio_embeddable_management_tab_style(screen)
+    end
   end
 
   def test_publishable_gate_fails_closed_without_helper

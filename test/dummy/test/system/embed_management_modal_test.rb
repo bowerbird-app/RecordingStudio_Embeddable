@@ -28,8 +28,12 @@ class EmbedManagementModalTest < ApplicationSystemTestCase
     within_management_frame do
       assert_selector "h1", exact_text: "Embed style"
       assert_selector "[data-styling-form='true'][data-live-preview-bound='true']"
+      assert_selector "a[data-fp-style='primary'][aria-current='page']", exact_text: "Styling"
+      assert_selector "a[data-fp-style='secondary']", exact_text: "Settings"
       click_on "Settings"
       assert_selector "h1", exact_text: "Embed settings"
+      assert_selector "a[data-fp-style='primary'][aria-current='page']", exact_text: "Settings"
+      assert_selector "a[data-fp-style='secondary']", exact_text: "Styling"
       domains.fill_in with: "localhost"
       click_on "Save changes"
       assert_text "Invalid embedder domain: localhost"
@@ -52,6 +56,8 @@ class EmbedManagementModalTest < ApplicationSystemTestCase
 
     within_management_frame do
       assert_text "Show the Chat button"
+      assert_selector "a[data-fp-style='primary'][aria-current='page']", exact_text: "Chat button"
+      assert_selector "a[data-fp-style='secondary']", exact_text: "Styling"
       assert_selector "iframe#embed-floating-preview"
       assert_selector "[data-action*='copyFromButton']"
       choose "Bottom left"

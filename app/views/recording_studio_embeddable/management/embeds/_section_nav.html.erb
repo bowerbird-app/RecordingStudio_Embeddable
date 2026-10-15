@@ -5,52 +5,53 @@
 <div class="flex flex-wrap items-center gap-2">
   <%= render FlatPack::Button::Component.new(
     text: t("recording_studio.embeddable.common.preview", default: "Preview"),
-    style: :secondary,
+    style: recording_studio_embeddable_management_tab_style(:preview),
     size: :md,
     href: recording_studio_embeddable_management_screen_path(@embed, :preview),
+    aria: recording_studio_embeddable_management_tab_aria(:preview),
     data: preview_link_data
   ) %>
   <%= render FlatPack::Button::Component.new(
     text: t("recording_studio.embeddable.common.styling", default: "Styling"),
-    style: :secondary,
+    style: recording_studio_embeddable_management_tab_style(:styling),
     size: :md,
     href: disable_management_actions ? nil : recording_studio_embeddable_management_screen_path(@embed, :styling),
     type: "button",
     class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
-    aria: (disable_management_actions ? { disabled: true } : {}),
+    aria: recording_studio_embeddable_management_tab_aria(:styling, disabled: disable_management_actions),
     data: tab_link_data
   ) %>
   <% if @embed.parent_recording.respond_to?(:floating_capable?) && @embed.parent_recording.floating_capable? %>
     <% floating_label = recording_studio_floating_label(@embed.parent_recording) %>
     <%= render FlatPack::Button::Component.new(
       text: t("recording_studio.embeddable.common.launcher", label: floating_label, default: "%{label}"),
-      style: :secondary,
+      style: recording_studio_embeddable_management_tab_style(:floating),
       size: :md,
       href: disable_management_actions ? nil : recording_studio_embeddable_management_screen_path(@embed, :floating),
       type: "button",
       class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
-      aria: (disable_management_actions ? { disabled: true } : {}),
+      aria: recording_studio_embeddable_management_tab_aria(:floating, disabled: disable_management_actions),
       data: tab_link_data
     ) %>
   <% end %>
   <%= render FlatPack::Button::Component.new(
     text: t("recording_studio.embeddable.common.settings", default: "Settings"),
-    style: :secondary,
+    style: recording_studio_embeddable_management_tab_style(:settings),
     size: :md,
     href: disable_management_actions ? nil : recording_studio_embeddable_management_screen_path(@embed, :settings),
     type: "button",
     class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
-    aria: (disable_management_actions ? { disabled: true } : {}),
+    aria: recording_studio_embeddable_management_tab_aria(:settings, disabled: disable_management_actions),
     data: tab_link_data
   ) %>
   <%= render FlatPack::Button::Component.new(
     text: t("recording_studio.embeddable.common.stats", default: "Stats"),
-    style: :secondary,
+    style: recording_studio_embeddable_management_tab_style(:stats),
     size: :md,
     href: disable_management_actions ? nil : recording_studio_embeddable_management_screen_path(@embed, :stats),
     type: "button",
     class: (disable_management_actions ? "pointer-events-none opacity-50" : nil),
-    aria: (disable_management_actions ? { disabled: true } : {}),
+    aria: recording_studio_embeddable_management_tab_aria(:stats, disabled: disable_management_actions),
     data: tab_link_data
   ) %>
 </div>

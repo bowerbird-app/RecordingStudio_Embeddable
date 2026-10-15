@@ -29,6 +29,35 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
 
   teardown { Current.actor = nil }
 
+  test "current tab is primary on the full page and after a frame change" do
+    get recording_studio_embeddable.floating_management_embed_path(@widget_embed)
+
+    assert_response :success
+    assert_select "nav[aria-label='Page navigation']", count: 1
+    assert_select "turbo-frame##{RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID}", count: 0
+    assert_primary_tab "Chat button"
+    assert_secondary_tab "Preview"
+    assert_secondary_tab "Styling"
+    assert_secondary_tab "Settings"
+    assert_secondary_tab "Stats"
+
+    get recording_studio_embeddable.styling_management_embed_path(@widget_embed),
+        headers: frame_headers
+
+    assert_modal_frame
+    assert_primary_tab "Styling"
+    assert_secondary_tab "Chat button"
+    assert_secondary_tab "Settings"
+
+    get recording_studio_embeddable.settings_management_embed_path(@widget_embed),
+        headers: frame_headers
+
+    assert_modal_frame
+    assert_primary_tab "Settings"
+    assert_secondary_tab "Styling"
+    assert_secondary_tab "Chat button"
+  end
+
   test "full page styling keeps the default layout" do
     get recording_studio_embeddable.styling_management_embed_path(@page_embed)
 
@@ -100,6 +129,8 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_modal_frame
     assert_includes response.body, "Invalid embedder domain: localhost"
     assert_includes response.body, "Embed settings"
+    assert_primary_tab "Settings"
+    assert_secondary_tab "Styling"
 
     patch recording_studio_embeddable.management_embed_path(@widget_embed),
           params: settings_params("partner.example"),
@@ -154,6 +185,8 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_modal_frame
     assert_includes response.body, "Text color must be a valid hex color"
+    assert_primary_tab "Styling"
+    assert_secondary_tab "Settings"
   end
 
   test "demo page renders one modal shell and an opener for page and widget" do
@@ -191,6 +224,15 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
       form_context: "settings",
       embed: { allowed_embedder_domains_text: domains, enabled: "1" }
     }
+  end
+
+  def assert_primary_tab(text)
+    assert_select "a[data-fp-style=primary][aria-current=page]", text: text, count: 1
+  end
+
+  def assert_secondary_tab(text)
+    assert_select "a[data-fp-style=secondary]", text: text, count: 1
+    assert_select "a[data-fp-style=primary][aria-current=page]", text: text, count: 0
   end
 
   def assert_modal_frame

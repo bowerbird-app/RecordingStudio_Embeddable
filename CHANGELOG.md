@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The modal uses Flatpack `scroll: :page` and `body_height_mode: :auto`, so the dialog follows the content. Close it with the Flatpack X, Escape, or the backdrop.
 - Management responses for Turbo Frame `recording_studio_embeddable_management`, `?variant=modal`, or `?modal=1` render inside that frame, without the page back and close bar. Tab links and forms stay in the frame. A successful save redirects inside the frame. A 422 re-renders the frame with the errors.
 - Embed style is two columns. Controls and Save are on the left. The live preview is on the right. Save sits under the controls.
+- The management tab for the open screen uses a primary button. The other tabs stay secondary, in the modal and on the full page. Switching tabs renders that screen again, so the primary tab moves with the screen.
 - The dummy app shows the modal for a Page and for the floating Widget at `/embed-modals`.
 
 ### Upgrade notes
