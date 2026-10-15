@@ -56,7 +56,7 @@
       <%= form_with model: @embed, url: recording_studio_embeddable_management_screen_path(@embed, :styling), method: :patch, class: "space-y-4", data: { styling_form: true, font_label_fallback: font_label_fallback }.merge(recording_studio_embeddable_management_form_data) do |_form| %>
         <%= recording_studio_embeddable_management_variant_field %>
 
-        <%= render FlatPack::OverflowRow::Component.new(gap: :md) do %>
+        <div class="flex flex-wrap items-start gap-[var(--stack-gap-md)]">
           <% if font_definition.present? && current_font_css.present? %>
             <%= render FlatPack::FontSwatch::Component.new(
               font: current_font_css,
@@ -110,7 +110,7 @@
               }
             ) %>
           <% end %>
-        <% end %>
+        </div>
 
         <%= render FlatPack::Popover::Component.new(trigger_id: "embed-width-trigger", placement: :bottom) do |popover| %>
           <% popover.popover_content do %>

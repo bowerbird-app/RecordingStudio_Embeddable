@@ -697,8 +697,8 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes source, "FlatPack::TextArea::Component.new("
     assert_includes source, "embed_code_help"
     assert_includes source, "for example inside a page or blog post"
-    assert_includes source, "embed_code_platforms"
-    assert_includes source, "Custom code"
+    refute_includes source, "embed_code_platforms"
+    refute_includes source, "Squarespace"
     refute_includes source, 'default: "Paste this into your page."'
     refute_includes source, "Copy the code below"
     refute_includes source, "FlatPack::TextInput::Component"
@@ -752,7 +752,8 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, "FlatPack::Grid::Component.new(cols: 2)"
     assert_includes styling, "FlatPack::ColorSwatch::Component"
     assert_includes styling, "FlatPack::FontSwatch::Component"
-    assert_includes styling, "FlatPack::OverflowRow::Component.new(gap: :md)"
+    assert_includes styling, "flex flex-wrap items-start gap-[var(--stack-gap-md)]"
+    refute_includes styling, "FlatPack::OverflowRow::Component"
     assert_includes styling, "FlatPack::Popover::Component.new(trigger_id: \"embed-width-trigger\""
     assert_includes styling, "FlatPack::Tooltip::Component.new(text: width_label"
     assert_includes styling, 'id: "embed-width-trigger"'
@@ -795,7 +796,6 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes styling, 'title: "Styling"'
     refute_includes styling, "FlatPack::Select::Component"
     refute_includes styling, "SegmentedButtons"
-    refute_includes styling, "flex flex-wrap items-start gap-[var(--stack-gap-md)]"
     refute_includes styling, "overflow-x-auto"
     refute_includes styling, "data-styling-color-swatch"
     refute_includes styling, "data-color-picker-trigger-name"

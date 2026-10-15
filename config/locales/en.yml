@@ -23,7 +23,6 @@ en:
           embeddable_label: "Embeddable"
           embed_code_heading: "Embed code"
           embed_code_help: "Add this code to your website wherever you want this to appear, for example inside a page or blog post. Paste it into the page's HTML, or ask your web developer to add it."
-          embed_code_platforms: "Using Squarespace, Wix or WordPress? Add an \"Embed\", \"HTML\" or \"Custom code\" block and paste the code into it."
           unavailable_title: "Embeddable unavailable"
           unavailable_description: "You need to publish this page before you can enable embeddable."
           publish_settings: "Publish Settings"
@@ -46,7 +45,6 @@ en:
           save: "Save %{label}"
           snippet_heading: "%{label} snippet"
           snippet_help_html: "Add this code to every page of your website where you want the %{label} to appear. Paste it just before the closing <code>&lt;/head&gt;</code> tag, or ask your web developer to add it."
-          snippet_platforms: "Using Squarespace, Wix or WordPress? Look for a \"Header code injection\" or \"Custom code\" setting."
         styling:
           title: "Embed style"
           disabled_notice: "Custom styling is currently disabled for this embed. You can still review the resolved values below."

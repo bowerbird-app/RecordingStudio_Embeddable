@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional modal for embed management. `recording_studio_embeddable_management_modal(recording:, tab: :styling)` opens Embed, Preview, Embed style, Settings, the floating screen, or Stats in a Flatpack modal.
 - The modal uses Flatpack `scroll: :page` and `body_height_mode: :auto`, so the dialog follows the content. Close it with the Flatpack X, Escape, or the backdrop.
 - Management responses for Turbo Frame `recording_studio_embeddable_management`, `?variant=modal`, or `?modal=1` render inside that frame, without the page back and close bar. Tab links and forms stay in the frame. A successful save redirects inside the frame. A 422 re-renders the frame with the errors.
-- Embed style is two columns. Controls and Save are on the left. The live preview is on the right. Save sits under the controls.
+- Embed style is two columns. Controls and Save are on the left. The live preview is on the right. Save sits under the controls. Colour swatches wrap onto the next line (`flex flex-wrap`) instead of scrolling sideways.
 - Every management screen has a tab: Embed, Preview, Embed style, Chat button (when the type floats), Settings, and Stats. The open screen's tab is a primary button. The others stay secondary. That row is on the full page and in the modal. Switching tabs renders that screen again, so the primary tab moves with the screen.
 - Preview is the management screen: the embed document sits in a frame under those tabs. The document itself is the same path with `?document=1`. Embed style's live preview uses that document URL. The document still forces a full load (`turbo-visit-control`) and allows same-origin framing.
 - The dummy app shows the modal for a Page and for the floating Widget at `/embed-modals`.
@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - The floating snippet tells people to add it on every page, just before the closing `</head>` tag.
 - The Embed screen tells people to put the iframe markup in the page HTML where the recording should appear.
+- Neither help text mentions Squarespace, Wix, or WordPress.
 
 ### Upgrade notes
 - Bump to `recording_studio_embeddable` `0.8.0`. No migration and no compatibility shim.

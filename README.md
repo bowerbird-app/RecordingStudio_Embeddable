@@ -70,7 +70,7 @@ article.embed_public_url(host: "example.com")
 article.embed_code(host: "example.com")
 ```
 
-`embed_code` is the iframe markup. Put it in the page HTML where the recording should appear, such as inside a page or a blog post. On Squarespace, Wix, or WordPress, add an Embed, HTML, or Custom code block and paste the markup there. The floating launcher is separate and belongs in the page head.
+`embed_code` is the iframe markup. Put it in the page HTML where the recording should appear, such as inside a page or a blog post. The floating launcher is separate and belongs in the page head.
 
 ## Floating launcher
 
@@ -146,7 +146,7 @@ The popup HTML is a live host response. It is not an Artifact and `PublishEmbedT
 
 ### Management screen
 
-Capable types get a screen next to Style. Its tab, heading, form labels, snippet section, and save flash all use `label`. It turns the button on and chooses Position with Bottom left or Bottom right (Bottom right when unset). When the button is on, that screen also shows the install snippet and its copy control. The snippet goes on every page, just before the closing `</head>` tag. On Squarespace, Wix, or WordPress, that is the header code injection or custom code setting. Spacing, panel size, and the icon are not on this form. The preview is the same kind of iframe frame as Style, and it loads `widget.js` — the production launcher — open, at the host size and colours. Position radios move that launcher inside the frame. The button closes and reopens the popup. Style still owns the accent colours. The Embed screen does not show the launcher snippet. Types that did not opt in do not get the screen.
+Capable types get a screen next to Style. Its tab, heading, form labels, snippet section, and save flash all use `label`. It turns the button on and chooses Position with Bottom left or Bottom right (Bottom right when unset). When the button is on, that screen also shows the install snippet and its copy control. The snippet goes on every page, just before the closing `</head>` tag. Spacing, panel size, and the icon are not on this form. The preview is the same kind of iframe frame as Style, and it loads `widget.js` — the production launcher — open, at the host size and colours. Position radios move that launcher inside the frame. The button closes and reopens the popup. Style still owns the accent colours. The Embed screen does not show the launcher snippet. Types that did not opt in do not get the screen.
 
 ### Options
 
@@ -307,7 +307,7 @@ Call the helper once for the shell, then again for each extra opener. The second
 
 The modal body is a Turbo Frame, `recording_studio_embeddable_management`. The host page has to load Turbo (`import "@hotwired/turbo-rails"`). A request for that frame, `?variant=modal`, or `?modal=1` renders the frame without the page back and close bar. The modal uses Flatpack `scroll: :page` and `body_height_mode: :auto`, so the dialog grows with the screen. Close it with the Flatpack X, Escape, or the backdrop. Leave the modal params off and the screen still renders in `recording_studio/default_layout`.
 
-Embed style is two columns: the controls and Save sit on the left, the live preview on the right. Preview shows that same embed document in a frame, without the style controls. The Chat button preview is separate: it loads the launcher, not the inline embed. A tab change renders that screen again, in the frame or on the full page, so the primary tab moves with it. Copy buttons, the Embed style preview, and the Chat button preview run again when the frame loads. The dummy app shows both openers at `/embed-modals`.
+Embed style is two columns: the controls and Save sit on the left, the live preview on the right. Colour swatches wrap onto the next line when they do not fit. Preview shows that same embed document in a frame, without the style controls. The Chat button preview is separate: it loads the launcher, not the inline embed. A tab change renders that screen again, in the frame or on the full page, so the primary tab moves with it. Copy buttons, the Embed style preview, and the Chat button preview run again when the frame loads. The dummy app shows both openers at `/embed-modals`.
 
 ## Development
 
