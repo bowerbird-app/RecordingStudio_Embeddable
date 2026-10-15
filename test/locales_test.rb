@@ -72,6 +72,14 @@ class LocalesTest < Minitest::Test
       )
       assert_equal "Sans", t("management.fonts.sans")
       assert_equal(
+        "Add this code to your website wherever you want this to appear, for example inside a page or blog post. Paste it into the page's HTML, or ask your web developer to add it.",
+        t("management.edit.embed_code_help")
+      )
+      assert_equal(
+        "Using Squarespace, Wix or WordPress? Add an \"Embed\", \"HTML\" or \"Custom code\" block and paste the code into it.",
+        t("management.edit.embed_code_platforms")
+      )
+      assert_equal(
         "Add this code to every page of your website where you want the Chat button to appear. Paste it just before the closing <code>&lt;/head&gt;</code> tag, or ask your web developer to add it.",
         t("management.floating.snippet_help_html", label: "Chat button")
       )

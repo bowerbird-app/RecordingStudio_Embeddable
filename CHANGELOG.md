@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - The floating snippet tells people to add it on every page, just before the closing `</head>` tag.
+- The Embed screen tells people to put the iframe markup in the page HTML where the recording should appear.
 
 ### Upgrade notes
 - Bump to `recording_studio_embeddable` `0.8.0`. No migration and no compatibility shim.

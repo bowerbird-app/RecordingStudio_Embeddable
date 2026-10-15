@@ -62,7 +62,14 @@
           <div class="space-y-4">
             <div class="space-y-1">
               <h2 class="text-base font-semibold"><%= t("recording_studio.embeddable.management.edit.embed_code_heading", default: "Embed code") %></h2>
-              <p class="text-sm text-(--text-muted-color)"><%= t("recording_studio.embeddable.management.edit.embed_code_help", default: "Paste this into your page.") %></p>
+              <p class="text-sm text-(--text-muted-color)"><%= t(
+                "recording_studio.embeddable.management.edit.embed_code_help",
+                default: "Add this code to your website wherever you want this to appear, for example inside a page or blog post. Paste it into the page's HTML, or ask your web developer to add it."
+              ) %></p>
+              <p class="text-sm text-(--text-muted-color)"><%= t(
+                "recording_studio.embeddable.management.edit.embed_code_platforms",
+                default: "Using Squarespace, Wix or WordPress? Add an \"Embed\", \"HTML\" or \"Custom code\" block and paste the code into it."
+              ) %></p>
             </div>
 
             <%= render FlatPack::TextArea::Component.new(

@@ -70,6 +70,8 @@ article.embed_public_url(host: "example.com")
 article.embed_code(host: "example.com")
 ```
 
+`embed_code` is the iframe markup. Put it in the page HTML where the recording should appear, such as inside a page or a blog post. On Squarespace, Wix, or WordPress, add an Embed, HTML, or Custom code block and paste the markup there. The floating launcher is separate and belongs in the page head.
+
 ## Floating launcher
 
 Inline embeds and the floating launcher are separate. `enabled` still switches the public document (iframe or CDN). `floating_enabled` switches the launcher. Types that do not opt in never float and never show launcher controls. Page and Article in the dummy app stay inline-only.
