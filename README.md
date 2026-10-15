@@ -115,7 +115,7 @@ The JSON `id` is `embed.token`. Browsers must send an `Origin` header. The respo
 
 ### Script and local helper
 
-Partners install one classic script. The URL is not fingerprinted:
+Partners install one classic script on every page where the button should appear. Paste it just before the closing `</head>` tag. The URL is not fingerprinted:
 
 ```html
 <script async src="https://example.com/recording_studio_embeddable/widget.js" data-embed="TOKEN"></script>
@@ -144,7 +144,7 @@ The popup HTML is a live host response. It is not an Artifact and `PublishEmbedT
 
 ### Management screen
 
-Capable types get a screen next to Style. Its tab, heading, form labels, snippet section, and save flash all use `label`. It turns the button on and chooses Position with Bottom left or Bottom right (Bottom right when unset). When the button is on, that screen also shows the install snippet and its copy control. Spacing, panel size, and the icon are not on this form. The preview is the same kind of iframe frame as Style, and it loads `widget.js` — the production launcher — open, at the host size and colours. Position radios move that launcher inside the frame. The button closes and reopens the popup. Style still owns the accent colours. The Embed screen does not show the launcher snippet. Types that did not opt in do not get the screen.
+Capable types get a screen next to Style. Its tab, heading, form labels, snippet section, and save flash all use `label`. It turns the button on and chooses Position with Bottom left or Bottom right (Bottom right when unset). When the button is on, that screen also shows the install snippet and its copy control. The snippet goes on every page, just before the closing `</head>` tag. On Squarespace, Wix, or WordPress, that is the header code injection or custom code setting. Spacing, panel size, and the icon are not on this form. The preview is the same kind of iframe frame as Style, and it loads `widget.js` — the production launcher — open, at the host size and colours. Position radios move that launcher inside the frame. The button closes and reopens the popup. Style still owns the accent colours. The Embed screen does not show the launcher snippet. Types that did not opt in do not get the screen.
 
 ### Options
 

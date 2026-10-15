@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The management tab for the open screen uses a primary button. The other tabs stay secondary, in the modal and on the full page. Switching tabs renders that screen again, so the primary tab moves with the screen.
 - The dummy app shows the modal for a Page and for the floating Widget at `/embed-modals`.
 
+### Changed
+- The floating snippet tells people to add it on every page, just before the closing `</head>` tag.
+
 ### Upgrade notes
 - Bump to `recording_studio_embeddable` `0.8.0`. No migration and no compatibility shim.
 - Full-page management is unchanged when the request is not a modal frame or `variant`/`modal` param.

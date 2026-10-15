@@ -71,6 +71,14 @@ class LocalesTest < Minitest::Test
         t("errors.invalid_embedder_domain", domain: "bad!")
       )
       assert_equal "Sans", t("management.fonts.sans")
+      assert_equal(
+        "Add this code to every page of your website where you want the Chat button to appear. Paste it just before the closing <code>&lt;/head&gt;</code> tag, or ask your web developer to add it.",
+        t("management.floating.snippet_help_html", label: "Chat button")
+      )
+      assert_equal(
+        "Using Squarespace, Wix or WordPress? Look for a \"Header code injection\" or \"Custom code\" setting.",
+        t("management.floating.snippet_platforms")
+      )
     end
   end
 

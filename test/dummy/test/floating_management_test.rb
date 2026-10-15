@@ -98,7 +98,12 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "launcher_snippet"
     assert_includes response.body, "Chat button snippet"
-    assert_includes response.body, "Paste this where the Chat button should appear."
+    assert_includes response.body, "Add this code to every page of your website where you want the Chat button to appear."
+    assert_includes response.body, "<code>&lt;/head&gt;</code>"
+    refute_includes response.body, "<code></head></code>"
+    assert_includes response.body, "Using Squarespace, Wix or WordPress?"
+    assert_includes response.body, "Header code injection"
+    refute_includes response.body, "Paste this where the Chat button should appear."
     refute_includes response.body, ">Launcher<"
     assert_includes response.body, "widget.js"
     assert_includes response.body, "copyFromButton"
