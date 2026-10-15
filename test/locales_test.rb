@@ -71,22 +71,28 @@ class LocalesTest < Minitest::Test
         t("errors.invalid_embedder_domain", domain: "bad!")
       )
       assert_equal "Sans", t("management.fonts.sans")
-      assert_equal(
-        "Add this code to your website wherever you want this to appear, for example inside a page or blog post. Paste it into the page's HTML, or ask your web developer to add it.",
-        t("management.edit.embed_code_help")
-      )
-      assert_equal(
-        "Using Squarespace, Wix or WordPress? Add an \"Embed\", \"HTML\" or \"Custom code\" block and paste the code into it.",
-        t("management.edit.embed_code_platforms")
-      )
-      assert_equal(
-        "Add this code to every page of your website where you want the Chat button to appear. Paste it just before the closing <code>&lt;/head&gt;</code> tag, or ask your web developer to add it.",
-        t("management.floating.snippet_help_html", label: "Chat button")
-      )
-      assert_equal(
-        "Using Squarespace, Wix or WordPress? Look for a \"Header code injection\" or \"Custom code\" setting.",
-        t("management.floating.snippet_platforms")
-      )
+    end
+  end
+
+  def test_install_help_describes_where_to_paste_the_code
+    I18n.with_locale(:en) do
+      embed_help = "Add this code to your website wherever you want this to appear, " \
+                   "for example inside a page or blog post. " \
+                   "Paste it into the page's HTML, or ask your web developer to add it."
+      assert_equal embed_help, t("management.edit.embed_code_help")
+
+      embed_platforms = "Using Squarespace, Wix or WordPress? " \
+                        "Add an \"Embed\", \"HTML\" or \"Custom code\" block and paste the code into it."
+      assert_equal embed_platforms, t("management.edit.embed_code_platforms")
+
+      snippet_help = "Add this code to every page of your website where you want the Chat button to appear. " \
+                     "Paste it just before the closing <code>&lt;/head&gt;</code> tag, " \
+                     "or ask your web developer to add it."
+      assert_equal snippet_help, t("management.floating.snippet_help_html", label: "Chat button")
+
+      snippet_platforms = "Using Squarespace, Wix or WordPress? " \
+                          "Look for a \"Header code injection\" or \"Custom code\" setting."
+      assert_equal snippet_platforms, t("management.floating.snippet_platforms")
     end
   end
 

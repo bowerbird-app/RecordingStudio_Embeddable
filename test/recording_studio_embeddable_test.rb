@@ -681,8 +681,11 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
     assert_includes source, "FlatPack::Grid::Component.new(cols: 2)"
     assert_includes source, "FlatPack::TextArea::Component.new("
-    assert_includes source, 'default: "Add this code to your website wherever you want this to appear, for example inside a page or blog post. Paste it into the page\'s HTML, or ask your web developer to add it."'
-    assert_includes source, 'default: "Using Squarespace, Wix or WordPress? Add an \\"Embed\\", \\"HTML\\" or \\"Custom code\\" block and paste the code into it."'
+    assert_includes source, "embed_code_help"
+    assert_includes source, "for example inside a page or blog post"
+    assert_includes source, "embed_code_platforms"
+    assert_includes source, "Custom code"
+    refute_includes source, 'default: "Paste this into your page."'
     refute_includes source, "Copy the code below"
     refute_includes source, "FlatPack::TextInput::Component"
     assert_includes source, 'default: "Embed"'
