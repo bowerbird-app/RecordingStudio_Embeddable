@@ -27,6 +27,7 @@ Two delivery modes ship in this gem:
   `config.artifacts_enabled`, default off).
 - `recording_studio_attachable` `~> 0.9` for direct image URLs on rich embeds
   (`url_mode: :direct` + `direct_url_host`).
+- `recording_studio_cache` `~> 0.5` (git tag `v0.5.0`) for the shared public-embed rate limiter.
 
 ## Install
 
@@ -273,6 +274,7 @@ Common settings include:
 - `require_domain_allowlist` and `allow_any_domain`
 - `require_publishable` and `fallback_to_publishable_renderer`
 - `rate_limiting_enabled`, `rate_limiter`, `rate_limit`, and `rate_limit_window`
+  (adapters over `RecordingStudioCache::RateLimiter`; Redis clients need `eval`)
 - `cache_mode` and `cache_policy`
 - `view_logging_enabled` and the related sampling/privacy flags
 - `management_authorizer`

@@ -204,10 +204,12 @@ stores `frame_ancestors` on the Artifacts metadata. Hosts that need a real CSP
 
 ## CaptureView / rate limit
 
-CDN-served hits never reach `EmbedsController`, so `CaptureView` and the Rails
-rate limiter do not run on the edge. Use Cloudflare rate limiting / analytics for
-CDN traffic. Keep `EmbedsController` as an optional origin fallback during
-migration. Browser-payload / API embeds stay on Rails.
+CDN-served hits never reach `EmbedsController`, so `CaptureView` and the origin
+rate limiter do not run on the edge. Origin limiting uses thin adapters over
+`RecordingStudioCache::RateLimiter` (`Rails.cache` or Redis with `eval`). Use
+Cloudflare rate limiting / analytics for CDN traffic. Keep `EmbedsController` as
+an optional origin fallback during migration. Browser-payload / API embeds stay
+on Rails.
 
 ## What was retired
 
