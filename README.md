@@ -54,9 +54,12 @@ The install generator will:
 If you prefer to install pieces manually, the default mount path is `/recording_studio_embeddable`.
 
 Do not strip this engine's `lib/` from the host's `eager_load_paths` or
-`autoload_paths`. The engine keeps gem `lib/` off those lists; code there loads
-through the gem entrypoint. Engine `app/` (controllers, helpers, models, jobs)
-stays on the normal Rails autoload paths.
+`autoload_paths` once you are on `0.10.0` or newer. The engine keeps gem `lib/`
+off those lists; code there loads through the gem entrypoint and is not
+reloadable in development (restart after `lib/` edits). Engine `app/`
+(controllers, helpers, models, jobs) stays on the normal Rails autoload paths.
+Bump to `0.10.0` before removing any older featured_in-style strip — removing
+it on `<= 0.9.0` breaks eager load.
 
 ## Opt In a Model
 
