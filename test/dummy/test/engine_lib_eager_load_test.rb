@@ -18,9 +18,12 @@ class EngineLibEagerLoadTest < ActiveSupport::TestCase
   end
 
   test "dummy app eager loads with Zeitwerk without stripping engine lib" do
+    # Same eager-load pass as `bin/rails zeitwerk:check` (Zeitwerk::Loader.eager_load_all).
+    # Do not use Rails.autoloaders.main.eager_load(force: true) here: FlatPack's
+    # app/components sit on autoload_paths but not eager_load_paths, and force
+    # loading them raises Zeitwerk::NameError unrelated to this engine.
     assert_nothing_raised do
-      Rails.application.eager_load!
-      Rails.autoloaders.each(&:eager_load)
+      Zeitwerk::Loader.eager_load_all
     end
   end
 end
