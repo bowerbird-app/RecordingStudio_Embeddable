@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-10-16
+
+### Fixed
+- The engine no longer adds its `lib/` directory to Rails `autoload_paths` or
+  `eager_load_paths`. Zeitwerk therefore does not try to eager-load gem `lib/`
+  (including generators and already-required files). Host apps no longer need
+  to strip `RecordingStudioEmbeddable::Engine.root.join("lib")` from those
+  paths. Library code under `lib/` still loads through the gem entrypoint
+  requires; helpers and models under `app/` stay on the engine's normal
+  autoload paths.
+
+### Upgrade notes
+- Bump to `recording_studio_embeddable` `0.10.0`. No migration.
+- If the host initializer removed this engine's `lib/` from
+  `config.eager_load_paths` / `config.autoload_paths` (the Featured In
+  workaround), delete that strip — it is unused after this release.
+
 ## [0.9.0] - 2026-10-16
 
 ### Changed

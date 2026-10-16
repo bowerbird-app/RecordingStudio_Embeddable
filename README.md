@@ -53,6 +53,11 @@ The install generator will:
 
 If you prefer to install pieces manually, the default mount path is `/recording_studio_embeddable`.
 
+Do not strip this engine's `lib/` from the host's `eager_load_paths` or
+`autoload_paths`. The engine keeps gem `lib/` off those lists; code there loads
+through the gem entrypoint. Engine `app/` (controllers, helpers, models, jobs)
+stays on the normal Rails autoload paths.
+
 ## Opt In a Model
 
 Declare the embeddable capability on any model you want to expose publicly:
