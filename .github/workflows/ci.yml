@@ -69,6 +69,13 @@ jobs:
         DATABASE_URL: postgres://postgres:postgres@localhost:5432/recording_studio_embeddable_test
         RAILS_ENV: test
 
+    - name: Zeitwerk check (dummy)
+      run: bundle exec rails zeitwerk:check
+      working-directory: test/dummy
+      env:
+        DATABASE_URL: postgres://postgres:postgres@localhost:5432/recording_studio_embeddable_test
+        RAILS_ENV: test
+
     - name: Run RuboCop
       run: bundle exec rubocop
 

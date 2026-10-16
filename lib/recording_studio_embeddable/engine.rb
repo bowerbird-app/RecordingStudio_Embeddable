@@ -4,9 +4,11 @@ module RecordingStudioEmbeddable
   class Engine < ::Rails::Engine
     isolate_namespace RecordingStudioEmbeddable
 
-    # Ensure lib namespaced services are reloadable in development and available in eager load.
-    config.autoload_paths << root.join("lib")
-    config.eager_load_paths << root.join("lib")
+    # Keep engine lib/ off Zeitwerk autoload and eager-load paths. Gem code under
+    # lib/ loads via classic requires from lib/recording_studio_embeddable.rb, so
+    # it is not reloadable in development (restart the process after lib/ edits).
+    # Putting lib/ on eager_load_paths forced hosts to strip it so Zeitwerk would
+    # not treat generators and already-required files as app constants.
 
     initializer "recording_studio_embeddable.require_family", before: :load_config_initializers do
       require "recording_studio"
