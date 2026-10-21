@@ -66,10 +66,10 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/flatpack.git
-  revision: d74cee1fadf516624bd9fde443b47bed8a1d39fc
-  tag: v0.1.287
+  revision: 0481215378d406e8d29894c35130aa12c9e2ec6f
+  tag: v0.1.289
   specs:
-    flat_pack (0.1.287)
+    flat_pack (0.1.289)
       pagy (~> 9.0)
       rails (>= 7.1, < 9)
       tailwind_merge (~> 0.13)
@@ -78,8 +78,8 @@ GIT
 PATH
   remote: .
   specs:
-    recording_studio_embeddable (0.11.1)
-      flat_pack (~> 0.1.287)
+    recording_studio_embeddable (0.11.2)
+      flat_pack (~> 0.1.289)
       rails (~> 8.1.0)
       recording_studio (~> 4.7.1)
       recording_studio_accessible (~> 0.9)
@@ -405,7 +405,7 @@ PLATFORMS
 DEPENDENCIES
   debug
   devise
-  flat_pack (~> 0.1.287)!
+  flat_pack (~> 0.1.289)!
   puma
   recording_studio (~> 4.7.1)!
   recording_studio_accessible (~> 0.13)!
@@ -454,7 +454,7 @@ CHECKSUMS
   drb (2.2.3) sha256=0b00d6fdb50995fe4a45dea13663493c841112e4068656854646f418fda13373
   erb (6.0.7) sha256=c5ca6dc25b0ef974a44dc8f59fe847577122483b1968a38dec305c60bf91ee92
   erubi (1.13.1) sha256=a082103b0885dbc5ecf1172fede897f9ebdb745a4b97a5e8dc63953db1ee4ad9
-  flat_pack (0.1.287)
+  flat_pack (0.1.289)
   globalid (1.4.0) sha256=037f12fbf1d9d7a014d501c2d5c77356fd4ddd96d7a7991d6700bba96706f427
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
   io-console (0.9.4) sha256=a403304f32928ee85e56d457b4612ca43f2703b561a3258844992bd24085fbb1
@@ -508,7 +508,7 @@ CHECKSUMS
   recording_studio_artifacts (0.4.0)
   recording_studio_attachable (0.15.0)
   recording_studio_cache (0.5.0)
-  recording_studio_embeddable (0.11.1)
+  recording_studio_embeddable (0.11.2)
   recording_studio_metrics (0.2.0)
   recording_studio_publishable (0.8.0)
   regexp_parser (2.11.3) sha256=ca13f381a173b7a93450e53459075c9b76a10433caadcb2f1180f2c741fc55a4

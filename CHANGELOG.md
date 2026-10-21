@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.2] - 2026-10-21
+
+### Changed
+- Require `flat_pack` `~> 0.1.289` (GitHub tag `v0.1.289`), up from `0.1.287`.
+- Embed management tabs stay a trackless `FlatPack::Button::Pill::Component` (no `track: true`). Flatpack 0.1.289 drops the group padding on those rows, so the first pill sits flush with the heading and the rest of the screen. The row shifts left by about 8px.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.11.2` and `flat_pack` to `~> 0.1.289` (tag `v0.1.289`) in the host Gemfile. Reload Flatpack kit CSS. Rebuild host Tailwind so it emits `bg-[var(--tabs-pill-list-background-color)]`. Do not rerun `bin/rails generate flat_pack:install`. No migration.
+
 ## [0.11.1] - 2026-10-21
 
 ### Changed
