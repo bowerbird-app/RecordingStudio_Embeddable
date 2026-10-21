@@ -15,6 +15,7 @@ module RecordingStudioEmbeddable
       require "recording_studio_accessible"
       require "recording_studio_publishable"
       require "recording_studio_attachable"
+      require "recording_studio_logs"
       require "flat_pack"
 
       RecordingStudio.register_capability(
@@ -73,6 +74,10 @@ module RecordingStudioEmbeddable
     initializer "recording_studio_embeddable.register_recording_studio_api_action",
                 before: "recording_studio_api.after_initialize" do
       RecordingStudioEmbeddable::Api.register_capability_action!
+    end
+
+    initializer "recording_studio_embeddable.logs", before: "recording_studio_logs.prepare" do
+      config.to_prepare { RecordingStudioEmbeddable::LogsRegistration.register! }
     end
   end
 end

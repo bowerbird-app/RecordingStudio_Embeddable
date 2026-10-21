@@ -1,4 +1,25 @@
-# Migration Notes - Private Gems to Public Gems
+# Migration notes
+
+## 0.12.0 — RecordingStudioLogs for embed view logs
+
+Existing `recording_studio_embeddable_view_logs` rows stay. The table is not
+repartitioned. Hosts add `root_recording_id` and `arrived_at`; they do not
+copy-and-switch or add a summary table.
+
+1. Pin `recording_studio_embeddable` `0.12.0` and `recording_studio_logs` GitHub
+   tag `v0.5.0` (`>= 0.4.1, < 0.6`).
+2. Run `bin/rails generate recording_studio_embeddable:migrations` and
+   `bin/rails db:migrate`. That adds and backfills `root_recording_id` and
+   `arrived_at` on the view log.
+3. Keep scheduling `RecordingStudioEmbeddable::PruneViewsJob` if you already do.
+   It still deletes rows older than `config.prune_views_after` (90 days).
+   RecordingStudioLogs registers this log with indefinite retention, so Logs
+   cleanup does not prune it. Do not schedule `PartitionMaintenanceJob` for this
+   table.
+
+---
+
+# Historical notes — private gems to public gems
 
 ## Changes Made
 

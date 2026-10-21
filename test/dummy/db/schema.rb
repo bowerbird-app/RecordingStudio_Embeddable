@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_13_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_21_090001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -371,11 +371,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_140000) do
     t.string "user_agent_digest"
     t.datetime "viewed_at", null: false
     t.string "viewer_digest"
+    t.uuid "root_recording_id"
+    t.datetime "arrived_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.index ["bot"], name: "idx_rse_view_logs_bot"
     t.index ["embed_id", "viewed_at"], name: "idx_rse_view_logs_embed_viewed_at"
     t.index ["embed_id"], name: "index_recording_studio_embeddable_view_logs_on_embed_id"
     t.index ["parent_recording_id", "viewed_at"], name: "idx_rse_view_logs_parent_recording_viewed_at"
     t.index ["referer_host", "viewed_at"], name: "idx_rse_view_logs_referer_viewed_at"
+    t.index ["root_recording_id", "viewed_at"], name: "idx_rse_view_logs_root_viewed_at"
     t.index ["status", "viewed_at"], name: "idx_rse_view_logs_status_viewed_at"
     t.index ["token_digest", "viewed_at"], name: "idx_rse_view_logs_token_viewed_at"
     t.index ["viewed_at"], name: "idx_rse_view_logs_viewed_at"

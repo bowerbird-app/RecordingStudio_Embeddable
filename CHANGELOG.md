@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-10-21
+
+### Added
+- RecordingStudioLogs `>= 0.4.1, < 0.6` (dummy and development pin GitHub tag
+  `v0.5.0`) for the existing embed view log. The raw table stays unpartitioned
+  (`partition_interval: nil`, UUID `id`). New columns are `root_recording_id`
+  (backfilled from the parent or embed recording) and `arrived_at`.
+  Registration uses `retention: :indefinite`. There are no daily summaries.
+
+### Changed
+- `PruneViewsJob` is unchanged: it still uses `config.prune_views_after`
+  (default 90 days) and deletes raw rows older than that window.
+  RecordingStudioLogs cleanup does not prune this log. Hosts that already
+  schedule `PruneViewsJob` do not need a new job name.
+
+### Upgrade notes
+- Bump to `recording_studio_embeddable` `0.12.0` and pin
+  `recording_studio_logs` to GitHub tag `v0.5.0` (allowed range
+  `>= 0.4.1, < 0.6`).
+- Run `bin/rails generate recording_studio_embeddable:migrations` and
+  `bin/rails db:migrate`. Existing `recording_studio_embeddable_view_logs`
+  rows are kept. Do not schedule partition maintenance for this unpartitioned
+  table.
+
 ## [0.11.2] - 2026-10-21
 
 ### Changed
@@ -498,7 +522,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.11.2...v0.12.0
 [0.9.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.6.0...v0.7.0
