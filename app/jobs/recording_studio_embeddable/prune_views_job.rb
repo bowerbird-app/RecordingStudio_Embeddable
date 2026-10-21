@@ -8,7 +8,17 @@ module RecordingStudioEmbeddable
     queue_as :default
 
     def perform(before: nil)
-      Services::PruneEmbeddableViewLogs.call(before: before)
+      cutoff = before || default_cutoff
+      return unless cutoff
+
+      EmbeddableViewLog.where(EmbeddableViewLog.arel_table[:viewed_at].lt(cutoff)).delete_all
+    end
+
+    private
+
+    def default_cutoff
+      duration = RecordingStudioEmbeddable.configuration.prune_views_after
+      duration ? Time.current - duration : nil
     end
   end
 end

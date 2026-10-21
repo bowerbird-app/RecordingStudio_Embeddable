@@ -17,10 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Registration uses `retention: :indefinite`. There are no daily summaries.
 
 ### Changed
-- `PruneViewsJob` still uses `config.prune_views_after` (default 90 days) and
-  deletes raw rows older than that window. RecordingStudioLogs cleanup does not
-  prune this log. Hosts that already schedule `PruneViewsJob` do not need a new
-  job name.
+- `PruneViewsJob` is unchanged: it still uses `config.prune_views_after`
+  (default 90 days) and deletes raw rows older than that window.
+  RecordingStudioLogs cleanup does not prune this log. Hosts that already
+  schedule `PruneViewsJob` do not need a new job name.
 
 ### Upgrade notes
 - Bump to `recording_studio_embeddable` `0.11.0` and pin
