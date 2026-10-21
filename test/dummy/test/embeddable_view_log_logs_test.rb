@@ -5,14 +5,9 @@ require "test_helper"
 class EmbeddableViewLogLogsTest < ActiveSupport::TestCase
   setup do
     RecordingStudioEmbeddable.reset_configuration!
-    RecordingStudioEmbeddable.configuration.logs_summaries_enabled = false
     RecordingStudioEmbeddable::LogsRegistration.register!
     RecordingStudioEmbeddable::EmbeddableViewLog.delete_all
-    RecordingStudioEmbeddable::EmbeddableViewDaySummary.delete_all
-    clear_runs!
-    @day = Date.new(2026, 10, 1)
     @root_id = SecureRandom.uuid
-    @embed_id = SecureRandom.uuid
   end
 
   teardown do
@@ -33,8 +28,7 @@ class EmbeddableViewLogLogsTest < ActiveSupport::TestCase
     assert_equal "uuid", type
     assert connection.column_exists?(table, :root_recording_id)
     assert connection.column_exists?(table, :arrived_at)
-    assert connection.data_source_exists?("recording_studio_logs_aggregation_runs")
-    assert connection.data_source_exists?("recording_studio_embeddable_view_day_summaries")
+    refute connection.data_source_exists?("recording_studio_embeddable_view_day_summaries")
   end
 
   test "log view stamps root from the parent recording" do
@@ -65,7 +59,7 @@ class EmbeddableViewLogLogsTest < ActiveSupport::TestCase
     Current.actor = nil
   end
 
-  test "prune views job still deletes old rows when summaries are off" do
+  test "prune views job still deletes old rows" do
     insert_log(viewed_at: Time.utc(2026, 6, 1, 12))
     insert_log(viewed_at: Time.utc(2026, 10, 20, 12))
 
@@ -75,34 +69,11 @@ class EmbeddableViewLogLogsTest < ActiveSupport::TestCase
     assert_equal Time.utc(2026, 10, 20, 12), RecordingStudioEmbeddable::EmbeddableViewLog.first.viewed_at
   end
 
-  test "summaries rebuild counts and block prune until the day is covered" do
-    RecordingStudioEmbeddable.configuration.logs_summaries_enabled = true
+  test "stats still read raw view logs" do
     insert_log(viewed_at: Time.utc(2026, 10, 1, 12), status: "rendered")
-    insert_log(viewed_at: Time.utc(2026, 10, 1, 18), status: "not_found")
-
-    RecordingStudioEmbeddable::PruneViewsJob.perform_now(before: Time.utc(2026, 10, 18))
-    assert_equal 2, RecordingStudioEmbeddable::EmbeddableViewLog.count
-
-    RecordingStudioEmbeddable::Services::RebuildEmbeddableViewLogSummaries.call(day: @day)
-    summaries = RecordingStudioEmbeddable::EmbeddableViewDaySummary.where(day: @day)
-    assert_equal 2, summaries.sum(:view_count)
-    assert_equal 1, summaries.where(status: "rendered").sum(:view_count)
-
-    RecordingStudioEmbeddable::Services::RebuildEmbeddableViewLogSummaries.call(day: @day)
-    assert_equal 2, RecordingStudioEmbeddable::EmbeddableViewDaySummary.where(day: @day).sum(:view_count)
-
-    RecordingStudioEmbeddable::PruneViewsJob.perform_now(before: Time.utc(2026, 10, 18))
-    assert_equal 0, RecordingStudioEmbeddable::EmbeddableViewLog.count
-  end
-
-  test "stats still read raw view logs while summaries stay off" do
-    RecordingStudioEmbeddable.configuration.logs_summaries_enabled = false
-    insert_log(viewed_at: Time.utc(2026, 10, 1, 12), status: "rendered")
-    RecordingStudioEmbeddable::Services::RebuildEmbeddableViewLogSummaries.call(day: @day)
 
     summary = RecordingStudioEmbeddable::EmbeddableViewLog.summary_for(nil)
     assert_equal 1, summary.fetch(:total)
-    assert_equal false, RecordingStudioEmbeddable.configuration.logs_summaries_enabled
   end
 
   private
@@ -120,12 +91,4 @@ class EmbeddableViewLogLogsTest < ActiveSupport::TestCase
       rate_limited: false
     )
   end
-
-  def clear_runs!
-    connection = RecordingStudioEmbeddable::LogsRegistration.logging_connection
-    return unless connection.data_source_exists?("recording_studio_logs_aggregation_runs")
-
-    connection.execute("DELETE FROM #{connection.quote_table_name('recording_studio_logs_aggregation_runs')}")
-  end
-
 end

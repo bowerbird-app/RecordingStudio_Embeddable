@@ -39,7 +39,6 @@ module RecordingStudioEmbeddable
       :view_log_raw_referer,
       :view_log_salt,
       :view_summary_enabled,
-      :logs_summaries_enabled,
       :bot_detector,
       :management_authorizer,
       :token_bytes,
@@ -101,7 +100,6 @@ module RecordingStudioEmbeddable
       @view_log_raw_referer = false
       @view_log_salt = nil
       @view_summary_enabled = true
-      @logs_summaries_enabled = false
       @bot_detector = nil
       @management_authorizer = lambda { |controller:|
         next false unless controller.respond_to?(:current_user, true)
@@ -164,7 +162,6 @@ module RecordingStudioEmbeddable
         allow_custom_styling: allow_custom_styling,
         view_logging_enabled: view_logging_enabled,
         async_view_logging: async_view_logging,
-        logs_summaries_enabled: logs_summaries_enabled,
         token_bytes: token_bytes,
         prune_views_after: prune_views_after,
         cdn_withhold_snippet_until_published: cdn_withhold_snippet_until_published,

@@ -70,8 +70,7 @@
         config.view_log_raw_user_agent = false # Store raw user agent when true; otherwise store only digest.
         config.view_log_raw_referer = false # Store raw referer when true; otherwise store normalized/digested value.
         config.view_log_salt = nil # Optional salt used to build stable privacy-preserving digests.
-        config.view_summary_enabled = true # Unused leftover; stats still read raw view logs.
-        config.logs_summaries_enabled = false # RecordingStudioLogs daily embed-view summaries. Leave off.
+        config.view_summary_enabled = true # Enable summary rollups/aggregations for view analytics.
         config.bot_detector = nil # Optional custom bot-detection strategy/callable.
 
         # Management and token lifecycle
@@ -141,8 +140,7 @@
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_log_raw_user_agent</td><td class="px-3 py-2 font-mono">false</td><td class="px-3 py-2">Stores raw User-Agent when true; otherwise stores digest only.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_log_raw_referer</td><td class="px-3 py-2 font-mono">false</td><td class="px-3 py-2">Stores raw Referer when true; otherwise stores digest/host only.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_log_salt</td><td class="px-3 py-2 font-mono">nil</td><td class="px-3 py-2">HMAC salt used for deterministic digest fields in logs.</td></tr>
-        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_summary_enabled</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">Unused leftover. Stats still read raw <code>EmbeddableViewLog</code> rows.</td></tr>
-        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">logs_summaries_enabled</td><td class="px-3 py-2 font-mono">false</td><td class="px-3 py-2">When true, RecordingStudioLogs rebuilds daily embed-view summaries and prune waits for covering aggregation runs. Leave off.</td></tr>
+        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">view_summary_enabled</td><td class="px-3 py-2 font-mono">true</td><td class="px-3 py-2">Enables summary-oriented analytics features for logs.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">bot_detector</td><td class="px-3 py-2 font-mono">nil</td><td class="px-3 py-2">Optional custom bot detector strategy/service.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">management_authorizer</td><td class="px-3 py-2 font-mono">lambda { current_user.RS_accessible }</td><td class="px-3 py-2">Authorization gate for management endpoints; expects an accessible user context.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">token_bytes</td><td class="px-3 py-2 font-mono">24</td><td class="px-3 py-2">Byte length for generated embed/public tokens.</td></tr>

@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
 module RecordingStudioEmbeddable
-  # Hosts may keep scheduling this job. With logs_summaries_enabled false it
-  # still deletes rows older than prune_views_after. With the flag true it
-  # delegates to RecordingStudioLogs retention (a UTC day needs a covering
-  # summary success before raw rows for that day are removed).
+  # Hosts may keep scheduling this job. It deletes rows older than
+  # prune_views_after (90 days by default). RecordingStudioLogs registers this
+  # table with indefinite retention, so Logs cleanup does not prune it.
   class PruneViewsJob < ActiveJob::Base
     queue_as :default
 

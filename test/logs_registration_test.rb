@@ -11,11 +11,6 @@ class LogsRegistrationTest < Minitest::Test
     RecordingStudioEmbeddable.reset_configuration!
   end
 
-  def test_logs_summaries_default_off
-    assert_equal false, RecordingStudioEmbeddable.configuration.logs_summaries_enabled
-    assert_equal false, RecordingStudioEmbeddable::LogsRegistration.summaries_enabled?
-  end
-
   def test_gemspec_pins_recording_studio_logs_like_api
     gemspec = File.read(File.expand_path("../recording_studio_embeddable.gemspec", __dir__))
 
@@ -29,17 +24,14 @@ class LogsRegistrationTest < Minitest::Test
     assert_equal :viewed_at, log.timestamp_column
     assert_nil log.partition_interval
     assert_equal :root_recording_id, log.root_column
-    assert_equal RecordingStudioEmbeddable.configuration.prune_views_after, log.retention
+    assert_equal :indefinite, log.retention
+    assert_empty RecordingStudioLogs.registry.aggregations_for(log)
 
     forbidden = RecordingStudioEmbeddable::LogsRegistration::FORBIDDEN_AGGREGATABLE
     aggregatable = log.contract.instance_variable_get(:@columns).keys
     forbidden.each do |column|
       refute_includes aggregatable, column
     end
-
-    aggregation = RecordingStudioEmbeddable::LogsRegistration.embed_views_definition
-    assert_equal RecordingStudioEmbeddable::LogsRegistration::EMBED_VIEWS, aggregation.name
-    assert_equal %i[root_recording_id embed_id parent_recording_id status], aggregation.group_by
   end
 
   def test_view_log_cutover_migration_keeps_existing_table

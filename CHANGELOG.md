@@ -13,32 +13,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - RecordingStudioLogs `>= 0.4.1, < 0.6` (dummy and development pin GitHub tag
   `v0.5.0`) for the existing embed view log. The raw table stays unpartitioned
   (`partition_interval: nil`, UUID `id`). New columns are `root_recording_id`
-  (backfilled from the parent or embed recording) and `arrived_at`. Daily
-  summaries live in `recording_studio_embeddable_view_day_summaries`
-  (`embeddable/embed_views`).
-- `config.logs_summaries_enabled` (default false). Unused by the stats screen,
-  view-logging flags, sampling/privacy, rate limits, and Metrics while off.
+  (backfilled from the parent or embed recording) and `arrived_at`.
+  Registration uses `retention: :indefinite`. There are no daily summaries.
 
 ### Changed
-- `PruneViewsJob` still uses `config.prune_views_after` (default 90 days). With
-  the summaries flag off it deletes raw rows older than that window. With the
-  flag on it delegates to RecordingStudioLogs retention (a UTC day is removed
-  only after a covering `embeddable/embed_views` success). Hosts that already
-  schedule `PruneViewsJob` do not need a new job name.
+- `PruneViewsJob` still uses `config.prune_views_after` (default 90 days) and
+  deletes raw rows older than that window. RecordingStudioLogs cleanup does not
+  prune this log. Hosts that already schedule `PruneViewsJob` do not need a new
+  job name.
 
 ### Upgrade notes
 - Bump to `recording_studio_embeddable` `0.11.0` and pin
   `recording_studio_logs` to GitHub tag `v0.5.0` (allowed range
   `>= 0.4.1, < 0.6`).
-- If Logs run tables are not present, run
-  `bin/rails generate recording_studio_logs:migrations`. Then run
-  `bin/rails generate recording_studio_embeddable:migrations` and
+- Run `bin/rails generate recording_studio_embeddable:migrations` and
   `bin/rails db:migrate`. Existing `recording_studio_embeddable_view_logs`
-  rows are kept.
-- Leave `config.logs_summaries_enabled` false. Optional: after comparing
-  daily totals, set it true and schedule `RecordingStudioLogs::DailyAggregationJob`
-  (and `ReconciliationJob`) before relying on Logs prune. Do not schedule
-  partition maintenance for this unpartitioned table.
+  rows are kept. Do not schedule partition maintenance for this unpartitioned
+  table.
 
 ## [0.10.0] - 2026-10-16
 

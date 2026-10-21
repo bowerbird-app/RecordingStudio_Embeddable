@@ -140,7 +140,6 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_equal [], config.blocked_embedder_domains
     assert_equal true, config.require_publishable
     assert_equal :null, config.rate_limiter
-    assert_equal false, config.logs_summaries_enabled
   end
 
   def test_capability_key_and_options

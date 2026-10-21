@@ -7,7 +7,6 @@ module RecordingStudioEmbeddable
         def call(before: nil)
           cutoff = before.presence || default_before
           return 0 if cutoff.blank?
-          return GuardedEmbeddableViewLogRetention.call(before: cutoff) if LogsRegistration.summaries_enabled?
           return 0 unless EmbeddableViewLog.table_exists?
 
           EmbeddableViewLog.where(EmbeddableViewLog.arel_table[:viewed_at].lt(cutoff)).delete_all

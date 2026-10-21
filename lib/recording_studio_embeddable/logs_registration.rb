@@ -3,7 +3,6 @@
 module RecordingStudioEmbeddable
   module LogsRegistration
     SOURCE_MODEL = "RecordingStudioEmbeddable::EmbeddableViewLog"
-    EMBED_VIEWS = "embeddable/embed_views"
     OWNER = "RecordingStudioEmbeddable"
     FORBIDDEN_AGGREGATABLE = %i[
       bot token_digest viewer_digest
@@ -14,21 +13,6 @@ module RecordingStudioEmbeddable
 
     module_function
 
-    def summaries_enabled?
-      RecordingStudioEmbeddable.configuration.logs_summaries_enabled
-    end
-
-    def logging_connection
-      EmbeddableViewLog.connection
-    end
-
-    def resolved_retention
-      duration = RecordingStudioEmbeddable.configuration.prune_views_after
-      return :indefinite if duration.blank?
-
-      duration
-    end
-
     def register!
       return unless defined?(RecordingStudioLogs)
 
@@ -38,7 +22,7 @@ module RecordingStudioEmbeddable
         partition_interval: nil,
         root_column: :root_recording_id,
         owner: OWNER,
-        retention: resolved_retention,
+        retention: :indefinite,
         aggregatable: {
           root_recording_id: { filter: [:eq], group: true },
           embed_id: { filter: [:eq], group: true },
@@ -52,22 +36,7 @@ module RecordingStudioEmbeddable
         }
       )
 
-      RecordingStudioLogs.aggregate(
-        source: SOURCE_MODEL,
-        name: EMBED_VIEWS,
-        summary_model: "RecordingStudioEmbeddable::EmbeddableViewDaySummary",
-        owner: OWNER,
-        group_by: %i[root_recording_id embed_id parent_recording_id status],
-        measurements: {
-          view_count: :count
-        }
-      )
-
       RecordingStudioLogs.finalize!
-    end
-
-    def embed_views_definition
-      RecordingStudioLogs.registry.aggregation(EMBED_VIEWS)
     end
   end
 end
