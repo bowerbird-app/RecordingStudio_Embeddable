@@ -75,7 +75,7 @@ class FloatingWidgetHelperTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Chat button snippet"
     assert_includes response.body, @embed.token
     assert_includes response.body, "widget.js"
-    assert_includes response.body, "copyFromButton"
+    assert_includes response.body, "flat-pack--clipboard#copy"
 
     publish = RecordingStudioPublishable::Services::Publishables::Update.call(
       parent_recording: @page,

@@ -26,7 +26,7 @@
     ) %>
   </div>
 
-  <%= render FlatPack::Card::Component.new(style: :outlined) do |card| %>
+  <%= render FlatPack::Card::Component.new(style: :default) do |card| %>
     <% card.body do %>
       <% if @recordings.any? %>
         <div class="overflow-x-auto">

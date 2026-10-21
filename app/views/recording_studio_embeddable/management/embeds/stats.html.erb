@@ -34,7 +34,7 @@
       }
     }
   ) do |chart| %>
-    <% chart.actions do %>
+    <% chart.top_right_slot do %>
       <%= render FlatPack::ChartButtons::Component.new do |controls| %>
         <% controls.dropdown(
           text: (@stats_range_picker == "custom" ? t("recording_studio.embeddable.management.stats.range", default: "Range") : @stats_range_options.fetch(@stats_range)),

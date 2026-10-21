@@ -13,8 +13,8 @@ module RecordingStudioEmbeddable
       "stats" => :stats
     }.freeze
 
-    def recording_studio_embeddable_management_tab_style(screen)
-      recording_studio_embeddable_management_current_tab == screen.to_sym ? :primary : :secondary
+    def recording_studio_embeddable_management_tab_active?(screen)
+      recording_studio_embeddable_management_current_tab == screen.to_sym
     end
 
     def recording_studio_embeddable_management_tab_aria(screen, disabled: false)

@@ -28,20 +28,21 @@ class EmbedManagementModalTest < ApplicationSystemTestCase
     within_management_frame do
       assert_selector "h1", exact_text: "Embed style"
       assert_selector "[data-styling-form='true'][data-live-preview-bound='true']"
-      assert_selector "a[data-fp-style='primary'][aria-current='page']", exact_text: "Embed style"
-      assert_selector "a[data-fp-style='secondary']", exact_text: "Settings"
+      assert_active_pill "Embed style"
+      assert_inactive_pill "Settings"
       find("a", exact_text: "Preview").click
       assert_selector "h1", exact_text: "Preview"
-      assert_selector "a[data-fp-style='primary'][aria-current='page']", exact_text: "Preview"
+      assert_active_pill "Preview"
       find("a", exact_text: "Embed").click
       assert_selector "h1", exact_text: "Embed"
-      assert_selector "a[data-fp-style='primary'][aria-current='page']", exact_text: "Embed"
+      assert_active_pill "Embed"
       find("a", exact_text: "Embed style").click
-      assert_selector "a[data-fp-style='primary'][aria-current='page']", exact_text: "Embed style"
+      assert_active_pill "Embed style"
       click_on "Settings"
       assert_selector "h1", exact_text: "Embed settings"
-      assert_selector "a[data-fp-style='primary'][aria-current='page']", exact_text: "Settings"
-      assert_selector "a[data-fp-style='secondary']", exact_text: "Embed style"
+      assert_active_pill "Settings"
+      assert_inactive_pill "Embed style"
+      assert_selector "[data-fp-style='primary']", exact_text: "Save changes"
       domains.fill_in with: "localhost"
       click_on "Save changes"
       assert_text "Invalid embedder domain: localhost"
@@ -64,10 +65,10 @@ class EmbedManagementModalTest < ApplicationSystemTestCase
 
     within_management_frame do
       assert_text "Show the Chat button"
-      assert_selector "a[data-fp-style='primary'][aria-current='page']", exact_text: "Chat button"
-      assert_selector "a[data-fp-style='secondary']", exact_text: "Embed style"
+      assert_active_pill "Chat button"
+      assert_inactive_pill "Embed style"
       assert_selector "iframe#embed-floating-preview"
-      assert_selector "[data-action*='copyFromButton']"
+      assert_selector "[data-action*='flat-pack--clipboard#copy']"
       choose "Bottom left"
     end
 
@@ -85,6 +86,19 @@ class EmbedManagementModalTest < ApplicationSystemTestCase
     assert_selector "h1", exact_text: "Dummy embeddables"
     visit embed_modals_path
     assert_selector "h1", exact_text: "Manage embeds"
+  end
+
+  def assert_active_pill(text)
+    pill = find(".fp-pill-style a[aria-current='page']", exact_text: text)
+    assert_nil pill.find(:xpath, "./parent::*")["data-fp-style"]
+    assert_includes pill[:class], "bg-[var(--tabs-pill-active-background-color)]"
+  end
+
+  def assert_inactive_pill(text)
+    pill = find(".fp-pill-style a", exact_text: text)
+    assert_nil pill["aria-current"]
+    assert_includes pill[:class], "text-[var(--tabs-pill-inactive-text-color)]"
+    refute_includes pill[:class], "bg-[var(--tabs-pill-active-background-color)]"
   end
 
   def within_management_frame(&block)

@@ -129,7 +129,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.11.0", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.11.1", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -451,15 +451,18 @@ class RecordingStudioEmbeddableTest < Minitest::Test
       File.expand_path("../app/controllers/recording_studio_embeddable/management/embeds_controller.rb", __dir__)
     )
 
-    assert_includes nav, "recording_studio_embeddable_management_tab_style(:edit)"
-    assert_includes nav, "recording_studio_embeddable_management_tab_style(:preview)"
-    assert_includes nav, "recording_studio_embeddable_management_tab_style(:styling)"
-    assert_includes nav, "recording_studio_embeddable_management_tab_style(:floating)"
-    assert_includes nav, "recording_studio_embeddable_management_tab_style(:settings)"
-    assert_includes nav, "recording_studio_embeddable_management_tab_style(:stats)"
+    assert_includes nav, "FlatPack::Button::Pill::Component.new"
+    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:edit)"
+    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:preview)"
+    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:styling)"
+    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:floating)"
+    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:settings)"
+    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:stats)"
     assert_includes nav, 'default: "Embed style"'
     assert_includes nav, "recording_studio_embeddable_management_tab_data"
+    refute_includes nav, "recording_studio_embeddable_management_tab_style"
     refute_includes nav, "recording_studio_embeddable_management_preview_data"
+    refute_includes nav, "style: :primary"
     refute_includes nav, "style: :secondary"
     refute_includes helper, "{ turbo: false }"
     assert_includes helper, "document: 1"
@@ -469,7 +472,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes layout, 'content="reload"'
   end
 
-  def test_current_management_tab_is_primary_and_other_tabs_stay_secondary
+  def test_current_management_tab_is_the_active_pill
     helper = Object.new.extend(RecordingStudioEmbeddable::ManagementModalHelper)
     helper.define_singleton_method(:action_name) { @action_name }
     helper.define_singleton_method(:params) { @params || {} }
@@ -479,28 +482,31 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     end
 
     helper.use_screen("styling")
-    assert_equal :primary, helper.recording_studio_embeddable_management_tab_style(:styling)
-    assert_equal :secondary, helper.recording_studio_embeddable_management_tab_style(:settings)
+    assert helper.recording_studio_embeddable_management_tab_active?(:styling)
+    refute helper.recording_studio_embeddable_management_tab_active?(:settings)
     assert_equal({ current: "page" }, helper.recording_studio_embeddable_management_tab_aria(:styling))
 
     helper.use_screen("update_styling")
     assert_equal :styling, helper.recording_studio_embeddable_management_current_tab
+    assert helper.recording_studio_embeddable_management_tab_active?(:styling)
 
     helper.use_screen("update", form_context: "settings")
     assert_equal :settings, helper.recording_studio_embeddable_management_current_tab
+    assert helper.recording_studio_embeddable_management_tab_active?(:settings)
 
     helper.use_screen("update_floating")
     assert_equal :floating, helper.recording_studio_embeddable_management_current_tab
+    assert helper.recording_studio_embeddable_management_tab_active?(:floating)
 
     helper.use_screen("edit")
-    assert_equal :primary, helper.recording_studio_embeddable_management_tab_style(:edit)
+    assert helper.recording_studio_embeddable_management_tab_active?(:edit)
     %i[preview styling floating settings stats].each do |screen|
-      assert_equal :secondary, helper.recording_studio_embeddable_management_tab_style(screen)
+      refute helper.recording_studio_embeddable_management_tab_active?(screen)
     end
 
     helper.use_screen("preview")
-    assert_equal :primary, helper.recording_studio_embeddable_management_tab_style(:preview)
-    assert_equal :secondary, helper.recording_studio_embeddable_management_tab_style(:edit)
+    assert helper.recording_studio_embeddable_management_tab_active?(:preview)
+    refute helper.recording_studio_embeddable_management_tab_active?(:edit)
   end
 
   def test_publishable_gate_fails_closed_without_helper
