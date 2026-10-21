@@ -18,6 +18,7 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
 
     workspace = Workspace.create!(name: "Manage #{SecureRandom.hex(4)}")
     root = RecordingStudio.root_recording_for(workspace)
+    grant_embed_management!(actor: @user, recording: root)
     @widget = root.record(Widget, actor: @user) { |widget| widget.title = "Hello widget" }
     @embed = @widget.ensure_embed!(floating_enabled: false, floating: { "position" => "bottom-right" })
     @page = root.record(Page, actor: @user) { |record| record.title = "Inline page" }

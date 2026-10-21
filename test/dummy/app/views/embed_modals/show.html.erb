@@ -11,7 +11,7 @@
     variant: :h1
   ) %>
 
-  <% if @page_recording&.embed && @widget_recording&.embed %>
+  <% if @page_recording && @widget_recording %>
     <div class="flex flex-wrap items-center gap-3">
       <%= recording_studio_embeddable_management_modal(
         recording: @page_recording,

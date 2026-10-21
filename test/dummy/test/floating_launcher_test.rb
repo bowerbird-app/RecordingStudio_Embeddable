@@ -35,6 +35,7 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
 
     workspace = Workspace.create!(name: "Floating #{SecureRandom.hex(4)}")
     root = RecordingStudio.root_recording_for(workspace)
+    grant_embed_management!(actor: @user, recording: root)
     @widget_recording = root.record(Widget, actor: @user) { |widget| widget.title = "Hello widget" }
     @widget_embed = @widget_recording.ensure_embed!(
       enabled: false,

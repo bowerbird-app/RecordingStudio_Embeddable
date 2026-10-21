@@ -16,6 +16,7 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
 
     workspace = Workspace.create!(name: "Modal #{SecureRandom.hex(4)}")
     root = RecordingStudio.root_recording_for(workspace)
+    grant_embed_management!(actor: @user, recording: root)
     @page = root.record(Page, actor: @user) { |record| record.title = "Modal page" }
     @page_embed = @page.ensure_embed!(enabled: true, allowed_embedder_domains: ["example.com"])
     @widget = root.record(Widget, actor: @user) { |widget| widget.title = "Modal chat" }
@@ -232,10 +233,18 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_select "button", text: "Chat button"
     page_src = css_select("[data-recording-studio-embeddable-management-src]").first["data-recording-studio-embeddable-management-src"]
     widget_src = css_select("[data-recording-studio-embeddable-management-src]").last["data-recording-studio-embeddable-management-src"]
-    assert_includes page_src, "/styling"
+    page = Page.find_by!(title: "Getting Started")
+    widget = Widget.find_by!(title: "Hello")
+    page_recording = RecordingStudio::Recording.unscoped.find_by!(recordable: page)
+    widget_recording = RecordingStudio::Recording.unscoped.find_by!(recordable: widget)
+    assert_includes page_src, "/management/recordings/#{page_recording.id}/embed"
+    assert_includes page_src, "tab=styling"
     assert_includes page_src, "variant=modal"
-    assert_includes widget_src, "/floating"
+    refute_includes page_src, "/styling"
+    assert_includes widget_src, "/management/recordings/#{widget_recording.id}/embed"
+    assert_includes widget_src, "tab=floating"
     assert_includes widget_src, "variant=modal"
+    assert_select "[data-recording-studio-embeddable-management-src][data-turbo-prefetch=false]", count: 2
   end
 
   private

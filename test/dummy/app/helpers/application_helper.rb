@@ -9,14 +9,14 @@ module ApplicationHelper
 		end
 	end
 
-	def dummy_recording_row_actions(recording, embed: nil)
+	def dummy_recording_row_actions(recording)
 		actions = []
-		embed ||= recording.current_embed if recording.respond_to?(:current_embed)
 
-		if embed.present?
+		if recording.respond_to?(:embeddable?) && recording.embeddable?
 			actions << {
 				text: "Embed",
-				href: recording_studio_embeddable.edit_management_embed_path(embed)
+				href: recording_studio_embeddable_management_path(recording),
+				data: { turbo_prefetch: "false" }
 			}
 		end
 

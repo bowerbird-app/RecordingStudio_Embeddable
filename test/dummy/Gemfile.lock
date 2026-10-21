@@ -111,7 +111,7 @@ GIT
 PATH
   remote: ../..
   specs:
-    recording_studio_embeddable (0.10.0)
+    recording_studio_embeddable (0.11.0)
       flat_pack (~> 0.1.143)
       rails (~> 8.1.0)
       recording_studio (~> 4.2)
@@ -744,7 +744,7 @@ CHECKSUMS
   recording_studio_artifacts (0.4.0)
   recording_studio_attachable (0.15.0)
   recording_studio_cache (0.5.0)
-  recording_studio_embeddable (0.10.0)
+  recording_studio_embeddable (0.11.0)
   recording_studio_metrics (0.2.0)
   recording_studio_publishable (0.8.0)
   recording_studio_root_switchable (0.8.0)

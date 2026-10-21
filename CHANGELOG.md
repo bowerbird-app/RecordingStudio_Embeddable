@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-10-21
+
+### Added
+- `GET /management/recordings/:recording_id/embed` (`management_recording_embed`) finds or creates the embed for one recording and redirects to its management screen. The redirect keeps `tab`, `variant=modal`, `modal=1`, and the Turbo Frame `recording_studio_embeddable_management`.
+- `recording_studio_embeddable_management_path` and `recording_studio_embeddable_management_url` build that URL through the mounted engine. Hosts use this one link instead of a hard-coded `script_name` and a controller that calls `ensure_embed!`.
+- The management modal opens that route, so the button works before an embed exists. The button sets `data-turbo-prefetch="false"`.
+
+### Changed
+- Management actions authorize `:edit` on the parent recording. `management_authorizer` is called with `controller:` and `recording:`. The default reads `current_user` and calls `RecordingStudioAccessible.authorized?(actor:, recording:, role: :edit)`. A false return or a raised error is a 404, including on existing embed screens. A person who can edit one recording cannot manage another recording's embed.
+- Prefetch requests (`Sec-Purpose`, `X-Sec-Purpose`, or `Purpose` containing `prefetch`) respond with `204` and do not create an embed.
+
+### Upgrade notes
+- Bump to `recording_studio_embeddable` `0.11.0`. No migration.
+- Update `config.management_authorizer` so it accepts `recording:` and returns true only when that actor may edit the recording. A signed-in `RS_accessible` user no longer manages every embed. `:admin` still satisfies `:edit`. `:view` does not.
+- Point host links at `recording_studio_embeddable_management_path(recording)` with `data-turbo-prefetch="false"`. Remove host controllers whose only job was `ensure_embed!` plus a redirect.
+- `recording_studio_embeddable_management_modal` no longer needs `ensure_embed!` first.
+
 ## [0.10.0] - 2026-10-16
 
 ### Changed
