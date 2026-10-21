@@ -107,7 +107,7 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Paste this where the Chat button should appear."
     refute_includes response.body, ">Launcher<"
     assert_includes response.body, "widget.js"
-    assert_includes response.body, "copyFromButton"
+    assert_includes response.body, "flat-pack--clipboard#copy"
     @embed.reload
     assert_equal true, @embed.floating_enabled
     assert_equal "bottom-left", @embed.floating["position"]

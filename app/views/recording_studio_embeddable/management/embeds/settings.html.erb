@@ -37,7 +37,7 @@
       title: t("recording_studio.embeddable.management.edit.unavailable_title", default: "Embeddable unavailable"),
       description: t("recording_studio.embeddable.management.edit.unavailable_description", default: "You need to publish this page before you can enable embeddable.")
     ) do |empty| %>
-      <% empty.actions do %>
+      <% empty.item do %>
         <% if publish_page_url.present? %>
           <%= render FlatPack::Button::Component.new(text: t("recording_studio.embeddable.management.edit.publish_settings", default: "Publish Settings"), style: :primary, href: publish_page_url) %>
         <% end %>

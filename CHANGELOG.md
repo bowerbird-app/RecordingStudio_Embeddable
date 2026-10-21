@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-10-21
+
+### Changed
+- Embed management tabs (Embed, Preview, Embed style, Chat button, Settings, Stats) render with `FlatPack::Button::Pill::Component`. The open tab uses the neutral pill active surface (grey background). The other tabs use the inactive pill. The same row is on the full page and in the modal Turbo Frame, including after a failed save (`422`).
+- Save, Apply, and other actions stay `FlatPack::Button::Component` with `style: :primary`.
+- Require `flat_pack` `~> 0.1.287` (GitHub tag `v0.1.287`), up from `0.1.213`.
+- Require `recording_studio` `~> 4.7.1` (GitHub tag `v4.7.1`), up from `4.5.0`. That release's default layout page nav uses Flatpack `with_back` / `with_close`. `4.5.0` still passes removed `PageNav` keywords such as `back_icon` and raises on Flatpack `0.1.287`.
+- The Stats chart range control uses `FlatPack::Chart::Component`'s `top_right_slot`. `actions` is deprecated in this Flatpack release.
+- Unpublished Embed and Settings empty states put Publish Settings in `FlatPack::EmptyState::Component`'s `item` slot. `actions` is gone.
+- The Chat button snippet still copies from the field. Flatpack now wires that control as `flat-pack--clipboard#copy`.
+- Dummy cards that used `FlatPack::Card` `style: :outlined` use `:default`. Flatpack `0.1.287` accepts `default`, `shaded`, `brand`, `brand_subtle`, and `gradient`.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.11.1`, `flat_pack` to `~> 0.1.287` (tag `v0.1.287`), and `recording_studio` to `~> 4.7.1` (tag `v4.7.1`) in the host Gemfile. Reload Flatpack kit CSS. No migration.
+- `recording_studio_embeddable_management_tab_style` is removed. It returned `:primary` or `:secondary` for those tabs. The open tab is now `recording_studio_embeddable_management_tab_active?`. Hosts that styled the old primary tab need the pill markup instead.
+
 ## [0.11.0] - 2026-10-21
 
 ### Added
