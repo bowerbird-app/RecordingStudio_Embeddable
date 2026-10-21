@@ -16,6 +16,7 @@ class FloatingWidgetHelperTest < ActionDispatch::IntegrationTest
 
     workspace = Workspace.create!(name: "Helper #{SecureRandom.hex(4)}")
     root = RecordingStudio.root_recording_for(workspace)
+    grant_embed_management!(actor: @user, recording: root)
     @widget = root.record(Widget, actor: @user) { |widget| widget.title = "Hello widget" }
     @embed = @widget.ensure_embed!(
       enabled: false,
@@ -74,7 +75,7 @@ class FloatingWidgetHelperTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Chat button snippet"
     assert_includes response.body, @embed.token
     assert_includes response.body, "widget.js"
-    assert_includes response.body, "copyFromButton"
+    assert_includes response.body, "flat-pack--clipboard#copy"
 
     publish = RecordingStudioPublishable::Services::Publishables::Update.call(
       parent_recording: @page,

@@ -53,10 +53,15 @@ RecordingStudioEmbeddable.configure do |config|
   config.cdn_withhold_snippet_until_published = false
   config.cdn_publish_queue = :default
 
-  config.management_authorizer = lambda do |controller:|
+  # True only when the actor may edit this parent recording. False, or a
+  # raised error, is a 404 on every management action.
+  config.management_authorizer = lambda do |controller:, recording:|
     next false unless controller.respond_to?(:current_user, true)
 
-    user = controller.send(:current_user)
-    user.present? && user.respond_to?(:RS_accessible, true) && user.RS_accessible
+    actor = controller.send(:current_user)
+    next false if actor.blank? || recording.blank?
+    next false unless defined?(RecordingStudioAccessible)
+
+    RecordingStudioAccessible.authorized?(actor: actor, recording: recording, role: :edit)
   end
 end

@@ -18,6 +18,7 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
 
     workspace = Workspace.create!(name: "Manage #{SecureRandom.hex(4)}")
     root = RecordingStudio.root_recording_for(workspace)
+    grant_embed_management!(actor: @user, recording: root)
     @widget = root.record(Widget, actor: @user) { |widget| widget.title = "Hello widget" }
     @embed = @widget.ensure_embed!(floating_enabled: false, floating: { "position" => "bottom-right" })
     @page = root.record(Page, actor: @user) { |record| record.title = "Inline page" }
@@ -106,7 +107,7 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     refute_includes response.body, "Paste this where the Chat button should appear."
     refute_includes response.body, ">Launcher<"
     assert_includes response.body, "widget.js"
-    assert_includes response.body, "copyFromButton"
+    assert_includes response.body, "flat-pack--clipboard#copy"
     @embed.reload
     assert_equal true, @embed.floating_enabled
     assert_equal "bottom-left", @embed.floating["position"]

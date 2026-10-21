@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.11.0] - 2026-10-21
+## [0.12.0] - 2026-10-21
 
 ### Added
 - RecordingStudioLogs `>= 0.4.1, < 0.6` (dummy and development pin GitHub tag
@@ -23,13 +23,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   schedule `PruneViewsJob` do not need a new job name.
 
 ### Upgrade notes
-- Bump to `recording_studio_embeddable` `0.11.0` and pin
+- Bump to `recording_studio_embeddable` `0.12.0` and pin
   `recording_studio_logs` to GitHub tag `v0.5.0` (allowed range
   `>= 0.4.1, < 0.6`).
 - Run `bin/rails generate recording_studio_embeddable:migrations` and
   `bin/rails db:migrate`. Existing `recording_studio_embeddable_view_logs`
   rows are kept. Do not schedule partition maintenance for this unpartitioned
   table.
+
+## [0.11.2] - 2026-10-21
+
+### Changed
+- Require `flat_pack` `~> 0.1.289` (GitHub tag `v0.1.289`), up from `0.1.287`.
+- Embed management tabs stay a trackless `FlatPack::Button::Pill::Component` (no `track: true`). Flatpack 0.1.289 drops the group padding on those rows, so the first pill sits flush with the heading and the rest of the screen. The row shifts left by about 8px.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.11.2` and `flat_pack` to `~> 0.1.289` (tag `v0.1.289`) in the host Gemfile. Reload Flatpack kit CSS. Rebuild host Tailwind so it emits `bg-[var(--tabs-pill-list-background-color)]`. Do not rerun `bin/rails generate flat_pack:install`. No migration.
+
+## [0.11.1] - 2026-10-21
+
+### Changed
+- Embed management tabs (Embed, Preview, Embed style, Chat button, Settings, Stats) render with `FlatPack::Button::Pill::Component`. The open tab uses the neutral pill active surface (grey background). The other tabs use the inactive pill. The same row is on the full page and in the modal Turbo Frame, including after a failed save (`422`).
+- Save, Apply, and other actions stay `FlatPack::Button::Component` with `style: :primary`.
+- Require `flat_pack` `~> 0.1.287` (GitHub tag `v0.1.287`), up from `0.1.213`.
+- Require `recording_studio` `~> 4.7.1` (GitHub tag `v4.7.1`), up from `4.5.0`. That release's default layout page nav uses Flatpack `with_back` / `with_close`. `4.5.0` still passes removed `PageNav` keywords such as `back_icon` and raises on Flatpack `0.1.287`.
+- The Stats chart range control uses `FlatPack::Chart::Component`'s `top_right_slot`. `actions` is deprecated in this Flatpack release.
+- Unpublished Embed and Settings empty states put Publish Settings in `FlatPack::EmptyState::Component`'s `item` slot. `actions` is gone.
+- The Chat button snippet still copies from the field. Flatpack now wires that control as `flat-pack--clipboard#copy`.
+- Dummy cards that used `FlatPack::Card` `style: :outlined` use `:default`. Flatpack `0.1.287` accepts `default`, `shaded`, `brand`, `brand_subtle`, and `gradient`.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.11.1`, `flat_pack` to `~> 0.1.287` (tag `v0.1.287`), and `recording_studio` to `~> 4.7.1` (tag `v4.7.1`) in the host Gemfile. Reload Flatpack kit CSS. No migration.
+- `recording_studio_embeddable_management_tab_style` is removed. It returned `:primary` or `:secondary` for those tabs. The open tab is now `recording_studio_embeddable_management_tab_active?`. Hosts that styled the old primary tab need the pill markup instead.
+
+## [0.11.0] - 2026-10-21
+
+### Added
+- `GET /management/recordings/:recording_id/embed` (`management_recording_embed`) finds or creates the embed for one recording and redirects to its management screen. The redirect keeps `tab`, `variant=modal`, `modal=1`, and the Turbo Frame `recording_studio_embeddable_management`.
+- `recording_studio_embeddable_management_path` and `recording_studio_embeddable_management_url` build that URL through the mounted engine. Hosts use this one link instead of a hard-coded `script_name` and a controller that calls `ensure_embed!`.
+- The management modal opens that route, so the button works before an embed exists. The button sets `data-turbo-prefetch="false"`.
+
+### Changed
+- Management actions authorize `:edit` on the parent recording. `management_authorizer` is called with `controller:` and `recording:`. The default reads `current_user` and calls `RecordingStudioAccessible.authorized?(actor:, recording:, role: :edit)`. A false return or a raised error is a 404, including on existing embed screens. A person who can edit one recording cannot manage another recording's embed.
+- Prefetch requests (`Sec-Purpose`, `X-Sec-Purpose`, or `Purpose` containing `prefetch`) respond with `204` and do not create an embed.
+
+### Upgrade notes
+- Bump to `recording_studio_embeddable` `0.11.0`. No migration.
+- Update `config.management_authorizer` so it accepts `recording:` and returns true only when that actor may edit the recording. A signed-in `RS_accessible` user no longer manages every embed. `:admin` still satisfies `:edit`. `:view` does not.
+- Point host links at `recording_studio_embeddable_management_path(recording)` with `data-turbo-prefetch="false"`. Remove host controllers whose only job was `ensure_embed!` plus a redirect.
+- `recording_studio_embeddable_management_modal` no longer needs `ensure_embed!` first.
 
 ## [0.10.0] - 2026-10-16
 
@@ -480,7 +522,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.12.0...HEAD
+[0.12.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.11.2...v0.12.0
 [0.9.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.6.0...v0.7.0

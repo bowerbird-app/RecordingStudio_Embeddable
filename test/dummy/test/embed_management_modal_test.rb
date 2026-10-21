@@ -16,6 +16,7 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
 
     workspace = Workspace.create!(name: "Modal #{SecureRandom.hex(4)}")
     root = RecordingStudio.root_recording_for(workspace)
+    grant_embed_management!(actor: @user, recording: root)
     @page = root.record(Page, actor: @user) { |record| record.title = "Modal page" }
     @page_embed = @page.ensure_embed!(enabled: true, allowed_embedder_domains: ["example.com"])
     @widget = root.record(Widget, actor: @user) { |widget| widget.title = "Modal chat" }
@@ -29,36 +30,36 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
 
   teardown { Current.actor = nil }
 
-  test "current tab is primary on the full page and after a frame change" do
+  test "current tab is the active pill on the full page and after a frame change" do
     get recording_studio_embeddable.floating_management_embed_path(@widget_embed)
 
     assert_response :success
     assert_select "nav[aria-label='Page navigation']", count: 1
     assert_select "turbo-frame##{RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID}", count: 0
-    assert_primary_tab "Chat button"
-    assert_secondary_tab "Embed"
-    assert_secondary_tab "Preview"
-    assert_secondary_tab "Embed style"
-    assert_secondary_tab "Settings"
-    assert_secondary_tab "Stats"
+    assert_active_pill "Chat button"
+    assert_inactive_pill "Embed"
+    assert_inactive_pill "Preview"
+    assert_inactive_pill "Embed style"
+    assert_inactive_pill "Settings"
+    assert_inactive_pill "Stats"
 
     get recording_studio_embeddable.styling_management_embed_path(@widget_embed),
         headers: frame_headers
 
     assert_modal_frame
-    assert_primary_tab "Embed style"
-    assert_secondary_tab "Embed"
-    assert_secondary_tab "Preview"
-    assert_secondary_tab "Chat button"
-    assert_secondary_tab "Settings"
+    assert_active_pill "Embed style"
+    assert_inactive_pill "Embed"
+    assert_inactive_pill "Preview"
+    assert_inactive_pill "Chat button"
+    assert_inactive_pill "Settings"
 
     get recording_studio_embeddable.settings_management_embed_path(@widget_embed),
         headers: frame_headers
 
     assert_modal_frame
-    assert_primary_tab "Settings"
-    assert_secondary_tab "Embed style"
-    assert_secondary_tab "Chat button"
+    assert_active_pill "Settings"
+    assert_inactive_pill "Embed style"
+    assert_inactive_pill "Chat button"
   end
 
   test "full page styling keeps the default layout" do
@@ -69,19 +70,20 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame##{RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID}", count: 0
     assert_includes response.body, "Embed style"
     refute_includes response.body, "variant=modal"
-    assert_primary_tab "Embed style"
-    assert_secondary_tab "Embed"
-    assert_secondary_tab "Preview"
-    assert_secondary_tab "Settings"
-    assert_secondary_tab "Stats"
+    assert_active_pill "Embed style"
+    assert_inactive_pill "Embed"
+    assert_inactive_pill "Preview"
+    assert_inactive_pill "Settings"
+    assert_inactive_pill "Stats"
+    assert_select "[data-fp-style=primary]", text: "Save", count: 1
 
     get recording_studio_embeddable.edit_management_embed_path(@page_embed)
 
     assert_response :success
     assert_select "nav[aria-label='Page navigation']", count: 1
     assert_select "turbo-frame##{RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID}", count: 0
-    assert_primary_tab "Embed"
-    assert_secondary_tab "Preview"
+    assert_active_pill "Embed"
+    assert_inactive_pill "Preview"
     assert_select "a[href=?]", recording_studio_embeddable.preview_management_embed_path(@page_embed)
     assert_select "a[data-turbo=false]", count: 0
     refute_includes response.body, "variant=modal"
@@ -114,7 +116,7 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Stats"
   end
 
-  test "preview screen marks preview primary and the document stays framable" do
+  test "preview screen marks preview as the active pill and the document stays framable" do
     document_path = recording_studio_embeddable.preview_management_embed_path(@page_embed, document: 1)
 
     get recording_studio_embeddable.preview_management_embed_path(@page_embed)
@@ -122,9 +124,9 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "nav[aria-label='Page navigation']", count: 1
     assert_select "turbo-frame##{RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID}", count: 0
-    assert_primary_tab "Preview"
-    assert_secondary_tab "Embed"
-    assert_secondary_tab "Embed style"
+    assert_active_pill "Preview"
+    assert_inactive_pill "Embed"
+    assert_inactive_pill "Embed style"
     assert_select "iframe[src=?]", document_path
     refute_includes response.body, 'name="turbo-visit-control"'
 
@@ -140,8 +142,8 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
         headers: frame_headers
 
     assert_modal_frame
-    assert_primary_tab "Preview"
-    assert_secondary_tab "Embed"
+    assert_active_pill "Preview"
+    assert_inactive_pill "Embed"
     assert_select "iframe[src=?]", document_path
   end
 
@@ -154,8 +156,9 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_modal_frame
     assert_includes response.body, "Invalid embedder domain: localhost"
     assert_includes response.body, "Embed settings"
-    assert_primary_tab "Settings"
-    assert_secondary_tab "Embed style"
+    assert_active_pill "Settings"
+    assert_inactive_pill "Embed style"
+    assert_select "[data-fp-style=primary]", text: "Save changes", count: 1
 
     patch recording_studio_embeddable.management_embed_path(@widget_embed),
           params: settings_params("partner.example"),
@@ -185,7 +188,8 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "nav[aria-label='Page navigation']", count: 1
     assert_includes response.body, "Embed settings updated."
-    assert_primary_tab "Settings"
+    assert_active_pill "Settings"
+    assert_select "[data-fp-style=primary]", text: "Save changes", count: 1
   end
 
   test "floating screen renders in the modal frame" do
@@ -195,7 +199,7 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_modal_frame
     assert_includes response.body, "Chat button"
     assert_select "iframe#embed-floating-preview"
-    assert_includes response.body, "copyFromButton"
+    assert_includes response.body, "flat-pack--clipboard#copy"
     assert_includes response.body, "contentDocument"
     assert_includes response.body, "turbo:frame-load"
   end
@@ -211,8 +215,9 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_modal_frame
     assert_includes response.body, "Text color must be a valid hex color"
-    assert_primary_tab "Embed style"
-    assert_secondary_tab "Settings"
+    assert_active_pill "Embed style"
+    assert_inactive_pill "Settings"
+    assert_select "[data-fp-style=primary]", text: "Save", count: 1
   end
 
   test "demo page renders one modal shell and an opener for page and widget" do
@@ -232,10 +237,18 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_select "button", text: "Chat button"
     page_src = css_select("[data-recording-studio-embeddable-management-src]").first["data-recording-studio-embeddable-management-src"]
     widget_src = css_select("[data-recording-studio-embeddable-management-src]").last["data-recording-studio-embeddable-management-src"]
-    assert_includes page_src, "/styling"
+    page = Page.find_by!(title: "Getting Started")
+    widget = Widget.find_by!(title: "Hello")
+    page_recording = RecordingStudio::Recording.unscoped.find_by!(recordable: page)
+    widget_recording = RecordingStudio::Recording.unscoped.find_by!(recordable: widget)
+    assert_includes page_src, "/management/recordings/#{page_recording.id}/embed"
+    assert_includes page_src, "tab=styling"
     assert_includes page_src, "variant=modal"
-    assert_includes widget_src, "/floating"
+    refute_includes page_src, "/styling"
+    assert_includes widget_src, "/management/recordings/#{widget_recording.id}/embed"
+    assert_includes widget_src, "tab=floating"
     assert_includes widget_src, "variant=modal"
+    assert_select "[data-recording-studio-embeddable-management-src][data-turbo-prefetch=false]", count: 2
   end
 
   private
@@ -252,13 +265,22 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     }
   end
 
-  def assert_primary_tab(text)
-    assert_select "a[data-fp-style=primary][aria-current=page]", text: text, count: 1
+  def assert_active_pill(text)
+    group = css_select(".fp-pill-style").first
+    assert group, "expected a Flatpack pill group"
+    assert_nil group["data-fp-style"]
+    nodes = css_select(".fp-pill-style a[aria-current=page]").select { |node| node.text.strip == text }
+    assert_equal 1, nodes.size, "expected one active pill #{text.inspect}"
+    assert_includes nodes.first["class"].to_s, "bg-[var(--tabs-pill-active-background-color)]"
   end
 
-  def assert_secondary_tab(text)
-    assert_select "a[data-fp-style=secondary]", text: text, count: 1
-    assert_select "a[data-fp-style=primary][aria-current=page]", text: text, count: 0
+  def assert_inactive_pill(text)
+    nodes = css_select(".fp-pill-style a").select { |node| node.text.strip == text }
+    assert_equal 1, nodes.size, "expected one inactive pill #{text.inspect}"
+    assert_nil nodes.first["aria-current"]
+    classes = nodes.first["class"].to_s
+    assert_includes classes, "text-[var(--tabs-pill-inactive-text-color)]"
+    refute_includes classes, "bg-[var(--tabs-pill-active-background-color)]"
   end
 
   def assert_modal_frame

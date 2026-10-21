@@ -290,13 +290,13 @@ Common settings include:
 - `prune_views_after` (default 90 days) — `PruneViewsJob` deletes raw view logs
   older than this window. RecordingStudioLogs registers the table with
   indefinite retention, so Logs cleanup does not prune it.
-- `management_authorizer`
+- `management_authorizer` — `call(controller:, recording:)` must allow `:edit` on that recording
 
 The initializer generator writes a working starting point at `config/initializers/recording_studio_embeddable.rb`.
 
 ## Management UI
 
-The engine also ships management routes for embed editors and operators. From there you can:
+The engine ships management screens for people who can edit a recording. From there you can:
 
 - Edit embed settings.
 - Preview the embed in a frame, with the same tabs as the other screens.
@@ -304,6 +304,44 @@ The engine also ships management routes for embed editors and operators. From th
 - Review summary and stats views.
 
 Each screen has a tab: Embed, Preview, Embed style, Chat button (when the type floats), Settings, and Stats. The open screen's tab is a primary button on the full page and in the modal.
+
+### One link per recording
+
+Hosts link to a single route. The engine finds or creates the embed, then redirects to the editor. Do not hard-code `script_name`, and do not add a host controller whose only job is `ensure_embed!`.
+
+```erb
+<%= link_to "Embed",
+      recording_studio_embeddable_management_path(recording, tab: :settings),
+      data: { turbo_prefetch: false } %>
+```
+
+`recording_studio_embeddable_management_path` and `recording_studio_embeddable_management_url` build that URL through the mounted engine, from a host view or from inside the engine. `tab` is optional: `:edit` (the default), `:preview`, `:styling`, `:settings`, `:floating`, or `:stats`. Extra keyword options are query params (`variant`, `modal`).
+
+`GET /management/recordings/:recording_id/embed` (`management_recording_embed`) loads the parent recording. A missing recording, a recording the actor cannot edit, or a recording that is not embeddable returns 404. Otherwise it calls `ensure_embed!(actor: current_user)` and redirects to that embed's management screen. The redirect keeps `tab`, `variant=modal`, `modal=1`, and a request for Turbo Frame `recording_studio_embeddable_management`.
+
+Prefetch requests do not create an embed. A request whose `Sec-Purpose`, `X-Sec-Purpose`, or `Purpose` header contains `prefetch` gets `204 No Content`. Put `data-turbo-prefetch="false"` on the link so a hover does not prefetch it.
+
+Calling the route twice returns the same embed.
+
+### Who can open management
+
+`config.management_authorizer` is called as `call(controller:, recording:)` on this route and on every existing management action (`edit`, `update`, styling, settings, floating, preview, stats). Return true only when the actor may edit that parent recording. A false return or a raised error is a 404, including when the embed id belongs to some other recording.
+
+The default reads `current_user` and calls `RecordingStudioAccessible.authorized?(actor:, recording:, role: :edit)`. Existing management actions load the embed, then run that check on its parent recording. A signed-in user cannot manage an embed they cannot edit.
+
+```ruby
+config.management_authorizer = lambda do |controller:, recording:|
+  next false unless controller.respond_to?(:current_user, true)
+
+  actor = controller.send(:current_user)
+  next false if actor.blank? || recording.blank?
+  next false unless defined?(RecordingStudioAccessible)
+
+  RecordingStudioAccessible.authorized?(actor: actor, recording: recording, role: :edit)
+end
+```
+
+`:admin` satisfies `:edit`. `:view` does not. A host that resolves a different actor should read that actor in the lambda and still require `:edit` on `recording`. `ensure_embed!` records `current_user` as the actor on the create event.
 
 Studio/management screens use core `recording_studio/default_layout` via `RecordingStudio::UsesDefaultLayout`. Do not wrap them in a second application shell. Core still puts `data-theme` on `<body>`; this gem copies FlatPack `rounded` onto `<html>` through `app/views/recording_studio/_default_layout_head.html.erb`. Hosts that already provide that partial should keep it. The public iframe at `/recording_studio_embeddable/embeds/:token` stays on the chrome-free embed layout.
 
@@ -318,7 +356,7 @@ Call the helper once for the shell, then again for each extra opener. The second
 <%= recording_studio_embeddable_management_modal(recording: widget_recording, tab: :floating, label: "Chat button") %>
 ```
 
-`recording` is the parent recording. It must already have an embed (`ensure_embed!`). `tab` is one of `:edit`, `:preview`, `:styling`, `:settings`, `:floating`, or `:stats`.
+`recording` is the parent recording. The opener works before an embed exists: the frame loads `management_recording_embed`, which finds or creates the embed and redirects to the tab. `tab` is one of `:edit`, `:preview`, `:styling`, `:settings`, `:floating`, or `:stats`. The button sets `data-turbo-prefetch="false"`.
 
 The modal body is a Turbo Frame, `recording_studio_embeddable_management`. The host page has to load Turbo (`import "@hotwired/turbo-rails"`). A request for that frame, `?variant=modal`, or `?modal=1` renders the frame without the page back and close bar. The modal uses Flatpack `scroll: :page` and `body_height_mode: :auto`, so the dialog grows with the screen. Close it with the Flatpack X, Escape, or the backdrop. Leave the modal params off and the screen still renders in `recording_studio/default_layout`.
 

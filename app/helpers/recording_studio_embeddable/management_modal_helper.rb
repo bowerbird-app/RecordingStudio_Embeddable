@@ -13,8 +13,8 @@ module RecordingStudioEmbeddable
       "stats" => :stats
     }.freeze
 
-    def recording_studio_embeddable_management_tab_style(screen)
-      recording_studio_embeddable_management_current_tab == screen.to_sym ? :primary : :secondary
+    def recording_studio_embeddable_management_tab_active?(screen)
+      recording_studio_embeddable_management_current_tab == screen.to_sym
     end
 
     def recording_studio_embeddable_management_tab_aria(screen, disabled: false)
@@ -32,8 +32,43 @@ module RecordingStudioEmbeddable
     end
   end
 
+  module ManagementPathHelper
+    def recording_studio_embeddable_management_path(recording, tab: nil, **)
+      recording_studio_embeddable_management_mounted_route(
+        :management_recording_embed_path,
+        recording,
+        tab: tab,
+        **
+      )
+    end
+
+    def recording_studio_embeddable_management_url(recording, tab: nil, **)
+      recording_studio_embeddable_management_mounted_route(
+        :management_recording_embed_url,
+        recording,
+        tab: tab,
+        **
+      )
+    end
+
+    private
+
+    def recording_studio_embeddable_management_mounted_route(route_name, recording, tab: nil, **options)
+      options = options.dup
+      options[:tab] = tab if tab.present?
+      recording_studio_embeddable_management_router_for(route_name).public_send(route_name, recording, **options)
+    end
+
+    def recording_studio_embeddable_management_router_for(route_name)
+      return self if respond_to?(route_name, true)
+
+      recording_studio_embeddable
+    end
+  end
+
   module ManagementModalHelper
     include ManagementTabHelper
+    include ManagementPathHelper
 
     SCREEN_ROUTES = {
       edit: :edit_management_embed_path,
@@ -46,10 +81,11 @@ module RecordingStudioEmbeddable
     }.freeze
 
     def recording_studio_embeddable_management_modal(recording:, tab: :edit, label: nil, style: :primary)
-      embed = recording_studio_embeddable_management_embed_for(recording)
-      return "".html_safe if embed.blank?
-
-      src = recording_studio_embeddable_management_screen_path(embed, tab, modal: true)
+      src = recording_studio_embeddable_management_path(
+        recording,
+        tab: tab,
+        variant: RecordingStudioEmbeddable::MODAL_VARIANT
+      )
       parts = [
         recording_studio_embeddable_management_modal_trigger(label: label, src: src, style: style)
       ]
@@ -68,8 +104,14 @@ module RecordingStudioEmbeddable
     end
 
     def recording_studio_embeddable_management_screen_path(embed, screen, modal: nil, **params)
-      use_modal = modal.nil? ? recording_studio_embeddable_management_modal_request? : modal
+      use_modal = if modal.nil?
+                    recording_studio_embeddable_management_modal_request?
+                  else
+                    recording_studio_embeddable_management_modal_request? ||
+                      ActiveModel::Type::Boolean.new.cast(modal)
+                  end
       params[:variant] = RecordingStudioEmbeddable::MODAL_VARIANT if use_modal
+      params[:modal] = modal if recording_studio_embeddable_management_query_modal?(modal)
       route = SCREEN_ROUTES.fetch(screen.to_sym) do
         raise ArgumentError, "Unknown embed management tab: #{screen}"
       end
@@ -106,10 +148,10 @@ module RecordingStudioEmbeddable
 
     private
 
-    def recording_studio_embeddable_management_embed_for(recording)
-      return unless recording.respond_to?(:embed)
+    def recording_studio_embeddable_management_query_modal?(modal)
+      return false if modal.nil? || modal == true || modal == false
 
-      recording.embed
+      modal.present?
     end
 
     def recording_studio_embeddable_management_modal_shell_rendered?
@@ -126,7 +168,8 @@ module RecordingStudioEmbeddable
         data: {
           action: "click->flat-pack--modal#open",
           modal_id: RecordingStudioEmbeddable::MANAGEMENT_MODAL_ID,
-          recording_studio_embeddable_management_src: src
+          recording_studio_embeddable_management_src: src,
+          turbo_prefetch: "false"
         }
       )
     end
