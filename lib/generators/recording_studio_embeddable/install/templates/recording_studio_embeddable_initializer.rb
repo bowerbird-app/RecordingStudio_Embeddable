@@ -35,6 +35,11 @@ RecordingStudioEmbeddable.configure do |config|
   config.view_log_raw_ip = false
   config.view_log_raw_user_agent = false
   config.view_log_raw_referer = false
+  # Daily embed-view summaries via RecordingStudioLogs. Leave off until you
+  # have compared totals; PruneViewsJob keeps deleting by viewed_at while this
+  # is false. When true, prune waits for covering Logs aggregation runs.
+  # config.logs_summaries_enabled = false
+  # config.prune_views_after = 90.days
   # Launcher icon URLs must be Attachable direct URLs, or http(s) on these hosts.
   config.floating_icon_hosts = []
   # App-wide launcher spacing, panel size, icon, and management label.

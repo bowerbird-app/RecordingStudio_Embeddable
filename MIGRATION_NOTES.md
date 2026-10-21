@@ -1,4 +1,34 @@
-# Migration Notes - Private Gems to Public Gems
+# Migration notes
+
+## 0.11.0 — RecordingStudioLogs for embed view logs
+
+Existing `recording_studio_embeddable_view_logs` rows stay. The table is not
+repartitioned. Hosts add columns and a summary table; they do not copy-and-switch.
+
+1. Pin `recording_studio_embeddable` `0.11.0` and `recording_studio_logs` GitHub
+   tag `v0.5.0` (`>= 0.4.1, < 0.6`).
+2. If `recording_studio_logs_aggregation_runs` is missing, run
+   `bin/rails generate recording_studio_logs:migrations`.
+3. Run `bin/rails generate recording_studio_embeddable:migrations` and
+   `bin/rails db:migrate`. That adds `root_recording_id` and `arrived_at` on the
+   view log (backfilled), plus `recording_studio_embeddable_view_day_summaries`.
+   The Embeddable summary migration also installs Logs run tables when they are
+   absent.
+4. Keep scheduling `RecordingStudioEmbeddable::PruneViewsJob` if you already do.
+   Retention is still `config.prune_views_after` (90 days).
+5. Leave `config.logs_summaries_enabled` false. Stats, sampling, privacy flags,
+   rate limits, and Metrics stay on the previous path. When you turn the flag
+   on, rebuild summaries (`FROM=… TO=… bin/rails recording_studio_embeddable:view_logs:backfill_summaries`)
+   and schedule Logs `DailyAggregationJob` / `ReconciliationJob`. Then prune
+   waits for a covering success per UTC day. Do not schedule
+   `PartitionMaintenanceJob` for this table.
+
+Rollback is turning the flag off. Raw rows deleted after a successful Logs prune
+do not come back.
+
+---
+
+# Historical notes — private gems to public gems
 
 ## Changes Made
 

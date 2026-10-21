@@ -28,6 +28,8 @@ Two delivery modes ship in this gem:
 - `recording_studio_attachable` `~> 0.9` for direct image URLs on rich embeds
   (`url_mode: :direct` + `direct_url_host`).
 - `recording_studio_cache` `~> 0.5` (git tag `v0.5.0`) for the shared public-embed rate limiter.
+- `recording_studio_logs` `>= 0.4.1, < 0.6` (git tag `v0.5.0`) for embed view-log
+  registration, retention, and optional daily summaries.
 
 ## Install
 
@@ -285,6 +287,10 @@ Common settings include:
   (adapters over `RecordingStudioCache::RateLimiter`; Redis clients need `eval`)
 - `cache_mode` and `cache_policy`
 - `view_logging_enabled` and the related sampling/privacy flags
+- `logs_summaries_enabled` (default `false`) — optional RecordingStudioLogs daily
+  embed-view summaries. Leave off unless you have compared totals; stats still
+  read raw `EmbeddableViewLog` rows. `PruneViewsJob` keeps the
+  `prune_views_after` window (default 90 days) while the flag is off.
 - `management_authorizer`
 
 The initializer generator writes a working starting point at `config/initializers/recording_studio_embeddable.rb`.

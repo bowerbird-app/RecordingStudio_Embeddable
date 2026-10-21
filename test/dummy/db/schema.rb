@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_13_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_21_090002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -341,6 +341,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_140000) do
     t.index ["token"], name: "index_recording_studio_embeddable_embeds_on_token", unique: true
   end
 
+  create_table "recording_studio_embeddable_view_day_summaries", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.date "day", null: false
+    t.uuid "root_recording_id"
+    t.uuid "embed_id"
+    t.uuid "parent_recording_id"
+    t.string "status", null: false
+    t.bigint "view_count", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["day", "root_recording_id", "embed_id", "parent_recording_id", "status"], name: "index_rse_view_day_summaries_identity", unique: true, nulls_not_distinct: true
+    t.index ["embed_id", "day"], name: "idx_rse_view_day_summaries_embed_day"
+    t.index ["root_recording_id", "day"], name: "idx_rse_view_day_summaries_root_day"
+  end
+
   create_table "recording_studio_embeddable_view_logs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.boolean "bot", default: false, null: false
     t.boolean "cache_hit", default: false, null: false
@@ -371,11 +385,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_140000) do
     t.string "user_agent_digest"
     t.datetime "viewed_at", null: false
     t.string "viewer_digest"
+    t.uuid "root_recording_id"
+    t.datetime "arrived_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
     t.index ["bot"], name: "idx_rse_view_logs_bot"
     t.index ["embed_id", "viewed_at"], name: "idx_rse_view_logs_embed_viewed_at"
     t.index ["embed_id"], name: "index_recording_studio_embeddable_view_logs_on_embed_id"
     t.index ["parent_recording_id", "viewed_at"], name: "idx_rse_view_logs_parent_recording_viewed_at"
     t.index ["referer_host", "viewed_at"], name: "idx_rse_view_logs_referer_viewed_at"
+    t.index ["root_recording_id", "viewed_at"], name: "idx_rse_view_logs_root_viewed_at"
     t.index ["status", "viewed_at"], name: "idx_rse_view_logs_status_viewed_at"
     t.index ["token_digest", "viewed_at"], name: "idx_rse_view_logs_token_viewed_at"
     t.index ["viewed_at"], name: "idx_rse_view_logs_viewed_at"
@@ -399,6 +416,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_13_140000) do
     t.uuid "recording_id", null: false
     t.index ["recording_id", "idempotency_key"], name: "index_recording_studio_events_on_recording_and_idempotency_key", unique: true, where: "(idempotency_key IS NOT NULL)"
     t.index ["recording_id"], name: "index_recording_studio_events_on_recording_id"
+  end
+
+  create_table "recording_studio_logs_aggregation_runs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "aggregation_name", null: false
+    t.date "day", null: false
+    t.string "status", null: false
+    t.text "error_message"
+    t.datetime "finished_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["aggregation_name", "day"], name: "index_rs_logs_aggregation_runs_on_name_and_day", unique: true
+  end
+
+  create_table "recording_studio_logs_maintenance_runs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "task", null: false
+    t.string "subject", null: false
+    t.string "status", null: false
+    t.text "details"
+    t.datetime "finished_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["task", "subject", "finished_at"], name: "index_rs_logs_maintenance_runs_on_task_and_subject"
   end
 
   create_table "recording_studio_publishable_publishables", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

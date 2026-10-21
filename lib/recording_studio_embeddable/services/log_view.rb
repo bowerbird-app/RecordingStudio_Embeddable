@@ -14,6 +14,8 @@ module RecordingStudioEmbeddable
           embed: embed,
           embed_recording_id: embed&.recording&.id,
           parent_recording_id: parent_recording&.id,
+          root_recording_id: root_recording_id_for(parent_recording, embed),
+          arrived_at: Time.current,
           parent_recordable_type: parent_recordable&.class&.name,
           parent_recordable_id: parent_recordable&.id,
           token_digest: digest(embed&.token || normalized[:token]),
@@ -68,6 +70,14 @@ module RecordingStudioEmbeddable
 
       def self.raw_value(value, config_key)
         RecordingStudioEmbeddable.configuration.public_send(config_key) ? value : nil
+      end
+
+      def self.root_recording_id_for(parent_recording, embed)
+        recording = parent_recording || embed&.recording
+        return if recording.blank?
+        return recording.root_recording_id.presence || recording.id if recording.respond_to?(:root_recording_id)
+
+        recording.id
       end
     end
   end
