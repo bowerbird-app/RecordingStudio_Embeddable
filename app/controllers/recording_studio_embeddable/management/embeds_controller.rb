@@ -5,10 +5,31 @@ module RecordingStudioEmbeddable
     class EmbedsController < RecordingStudioEmbeddable::ApplicationController
       include RecordingStudioEmbeddable::ManagementModalHelper
 
+      before_action :load_management_target
       before_action :authorize_management!
-      before_action :load_embed
 
       layout :management_layout
+
+      def show
+        unless @recording.respond_to?(:embeddable?) && @recording.embeddable?
+          head :not_found
+          return
+        end
+
+        if management_prefetch_request?
+          head :no_content
+          return
+        end
+
+        embed = @recording.ensure_embed!(actor: management_actor)
+        redirect_to recording_studio_embeddable_management_screen_path(
+          embed,
+          requested_management_tab,
+          **preserved_management_query
+        )
+      rescue RecordingStudioEmbeddable::NotEmbeddableError
+        head :not_found
+      end
 
       def edit; end
 
@@ -126,14 +147,56 @@ module RecordingStudioEmbeddable
 
       def authorize_management!
         authorizer = RecordingStudioEmbeddable.configuration.management_authorizer
-        allowed = authorizer.respond_to?(:call) && authorizer.call(controller: self)
+        allowed = authorizer.respond_to?(:call) &&
+                  authorizer.call(controller: self, recording: @recording)
         head :not_found unless allowed
       rescue StandardError
         head :not_found
       end
 
-      def load_embed
-        @embed = Embed.find(params[:id])
+      def load_management_target
+        if action_name == "show"
+          @recording = find_management_recording(params[:recording_id])
+        else
+          @embed = Embed.find(params[:id])
+          @recording = @embed.parent_recording
+        end
+        head :not_found unless @recording
+      end
+
+      def find_management_recording(id)
+        return if id.blank?
+        return unless defined?(RecordingStudio::Recording)
+
+        RecordingStudio::Recording.find_by(id: id)
+      rescue ArgumentError
+        nil
+      end
+
+      def management_actor
+        return unless respond_to?(:current_user, true)
+
+        send(:current_user)
+      end
+
+      def requested_management_tab
+        tab = params[:tab].to_s.strip
+        symbol = tab.to_sym
+        return symbol if tab.present? && SCREEN_ROUTES.key?(symbol) && symbol != :update
+
+        :edit
+      end
+
+      def preserved_management_query
+        query = {}
+        query[:modal] = params[:modal] if params[:modal].present?
+        query
+      end
+
+      def management_prefetch_request?
+        %w[Sec-Purpose X-Sec-Purpose Purpose].any? do |name|
+          request.headers[name].to_s.split(/[;,\s]+/).any? { |token| token.casecmp("prefetch").zero? }
+        end
       end
 
       def apply_embed_params

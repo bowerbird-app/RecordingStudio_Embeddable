@@ -101,11 +101,18 @@ module RecordingStudioEmbeddable
       @view_log_salt = nil
       @view_summary_enabled = true
       @bot_detector = nil
-      @management_authorizer = lambda { |controller:|
+      # Called as call(controller:, recording:) for every management action.
+      # True only when the actor may edit that parent recording. False, or a
+      # raised error, is a 404. Hosts that resolve a different actor should
+      # read that actor here and still check :edit.
+      @management_authorizer = lambda { |controller:, recording:|
         next false unless controller.respond_to?(:current_user, true)
 
-        user = controller.send(:current_user)
-        user.present? && user.respond_to?(:RS_accessible, true) && user.RS_accessible
+        actor = controller.send(:current_user)
+        next false if actor.blank? || recording.blank?
+        next false unless defined?(RecordingStudioAccessible)
+
+        RecordingStudioAccessible.authorized?(actor: actor, recording: recording, role: :edit)
       }
       @token_bytes = 24
       @prune_views_after = 90.respond_to?(:days) ? 90.days : 90 * 24 * 60 * 60

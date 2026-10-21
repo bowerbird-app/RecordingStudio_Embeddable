@@ -14,3 +14,4 @@ Next steps:
    false to serve embeds only from the Rails mount (Artifacts stays installed).
 6. Run `bin/rails tailwindcss:build` if you use Tailwind CSS.
 7. Mount routes are added at the configured mount path. Adjust auth, layout, and current actor integration to match your host app.
+8. Link embed management with `recording_studio_embeddable_management_path(recording)` and `data-turbo-prefetch="false"`. `management_authorizer` receives `recording:` and must allow `:edit` on that recording.

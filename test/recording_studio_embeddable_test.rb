@@ -129,7 +129,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.10.0", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.11.0", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -856,6 +856,73 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes source, "ButtonGroup"
     refute_includes source, "flex-col items-start"
     refute_includes source, "styling-save-button"
+  end
+
+  def test_default_management_authorizer_requires_edit_on_the_recording
+    stub = nil
+    authorizer = RecordingStudioEmbeddable::Configuration.new.management_authorizer
+
+    assert_includes authorizer.parameters, %i[keyreq controller]
+    assert_includes authorizer.parameters, %i[keyreq recording]
+
+    recording = Object.new
+    actor = Object.new
+    controller = Object.new
+    controller.define_singleton_method(:current_user) { actor }
+    calls = []
+    stub = Module.new do
+      define_singleton_method(:authorized?) do |actor:, recording:, role:|
+        calls << { actor: actor, recording: recording, role: role }
+        role == :edit
+      end
+    end
+
+    Object.const_set(:RecordingStudioAccessible, stub)
+    assert authorizer.call(controller: controller, recording: recording)
+    assert_equal [{ actor: actor, recording: recording, role: :edit }], calls
+    refute authorizer.call(controller: controller, recording: nil)
+
+    controller.define_singleton_method(:current_user) { nil }
+    refute authorizer.call(controller: controller, recording: recording)
+  ensure
+    if defined?(RecordingStudioAccessible) && RecordingStudioAccessible.equal?(stub)
+      Object.send(:remove_const, :RecordingStudioAccessible)
+    end
+  end
+
+  def test_management_path_delegates_to_the_mounted_route_helper
+    helper_source = File.read(
+      File.expand_path("../app/helpers/recording_studio_embeddable/management_modal_helper.rb", __dir__)
+    )
+    template = File.read(
+      File.expand_path(
+        "../lib/generators/recording_studio_embeddable/install/templates/recording_studio_embeddable_initializer.rb",
+        __dir__
+      )
+    )
+
+    refute_includes helper_source, "script_name"
+    refute_includes helper_source, 'return "".html_safe if embed.blank?'
+    assert_includes helper_source, "recording_studio_embeddable_management_path"
+    assert_includes helper_source, 'turbo_prefetch: "false"'
+    assert_includes template, "|controller:, recording:|"
+    assert_includes template, "role: :edit"
+
+    recording = Struct.new(:id).new("rec-1")
+    helper = Object.new.extend(RecordingStudioEmbeddable::ManagementModalHelper)
+    helper.define_singleton_method(:management_recording_embed_path) do |record, **options|
+      "path:#{record.id}:#{options[:tab]}:#{options[:variant]}"
+    end
+    helper.define_singleton_method(:management_recording_embed_url) do |record, **options|
+      "url:#{record.id}:#{options[:tab]}"
+    end
+
+    assert_equal "path:rec-1:settings:modal",
+                 helper.recording_studio_embeddable_management_path(recording, tab: :settings, variant: "modal")
+    assert_equal "url:rec-1:edit",
+                 helper.recording_studio_embeddable_management_url(recording, tab: :edit)
+    assert_equal "path:rec-1::",
+                 helper.recording_studio_embeddable_management_path(recording)
   end
 
   def test_font_family_token_passes_through_css_stacks
