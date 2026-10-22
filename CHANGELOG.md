@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.1] - 2026-10-22
+
+### Changed
+- Lifted the `recording_studio_logs` ceiling to `< 1.0` (CI tested with Logs 0.5.0). No code change.
+
 ## [0.12.0] - 2026-10-21
 
 ### Added
@@ -522,7 +527,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.12.1...HEAD
+[0.12.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.11.2...v0.12.0
 [0.9.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.7.0...v0.8.0

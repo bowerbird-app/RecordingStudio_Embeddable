@@ -14,7 +14,7 @@ class LogsRegistrationTest < Minitest::Test
   def test_gemspec_pins_recording_studio_logs_like_api
     gemspec = File.read(File.expand_path("../recording_studio_embeddable.gemspec", __dir__))
 
-    assert_includes gemspec, 'spec.add_dependency "recording_studio_logs", ">= 0.4.1", "< 0.6"'
+    assert_includes gemspec, 'spec.add_dependency "recording_studio_logs", ">= 0.4.1", "< 1.0"'
   end
 
   def test_register_keeps_unpartitioned_table_and_omits_actor_ip_request_fields
