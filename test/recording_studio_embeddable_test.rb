@@ -129,7 +129,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.12.1", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.13.0", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -628,22 +628,6 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_equal "recording_studio_embeddable_view_logs", RecordingStudioEmbeddable::EmbeddableViewLog.table_name
   end
 
-  def test_management_application_controller_uses_core_default_layout
-    source = File.read(File.expand_path("../app/controllers/recording_studio_embeddable/application_controller.rb",
-                                        __dir__))
-
-    assert_includes source, "RecordingStudio::UsesDefaultLayout"
-    assert_includes source, 'layout "recording_studio/default_layout"'
-    refute_includes source, 'layout "recording_studio_embeddable/application"'
-  end
-
-  def test_default_layout_head_copies_rounded_theme_onto_html
-    source = File.read(File.expand_path("../app/views/recording_studio/_default_layout_head.html.erb", __dir__))
-
-    assert_includes source, 'stylesheet_link_tag "flat_pack/application"'
-    assert_includes source, 'document.documentElement.setAttribute("data-theme", "rounded")'
-  end
-
   def test_public_embed_layout_stays_chrome_free_with_rounded_theme
     source = File.read(File.expand_path("../app/views/layouts/recording_studio_embeddable/embed.html.erb", __dir__))
 
@@ -709,7 +693,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes source, "Copy the code below"
     refute_includes source, "FlatPack::TextInput::Component"
     assert_includes source, 'default: "Embed"'
-    assert_includes source, "subtitle: recordable_title"
+    assert_includes source, "content_for :subtitle, recordable_title"
     refute_includes source, "large_subtitle"
     assert_includes source, "section_nav"
   end
@@ -724,7 +708,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
       assert_includes source, 'render "section_nav"'
       refute_includes source, "large_subtitle"
       refute_includes source, "Getting Started"
-      assert_includes source, "subtitle: recordable_title"
+      assert_includes source, "content_for :subtitle, recordable_title"
     end
 
     settings = File.read(
@@ -740,7 +724,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes settings, "recording_studio_embeddable_management_modal_tabs?"
     assert_includes settings, 'render "section_nav"'
     assert_includes settings, 'default: "Embed settings"'
-    assert_includes settings, "subtitle: recordable_title"
+    assert_includes settings, "content_for :subtitle, recordable_title"
     refute_includes settings, "large_subtitle"
     assert_includes settings, "FlatPack::Grid::Component.new(cols: 2)"
     refute_includes settings, 'label: "Width"'

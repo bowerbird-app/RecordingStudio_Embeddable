@@ -1,10 +1,7 @@
+<% content_for :title, "Config" %>
+<% content_for :subtitle, "Complete Recording Studio Embeddable configuration reference with defaults and behavior notes." %>
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
   <%= render "app_nav" %>
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "Config",
-    subtitle: "Complete Recording Studio Embeddable configuration reference with defaults and behavior notes.",
-    variant: :h1
-  ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
     title: "Initializer location",
@@ -15,6 +12,7 @@
     language: :ruby,
     code: <<~'CODE'
       RecordingStudioEmbeddable.configure do |config|
+        config.layout = nil # nil uses RecordingStudio.configuration.layout, then the core default layout.
         # Domain policy
         config.allowed_embedder_domains = [] # Host/domain allowlist that can embed your content.
         config.blocked_embedder_domains = [] # Host/domain denylist that is always blocked.

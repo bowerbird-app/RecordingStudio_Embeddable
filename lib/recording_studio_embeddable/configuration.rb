@@ -51,7 +51,7 @@ module RecordingStudioEmbeddable
       :floating_icon_hosts,
       :floating_defaults
     )
-    attr_reader :hooks
+    attr_reader :hooks, :layout
 
     def initialize
       @allowed_embedder_domains = []
@@ -134,7 +134,13 @@ module RecordingStudioEmbeddable
         "icon_url" => nil,
         "label" => "Floating button"
       }
+      # nil falls through to RecordingStudio.configuration.layout, then the core default.
+      @layout = nil
       @hooks = Hooks.new
+    end
+
+    def layout=(value)
+      @layout = RecordingStudio::Layout.accept(value)
     end
 
     def merge!(hash)

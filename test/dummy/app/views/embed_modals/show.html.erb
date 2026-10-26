@@ -1,15 +1,8 @@
-<% recording_studio_page_nav(
-  title: "Manage embeds",
-  page_nav_anchor_url: root_path,
-  page_nav_anchor_label: "Close"
-) %>
+<% content_for :title, "Manage embeds" %>
+<% content_for :subtitle, "Open the embed screens in a window. Full pages stay the same." %>
+<% flat_pack_page_nav(round: true, style: :default, anchor_href: root_path, anchor_tooltip: "Close") %>
 
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "Manage embeds",
-    subtitle: "Open the embed screens in a window. Full pages stay the same.",
-    variant: :h1
-  ) %>
 
   <% if @page_recording && @widget_recording %>
     <div class="flex flex-wrap items-center gap-3">

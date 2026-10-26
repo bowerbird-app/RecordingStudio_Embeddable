@@ -141,7 +141,7 @@ module RecordingStudioEmbeddable
         if recording_studio_embeddable_management_modal_request?
           "recording_studio_embeddable/management_modal"
         else
-          "recording_studio/default_layout"
+          recording_studio_resolved_layout
         end
       end
 

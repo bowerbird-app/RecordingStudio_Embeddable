@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-10-26
+
+### Changed
+- Require `recording_studio` `>= 6.1.0` (git tag `v6.1.0`) and `flat_pack` `>= 0.1.315`. Development and the dummy app pin flatpack commit `1fcbafe94f8eb118f0a22182f63f5110fcc97a56` (`FlatPack::VERSION` `0.1.319`). Require `view_component` `>= 4.14`, `< 5`.
+- `RecordingStudioEmbeddable.configuration.layout` defaults to `nil`. `nil` uses `RecordingStudio.configuration.layout`, then `"recording_studio/default_layout"`. `false` renders no layout. A string is a layout name. A callable is invoked as `call(controller:)`. Invalid values raise `ArgumentError`.
+- `RecordingStudioEmbeddable::ApplicationController` calls `recording_studio_layout`. Management full pages use that resolution. The management modal still uses `recording_studio_embeddable/management_modal`. Public iframe, launcher, and widget responses stay on their chromeless layouts.
+- Management and dummy studio pages set `content_for :title` and `content_for :subtitle`. Back and close use `flat_pack_page_nav(round: true, style: :default, ...)`. This gem no longer ships `recording_studio/_default_layout_head`.
+- Dummy cards no longer pass `style:` to `FlatPack::Card`.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.13.0`, `recording_studio` to `>= 6.1.0` (tag `v6.1.0`), and `flat_pack` to `>= 0.1.315`.
+- Remove `include RecordingStudio::UsesDefaultLayout` and `layout "recording_studio/default_layout"` from host controllers that render these screens. The engine base controller already calls `recording_studio_layout { RecordingStudioEmbeddable.configuration.layout }`.
+- Leave `config.layout` as `nil` unless the host shell should replace the core default.
+- On studio pages, replace `recording_studio_page_nav` and a second `FlatPack::PageTitle` with `content_for :title`, `content_for :subtitle`, and `flat_pack_page_nav`. Register page actions with `register_page_nav`.
+- Delete a copied `recording_studio/_default_layout_head` that links `flat_pack/application`. The v6 layout already loads Flatpack stylesheets before Tailwind.
+- Sibling gems that still depend on `recording_studio` `~> 4.x` need a Bundler override until those gems raise their floor. This repository loads `test/support/widen_recording_studio_requirement.rb` from the Gemfile for that reason.
+
 ## [0.12.1] - 2026-10-22
 
 ### Changed
