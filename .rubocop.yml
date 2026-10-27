@@ -51,6 +51,7 @@ Metrics/BlockLength:
   Exclude:
     - 'db/migrate/**/*'
     - 'lib/generators/**/*'
+    - 'recording_studio_embeddable.gemspec'
 
 Metrics/CyclomaticComplexity:
   Exclude:

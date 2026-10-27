@@ -42,6 +42,15 @@ namespace :test do
   task all: %i[test dummy]
 end
 
+namespace :recording_studio do
+  desc "Fail when the dummy app hard-codes layout \"recording_studio/...\""
+  task :check_layouts do
+    Dir.chdir(DUMMY_APP_ROOT) do
+      run_command!(dummy_bundle_env, "bin/rails", "recording_studio:check_layouts")
+    end
+  end
+end
+
 namespace :app do
   desc "Run all tests for the gem"
   task test: :test

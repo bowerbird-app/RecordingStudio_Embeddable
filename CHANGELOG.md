@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.13.0] - 2026-10-26
 
 ### Changed
-- Require `recording_studio` `>= 6.1.0` (git tag `v6.1.0`) and `flat_pack` `>= 0.1.315`. Development and the dummy app pin flatpack commit `1fcbafe94f8eb118f0a22182f63f5110fcc97a56` (`FlatPack::VERSION` `0.1.319`). Require `view_component` `>= 4.14`, `< 5`.
+- Require `recording_studio` `>= 6.1.0` (git tag `v6.1.0`) and `flat_pack` `>= 0.1.315`. Development and the dummy app pin flatpack commit `1fcbafe94f8eb118f0a22182f63f5110fcc97a56` (`FlatPack::VERSION` `0.1.319`). The gemspec requires `view_component` `>= 4.14`, `< 5`.
+- The dummy app ignores `style:` on `FlatPack::Card` and restores `recording_studio_page_nav` for Recording Studio API 0.5.5 admin HTML. Those views still use both, and Publishable 0.12.0 does not own that render path.
 - `RecordingStudioEmbeddable.configuration.layout` defaults to `nil`. `nil` uses `RecordingStudio.configuration.layout`, then `"recording_studio/default_layout"`. `false` renders no layout. A string is a layout name. A callable is invoked as `call(controller:)`. Invalid values raise `ArgumentError`.
 - `RecordingStudioEmbeddable::ApplicationController` calls `recording_studio_layout`. Management full pages use that resolution. The management modal still uses `recording_studio_embeddable/management_modal`. Public iframe, launcher, and widget responses stay on their chromeless layouts.
 - Management and dummy studio pages set `content_for :title` and `content_for :subtitle`. Back and close use `flat_pack_page_nav(round: true, style: :default, ...)`. This gem no longer ships `recording_studio/_default_layout_head`.
