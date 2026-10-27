@@ -129,7 +129,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.12.1", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.13.0", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -451,15 +451,24 @@ class RecordingStudioEmbeddableTest < Minitest::Test
       File.expand_path("../app/controllers/recording_studio_embeddable/management/embeds_controller.rb", __dir__)
     )
 
-    assert_includes nav, "FlatPack::Button::Pill::Component.new"
-    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:edit)"
-    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:preview)"
-    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:styling)"
-    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:floating)"
-    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:settings)"
-    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:stats)"
-    assert_includes nav, 'default: "Embed style"'
-    assert_includes nav, "recording_studio_embeddable_management_tab_data"
+    assert_includes nav, "register_page_nav("
+    refute_includes nav, "FlatPack::Button::Pill::Component.new"
+    assert_includes nav, "screen: :edit"
+    assert_includes nav, "screen: :preview"
+    assert_includes nav, "screen: :styling"
+    assert_includes nav, "screen: :floating"
+    assert_includes nav, "screen: :settings"
+    assert_includes nav, "screen: :stats"
+    assert_includes nav, 'default: "Style"'
+    assert_includes nav, "recording_studio_embeddable_management_section_button"
+    assert_includes helper, "recording_studio_embeddable_management_tab_data"
+    assert_includes helper, "current: recording_studio_embeddable_management_tab_active?(screen)"
+    assert_includes helper, "pointer-events-none opacity-50"
+    assert_includes helper, 'tabindex] = "-1"'
+    modal_layout = File.read(
+      File.expand_path("../app/views/layouts/recording_studio_embeddable/management_modal.html.erb", __dir__)
+    )
+    assert_includes modal_layout, "page_nav_button_group("
     refute_includes nav, "recording_studio_embeddable_management_tab_style"
     refute_includes nav, "recording_studio_embeddable_management_preview_data"
     refute_includes nav, "style: :primary"
@@ -628,22 +637,6 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_equal "recording_studio_embeddable_view_logs", RecordingStudioEmbeddable::EmbeddableViewLog.table_name
   end
 
-  def test_management_application_controller_uses_core_default_layout
-    source = File.read(File.expand_path("../app/controllers/recording_studio_embeddable/application_controller.rb",
-                                        __dir__))
-
-    assert_includes source, "RecordingStudio::UsesDefaultLayout"
-    assert_includes source, 'layout "recording_studio/default_layout"'
-    refute_includes source, 'layout "recording_studio_embeddable/application"'
-  end
-
-  def test_default_layout_head_copies_rounded_theme_onto_html
-    source = File.read(File.expand_path("../app/views/recording_studio/_default_layout_head.html.erb", __dir__))
-
-    assert_includes source, 'stylesheet_link_tag "flat_pack/application"'
-    assert_includes source, 'document.documentElement.setAttribute("data-theme", "rounded")'
-  end
-
   def test_public_embed_layout_stays_chrome_free_with_rounded_theme
     source = File.read(File.expand_path("../app/views/layouts/recording_studio_embeddable/embed.html.erb", __dir__))
 
@@ -709,7 +702,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes source, "Copy the code below"
     refute_includes source, "FlatPack::TextInput::Component"
     assert_includes source, 'default: "Embed"'
-    assert_includes source, "subtitle: recordable_title"
+    assert_includes source, "content_for :subtitle, recordable_title"
     refute_includes source, "large_subtitle"
     assert_includes source, "section_nav"
   end
@@ -724,7 +717,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
       assert_includes source, 'render "section_nav"'
       refute_includes source, "large_subtitle"
       refute_includes source, "Getting Started"
-      assert_includes source, "subtitle: recordable_title"
+      assert_includes source, "content_for :subtitle, recordable_title"
     end
 
     settings = File.read(
@@ -740,7 +733,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes settings, "recording_studio_embeddable_management_modal_tabs?"
     assert_includes settings, 'render "section_nav"'
     assert_includes settings, 'default: "Embed settings"'
-    assert_includes settings, "subtitle: recordable_title"
+    assert_includes settings, "content_for :subtitle, recordable_title"
     refute_includes settings, "large_subtitle"
     assert_includes settings, "FlatPack::Grid::Component.new(cols: 2)"
     refute_includes settings, 'label: "Width"'
@@ -754,7 +747,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes settings, "Iframe width"
     refute_includes settings, "Iframe height"
 
-    assert_includes styling, 'default: "Embed style"'
+    assert_includes styling, 'default: "Style"'
     assert_includes styling, "FlatPack::Grid::Component.new(cols: 2)"
     assert_includes styling, "FlatPack::ColorSwatch::Component"
     assert_includes styling, "FlatPack::FontSwatch::Component"

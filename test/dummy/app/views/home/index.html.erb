@@ -1,15 +1,8 @@
-<% recording_studio_page_nav(
-  title: "Dummy embeddables",
-  page_nav_anchor_url: root_path,
-  page_nav_anchor_label: "Close"
-) %>
+<% content_for :title, "Dummy embeddables" %>
+<% content_for :subtitle, "Review demo recordings, open embed management, and jump to publishable edit." %>
+<% flat_pack_page_nav(round: true, style: :default, anchor_href: root_path, anchor_tooltip: "Close") %>
 
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "Dummy embeddables",
-    subtitle: "Review demo recordings, open embed management, and jump to publishable edit.",
-    variant: :h1
-  ) %>
 
   <div>
     <%= render FlatPack::Button::Component.new(
@@ -26,7 +19,7 @@
     ) %>
   </div>
 
-  <%= render FlatPack::Card::Component.new(style: :default) do |card| %>
+  <%= render FlatPack::Card::Component.new do |card| %>
     <% card.body do %>
       <% if @recordings.any? %>
         <div class="overflow-x-auto">

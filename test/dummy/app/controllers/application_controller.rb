@@ -2,7 +2,6 @@
 
 class ApplicationController < ActionController::Base
   include RecordingStudio::RootSwitchable::ControllerSupport
-  include RecordingStudio::UsesDefaultLayout
 
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
@@ -12,6 +11,7 @@ class ApplicationController < ActionController::Base
 
   helper_method :admin_root_current?
 
+  recording_studio_layout { RecordingStudio.configuration.layout }
   layout :application_layout
 
   before_action :authenticate_user!
@@ -20,7 +20,7 @@ class ApplicationController < ActionController::Base
   private
 
   def application_layout
-    devise_controller? ? "application" : "recording_studio/default_layout"
+    devise_controller? ? "application" : recording_studio_resolved_layout
   end
 
   def set_current_actor

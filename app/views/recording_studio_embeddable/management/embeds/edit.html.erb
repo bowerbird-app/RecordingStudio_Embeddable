@@ -17,18 +17,16 @@
 <% publish_page_url = parent_recording.present? ? recording_studio_publishable.edit_recording_publishable_path(recording_id: parent_recording.id) : nil %>
 <% disable_management_actions = show_unpublished_warning %>
 
-<% recording_studio_page_nav(
-  title: t("recording_studio.embeddable.management.edit.title", default: "Embed"),
-  page_nav_anchor_url: main_app.root_path,
-  page_nav_anchor_label: t("recording_studio.embeddable.common.close", default: "Close")
+<% content_for :title, t("recording_studio.embeddable.management.edit.title", default: "Embed") %>
+<% content_for :subtitle, recordable_title %>
+<% flat_pack_page_nav(
+  round: true,
+  style: :default,
+  anchor_href: main_app.root_path,
+  anchor_tooltip: t("recording_studio.embeddable.common.close", default: "Close")
 ) %>
 
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: t("recording_studio.embeddable.management.edit.title", default: "Embed"),
-    subtitle: recordable_title,
-    variant: :h1
-  ) %>
 
   <%= render "section_nav", disable_management_actions: disable_management_actions %>
 

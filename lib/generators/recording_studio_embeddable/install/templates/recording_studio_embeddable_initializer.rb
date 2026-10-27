@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 RecordingStudioEmbeddable.configure do |config|
+  # nil uses RecordingStudio.configuration.layout, then recording_studio/default_layout.
+  # false renders no layout. A String names a layout. A callable is call(controller:).
+  config.layout = nil
   config.public_embeds_enabled = true
   # Host-wide Artifacts/CDN usage switch (default off). The Artifacts gem is
   # always installed with Embeddable; this only controls whether Embeddable

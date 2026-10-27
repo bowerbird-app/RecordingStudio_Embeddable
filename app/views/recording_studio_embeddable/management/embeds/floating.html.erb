@@ -1,20 +1,18 @@
 <% settings = @floating || @embed.floating_settings %>
 <% floating_label = recording_studio_floating_label(@recording) %>
 
-<% recording_studio_page_nav(
-  title: t("recording_studio.embeddable.management.floating.title", label: floating_label, default: "%{label}"),
-  page_nav_back_url: edit_management_embed_path(@embed),
-  page_nav_back_label: t("recording_studio.embeddable.common.embed", default: "Embed"),
-  page_nav_anchor_url: main_app.root_path,
-  page_nav_anchor_label: t("recording_studio.embeddable.common.close", default: "Close")
+<% content_for :title, t("recording_studio.embeddable.management.floating.title", label: floating_label, default: "%{label}") %>
+<% content_for :subtitle, t("recording_studio.embeddable.management.floating.subtitle", default: "Colours come from Style.") %>
+<% flat_pack_page_nav(
+  round: true,
+  style: :default,
+  back_href: edit_management_embed_path(@embed),
+  back_tooltip: t("recording_studio.embeddable.common.embed", default: "Embed"),
+  anchor_href: main_app.root_path,
+  anchor_tooltip: t("recording_studio.embeddable.common.close", default: "Close")
 ) %>
 
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: t("recording_studio.embeddable.management.floating.title", label: floating_label, default: "%{label}"),
-    subtitle: t("recording_studio.embeddable.management.floating.subtitle", default: "Colours come from Style."),
-    variant: :h1
-  ) %>
 
   <%= render "section_nav" %>
 

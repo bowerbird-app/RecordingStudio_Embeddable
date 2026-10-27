@@ -1,10 +1,7 @@
+<% content_for :title, "Install" %>
+<% content_for :subtitle, "Install Recording Studio Embeddable in a Rails host app and verify the mount, initializer, and migrations." %>
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
   <%= render "app_nav" %>
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "Install",
-    subtitle: "Install Recording Studio Embeddable in a Rails host app and verify the mount, initializer, and migrations.",
-    variant: :h1
-  ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
     title: "Step 1: Add the gem",

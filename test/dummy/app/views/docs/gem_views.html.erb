@@ -1,10 +1,7 @@
+<% content_for :title, "Gem Views" %>
+<% content_for :subtitle, "How embed templates are resolved, where to place host-app views, and how engine view overrides work." %>
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6">
   <%= render "app_nav" %>
-  <%= render FlatPack::PageTitle::Component.new(
-    title: "Gem Views",
-    subtitle: "How embed templates are resolved, where to place host-app views, and how engine view overrides work.",
-    variant: :h1
-  ) %>
 
   <%= render FlatPack::SectionTitle::Component.new(
     title: "Renderer resolution order",

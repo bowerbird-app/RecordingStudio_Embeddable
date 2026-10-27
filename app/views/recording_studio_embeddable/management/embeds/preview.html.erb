@@ -2,20 +2,18 @@
 <% recordable = parent_recording&.recordable %>
 <% recordable_title = recordable.try(:title).presence || recordable.try(:name).presence || t("recording_studio.embeddable.common.embedded_recording", default: "Embedded recording") %>
 
-<% recording_studio_page_nav(
-  title: t("recording_studio.embeddable.common.preview", default: "Preview"),
-  page_nav_back_url: edit_management_embed_path(@embed),
-  page_nav_back_label: t("recording_studio.embeddable.common.embed", default: "Embed"),
-  page_nav_anchor_url: main_app.root_path,
-  page_nav_anchor_label: t("recording_studio.embeddable.common.close", default: "Close")
+<% content_for :title, t("recording_studio.embeddable.common.preview", default: "Preview") %>
+<% content_for :subtitle, recordable_title %>
+<% flat_pack_page_nav(
+  round: true,
+  style: :default,
+  back_href: edit_management_embed_path(@embed),
+  back_tooltip: t("recording_studio.embeddable.common.embed", default: "Embed"),
+  anchor_href: main_app.root_path,
+  anchor_tooltip: t("recording_studio.embeddable.common.close", default: "Close")
 ) %>
 
 <div class="flex w-full flex-col gap-6">
-  <%= render FlatPack::PageTitle::Component.new(
-    title: t("recording_studio.embeddable.common.preview", default: "Preview"),
-    subtitle: recordable_title,
-    variant: :h1
-  ) %>
 
   <%= render "section_nav" %>
 
