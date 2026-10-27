@@ -1,58 +1,45 @@
 <% disable_management_actions = local_assigns.fetch(:disable_management_actions, false) %>
-<% tab_link_data = recording_studio_embeddable_management_tab_data %>
-<% pill_items = [] %>
-<% pill_items << {
+<% sections = [] %>
+<% sections << {
+  screen: :edit,
   text: t("recording_studio.embeddable.common.embed", default: "Embed"),
-  href: recording_studio_embeddable_management_screen_path(@embed, :edit),
-  active: recording_studio_embeddable_management_tab_active?(:edit),
-  aria: recording_studio_embeddable_management_tab_aria(:edit),
-  data: tab_link_data
-}.compact %>
-<% pill_items << {
+  disabled: false
+} %>
+<% sections << {
+  screen: :preview,
   text: t("recording_studio.embeddable.common.preview", default: "Preview"),
-  href: recording_studio_embeddable_management_screen_path(@embed, :preview),
-  active: recording_studio_embeddable_management_tab_active?(:preview),
-  aria: recording_studio_embeddable_management_tab_aria(:preview),
-  data: tab_link_data
-}.compact %>
-<% pill_items << {
-  text: t("recording_studio.embeddable.management.styling.title", default: "Embed style"),
-  href: recording_studio_embeddable_management_screen_path(@embed, :styling),
-  active: recording_studio_embeddable_management_tab_active?(:styling),
-  aria: recording_studio_embeddable_management_tab_aria(:styling, disabled: disable_management_actions),
-  data: tab_link_data,
-  class: ("pointer-events-none opacity-50" if disable_management_actions),
-  tabindex: ("-1" if disable_management_actions)
-}.compact %>
+  disabled: false
+} %>
+<% sections << {
+  screen: :styling,
+  text: t("recording_studio.embeddable.management.styling.title", default: "Style"),
+  disabled: disable_management_actions
+} %>
 <% if @embed.parent_recording.respond_to?(:floating_capable?) && @embed.parent_recording.floating_capable? %>
   <% floating_label = recording_studio_floating_label(@embed.parent_recording) %>
-  <% pill_items << {
+  <% sections << {
+    screen: :floating,
     text: t("recording_studio.embeddable.common.launcher", label: floating_label, default: "%{label}"),
-    href: recording_studio_embeddable_management_screen_path(@embed, :floating),
-    active: recording_studio_embeddable_management_tab_active?(:floating),
-    aria: recording_studio_embeddable_management_tab_aria(:floating, disabled: disable_management_actions),
-    data: tab_link_data,
-    class: ("pointer-events-none opacity-50" if disable_management_actions),
-    tabindex: ("-1" if disable_management_actions)
-  }.compact %>
+    disabled: disable_management_actions
+  } %>
 <% end %>
-<% pill_items << {
+<% sections << {
+  screen: :settings,
   text: t("recording_studio.embeddable.common.settings", default: "Settings"),
-  href: recording_studio_embeddable_management_screen_path(@embed, :settings),
-  active: recording_studio_embeddable_management_tab_active?(:settings),
-  aria: recording_studio_embeddable_management_tab_aria(:settings, disabled: disable_management_actions),
-  data: tab_link_data,
-  class: ("pointer-events-none opacity-50" if disable_management_actions),
-  tabindex: ("-1" if disable_management_actions)
-}.compact %>
-<% pill_items << {
+  disabled: disable_management_actions
+} %>
+<% sections << {
+  screen: :stats,
   text: t("recording_studio.embeddable.common.stats", default: "Stats"),
-  href: recording_studio_embeddable_management_screen_path(@embed, :stats),
-  active: recording_studio_embeddable_management_tab_active?(:stats),
-  aria: recording_studio_embeddable_management_tab_aria(:stats, disabled: disable_management_actions),
-  data: tab_link_data,
-  class: ("pointer-events-none opacity-50" if disable_management_actions),
-  tabindex: ("-1" if disable_management_actions)
-}.compact %>
-
-<%= render FlatPack::Button::Pill::Component.new(size: :md, items: pill_items) %>
+  disabled: disable_management_actions
+} %>
+<% sections.each do |section| %>
+  <% register_page_nav(
+    role: :secondary,
+    component: recording_studio_embeddable_management_section_button(
+      screen: section[:screen],
+      text: section[:text],
+      disabled: section[:disabled]
+    )
+  ) %>
+<% end %>

@@ -26,22 +26,22 @@ class EmbedManagementModalTest < ApplicationSystemTestCase
     click_button "Page embed"
 
     within_management_frame do
-      assert_selector "h1", exact_text: "Embed style"
+      assert_selector "h1", exact_text: "Style"
       assert_selector "[data-styling-form='true'][data-live-preview-bound='true']"
-      assert_active_pill "Embed style"
-      assert_inactive_pill "Settings"
+      assert_active_section "Style"
+      assert_inactive_section "Settings"
       find("a", exact_text: "Preview").click
       assert_selector "h1", exact_text: "Preview"
-      assert_active_pill "Preview"
+      assert_active_section "Preview"
       find("a", exact_text: "Embed").click
       assert_selector "h1", exact_text: "Embed"
-      assert_active_pill "Embed"
-      find("a", exact_text: "Embed style").click
-      assert_active_pill "Embed style"
+      assert_active_section "Embed"
+      find("a", exact_text: "Style").click
+      assert_active_section "Style"
       click_on "Settings"
       assert_selector "h1", exact_text: "Embed settings"
-      assert_active_pill "Settings"
-      assert_inactive_pill "Embed style"
+      assert_active_section "Settings"
+      assert_inactive_section "Style"
       assert_selector "[data-fp-style='primary']", exact_text: "Save changes"
       domains.fill_in with: "localhost"
       click_on "Save changes"
@@ -65,8 +65,8 @@ class EmbedManagementModalTest < ApplicationSystemTestCase
 
     within_management_frame do
       assert_text "Show the Chat button"
-      assert_active_pill "Chat button"
-      assert_inactive_pill "Embed style"
+      assert_active_section "Chat button"
+      assert_inactive_section "Style"
       assert_selector "iframe#embed-floating-preview"
       assert_selector "[data-action*='flat-pack--clipboard#copy']"
       choose "Bottom left"
@@ -88,17 +88,15 @@ class EmbedManagementModalTest < ApplicationSystemTestCase
     assert_selector "h1", exact_text: "Manage embeds"
   end
 
-  def assert_active_pill(text)
-    pill = find(".fp-pill-style a[aria-current='page']", exact_text: text)
-    assert_nil pill.find(:xpath, "./parent::*")["data-fp-style"]
-    assert_includes pill[:class], "bg-[var(--tabs-pill-active-background-color)]"
+  def assert_active_section(text)
+    link = find(".fp-button-group-menu__row a[aria-current='page']", exact_text: text)
+    assert_includes link[:class], "fp-button-current"
   end
 
-  def assert_inactive_pill(text)
-    pill = find(".fp-pill-style a", exact_text: text)
-    assert_nil pill["aria-current"]
-    assert_includes pill[:class], "text-[var(--tabs-pill-inactive-text-color)]"
-    refute_includes pill[:class], "bg-[var(--tabs-pill-active-background-color)]"
+  def assert_inactive_section(text)
+    link = find(".fp-button-group-menu__row a", exact_text: text)
+    assert_nil link["aria-current"]
+    refute_includes link[:class], "fp-button-current"
   end
 
   def within_management_frame(&block)

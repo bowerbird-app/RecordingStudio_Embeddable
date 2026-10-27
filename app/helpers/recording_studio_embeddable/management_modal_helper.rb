@@ -66,9 +66,32 @@ module RecordingStudioEmbeddable
     end
   end
 
+  module ManagementSectionNav
+    # Ghost sm matches the default layout's page_nav_button_group styles.
+    # register_page_nav passes a component through unchanged, so current and
+    # disabled have to be set here.
+    def recording_studio_embeddable_management_section_button(screen:, text:, disabled: false)
+      arguments = {
+        text: text,
+        href: recording_studio_embeddable_management_screen_path(@embed, screen),
+        style: :ghost,
+        size: :sm,
+        current: recording_studio_embeddable_management_tab_active?(screen),
+        data: recording_studio_embeddable_management_tab_data
+      }
+      if disabled
+        arguments[:class] = "pointer-events-none opacity-50"
+        arguments[:tabindex] = "-1"
+        arguments[:aria] = { disabled: true }
+      end
+      FlatPack::Button::Component.new(**arguments)
+    end
+  end
+
   module ManagementModalHelper
     include ManagementTabHelper
     include ManagementPathHelper
+    include ManagementSectionNav
 
     SCREEN_ROUTES = {
       edit: :edit_management_embed_path,

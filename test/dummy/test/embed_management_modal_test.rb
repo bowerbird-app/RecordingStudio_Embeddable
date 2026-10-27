@@ -36,30 +36,30 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "nav[aria-label='Page navigation']", count: 1
     assert_select "turbo-frame##{RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID}", count: 0
-    assert_active_pill "Chat button"
-    assert_inactive_pill "Embed"
-    assert_inactive_pill "Preview"
-    assert_inactive_pill "Embed style"
-    assert_inactive_pill "Settings"
-    assert_inactive_pill "Stats"
+    assert_active_section "Chat button"
+    assert_inactive_section "Embed"
+    assert_inactive_section "Preview"
+    assert_inactive_section "Style"
+    assert_inactive_section "Settings"
+    assert_inactive_section "Stats"
 
     get recording_studio_embeddable.styling_management_embed_path(@widget_embed),
         headers: frame_headers
 
     assert_modal_frame
-    assert_active_pill "Embed style"
-    assert_inactive_pill "Embed"
-    assert_inactive_pill "Preview"
-    assert_inactive_pill "Chat button"
-    assert_inactive_pill "Settings"
+    assert_active_section "Style"
+    assert_inactive_section "Embed"
+    assert_inactive_section "Preview"
+    assert_inactive_section "Chat button"
+    assert_inactive_section "Settings"
 
     get recording_studio_embeddable.settings_management_embed_path(@widget_embed),
         headers: frame_headers
 
     assert_modal_frame
-    assert_active_pill "Settings"
-    assert_inactive_pill "Embed style"
-    assert_inactive_pill "Chat button"
+    assert_active_section "Settings"
+    assert_inactive_section "Style"
+    assert_inactive_section "Chat button"
   end
 
   test "full page styling keeps the default layout" do
@@ -68,13 +68,13 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "nav[aria-label='Page navigation']", count: 1
     assert_select "turbo-frame##{RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID}", count: 0
-    assert_includes response.body, "Embed style"
+    assert_includes response.body, "Style"
     refute_includes response.body, "variant=modal"
-    assert_active_pill "Embed style"
-    assert_inactive_pill "Embed"
-    assert_inactive_pill "Preview"
-    assert_inactive_pill "Settings"
-    assert_inactive_pill "Stats"
+    assert_active_section "Style"
+    assert_inactive_section "Embed"
+    assert_inactive_section "Preview"
+    assert_inactive_section "Settings"
+    assert_inactive_section "Stats"
     assert_select "[data-fp-style=primary]", text: "Save", count: 1
 
     get recording_studio_embeddable.edit_management_embed_path(@page_embed)
@@ -82,8 +82,8 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "nav[aria-label='Page navigation']", count: 1
     assert_select "turbo-frame##{RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID}", count: 0
-    assert_active_pill "Embed"
-    assert_inactive_pill "Preview"
+    assert_active_section "Embed"
+    assert_inactive_section "Preview"
     assert_select "a[href=?]", recording_studio_embeddable.preview_management_embed_path(@page_embed)
     assert_select "a[data-turbo=false]", count: 0
     refute_includes response.body, "variant=modal"
@@ -94,7 +94,7 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
         headers: frame_headers
 
     assert_modal_frame
-    assert_includes response.body, "Embed style"
+    assert_includes response.body, "Style"
     assert_operator response.body.index(">Save<"), :<, response.body.index('id="embed-styling-preview"')
     assert_operator response.body.index("</form>"), :<, response.body.index('id="embed-styling-preview"')
     assert_includes response.body, "variant=modal"
@@ -124,9 +124,9 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "nav[aria-label='Page navigation']", count: 1
     assert_select "turbo-frame##{RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID}", count: 0
-    assert_active_pill "Preview"
-    assert_inactive_pill "Embed"
-    assert_inactive_pill "Embed style"
+    assert_active_section "Preview"
+    assert_inactive_section "Embed"
+    assert_inactive_section "Style"
     assert_select "iframe[src=?]", document_path
     refute_includes response.body, 'name="turbo-visit-control"'
 
@@ -142,8 +142,8 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
         headers: frame_headers
 
     assert_modal_frame
-    assert_active_pill "Preview"
-    assert_inactive_pill "Embed"
+    assert_active_section "Preview"
+    assert_inactive_section "Embed"
     assert_select "iframe[src=?]", document_path
   end
 
@@ -156,8 +156,8 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_modal_frame
     assert_includes response.body, "Invalid embedder domain: localhost"
     assert_includes response.body, "Embed settings"
-    assert_active_pill "Settings"
-    assert_inactive_pill "Embed style"
+    assert_active_section "Settings"
+    assert_inactive_section "Style"
     assert_select "[data-fp-style=primary]", text: "Save changes", count: 1
 
     patch recording_studio_embeddable.management_embed_path(@widget_embed),
@@ -188,7 +188,7 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "nav[aria-label='Page navigation']", count: 1
     assert_includes response.body, "Embed settings updated."
-    assert_active_pill "Settings"
+    assert_active_section "Settings"
     assert_select "[data-fp-style=primary]", text: "Save changes", count: 1
   end
 
@@ -215,8 +215,8 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
     assert_modal_frame
     assert_includes response.body, "Text color must be a valid hex color"
-    assert_active_pill "Embed style"
-    assert_inactive_pill "Settings"
+    assert_active_section "Style"
+    assert_inactive_section "Settings"
     assert_select "[data-fp-style=primary]", text: "Save", count: 1
   end
 
@@ -265,22 +265,17 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     }
   end
 
-  def assert_active_pill(text)
-    group = css_select(".fp-pill-style").first
-    assert group, "expected a Flatpack pill group"
-    assert_nil group["data-fp-style"]
-    nodes = css_select(".fp-pill-style a[aria-current=page]").select { |node| node.text.strip == text }
-    assert_equal 1, nodes.size, "expected one active pill #{text.inspect}"
-    assert_includes nodes.first["class"].to_s, "bg-[var(--tabs-pill-active-background-color)]"
+  def assert_active_section(text)
+    nodes = css_select(".fp-button-group-menu__row a[aria-current=page]").select { |node| node.text.strip == text }
+    assert_equal 1, nodes.size, "expected one active section #{text.inspect}"
+    assert_includes nodes.first["class"].to_s, "fp-button-current"
   end
 
-  def assert_inactive_pill(text)
-    nodes = css_select(".fp-pill-style a").select { |node| node.text.strip == text }
-    assert_equal 1, nodes.size, "expected one inactive pill #{text.inspect}"
+  def assert_inactive_section(text)
+    nodes = css_select(".fp-button-group-menu__row a").select { |node| node.text.strip == text }
+    assert_equal 1, nodes.size, "expected one section link #{text.inspect}"
     assert_nil nodes.first["aria-current"]
-    classes = nodes.first["class"].to_s
-    assert_includes classes, "text-[var(--tabs-pill-inactive-text-color)]"
-    refute_includes classes, "bg-[var(--tabs-pill-active-background-color)]"
+    refute_includes nodes.first["class"].to_s, "fp-button-current"
   end
 
   def assert_modal_frame

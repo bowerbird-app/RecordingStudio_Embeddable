@@ -306,7 +306,7 @@ The engine ships management screens for people who can edit a recording. From th
 - Adjust styling overrides.
 - Review summary and stats views.
 
-Each screen has a tab: Embed, Preview, Embed style, Chat button (when the type floats), Settings, and Stats. The open screen's tab is a primary button on the full page and in the modal.
+Each screen registers a section link: Embed, Preview, Style, Chat button (when the type floats), Settings, and Stats. `register_page_nav` stores them, and the default layout draws that group in the top-right page nav. The open screen sets `current: true`. The management modal draws the same group inside its frame.
 
 ### One link per recording
 
@@ -348,7 +348,7 @@ end
 
 Studio and management screens use `recording_studio/default_layout` through `recording_studio_layout`. `config.layout` defaults to `nil`. `nil` uses `RecordingStudio.configuration.layout`, then `"recording_studio/default_layout"`. `false` renders no layout. A string is a layout name. A callable is invoked as `call(controller:)`. Do not wrap these screens in a second application shell. The core layout sets `data-theme="rounded"` on `<html>` and loads `flat_pack/variables`, `flat_pack/application`, and `flat_pack/rich_text` before Tailwind. The public iframe at `/recording_studio_embeddable/embeds/:token` stays on the chrome-free embed layout.
 
-Page headings are `content_for :title` and `content_for :subtitle`. Back and close are `flat_pack_page_nav(round: true, style: :default, back_href:, back_tooltip:, anchor_href:, anchor_tooltip:)`. Page actions are `register_page_nav`. The management modal keeps its own layout and reads the same title slots, without the back and close bar.
+Page headings are `content_for :title` and `content_for :subtitle`. Back and close are `flat_pack_page_nav(round: true, style: :default, back_href:, back_tooltip:, anchor_href:, anchor_tooltip:)`. Page actions, including the management sections, are `register_page_nav`. The management modal keeps its own layout, draws that button group, and reads the same title slots, without the back and close bar.
 
 ### Open management in a modal
 
@@ -365,7 +365,7 @@ Call the helper once for the shell, then again for each extra opener. The second
 
 The modal body is a Turbo Frame, `recording_studio_embeddable_management`. The host page has to load Turbo (`import "@hotwired/turbo-rails"`). A request for that frame, `?variant=modal`, or `?modal=1` renders the frame without the page back and close bar. The modal uses Flatpack `scroll: :page` and `body_height_mode: :auto`, so the dialog grows with the screen. Close it with the Flatpack X, Escape, or the backdrop. Leave the modal params off and the screen still renders in `recording_studio/default_layout`.
 
-Embed style is two columns: the controls and Save sit on the left, the live preview on the right. Colour swatches wrap onto the next line when they do not fit. Preview shows that same embed document in a frame, without the style controls. The Chat button preview is separate: it loads the launcher, not the inline embed. A tab change renders that screen again, in the frame or on the full page, so the primary tab moves with it. Copy buttons, the Embed style preview, and the Chat button preview run again when the frame loads. The dummy app shows both openers at `/embed-modals`.
+Style is two columns: the controls and Save sit on the left, the live preview on the right. Colour swatches wrap onto the next line when they do not fit. Preview shows that same embed document in a frame, without the style controls. The Chat button preview is separate: it loads the launcher, not the inline embed. A section change renders that screen again, in the frame or on the full page, so the current section moves with it. Copy buttons, the Style preview, and the Chat button preview run again when the frame loads. The dummy app shows both openers at `/embed-modals`.
 
 ## Development
 

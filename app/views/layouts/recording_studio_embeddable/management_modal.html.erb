@@ -1,4 +1,19 @@
 <%= turbo_frame_tag RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID, class: "block w-full" do %>
+  <%# The modal frame has no default layout, so it draws the same group the studio shell puts in nav.right. %>
+  <% page_buttons = page_nav_button_group(
+    styles: {
+      primary: { style: :ghost, size: :sm },
+      secondary: { style: :ghost, size: :sm },
+      destructive: { style: :ghost, size: :sm }
+    },
+    variant: :outlined,
+    collapse: :menu
+  ) %>
+  <% if page_buttons %>
+    <div class="flex w-full justify-end">
+      <%= page_buttons %>
+    </div>
+  <% end %>
   <% if flash[:notice].present? %>
     <%= render FlatPack::Alert::Component.new(description: flash[:notice], style: :success, class: "mb-4") %>
   <% end %>

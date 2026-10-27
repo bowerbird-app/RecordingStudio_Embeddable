@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `RecordingStudioEmbeddable.configuration.layout` defaults to `nil`. `nil` uses `RecordingStudio.configuration.layout`, then `"recording_studio/default_layout"`. `false` renders no layout. A string is a layout name. A callable is invoked as `call(controller:)`. Invalid values raise `ArgumentError`.
 - `RecordingStudioEmbeddable::ApplicationController` calls `recording_studio_layout`. Management full pages use that resolution. The management modal still uses `recording_studio_embeddable/management_modal`. Public iframe, launcher, and widget responses stay on their chromeless layouts.
 - Management and dummy studio pages set `content_for :title` and `content_for :subtitle`. Back and close use `flat_pack_page_nav(round: true, style: :default, ...)`. This gem no longer ships `recording_studio/_default_layout_head`.
+- Management sections (Embed, Preview, Style, the launcher when the type floats, Settings, Stats) register with `register_page_nav`. The default layout draws them in the top-right page nav button group. The management modal draws that same group. The styling title is "Style".
 - Dummy cards no longer pass `style:` to `FlatPack::Card`.
 
 ### Upgrade notes

@@ -451,15 +451,24 @@ class RecordingStudioEmbeddableTest < Minitest::Test
       File.expand_path("../app/controllers/recording_studio_embeddable/management/embeds_controller.rb", __dir__)
     )
 
-    assert_includes nav, "FlatPack::Button::Pill::Component.new"
-    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:edit)"
-    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:preview)"
-    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:styling)"
-    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:floating)"
-    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:settings)"
-    assert_includes nav, "recording_studio_embeddable_management_tab_active?(:stats)"
-    assert_includes nav, 'default: "Embed style"'
-    assert_includes nav, "recording_studio_embeddable_management_tab_data"
+    assert_includes nav, "register_page_nav("
+    refute_includes nav, "FlatPack::Button::Pill::Component.new"
+    assert_includes nav, "screen: :edit"
+    assert_includes nav, "screen: :preview"
+    assert_includes nav, "screen: :styling"
+    assert_includes nav, "screen: :floating"
+    assert_includes nav, "screen: :settings"
+    assert_includes nav, "screen: :stats"
+    assert_includes nav, 'default: "Style"'
+    assert_includes nav, "recording_studio_embeddable_management_section_button"
+    assert_includes helper, "recording_studio_embeddable_management_tab_data"
+    assert_includes helper, "current: recording_studio_embeddable_management_tab_active?(screen)"
+    assert_includes helper, "pointer-events-none opacity-50"
+    assert_includes helper, 'tabindex] = "-1"'
+    modal_layout = File.read(
+      File.expand_path("../app/views/layouts/recording_studio_embeddable/management_modal.html.erb", __dir__)
+    )
+    assert_includes modal_layout, "page_nav_button_group("
     refute_includes nav, "recording_studio_embeddable_management_tab_style"
     refute_includes nav, "recording_studio_embeddable_management_preview_data"
     refute_includes nav, "style: :primary"
@@ -738,7 +747,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     refute_includes settings, "Iframe width"
     refute_includes settings, "Iframe height"
 
-    assert_includes styling, 'default: "Embed style"'
+    assert_includes styling, 'default: "Style"'
     assert_includes styling, "FlatPack::Grid::Component.new(cols: 2)"
     assert_includes styling, "FlatPack::ColorSwatch::Component"
     assert_includes styling, "FlatPack::FontSwatch::Component"
