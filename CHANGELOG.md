@@ -10,7 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.14.0] - 2026-10-28
 
 ### Removed
-- Google Fonts lookup (`RecordingStudioEmbeddable::Services::GoogleFonts` and its require). Embed styling still uses Flatpack font stacks on the recordable.
 - `:oembed` from `config.allowed_embed_modes` (default and install initializer). This gem serves iframe and browser-payload embeds. oEmbed lives in RecordingStudio_external_embed.
 
 ### Changed
@@ -21,7 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump `recording_studio_embeddable` to `0.14.0`. No migration.
 - Drop `:oembed` from a copied `config.allowed_embed_modes` if you still have it. Keep using RecordingStudio_external_embed for oEmbed.
 - Existing embeds keep their stored `allowed_embed_modes` (including `:oembed`). Only newly created embeds get the new `[:iframe]` default. No migration.
-- Stop calling `RecordingStudioEmbeddable::Services::GoogleFonts`. There is no replacement in this gem.
 
 ## [0.13.1] - 2026-10-28
 
