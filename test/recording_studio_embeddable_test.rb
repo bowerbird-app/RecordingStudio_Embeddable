@@ -129,7 +129,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.13.1", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.13.2", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
