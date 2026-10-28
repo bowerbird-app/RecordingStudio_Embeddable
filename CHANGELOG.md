@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.1] - 2026-10-28
+
+### Changed
+- Require `recording_studio` `>= 6.3.0` (git tag `v6.3.0`) with no pessimistic pin.
+- Pin `flat_pack` `>= 0.1.328` (git tag `v0.1.328`).
+- Raise sibling floors to Accessible `~> 0.23` (`v0.23.1`), Artifacts git tag `v0.4.4` (gem `VERSION` is still `0.4.0`, so the constraint stays `~> 0.4.0`), Attachable `~> 0.22` (`v0.22.0`), Cache `~> 0.6` (`v0.6.0`), Logs `>= 0.7.1, < 1.0` (`v0.7.1`), Publishable `~> 0.12` (`v0.12.0`). Development and the dummy app pin Metrics `v0.7.0`.
+- Dummy RootSwitchable moves from `v0.8.0` to `v0.11.0` so Metrics `0.7.0` can resolve. Artifacts `0.4.4` still declares `recording_studio` `~> 4.2`, so the Bundler widen hook stays for that gem and for API `v0.5.5`. Accessible `0.23.1` needs Trashable `v0.12.0` from GitHub.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.13.1` and pin the sibling git tags above. Keep `view_component` at `>= 4.14`, `< 5` and Rails `~> 8.1.0`.
+- No migration. Embed mixin and public payload APIs are unchanged.
+
 ## [0.13.0] - 2026-10-26
 
 ### Changed
@@ -546,7 +558,9 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.12.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.1...HEAD
+[0.13.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.0...v0.13.1
+[0.13.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.12.1...v0.13.0
 [0.12.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.11.2...v0.12.0
 [0.9.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.8.0...v0.9.0

@@ -1,5 +1,14 @@
 # Migration notes
 
+## 0.13.1 — Recording Studio 6.3 sibling pins
+
+No schema change. Hosts pick up new git tags through the `0.13.1` gemspec floors.
+
+1. Pin `recording_studio_embeddable` `0.13.1`, `recording_studio` `>= 6.3.0` (git tag `v6.3.0`, no `~>`), and `flat_pack` `>= 0.1.328` (git tag `v0.1.328`). Keep `view_component` at `>= 4.14`, `< 5`.
+2. Raise sibling pins to Accessible `v0.23.1`, Artifacts git tag `v0.4.4` (keep `~> 0.4.0` because that tag still ships gem `VERSION` `0.4.0`), Attachable `v0.22.0`, Cache `v0.6.0`, Logs `v0.7.1`, Publishable `v0.12.0`. Logs and Attachable pull Metrics `v0.7.0`.
+3. Leave the Bundler widen hook in this repository. Artifacts `0.4.4` still declares `recording_studio` `~> 4.2`. Hosts that already bumped Artifacts past that range should not copy the hook.
+4. Dummy-only RootSwitchable is `v0.11.0` so Metrics `0.7.0` resolves. That pin is not a host requirement of this gem.
+
 ## 0.13.0 — Recording Studio 6.1 layout
 
 `RecordingStudio::UsesDefaultLayout` is gone. Management screens take their layout from `config.layout`.

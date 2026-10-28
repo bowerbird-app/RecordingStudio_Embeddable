@@ -2,12 +2,10 @@
 
 require "test_helper"
 
-# Dummy pins RootSwitchable for Admin API HTML (current_root_recording).
-# 0.7+ also pulls recording_studio_metrics; 0.8.0 validates page_copy at boot.
 class RootSwitchablePinTest < ActiveSupport::TestCase
-  test "dummy pins root_switchable 0.8.0 and metrics 0.2.0" do
-    assert_equal "0.8.0", RecordingStudioRootSwitchable::VERSION
-    assert_equal "0.2.0", RecordingStudioMetrics::VERSION
+  test "dummy pins root_switchable 0.11.0 and metrics 0.7.0" do
+    assert_equal "0.11.0", RecordingStudioRootSwitchable::VERSION
+    assert_equal "0.7.0", RecordingStudioMetrics::VERSION
   end
 
   test "default page_copy boots with English defaults" do

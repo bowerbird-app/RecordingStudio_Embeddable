@@ -6,7 +6,7 @@ preview paths and never `/rails/active_storage/...`.
 
 ## Host setup
 
-Pin Attachable `~> 0.13` (tag `v0.15.0`) and configure:
+Pin Attachable `~> 0.22` (tag `v0.22.0`) and configure:
 
 ```ruby
 RecordingStudioAttachable.configure do |config|
