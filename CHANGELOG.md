@@ -11,7 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - SimpleCov output under `coverage/` and `test/dummy/coverage/` is untracked and gitignored.
-- Leftover `docs/gem_template/` template docs are gone.
 
 ### Upgrade notes
 - Bump `recording_studio_embeddable` to `0.13.2`. No migration. Default `allowed_embed_modes` is unchanged (`%i[iframe oembed]`).
