@@ -20,12 +20,10 @@ gem "recording_studio_cache", "~> 0.6",
     github: "bowerbird-app/RecordingStudio_cache", tag: "v0.6.0"
 gem "recording_studio_logs", ">= 0.7.1", "< 1.0",
     github: "bowerbird-app/RecordingStudio_logs", tag: "v0.7.1"
-# Attachable 0.22 and Logs 0.7.1 depend on recording_studio_metrics; pin from GitHub.
 gem "recording_studio_metrics", ">= 0.7.0", "< 1.0",
     github: "bowerbird-app/RecordingStudio_metrics",
     tag: "v0.7.0"
 gem "recording_studio_publishable", "~> 0.12", github: "bowerbird-app/RecordingStudio_publishable", tag: "v0.12.0"
-# Accessible 0.23.1 depends on recording_studio_trashable ~> 0.10 (not on RubyGems).
 gem "recording_studio_trashable", "~> 0.10",
     github: "bowerbird-app/RecordingStudio_trashable", tag: "v0.12.0"
 gem "view_component", ">= 4.14", "< 5"
