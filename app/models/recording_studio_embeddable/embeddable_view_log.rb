@@ -20,7 +20,7 @@ module RecordingStudioEmbeddable
 
     STATUSES = %w[
       rendered not_modified not_found forbidden disabled unpublished rate_limited invalid_token
-      error
+      oembed_rendered oembed_blocked error
     ].freeze
 
     validates :status, inclusion: { in: STATUSES }

@@ -24,8 +24,8 @@
         config.require_publishable = true # Only serve embeds for publishable/published records.
         config.artifacts_enabled = false # Host-wide Artifacts usage switch (gem always installed).
         config.embed_url_strategy = :dedicated # :dedicated = Rails mount; :cdn = Artifacts public URL (needs artifacts_enabled).
-        config.allowed_embed_modes = %i[iframe oembed] # Supported embed transports; valid values are :iframe and :oembed.
-        config.default_embed_mode = :iframe # Default transport when mode is omitted; options are :iframe or :oembed.
+        config.allowed_embed_modes = %i[iframe] # Supported embed transports; valid values are :iframe.
+        config.default_embed_mode = :iframe # Default transport when mode is omitted; options are :iframe.
         config.fallback_to_publishable_renderer = false # If true, fallback to publishable renderer when embed renderer is missing.
         config.default_sizing = { # Default iframe sizing used when no per-embed overrides exist.
           "mode" => "responsive",

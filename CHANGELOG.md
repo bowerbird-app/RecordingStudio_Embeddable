@@ -12,7 +12,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Google Fonts lookup (`RecordingStudioEmbeddable::Services::GoogleFonts` and its require). Embed styling still uses Flatpack font stacks on the recordable.
 - `:oembed` from `config.allowed_embed_modes` (default and install initializer). This gem serves iframe and browser-payload embeds. oEmbed lives in RecordingStudio_external_embed.
-- View-log statuses `oembed_rendered` and `oembed_blocked`. New rows cannot use those values.
 
 ### Changed
 - SimpleCov output under `coverage/` and `test/dummy/coverage/` is untracked and gitignored.
@@ -22,7 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump `recording_studio_embeddable` to `0.14.0`. No migration.
 - Drop `:oembed` from a copied `config.allowed_embed_modes` if you still have it. Keep using RecordingStudio_external_embed for oEmbed.
 - Stop calling `RecordingStudioEmbeddable::Services::GoogleFonts`. There is no replacement in this gem.
-- Existing view-log rows with `oembed_*` statuses stay in the table. Reloading one of those rows will fail status validation until you leave those rows unread or rewrite the status.
 
 ## [0.13.1] - 2026-10-28
 
