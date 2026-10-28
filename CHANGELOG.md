@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Upgrade notes
 - Bump `recording_studio_embeddable` to `0.14.0`. No migration.
 - Drop `:oembed` from a copied `config.allowed_embed_modes` if you still have it. Keep using RecordingStudio_external_embed for oEmbed.
-- Existing embeds keep their stored `allowed_embed_modes` (including `:oembed`). Only newly created embeds get the new `[:iframe]` default. No migration.
+- Existing embeds keep their stored `allowed_embed_modes` (including `:oembed`). Only newly created embeds get the new `[:iframe]` default. Rows whose stored `allowed_embed_modes` is blank fall back to the config default and therefore lose `:oembed`. No migration.
 
 ## [0.13.1] - 2026-10-28
 
