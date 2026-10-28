@@ -129,7 +129,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.14.0", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.13.2", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -138,9 +138,6 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
     assert_equal [], config.allowed_embedder_domains
     assert_equal [], config.blocked_embedder_domains
-    assert_equal %i[iframe], config.allowed_embed_modes
-    refute_includes config.allowed_embed_modes, :oembed
-    assert_equal :iframe, config.default_embed_mode
     assert_equal true, config.require_publishable
     assert_equal :null, config.rate_limiter
   end

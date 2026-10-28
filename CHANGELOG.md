@@ -7,19 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.14.0] - 2026-10-28
-
-### Removed
-- `:oembed` from `config.allowed_embed_modes` (default and install initializer). This gem serves iframe and browser-payload embeds. oEmbed lives in RecordingStudio_external_embed.
+## [0.13.2] - 2026-10-28
 
 ### Changed
 - SimpleCov output under `coverage/` and `test/dummy/coverage/` is untracked and gitignored.
 - Leftover `docs/gem_template/` template docs are gone.
 
 ### Upgrade notes
-- Bump `recording_studio_embeddable` to `0.14.0`. No migration.
-- Drop `:oembed` from a copied `config.allowed_embed_modes` if you still have it. Keep using RecordingStudio_external_embed for oEmbed.
-- Existing embeds keep their stored `allowed_embed_modes` (including `:oembed`). Only newly created embeds get the new `[:iframe]` default. Rows whose stored `allowed_embed_modes` is blank fall back to the config default and therefore lose `:oembed`. No migration.
+- Bump `recording_studio_embeddable` to `0.13.2`. No migration. Default `allowed_embed_modes` is unchanged (`%i[iframe oembed]`).
 
 ## [0.13.1] - 2026-10-28
 
@@ -572,8 +567,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.14.0...HEAD
-[0.14.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.1...v0.14.0
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.2...HEAD
+[0.13.2]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.1...v0.13.2
 [0.13.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.12.1...v0.13.0
 [0.12.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.12.0...v0.12.1

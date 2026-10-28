@@ -15,7 +15,7 @@ RecordingStudioEmbeddable.configure do |config|
   # Artifacts public URL only (never the Rails mount). Only used when
   # artifacts_enabled is true.
   config.embed_url_strategy = :dedicated
-  config.allowed_embed_modes = %i[iframe]
+  config.allowed_embed_modes = %i[iframe oembed]
   config.default_embed_mode = :iframe
   config.allowed_embedder_domains = []
   config.blocked_embedder_domains = []
