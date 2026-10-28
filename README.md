@@ -23,16 +23,19 @@ Two delivery modes ship in this gem:
 - Ruby 3.3 or newer.
 - Rails 8.1 or newer.
 - A host application that can mount the engine and run the supplied migrations.
-- `recording_studio` `>= 6.1.0` (git tag `v6.1.0`).
-- `flat_pack` `>= 0.1.315`. This repository pins commit `1fcbafe94f8eb118f0a22182f63f5110fcc97a56` (`FlatPack::VERSION` `0.1.319`).
+- `recording_studio` `>= 6.3.0` (git tag `v6.3.0`). Do not pin a `~>` range on core.
+- `flat_pack` `>= 0.1.328` (git tag `v0.1.328`).
 - `view_component` `>= 4.14`, `< 5`.
-- `recording_studio_artifacts` `~> 0.4.0` (always installed; usage gated by
-  `config.artifacts_enabled`, default off).
-- `recording_studio_attachable` `~> 0.9` for direct image URLs on rich embeds
+- `recording_studio_artifacts` `~> 0.4.0` from git tag `v0.4.4` (the gem
+  `VERSION` constant is still `0.4.0`; usage gated by `config.artifacts_enabled`,
+  default off).
+- `recording_studio_attachable` `~> 0.22` for direct image URLs on rich embeds
   (`url_mode: :direct` + `direct_url_host`).
-- `recording_studio_cache` `~> 0.5` (git tag `v0.5.0`) for the shared public-embed rate limiter.
-- `recording_studio_logs` `>= 0.4.1, < 0.6` (git tag `v0.5.0`) for embed view-log
+- `recording_studio_cache` `~> 0.6` (git tag `v0.6.0`) for the shared public-embed rate limiter.
+- `recording_studio_logs` `>= 0.7.1, < 1.0` (git tag `v0.7.1`) for embed view-log
   registration. The table stays unpartitioned; prune is still `PruneViewsJob`.
+- `recording_studio_accessible` `~> 0.23` (git tag `v0.23.1`) and
+  `recording_studio_publishable` `~> 0.12` (git tag `v0.12.0`).
 
 ## Install
 
@@ -266,8 +269,8 @@ The dummy app mounts that public API at `/recording_studio_api` and allowlists `
 
 Admin HTML under `/recording_studio_api/admin_api` needs a host
 `current_root_recording` that is an `AdminRoot`. The dummy supplies that through
-`recording_studio_root_switchable` (ControllerSupport; dummy pin `v0.8.0`, plus
-`recording_studio_metrics` `v0.2.0` for the 0.7+ dependency), a seeded AdminRoot
+`recording_studio_root_switchable` (ControllerSupport; dummy pin `v0.11.0`, plus
+`recording_studio_metrics` `v0.7.0`), a seeded AdminRoot
 with Accessible owner access, and a RootSwitchable default that prefers
 AdminRoot — the same contract as the RecordingStudio_api dummy.
 
@@ -378,7 +381,7 @@ bundle exec rake test:dummy
 cd test/dummy && bin/dev
 ```
 
-The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine. It pins Accessible `v0.11.1`, Publishable `v0.4.2`, Attachable `v0.7.1`, Admin `v2.0.4`, and Recording Studio API `v0.5.5` (held). It mounts the public API so GET `:embed` can be exercised over HTTP. Dummy grants access through Accessible's public services and shims `RecordingStudio::Access.roles` so API 0.5.5 can still authorize member actions against string roles.
+The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine. It pins Accessible `v0.23.1`, Publishable `v0.12.0`, Attachable `v0.22.0`, Admin `v2.2.0`, Recording Studio API `v0.5.5` (held), RootSwitchable `v0.11.0`, and Metrics `v0.7.0`. It mounts the public API so GET `:embed` can be exercised over HTTP. Dummy grants access through Accessible's public services and shims `RecordingStudio::Access.roles` so API 0.5.5 can still authorize member actions against string roles.
 
 Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key. The dummy blob includes `recording_studio_artifacts.cdn` placeholders (`dev_placeholder`, fake `public_base_url`) so the key shape is visible — **never real R2 secrets** (this repo is public).
 
