@@ -129,7 +129,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.13.1", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.14.0", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -138,6 +138,9 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
     assert_equal [], config.allowed_embedder_domains
     assert_equal [], config.blocked_embedder_domains
+    assert_equal %i[iframe], config.allowed_embed_modes
+    refute_includes config.allowed_embed_modes, :oembed
+    assert_equal :iframe, config.default_embed_mode
     assert_equal true, config.require_publishable
     assert_equal :null, config.rate_limiter
   end
@@ -635,6 +638,26 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
   def test_embeddable_view_log_uses_canonical_table_name
     assert_equal "recording_studio_embeddable_view_logs", RecordingStudioEmbeddable::EmbeddableViewLog.table_name
+    refute_includes RecordingStudioEmbeddable::EmbeddableViewLog::STATUSES, "oembed_rendered"
+    refute_includes RecordingStudioEmbeddable::EmbeddableViewLog::STATUSES, "oembed_blocked"
+  end
+
+  def test_google_fonts_service_is_not_shipped
+    refute File.exist?(File.expand_path("../lib/recording_studio_embeddable/services/google_fonts.rb", __dir__))
+    refute RecordingStudioEmbeddable::Services.const_defined?(:GoogleFonts, false)
+    refute_includes File.read(File.expand_path("../lib/recording_studio_embeddable.rb", __dir__)), "google_fonts"
+  end
+
+  def test_install_initializer_omits_oembed_mode
+    template = File.read(
+      File.expand_path(
+        "../lib/generators/recording_studio_embeddable/install/templates/recording_studio_embeddable_initializer.rb",
+        __dir__
+      )
+    )
+
+    assert_includes template, "config.allowed_embed_modes = %i[iframe]"
+    refute_includes template, "oembed"
   end
 
   def test_public_embed_layout_stays_chrome_free_with_rounded_theme

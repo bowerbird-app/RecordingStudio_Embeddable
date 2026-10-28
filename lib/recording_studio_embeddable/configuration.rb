@@ -65,7 +65,7 @@ module RecordingStudioEmbeddable
       # when off, partner URLs stay on the Rails mount and no publish/purge jobs
       # are enqueued (R2 objects are left alone).
       @artifacts_enabled = false
-      @allowed_embed_modes = %i[iframe oembed]
+      @allowed_embed_modes = %i[iframe]
       @default_embed_mode = :iframe
       @fallback_to_publishable_renderer = false
       @require_domain_allowlist = true

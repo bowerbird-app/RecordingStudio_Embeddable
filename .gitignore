@@ -55,6 +55,10 @@ test/dummy/config/credentials/*.key
 test/dummy/config/credentials/development.key
 test/dummy/config/credentials/test.key
 
+# Coverage reports (SimpleCov)
+coverage/
+test/dummy/coverage/
+
 # Build artifacts
 *.gem
 pkg/
