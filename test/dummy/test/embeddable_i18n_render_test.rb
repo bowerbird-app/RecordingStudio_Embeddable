@@ -79,6 +79,52 @@ class EmbeddableI18nRenderTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "No geo access data for this filter and date range."
   end
 
+  test "stats countries table shows headers and geo row values" do
+    now = Time.current
+    root_id = @page_recording.root_recording_id.presence || @page_recording.id
+
+    RecordingStudioEmbeddable::EmbeddableViewLog.create!(
+      embed: @embed,
+      root_recording_id: root_id,
+      parent_recording_id: @page_recording.id,
+      status: "rendered",
+      viewed_at: now,
+      arrived_at: now,
+      bot: false,
+      cache_hit: false,
+      rate_limited: false,
+      viewer_digest: "digest-au",
+      metadata: { "country" => "AU" }
+    )
+    RecordingStudioEmbeddable::EmbeddableViewLog.create!(
+      embed: @embed,
+      root_recording_id: root_id,
+      parent_recording_id: @page_recording.id,
+      status: "rendered",
+      viewed_at: now,
+      arrived_at: now,
+      bot: true,
+      cache_hit: false,
+      rate_limited: false,
+      viewer_digest: "digest-unknown",
+      metadata: {}
+    )
+
+    get recording_studio_embeddable.stats_management_embed_path(@embed)
+
+    assert_response :success
+    assert_select "table.fp-table"
+    assert_select "th", text: "Country"
+    assert_select "th", text: "Views"
+    assert_select "th", text: "Unique views"
+    assert_select "th", text: "Human views"
+    assert_select "th", text: "Bot views"
+    rows = css_select("table.fp-table tbody tr").map { |tr| tr.css("td").map { |td| td.text.strip } }
+    assert_equal ["AU", "1", "1", "1", "0"], rows.find { |cells| cells.first == "AU" }
+    assert_equal ["Unknown", "1", "1", "0", "1"], rows.find { |cells| cells.first == "Unknown" }
+    refute_includes response.body, "No geo access data for this filter and date range."
+  end
+
   test "stats filters keep raw tokens under a translated locale" do
     previous_available = I18n.available_locales
     I18n.available_locales = previous_available | [:fr]

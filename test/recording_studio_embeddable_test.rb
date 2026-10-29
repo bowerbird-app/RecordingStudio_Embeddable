@@ -129,7 +129,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.13.2", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.13.3", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -840,6 +840,19 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes stats, 'default: "Stats"'
     assert_includes stats, 'default: "Apply"), style: :primary'
     refute_includes stats, "Embed Stats"
+    assert_includes stats, "FlatPack::Table::Component.new("
+    assert_includes stats, "data: @stats_geo_rows"
+    assert_includes stats, "dividers: true"
+    assert_includes stats, "style: :plain"
+    assert_includes stats, 'default: "Country"'
+    assert_includes stats, 'default: "Unique views"'
+    assert_includes stats, 'default: "Human views"'
+    assert_includes stats, 'default: "Bot views"'
+    assert_includes stats, 'default: "Unknown"'
+    assert_includes stats, 'default: "No geo access data for this filter and date range."'
+    refute_includes stats, "<table class="
+    refute_includes stats, "<thead>"
+    refute_includes stats, "<tbody>"
   end
 
   def test_styling_actions_are_one_row_of_separate_buttons
