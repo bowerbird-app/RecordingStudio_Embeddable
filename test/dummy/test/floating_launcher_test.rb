@@ -77,6 +77,8 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
     refute @widget_embed.reload.floating.key?("edge_spacing")
     assert_equal "#111827", body.dig("colors", "background")
     assert_equal "http://www.example.com/widgets/#{@widget_embed.token}", body.fetch("popup_url")
+    refute body.key?("sandbox")
+    refute body.key?("allow")
     refute_includes @widget_embed.reload.floating.to_json, "popup_url"
     refute_includes @widget_embed.floating.to_json, "http"
   end
@@ -164,6 +166,32 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
     refute configuration.key?("popup_url")
   end
 
+  test "launcher json opts into sandbox and allow without storing them" do
+    with_popup_frame(
+      sandbox: %w[allow-scripts allow-same-origin allow-forms allow-popups],
+      allow: "clipboard-write"
+    ) do
+      get "/recording_studio_embeddable/embeds/#{@widget_embed.token}/launcher",
+          headers: { "Origin" => "https://partner.example.com" }
+    end
+
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal "allow-scripts allow-same-origin allow-forms allow-popups", body.fetch("sandbox")
+    assert_equal "clipboard-write", body.fetch("allow")
+    refute_includes @widget_embed.reload.floating.to_json, "sandbox"
+    refute_includes @widget_embed.floating.to_json, "clipboard-write"
+  end
+
+  test "launcher rejects an unknown sandbox token" do
+    assert_raises(ArgumentError) do
+      with_popup_frame(sandbox: "allow-scripts allow-evil") do
+        get "/recording_studio_embeddable/embeds/#{@widget_embed.token}/launcher",
+            headers: { "Origin" => "https://partner.example.com" }
+      end
+    end
+  end
+
   test "launcher is rate limited" do
     Rails.cache = ActiveSupport::Cache::MemoryStore.new
     RecordingStudioEmbeddable.configuration.rate_limiting_enabled = true
@@ -191,5 +219,18 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
         headers: { "Origin" => "https://partner.example.com" }
 
     assert_response :not_found
+  end
+
+  private
+
+  def with_popup_frame(sandbox:, allow: :unset)
+    capability = Widget.recording_studio_capabilities.find { |item| item.key == :embeddable }
+    original = capability.options[:floating_options]
+    patched = original.merge(sandbox: sandbox)
+    patched[:allow] = allow unless allow == :unset
+    capability.options[:floating_options] = patched
+    yield
+  ensure
+    capability.options[:floating_options] = original if capability && original
   end
 end

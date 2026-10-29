@@ -37,7 +37,7 @@ module RecordingStudioEmbeddable
           "icon_url" => host["icon_url"],
           "colors" => Colors.call(recording: recording, embed: embed),
           "popup_url" => popup_url
-        }
+        }.merge(PopupFrame.for(recording))
       end
 
       private

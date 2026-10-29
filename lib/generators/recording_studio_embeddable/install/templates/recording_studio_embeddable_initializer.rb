@@ -43,6 +43,10 @@ RecordingStudioEmbeddable.configure do |config|
   # App-wide launcher spacing, panel size, icon, and management label.
   # A type overrides these with floating_options: on Embeddable.to.
   # People do not edit them per embed. label is the word on that screen.
+  # Optional sandbox and allow set the popup iframe. Leave them out to keep
+  # sandbox="allow-scripts allow-forms allow-same-origin" and no allow attribute.
+  # ChatKit in the popup: sandbox %w[allow-scripts allow-same-origin allow-forms allow-popups],
+  # allow "clipboard-write".
   config.floating_defaults = {
     "edge_spacing" => 20,
     "popup_width" => 380,

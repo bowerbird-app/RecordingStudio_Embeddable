@@ -58,7 +58,9 @@ class FloatingConfigTest < Minitest::Test
       "popup_url" => "https://evil.example/widget",
       "edge_spacing" => 16,
       "popup_width" => 320,
-      "icon_url" => "https://images.example.com/launcher.png"
+      "icon_url" => "https://images.example.com/launcher.png",
+      "sandbox" => "allow-scripts allow-popups",
+      "allow" => "clipboard-write"
     )
     refute_predicate rejected, :valid?
     assert_includes rejected.errors.join(" "), "unknown"

@@ -119,6 +119,21 @@ Spacing, panel size, the icon, and the management label are host configuration. 
 - `popup_width`: 280–440 (default 380)
 - `popup_height`: 360–720 (default 560)
 - `icon_url`: optional. An Attachable direct URL for that recording, or an `http(s)` URL on `config.floating_icon_hosts`. A script URL or an unlisted host is dropped.
+- `sandbox`: optional popup iframe `sandbox` tokens. A string or an array. Unknown tokens raise `ArgumentError`. Omit it and the iframe stays `sandbox="allow-scripts allow-forms allow-same-origin"`.
+- `allow`: optional popup iframe `allow` features, such as `clipboard-write`. A string or an array. Unknown features raise `ArgumentError`. Omit it and the iframe has no `allow` attribute.
+
+`sandbox` and `allow` are not stored on the embed. A type's `floating_options` replace the app-wide value for that key. Several features in `allow` are rendered with `; ` between them. `sandbox` tokens are rendered in the order you list them, separated by a single space.
+
+Hosting the Recording Studio Agents ChatKit page in the popup needs scripts, same-origin, forms, popups, and the clipboard. That combination is opt-in:
+
+```ruby
+floating_options: {
+  sandbox: %w[allow-scripts allow-same-origin allow-forms allow-popups],
+  allow: "clipboard-write"
+}
+```
+
+Leave both keys unset for every other popup. The built-in iframe markup does not change.
 
 Management copy lives under `recording_studio.embeddable` and interpolates `%{label}`. A locale translates the sentence. It does not translate the host's word.
 
@@ -150,6 +165,8 @@ On a host page, render the same launcher without the iframe embed code:
 
 That helper inlines the same JSON the endpoint would return, so a same-origin page does not depend on a cross-origin fetch. Copy the external snippet from the floating screen with `recording_studio_floating_widget_snippet` when the launcher is on. The Embed screen keeps only the inline embed code. Inline `enabled` and the launcher stay independent: a page can float while the public document is off, and a Page or Article never gets either control.
 
+When that JSON includes `sandbox` or `allow`, `widget.js` sets those attributes on the popup iframe. When it does not, the iframe is `sandbox="allow-scripts allow-forms allow-same-origin"` and has no `allow` attribute.
+
 ### Interactive popup
 
 Include `RecordingStudioEmbeddable::FloatingWidget::Interactive` on the host controller that renders `floating_popup`. Inherit `ActionController::Base` (or another controller that does not load the host session). The concern:
@@ -161,6 +178,8 @@ Include `RecordingStudioEmbeddable::FloatingWidget::Interactive` on the host con
 
 The popup HTML is a live host response. It is not an Artifact and `PublishEmbedToCdn` does not upload it. A static popup can be plain HTML. An interactive one, such as the dummy contact form, posts back to the host with the widget CSRF cookie.
 
+`widget.js` sets the popup iframe `sandbox` and `allow` attributes. `FloatingWidget::Interactive` does not. Its `frame-ancestors` policy is separate.
+
 ### Management screen
 
 Capable types get a screen next to Style. Its tab, heading, form labels, snippet section, and save flash all use `label`. It turns the button on and chooses Position with Bottom left or Bottom right (Bottom right when unset). When the button is on, that screen also shows the install snippet and its copy control. The snippet goes on every page, just before the closing `</head>` tag. Spacing, panel size, and the icon are not on this form. The preview is the same kind of iframe frame as Style, and it loads `widget.js` — the production launcher — open, at the host size and colours. Position radios move that launcher inside the frame. The button closes and reopens the popup. Style still owns the accent colours. The Embed screen does not show the launcher snippet. Types that did not opt in do not get the screen.
@@ -171,10 +190,10 @@ Capable types get a screen next to Style. Its tab, heading, form labels, snippet
 | --- | --- | --- |
 | `floating: true` | recordable capability | Opt in. Off types never float. |
 | `floating_popup` | capability | `{ controller:, action: }`. Route accepts `:token`. |
-| `floating_options` | capability | `label`, `edge_spacing`, `popup_width`, `popup_height`, optional `icon_url`. Overrides `config.floating_defaults` for that type. |
+| `floating_options` | capability | `label`, `edge_spacing`, `popup_width`, `popup_height`, optional `icon_url`, optional `sandbox`, optional `allow`. Overrides `config.floating_defaults` for that type. |
 | `floating_enabled` | embed column | Show switch. Independent of `enabled`. |
-| `floating` | embed jsonb | `position` only. |
-| `config.floating_defaults` | initializer | App-wide label, spacing, panel size, and icon. `label` defaults to "Floating button". |
+| `floating` | embed jsonb | `position` only. `sandbox` and `allow` stored here are rejected. |
+| `config.floating_defaults` | initializer | App-wide label, spacing, panel size, and icon. Optional `sandbox` and `allow`. `label` defaults to "Floating button". Omit `sandbox` and `allow` to keep the built-in popup iframe. |
 | `config.floating_icon_hosts` | initializer | Extra icon hosts. Attachable direct URLs are also allowed. |
 | Accent colours | existing theme | `accent_color` and `accent_text_color`. No launcher colour editor. |
 

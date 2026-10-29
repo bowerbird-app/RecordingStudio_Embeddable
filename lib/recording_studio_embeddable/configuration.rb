@@ -126,6 +126,8 @@ module RecordingStudioEmbeddable
       @floating_icon_hosts = []
       # App-wide launcher spacing, panel size, icon, and management label.
       # A type can override these with floating_options: on Embeddable.to.
+      # Optional sandbox and allow on either hash set the popup iframe.
+      # Omit both and widget.js keeps its built-in sandbox and no allow attribute.
       # Not editable per embed. +label+ is the word on the management screen.
       @floating_defaults = {
         "edge_spacing" => 20,
