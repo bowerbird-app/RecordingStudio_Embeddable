@@ -15,6 +15,7 @@ module RecordingStudio
 
       def initialize(**options)
         super()
+        RecordingStudioEmbeddable::Floating::PopupFrame.normalize_floating_options!(options)
         @options = options.reverse_merge(enabled: true)
       end
 

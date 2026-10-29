@@ -48,6 +48,9 @@ class FloatingWidgetHelperTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "http://www.example.com/widgets/#{@embed.token}"
     refute_includes response.body, @embed.id
     refute_includes @embed.reload.floating.to_json, "popup_url"
+    config = JSON.parse(Nokogiri::HTML(response.body).at_css("script[data-config]")["data-config"])
+    refute config.key?("sandbox")
+    refute config.key?("allow")
 
     get widget_on_site_path(tokens: @page_embed.token)
     assert_response :success
@@ -87,5 +90,21 @@ class FloatingWidgetHelperTest < ActionDispatch::IntegrationTest
     get recording_studio_embeddable.edit_management_embed_path(@page_embed)
     assert_response :success
     refute_includes response.body, "launcher_snippet"
+  end
+
+  test "local helper inlines opt-in sandbox and allow" do
+    previous = RecordingStudioEmbeddable.configuration.floating_defaults
+    RecordingStudioEmbeddable.configuration.floating_defaults = previous.merge(
+      "sandbox" => "allow-scripts allow-same-origin allow-forms allow-popups",
+      "allow" => "clipboard-write"
+    )
+    get widget_on_site_path(tokens: @embed.token)
+
+    assert_response :success
+    config = JSON.parse(Nokogiri::HTML(response.body).at_css("script[data-config]")["data-config"])
+    assert_equal "allow-scripts allow-same-origin allow-forms allow-popups", config.fetch("sandbox")
+    assert_equal "clipboard-write", config.fetch("allow")
+  ensure
+    RecordingStudioEmbeddable.configuration.floating_defaults = previous if previous
   end
 end

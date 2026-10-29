@@ -77,6 +77,8 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
     refute @widget_embed.reload.floating.key?("edge_spacing")
     assert_equal "#111827", body.dig("colors", "background")
     assert_equal "http://www.example.com/widgets/#{@widget_embed.token}", body.fetch("popup_url")
+    refute body.key?("sandbox")
+    refute body.key?("allow")
     refute_includes @widget_embed.reload.floating.to_json, "popup_url"
     refute_includes @widget_embed.floating.to_json, "http"
   end
@@ -162,6 +164,27 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
     assert_equal %w[sizing theme].sort, configuration.keys.sort
     refute configuration.key?("floating")
     refute configuration.key?("popup_url")
+  end
+
+  test "launcher json renders sandbox and allow from floating_defaults" do
+    previous = RecordingStudioEmbeddable.configuration.floating_defaults
+    RecordingStudioEmbeddable.configuration.floating_defaults = previous.merge(
+      "sandbox" => %w[allow-scripts allow-same-origin allow-forms allow-popups],
+      "allow" => "clipboard-write"
+    )
+
+    get "/recording_studio_embeddable/embeds/#{@widget_embed.token}/launcher",
+        headers: { "Origin" => "https://partner.example.com" }
+
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal "allow-scripts allow-same-origin allow-forms allow-popups", body.fetch("sandbox")
+    assert_equal "clipboard-write", body.fetch("allow")
+    assert_equal 24, body.fetch("edge_spacing")
+    refute_includes @widget_embed.reload.floating.to_json, "sandbox"
+    refute_includes @widget_embed.floating.to_json, "clipboard-write"
+  ensure
+    RecordingStudioEmbeddable.configuration.floating_defaults = previous if previous
   end
 
   test "launcher is rate limited" do

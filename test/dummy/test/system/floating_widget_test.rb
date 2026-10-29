@@ -80,6 +80,67 @@ class FloatingWidgetTest < ApplicationSystemTestCase
     assert_selector "[data-position='bottom-right'][data-open='true']"
   end
 
+  test "popup iframe keeps the built-in sandbox and has no allow attribute" do
+    page.current_window.resize_to(1400, 900)
+    visit widget_on_site_path(tokens: @right_embed.token)
+    find("[data-widget-launcher]").click
+
+    attributes = popup_iframe_attributes
+    assert_equal "allow-scripts allow-forms allow-same-origin", attributes.fetch("sandbox")
+    assert_nil attributes.fetch("allow")
+  end
+
+  test "floating_defaults sandbox and allow render on the popup iframe" do
+    previous = RecordingStudioEmbeddable.configuration.floating_defaults
+    RecordingStudioEmbeddable.configuration.floating_defaults = previous.merge(
+      "sandbox" => "allow-scripts allow-forms allow-popups",
+      "allow" => "clipboard-write"
+    )
+    page.current_window.resize_to(1400, 900)
+    visit widget_on_site_path(tokens: @right_embed.token)
+    find("[data-widget-launcher]").click
+
+    attributes = popup_iframe_attributes
+    assert_equal "allow-scripts allow-forms allow-popups", attributes.fetch("sandbox")
+    assert_equal "clipboard-write", attributes.fetch("allow")
+  ensure
+    RecordingStudioEmbeddable.configuration.floating_defaults = previous if previous
+  end
+
+  test "opt-in sandbox and allow render on the popup iframe" do
+    page.current_window.resize_to(1400, 900)
+    visit widget_on_site_path(tokens: @right_embed.token)
+    page.execute_script(<<~JS)
+      var existing = document.querySelector("script[data-config]");
+      var current = JSON.parse(existing.getAttribute("data-config"));
+      var config = {
+        id: "chatkit-frame",
+        title: current.title,
+        position: current.position,
+        popup_url: current.popup_url,
+        colors: current.colors,
+        sandbox: "allow-scripts allow-same-origin allow-forms allow-popups",
+        allow: "clipboard-write"
+      };
+      var extra = document.createElement("script");
+      extra.src = existing.src;
+      extra.async = true;
+      extra.setAttribute("data-embed", config.id);
+      extra.setAttribute("data-config", JSON.stringify(config));
+      document.body.appendChild(extra);
+      window.__recordingStudioFloatingWidget.scan();
+    JS
+
+    find("[data-recording-studio-widget='chatkit-frame'] [data-widget-launcher]").click
+    attributes = popup_iframe_attributes("chatkit-frame")
+    assert_equal "allow-scripts allow-same-origin allow-forms allow-popups", attributes.fetch("sandbox")
+    assert_equal "clipboard-write", attributes.fetch("allow")
+
+    original = popup_iframe_attributes(@right_embed.token)
+    assert_equal "allow-scripts allow-forms allow-same-origin", original.fetch("sandbox")
+    assert_nil original.fetch("allow")
+  end
+
   test "installed snippet mounts a launcher from the endpoint" do
     visit_installed(@left_embed.token)
 
@@ -88,5 +149,24 @@ class FloatingWidgetTest < ApplicationSystemTestCase
     widget = find("[data-recording-studio-widget]")
     assert_equal "bottom-left", widget["data-position"]
     assert_equal @left_embed.token, widget["data-recording-studio-widget"]
+  end
+
+  private
+
+  def popup_iframe_attributes(widget_id = nil)
+    selector = if widget_id
+      "[data-recording-studio-widget='#{widget_id}'] [data-recording-studio-widget-frame]"
+    else
+      "[data-recording-studio-widget-frame]"
+    end
+    page.evaluate_script(<<~JS)
+      (function () {
+        var frame = document.querySelector(#{selector.to_json});
+        return {
+          sandbox: frame.getAttribute("sandbox"),
+          allow: frame.getAttribute("allow")
+        };
+      })()
+    JS
   end
 end

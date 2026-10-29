@@ -14,6 +14,10 @@ class FloatingWidgetScriptTest < ActiveSupport::TestCase
     assert_includes source, "data-preview-open"
     assert_includes source, 'widget.setAttribute("data-preview", "true")'
     assert_includes source, "openWidget(widget, frame, popupUrl.href, launcher)"
+    assert_equal 1, source.scan('frame.setAttribute("sandbox", "allow-scripts allow-forms allow-same-origin")').size
+    assert_includes source, 'typeof config.sandbox === "string"'
+    assert_includes source, 'typeof config.allow === "string" && config.allow'
+    refute_includes source, "clipboard-write"
     refute_match(/postMessage\(\s*[^,\n]+,\s*["']\*["']\s*\)/, source)
     refute_includes source, "from \"react\""
     refute_includes source, "from 'react'"

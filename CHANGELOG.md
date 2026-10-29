@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-10-29
+
+### Added
+- Opt-in `sandbox` and `allow` on the floating launcher popup iframe. Set either key on `floating_options` or `config.floating_defaults` as a string or an array of tokens. The embed jsonb still stores `position` only.
+- Unknown sandbox tokens, unknown allow features, and allow origin lists (such as `camera 'self'`) raise `ArgumentError` when `floating_defaults` is assigned and when a type registers `floating_options`. The public launcher and the host helper do not validate again. Only the popup settings are frozen. Changing `floating_defaults` or `floating_options` in place raises `FrozenError`.
+- `allow` accepts bare permissions-policy feature names only. A non-lowercase name such as `Camera` is an unknown feature. An origin list names the offending token.
+- With neither key set, the popup iframe stays `sandbox="allow-scripts allow-forms allow-same-origin"` and has no `allow` attribute.
+- Hosting the Recording Studio Agents ChatKit page in the popup can pass `sandbox: %w[allow-scripts allow-same-origin allow-forms allow-popups]` and `allow: "clipboard-write"`.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.14.0`. No migration. Leave `sandbox` and `allow` unset to keep today's popup iframe markup.
+- A bad `sandbox` or `allow` raises when `floating_defaults` is assigned and when the type is registered. With eager load, that is boot. In development without eager loading, validation may happen on the first request rather than at boot.
+- Assigning `nil` to `floating_defaults` or `floating_options` raises `ArgumentError` (`must be a hash`).
+- Only the popup settings are frozen. Mutating `floating_defaults` or `floating_options` after validation raises `FrozenError`. The rest of the capability options stay mutable.
+- `FloatingWidget::Interactive` `frame-ancestors` behavior is unchanged.
+
 ## [0.13.3] - 2026-10-29
 
 ### Changed
@@ -574,7 +590,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.3...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.3...v0.14.0
 [0.13.3]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.2...v0.13.3
 [0.13.2]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.1...v0.13.2
 [0.13.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.0...v0.13.1
