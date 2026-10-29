@@ -46,13 +46,13 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_artifacts.git
-  revision: 17f5265cae3c20e6d6ee33e2902ed75f75b788cc
-  tag: v0.4.4
+  revision: 02dea63c251c976a8d7e827534bd562a86f2a5d7
+  tag: v0.4.5
   specs:
-    recording_studio_artifacts (0.4.0)
+    recording_studio_artifacts (0.4.5)
       aws-sdk-s3 (~> 1)
       rails (~> 8.1.0)
-      recording_studio (>= 4.1)
+      recording_studio (>= 4.2, < 7)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_attachable.git
@@ -648,7 +648,7 @@ DEPENDENCIES
   recording_studio_accessible (~> 0.23)!
   recording_studio_admin!
   recording_studio_api!
-  recording_studio_artifacts (~> 0.4.0)!
+  recording_studio_artifacts (~> 0.4.5)!
   recording_studio_attachable (~> 0.22)!
   recording_studio_cache (~> 0.6)!
   recording_studio_embeddable!
@@ -800,7 +800,7 @@ CHECKSUMS
   recording_studio_accessible (0.23.1)
   recording_studio_admin (2.2.0)
   recording_studio_api (0.18.0)
-  recording_studio_artifacts (0.4.0)
+  recording_studio_artifacts (0.4.5)
   recording_studio_attachable (0.22.0)
   recording_studio_cache (0.6.0)
   recording_studio_embeddable (0.13.3)

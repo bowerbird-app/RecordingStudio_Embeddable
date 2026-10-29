@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-# Artifacts 0.4.4 still declares `recording_studio` `~> 4.2`. Dummy pins for
-# API 0.5.5 also declare `~> 4.2`. Those ranges reject 6.3.0. Rewrite the
-# requirement on the existing dependency object when Bundler reads the gemspec.
+# The root Gemfile still pins recording_studio_artifacts tag v0.4.4, whose
+# gemspec declares recording_studio ~> 4.2. That range rejects 6.3.0. The
+# dummy Gemfile pins artifacts v0.4.5 (>= 4.2, < 7) and does not load this
+# file. Rewrite the requirement when Bundler reads the root gemspecs.
 module WidenRecordingStudioRequirement
   COMPATIBLE_VERSION = Gem::Version.new("6.3.0")
   WIDENED = Gem::Requirement.new(">= 4.1")
