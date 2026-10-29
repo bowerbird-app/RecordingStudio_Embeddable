@@ -29,24 +29,30 @@ GIT
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_api.git
-  revision: e16fbad11f1b4049a02f99b8b487adf7927dbf5c
-  tag: v0.5.5
+  revision: c272661e2bdd9225c9a99be38eed85feb0f72154
+  tag: v0.18.0
   specs:
-    recording_studio_api (0.5.5)
+    recording_studio_api (0.18.0)
+      flat_pack (>= 0.1.315)
       rails (~> 8.1.0)
-      recording_studio (>= 4.1)
-      recording_studio_accessible (~> 0.9)
+      recording_studio (>= 6.1.0)
+      recording_studio_accessible (~> 0.11)
+      recording_studio_logs (>= 0.4.1, < 1.0)
+      recording_studio_metrics (>= 0.3.0, < 1.0)
+      recording_studio_moveable (~> 4.0)
+      recording_studio_trashable (~> 0.10)
       redis (~> 5.3)
+      view_component (>= 4.14, < 5)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_artifacts.git
-  revision: 17f5265cae3c20e6d6ee33e2902ed75f75b788cc
-  tag: v0.4.4
+  revision: 02dea63c251c976a8d7e827534bd562a86f2a5d7
+  tag: v0.4.5
   specs:
-    recording_studio_artifacts (0.4.0)
+    recording_studio_artifacts (0.4.5)
       aws-sdk-s3 (~> 1)
       rails (~> 8.1.0)
-      recording_studio (>= 4.1)
+      recording_studio (>= 4.2, < 7)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_attachable.git
@@ -69,6 +75,14 @@ GIT
       recording_studio (>= 6.1.0)
 
 GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_icons.git
+  revision: f08b966a53544a3e7fb36896fbf34dd3f9c9055d
+  tag: v0.1.1
+  specs:
+    recording_studio_icons (0.1.1)
+      rails (>= 8.1.0)
+
+GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_logs.git
   revision: 33a9511bd88b9d0199faac0e2889b5a607e27def
   tag: v0.7.1
@@ -86,6 +100,19 @@ GIT
     recording_studio_metrics (0.7.0)
       rails (~> 8.1.0)
       recording_studio (>= 6.1.0)
+
+GIT
+  remote: https://github.com/bowerbird-app/RecordingStudio_moveable.git
+  revision: 65117c09c58213050d74bb3221966410dc4c6e20
+  tag: v4.0.1
+  specs:
+    recording_studio_moveable (4.0.1)
+      flat_pack (>= 0.1.315)
+      rails (>= 8.1.0, < 9.0)
+      recording_studio (>= 6.1.0)
+      recording_studio_accessible (~> 0.6)
+      recording_studio_icons (>= 0.1.0)
+      view_component (>= 4.14, < 5)
 
 GIT
   remote: https://github.com/bowerbird-app/RecordingStudio_publishable.git
@@ -621,12 +648,14 @@ DEPENDENCIES
   recording_studio_accessible (~> 0.23)!
   recording_studio_admin!
   recording_studio_api!
-  recording_studio_artifacts (~> 0.4.0)!
+  recording_studio_artifacts (~> 0.4.5)!
   recording_studio_attachable (~> 0.22)!
   recording_studio_cache (~> 0.6)!
   recording_studio_embeddable!
+  recording_studio_icons (>= 0.1.0)!
   recording_studio_logs (>= 0.7.1, < 1.0)!
   recording_studio_metrics (>= 0.7.0, < 1.0)!
+  recording_studio_moveable (~> 4.0)!
   recording_studio_publishable (~> 0.12)!
   recording_studio_root_switchable!
   recording_studio_trashable (~> 0.10)!
@@ -770,13 +799,15 @@ CHECKSUMS
   recording_studio (6.3.0)
   recording_studio_accessible (0.23.1)
   recording_studio_admin (2.2.0)
-  recording_studio_api (0.5.5)
-  recording_studio_artifacts (0.4.0)
+  recording_studio_api (0.18.0)
+  recording_studio_artifacts (0.4.5)
   recording_studio_attachable (0.22.0)
   recording_studio_cache (0.6.0)
   recording_studio_embeddable (0.13.3)
+  recording_studio_icons (0.1.1)
   recording_studio_logs (0.7.1)
   recording_studio_metrics (0.7.0)
+  recording_studio_moveable (4.0.1)
   recording_studio_publishable (0.12.0)
   recording_studio_root_switchable (0.11.0)
   recording_studio_trashable (0.12.0)
