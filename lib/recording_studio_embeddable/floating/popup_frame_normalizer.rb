@@ -9,10 +9,24 @@ module RecordingStudioEmbeddable
       def normalize_layer(raw, name:)
         raise ArgumentError, "#{name} must be a hash." unless raw.is_a?(Hash)
 
-        copy = raw.dup
+        copy = raw.deep_dup
         write_canonical(copy, "sandbox")
         write_canonical(copy, "allow")
-        copy
+        deep_freeze(copy)
+      end
+
+      def deep_freeze(value)
+        case value
+        when Hash
+          value.each_value { |item| deep_freeze(item) }
+          value.freeze
+        when Array
+          value.each { |item| deep_freeze(item) }
+          value.freeze
+        else
+          value.freeze if value.respond_to?(:freeze)
+          value
+        end
       end
 
       def write_canonical(copy, key)
@@ -38,16 +52,28 @@ module RecordingStudioEmbeddable
       end
 
       def assert_token!(token, name:)
-        if name == "allow" && !PopupFrame::BARE_ALLOW_FEATURE.match?(token)
-          raise ArgumentError,
-                %(allow accepts bare feature names only. Origin lists such as "camera 'self'" are rejected.)
-        end
+        raise_origin_list!(token) if origin_list?(token, name: name)
 
         known = name == "allow" ? PopupFrame::ALLOW_FEATURES : PopupFrame::SANDBOX_TOKENS
         return if known.include?(token)
 
         list = known.join(" ")
         raise ArgumentError, %(Unknown #{name} token "#{token}". Known #{name} tokens: #{list}.)
+      end
+
+      def origin_list?(token, name:)
+        return false unless name == "allow"
+        return false if PopupFrame::BARE_ALLOW_FEATURE.match?(token)
+
+        !token.match?(/\A[A-Za-z0-9-]+\z/)
+      end
+
+      def raise_origin_list!(token)
+        example = "\"camera 'self'\""
+        offending = "\"#{token}\""
+        message = "allow accepts bare feature names only. Origin lists such as #{example} are rejected. " \
+                  "Offending token: #{offending}."
+        raise ArgumentError, message
       end
 
       def tokenize(value, name:)

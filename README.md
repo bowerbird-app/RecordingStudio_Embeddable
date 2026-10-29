@@ -122,7 +122,7 @@ Spacing, panel size, the icon, and the management label are host configuration. 
 - `sandbox`: optional popup iframe `sandbox` tokens. A string or an array. Unknown tokens raise `ArgumentError` when `config.floating_defaults` is assigned, or when the type registers `floating_options`. Omit it and the iframe stays `sandbox="allow-scripts allow-forms allow-same-origin"`.
 - `allow`: optional popup iframe `allow` features. Bare feature names only, such as `clipboard-write`. A string or an array. Origin lists such as `camera 'self'` are rejected. Unknown features raise `ArgumentError` at that same assignment or registration. Omit it and the iframe has no `allow` attribute.
 
-`sandbox` and `allow` are not stored on the embed. A type's `floating_options` replace the app-wide value for that key. Several bare features in `allow` are rendered with `; ` between them. `sandbox` tokens are rendered in the order you list them, separated by a single space. The launcher request and the host helper read those stored strings. They do not validate again.
+`sandbox` and `allow` are not stored on the embed. A type's `floating_options` replace the app-wide value for that key. Several bare features in `allow` are rendered with `; ` between them. `sandbox` tokens are rendered in the order you list them, separated by a single space. The launcher request and the host helper read those stored strings. They do not validate again. The normalized hashes are frozen. Changing them in place raises `FrozenError`. Assign the hash again instead.
 
 Hosting the Recording Studio Agents ChatKit page in the popup needs scripts, same-origin, forms, popups, and the clipboard. That combination is opt-in:
 
@@ -135,12 +135,13 @@ floating_options: {
 
 Leave both keys unset for every other popup. The built-in iframe markup does not change.
 
-Some sandbox tokens change what the framed page can do to the host:
+Some sandbox tokens change what the framed page can do:
 
-- `allow-top-navigation`, `allow-top-navigation-by-user-activation`, and `allow-top-navigation-to-custom-protocols` let the frame navigate the host page.
+- `allow-top-navigation` and `allow-top-navigation-by-user-activation` let the frame navigate the host page.
+- `allow-top-navigation-to-custom-protocols` lets the popup open external-protocol links (`mailto:`, `tel:`, app schemes).
 - `allow-popups-to-escape-sandbox` gives those popups no sandbox.
-- `allow-scripts` together with `allow-same-origin` lets the framed page remove its own sandbox. That pair is already the default. It is safe because the popup is same-origin and trusted.
-- Leaving out `allow-scripts` breaks the popup.
+- `allow-scripts` together with `allow-same-origin` lets the framed page remove its own sandbox. That pair is already the default. The popup is cross-origin to embedders, so `allow-same-origin` keeps the popup's own origin and does not grant access to the embedding page.
+- Dropping `allow-scripts` breaks interactive popups.
 
 Management copy lives under `recording_studio.embeddable` and interpolates `%{label}`. A locale translates the sentence. It does not translate the host's word.
 

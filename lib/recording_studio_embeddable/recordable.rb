@@ -15,7 +15,8 @@ module RecordingStudioEmbeddable
         Floating::PopupFrame.normalize_floating_options!(options)
 
         current = recording_studio_embeddable_options || {}
-        self.recording_studio_embeddable_options = current.merge(options).reverse_merge(enabled: true)
+        stored = current.merge(options).reverse_merge(enabled: true)
+        self.recording_studio_embeddable_options = stored.freeze
 
         # Register this recordable as an embeddable parent so Embed children are allowed.
         return unless defined?(RecordingStudio) && RecordingStudio.respond_to?(:enable_capability)

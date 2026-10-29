@@ -166,27 +166,10 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
     refute configuration.key?("popup_url")
   end
 
-  test "launcher json opts into sandbox and allow without storing them" do
-    with_popup_frame(
-      sandbox: %w[allow-scripts allow-same-origin allow-forms allow-popups],
-      allow: "clipboard-write"
-    ) do
-      get "/recording_studio_embeddable/embeds/#{@widget_embed.token}/launcher",
-          headers: { "Origin" => "https://partner.example.com" }
-    end
-
-    assert_response :success
-    body = JSON.parse(response.body)
-    assert_equal "allow-scripts allow-same-origin allow-forms allow-popups", body.fetch("sandbox")
-    assert_equal "clipboard-write", body.fetch("allow")
-    refute_includes @widget_embed.reload.floating.to_json, "sandbox"
-    refute_includes @widget_embed.floating.to_json, "clipboard-write"
-  end
-
   test "launcher json renders sandbox and allow from floating_defaults" do
     previous = RecordingStudioEmbeddable.configuration.floating_defaults
     RecordingStudioEmbeddable.configuration.floating_defaults = previous.merge(
-      "sandbox" => %w[allow-scripts allow-forms allow-popups],
+      "sandbox" => %w[allow-scripts allow-same-origin allow-forms allow-popups],
       "allow" => "clipboard-write"
     )
 
@@ -195,9 +178,11 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     body = JSON.parse(response.body)
-    assert_equal "allow-scripts allow-forms allow-popups", body.fetch("sandbox")
+    assert_equal "allow-scripts allow-same-origin allow-forms allow-popups", body.fetch("sandbox")
     assert_equal "clipboard-write", body.fetch("allow")
     assert_equal 24, body.fetch("edge_spacing")
+    refute_includes @widget_embed.reload.floating.to_json, "sandbox"
+    refute_includes @widget_embed.floating.to_json, "clipboard-write"
   ensure
     RecordingStudioEmbeddable.configuration.floating_defaults = previous if previous
   end
@@ -229,18 +214,5 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
         headers: { "Origin" => "https://partner.example.com" }
 
     assert_response :not_found
-  end
-
-  private
-
-  def with_popup_frame(sandbox:, allow: :unset)
-    capability = Widget.recording_studio_capabilities.find { |item| item.key == :embeddable }
-    original = capability.options[:floating_options]
-    patched = original.merge(sandbox: sandbox)
-    patched[:allow] = allow unless allow == :unset
-    capability.options[:floating_options] = patched
-    yield
-  ensure
-    capability.options[:floating_options] = original if capability && original
   end
 end

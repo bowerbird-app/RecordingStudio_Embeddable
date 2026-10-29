@@ -60,17 +60,65 @@ class FloatingPopupFrameTest < Minitest::Test
     end
 
     assert_includes error.message, "allow-evil"
+    assert_includes error.message, "Known sandbox tokens"
+    assert_includes error.message, "allow-scripts"
     assert_equal previous, RecordingStudioEmbeddable.configuration.floating_defaults
     refute previous.key?("sandbox")
   end
 
   def test_floating_defaults_assignment_rejects_allow_origin_lists
+    offending = "clipboard-write=(self)"
     error = assert_raises(ArgumentError) do
-      RecordingStudioEmbeddable.configuration.floating_defaults = { "allow" => "camera 'self'" }
+      RecordingStudioEmbeddable.configuration.floating_defaults = { "allow" => offending }
     end
 
     assert_includes error.message, "bare feature"
-    assert_includes error.message, "camera 'self'"
+    assert_includes error.message, %(Offending token: "#{offending}".)
+  end
+
+  def test_uppercase_allow_feature_is_an_unknown_token
+    error = assert_raises(ArgumentError) { register(allow: "Camera") }
+
+    assert_includes error.message, %(Unknown allow token "Camera")
+    assert_includes error.message, "Known allow tokens"
+    assert_includes error.message, "clipboard-write"
+    refute_includes error.message, "Origin lists"
+    refute_includes error.message, "Offending token"
+  end
+
+  def test_nil_floating_defaults_and_floating_options_must_be_a_hash
+    defaults_error = assert_raises(ArgumentError) do
+      RecordingStudioEmbeddable.configuration.floating_defaults = nil
+    end
+    assert_includes defaults_error.message, "floating_defaults must be a hash."
+
+    options_error = assert_raises(ArgumentError) do
+      RecordingStudio::Capabilities::Embeddable.to(floating: true, floating_options: nil)
+    end
+    assert_includes options_error.message, "floating_options must be a hash."
+  end
+
+  def test_mutation_after_validation_raises_frozen_error
+    RecordingStudioEmbeddable.configuration.floating_defaults = {
+      sandbox: "allow-scripts",
+      allow: "clipboard-write"
+    }
+    defaults = RecordingStudioEmbeddable.configuration.floating_defaults
+
+    assert_raises(FrozenError) { defaults[:sandbox] << " allow-popups" }
+    assert_raises(FrozenError) { defaults[:allow] = "fullscreen" }
+    assert_raises(FrozenError) { defaults["sandbox"] = "allow-forms" }
+    assert_equal "allow-scripts", defaults[:sandbox]
+    assert_equal "clipboard-write", defaults[:allow]
+
+    capability = register(sandbox: "allow-scripts", allow: "clipboard-write")
+    options = capability.options[:floating_options]
+
+    assert_raises(FrozenError) { options[:allow] = "fullscreen" }
+    assert_raises(FrozenError) { options[:sandbox] << " allow-popups" }
+    assert_raises(FrozenError) { capability.options[:floating_options] = { sandbox: "allow-forms" } }
+    assert_equal "allow-scripts", options[:sandbox]
+    assert_equal "clipboard-write", options[:allow]
   end
 
   def test_type_registration_rejects_unknown_tokens
@@ -78,6 +126,8 @@ class FloatingPopupFrameTest < Minitest::Test
       register(sandbox: "allow-scripts allow-evil")
     end
     assert_includes error.message, "allow-evil"
+    assert_includes error.message, "Known sandbox tokens"
+    assert_includes error.message, "allow-scripts"
 
     allow_error = assert_raises(ArgumentError) { register(allow: "clipboard") }
     assert_includes allow_error.message, "clipboard"
@@ -101,15 +151,7 @@ class FloatingPopupFrameTest < Minitest::Test
     end
 
     assert_includes error.message, "bare feature"
-  end
-
-  def test_render_reads_stored_strings_without_validating
-    rendered = RecordingStudioEmbeddable::Floating::PopupFrame.for(
-      recording_with(floating_options: { sandbox: "allow-evil", allow: "camera 'self'" })
-    )
-
-    assert_equal "allow-evil", rendered.fetch("sandbox")
-    assert_equal "camera 'self'", rendered.fetch("allow")
+    assert_includes error.message, %(Offending token: "'self'".)
   end
 
   private
@@ -129,7 +171,11 @@ class FloatingPopupFrameTest < Minitest::Test
 
   def recording_with(floating_options: nil)
     options = { enabled: true, floating: true }
-    options[:floating_options] = floating_options if floating_options
+    if floating_options
+      layer = { floating_options: floating_options }
+      RecordingStudioEmbeddable::Floating::PopupFrame.normalize_floating_options!(layer)
+      options[:floating_options] = layer.fetch(:floating_options)
+    end
     recording = Object.new
     recordable = recordable_with(options)
     recording.define_singleton_method(:recordable) { recordable }

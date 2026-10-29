@@ -93,11 +93,10 @@ class FloatingWidgetHelperTest < ActionDispatch::IntegrationTest
   end
 
   test "local helper inlines opt-in sandbox and allow" do
-    capability = Widget.recording_studio_capabilities.find { |item| item.key == :embeddable }
-    original = capability.options[:floating_options]
-    capability.options[:floating_options] = original.merge(
-      sandbox: "allow-scripts allow-same-origin allow-forms allow-popups",
-      allow: "clipboard-write"
+    previous = RecordingStudioEmbeddable.configuration.floating_defaults
+    RecordingStudioEmbeddable.configuration.floating_defaults = previous.merge(
+      "sandbox" => "allow-scripts allow-same-origin allow-forms allow-popups",
+      "allow" => "clipboard-write"
     )
     get widget_on_site_path(tokens: @embed.token)
 
@@ -106,6 +105,6 @@ class FloatingWidgetHelperTest < ActionDispatch::IntegrationTest
     assert_equal "allow-scripts allow-same-origin allow-forms allow-popups", config.fetch("sandbox")
     assert_equal "clipboard-write", config.fetch("allow")
   ensure
-    capability.options[:floating_options] = original if capability && original
+    RecordingStudioEmbeddable.configuration.floating_defaults = previous if previous
   end
 end
