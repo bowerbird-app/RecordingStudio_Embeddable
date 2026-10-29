@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.3] - 2026-10-29
+
+### Changed
+- Stats countries list renders with `FlatPack::Table` (`data:`, `dividers: true`, `style: :plain`). Column titles and values are unchanged: Country, Views, Unique views, Human views, Bot views.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.13.3`. No migration. Stats copy is unchanged.
+
 ## [0.13.2] - 2026-10-28
 
 ### Changed
@@ -566,7 +574,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.2...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.3...HEAD
+[0.13.3]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.2...v0.13.3
 [0.13.2]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.1...v0.13.2
 [0.13.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.0...v0.13.1
 [0.13.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.12.1...v0.13.0

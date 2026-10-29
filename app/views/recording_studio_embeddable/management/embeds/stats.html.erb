@@ -130,37 +130,39 @@
       <h2 class="text-sm font-semibold text-(--surface-content-color)"><%= t("recording_studio.embeddable.management.stats.countries", default: "Countries") %></h2>
     </div>
 
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm">
-        <thead>
-          <tr class="border-b border-(--surface-border-color) text-left text-(--surface-muted-content-color)">
-            <th class="px-4 py-2 font-medium"><%= t("recording_studio.embeddable.management.stats.country", default: "Country") %></th>
-            <th class="px-4 py-2 font-medium"><%= t("recording_studio.embeddable.management.stats.views", default: "Views") %></th>
-            <th class="px-4 py-2 font-medium"><%= t("recording_studio.embeddable.management.stats.unique_views", default: "Unique views") %></th>
-            <th class="px-4 py-2 font-medium"><%= t("recording_studio.embeddable.management.stats.human_views", default: "Human views") %></th>
-            <th class="px-4 py-2 font-medium"><%= t("recording_studio.embeddable.management.stats.bot_views", default: "Bot views") %></th>
-          </tr>
-        </thead>
-        <tbody>
-          <% if @stats_geo_rows.present? %>
-            <% @stats_geo_rows.each do |row| %>
-              <tr class="border-b border-(--surface-border-color) last:border-b-0">
-                <td class="px-4 py-2 text-(--surface-content-color)"><%= row[:country] == "Unknown" ? t("recording_studio.embeddable.management.stats.unknown_country", default: "Unknown") : row[:country] %></td>
-                <td class="px-4 py-2 text-(--surface-content-color)"><%= row[:views] %></td>
-                <td class="px-4 py-2 text-(--surface-content-color)"><%= row[:unique_views] %></td>
-                <td class="px-4 py-2 text-(--surface-content-color)"><%= row[:human_views] %></td>
-                <td class="px-4 py-2 text-(--surface-content-color)"><%= row[:bot_views] %></td>
-              </tr>
-            <% end %>
-          <% else %>
-            <tr>
-              <td colspan="5" class="px-4 py-4 text-(--surface-muted-content-color)">
-                <%= t("recording_studio.embeddable.management.stats.empty_geo", default: "No geo access data for this filter and date range.") %>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
+    <% if @stats_geo_rows.present? %>
+      <%= render FlatPack::Table::Component.new(
+        data: @stats_geo_rows,
+        dividers: true,
+        style: :plain
+      ) do |table| %>
+        <% table.column(
+          title: t("recording_studio.embeddable.management.stats.country", default: "Country"),
+          html: ->(row) {
+            row[:country] == "Unknown" ? t("recording_studio.embeddable.management.stats.unknown_country", default: "Unknown") : row[:country]
+          }
+        ) %>
+        <% table.column(
+          title: t("recording_studio.embeddable.management.stats.views", default: "Views"),
+          html: ->(row) { row[:views].to_s }
+        ) %>
+        <% table.column(
+          title: t("recording_studio.embeddable.management.stats.unique_views", default: "Unique views"),
+          html: ->(row) { row[:unique_views].to_s }
+        ) %>
+        <% table.column(
+          title: t("recording_studio.embeddable.management.stats.human_views", default: "Human views"),
+          html: ->(row) { row[:human_views].to_s }
+        ) %>
+        <% table.column(
+          title: t("recording_studio.embeddable.management.stats.bot_views", default: "Bot views"),
+          html: ->(row) { row[:bot_views].to_s }
+        ) %>
+      <% end %>
+    <% else %>
+      <p class="px-4 py-4 text-sm text-(--surface-muted-content-color)">
+        <%= t("recording_studio.embeddable.management.stats.empty_geo", default: "No geo access data for this filter and date range.") %>
+      </p>
+    <% end %>
   </section>
 </div>

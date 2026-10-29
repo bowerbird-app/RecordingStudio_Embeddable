@@ -307,7 +307,7 @@ The engine ships management screens for people who can edit a recording. From th
 - Edit embed settings.
 - Preview the embed in a frame, with the same tabs as the other screens.
 - Adjust styling overrides.
-- Review summary and stats views.
+- Review summary and stats views. The Stats countries list is a FlatPack Table (Country, Views, Unique views, Human views, Bot views).
 
 Each screen registers a section link: Embed, Preview, Style, Chat button (when the type floats), Settings, and Stats. `register_page_nav` stores them, and the default layout draws that group in the top-right page nav. The open screen sets `current: true`. The management modal draws the same group inside its frame.
 
