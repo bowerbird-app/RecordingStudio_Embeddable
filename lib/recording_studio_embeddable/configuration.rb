@@ -48,10 +48,9 @@ module RecordingStudioEmbeddable
       :cdn_variant_retry_wait,
       :cdn_storage,
       :cdn_purger,
-      :floating_icon_hosts,
-      :floating_defaults
+      :floating_icon_hosts
     )
-    attr_reader :hooks, :layout
+    attr_reader :hooks, :layout, :floating_defaults
 
     def initialize
       @allowed_embedder_domains = []
@@ -127,9 +126,10 @@ module RecordingStudioEmbeddable
       # App-wide launcher spacing, panel size, icon, and management label.
       # A type can override these with floating_options: on Embeddable.to.
       # Optional sandbox and allow on either hash set the popup iframe.
+      # Those two keys are checked here, when the hash is assigned.
       # Omit both and widget.js keeps its built-in sandbox and no allow attribute.
       # Not editable per embed. +label+ is the word on the management screen.
-      @floating_defaults = {
+      self.floating_defaults = {
         "edge_spacing" => 20,
         "popup_width" => 380,
         "popup_height" => 560,
@@ -143,6 +143,10 @@ module RecordingStudioEmbeddable
 
     def layout=(value)
       @layout = RecordingStudio::Layout.accept(value)
+    end
+
+    def floating_defaults=(value)
+      @floating_defaults = Floating::PopupFrame.normalize_layer(value, name: "floating_defaults")
     end
 
     def merge!(hash)

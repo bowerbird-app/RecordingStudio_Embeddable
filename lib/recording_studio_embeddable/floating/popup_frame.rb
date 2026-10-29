@@ -3,11 +3,30 @@
 module RecordingStudioEmbeddable
   module Floating
     # Optional sandbox and allow attributes for the popup iframe.
-    # Keys come from config.floating_defaults, then floating_options.
-    # When a key is absent, it is omitted so widget.js keeps today's markup.
+    # Those keys are normalized when config is assigned and when a type
+    # registers. Rendering only reads the stored strings.
     class PopupFrame
       SANDBOX_TOKENS = PopupFrameTokens::SANDBOX_TOKENS
       ALLOW_FEATURES = PopupFrameTokens::ALLOW_FEATURES
+      BARE_ALLOW_FEATURE = /\A[a-z0-9-]+\z/
+
+      def self.normalize_layer(raw, name:)
+        PopupFrameNormalizer.normalize_layer(raw, name: name)
+      end
+
+      def self.normalize_floating_options!(options)
+        key = floating_options_key(options)
+        return unless key
+
+        options[key] = normalize_layer(options[key], name: "floating_options")
+      end
+
+      def self.floating_options_key(options)
+        return :floating_options if options.key?(:floating_options)
+        return "floating_options" if options.key?("floating_options")
+
+        nil
+      end
 
       def self.for(recording)
         new(recording).to_h
@@ -18,27 +37,13 @@ module RecordingStudioEmbeddable
       end
 
       def to_h
-        sandbox_value = nil
-        allow_value = nil
-        sandbox_set = false
-        allow_set = false
-
+        attributes = {}
         each_layer do |raw|
           next unless raw.is_a?(Hash)
 
-          if present?(raw, "sandbox")
-            sandbox_value = normalize(fetch(raw, "sandbox"), name: "sandbox", known: SANDBOX_TOKENS, joiner: " ")
-            sandbox_set = true
-          end
-          next unless present?(raw, "allow")
-
-          allow_value = normalize(fetch(raw, "allow"), name: "allow", known: ALLOW_FEATURES, joiner: "; ")
-          allow_set = true
+          copy_stored(attributes, raw, "sandbox", " ")
+          copy_stored(attributes, raw, "allow", "; ")
         end
-
-        attributes = {}
-        attributes["sandbox"] = sandbox_value if sandbox_set
-        attributes["allow"] = allow_value if allow_set
         attributes
       end
 
@@ -58,50 +63,19 @@ module RecordingStudioEmbeddable
         options[:floating_options] || options["floating_options"] || {}
       end
 
-      def present?(raw, key)
-        raw.key?(key) || raw.key?(key.to_sym)
-      end
+      def copy_stored(attributes, raw, key, joiner)
+        return unless raw.key?(key) || raw.key?(key.to_sym)
 
-      def fetch(raw, key)
-        raw.key?(key) ? raw[key] : raw[key.to_sym]
-      end
+        value = raw.key?(key) ? raw[key] : raw[key.to_sym]
+        text = case value
+               when Array
+                 value.map(&:to_s).join(joiner)
+               when String, Symbol
+                 value.to_s
+               end
+        return if text.nil? || text.empty?
 
-      def normalize(value, name:, known:, joiner:)
-        tokens = tokenize(value, name: name)
-        raise ArgumentError, "#{name} must include at least one token." if tokens.empty?
-
-        unknown = tokens.find { |token| !known.include?(token) }
-        raise ArgumentError, unknown_token_message(name, unknown, known) if unknown
-
-        repeated = tokens.tally.find { |_token, count| count > 1 }
-        raise ArgumentError, %(#{name} token "#{repeated.first}" is repeated.) if repeated
-
-        tokens.join(joiner)
-      end
-
-      def unknown_token_message(name, unknown, known)
-        list = known.join(" ")
-        %(Unknown #{name} token "#{unknown}". Known #{name} tokens: #{list}.)
-      end
-
-      def tokenize(value, name:)
-        case value
-        when String, Symbol
-          value.to_s.split(/[\s;]+/)
-        when Array
-          value.flat_map { |item| token_piece(item, name: name) }
-        else
-          raise ArgumentError, "#{name} must be a string or an array of tokens."
-        end
-      end
-
-      def token_piece(item, name:)
-        case item
-        when String, Symbol
-          item.to_s.split(/[\s;]+/)
-        else
-          raise ArgumentError, "#{name} must be a string or an array of tokens."
-        end
+        attributes[key] = text
       end
     end
   end

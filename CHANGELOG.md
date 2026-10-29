@@ -10,12 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.14.0] - 2026-10-29
 
 ### Added
-- Opt-in `sandbox` and `allow` on the floating launcher popup iframe. Set either key on `floating_options` or `config.floating_defaults` as a string or an array of tokens. Unknown sandbox tokens and unknown allow features raise `ArgumentError`. The embed jsonb still stores `position` only.
+- Opt-in `sandbox` and `allow` on the floating launcher popup iframe. Set either key on `floating_options` or `config.floating_defaults` as a string or an array of tokens. The embed jsonb still stores `position` only.
+- Unknown sandbox tokens, unknown allow features, and allow origin lists (such as `camera 'self'`) raise `ArgumentError` when `floating_defaults` is assigned and when a type registers `floating_options`. The public launcher and the host helper do not validate again.
+- `allow` accepts bare permissions-policy feature names only.
 - With neither key set, the popup iframe stays `sandbox="allow-scripts allow-forms allow-same-origin"` and has no `allow` attribute.
 - Hosting the Recording Studio Agents ChatKit page in the popup can pass `sandbox: %w[allow-scripts allow-same-origin allow-forms allow-popups]` and `allow: "clipboard-write"`.
 
 ### Upgrade notes
 - Bump `recording_studio_embeddable` to `0.14.0`. No migration. Leave `sandbox` and `allow` unset to keep today's popup iframe markup.
+- A bad `sandbox` or `allow` fails when the app boots or the model class loads, not on the first popup request.
 - `FloatingWidget::Interactive` `frame-ancestors` behavior is unchanged.
 
 ## [0.13.3] - 2026-10-29

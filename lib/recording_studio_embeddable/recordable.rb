@@ -12,6 +12,8 @@ module RecordingStudioEmbeddable
 
     class_methods do
       def recording_studio_embeddable(**options)
+        Floating::PopupFrame.normalize_floating_options!(options)
+
         current = recording_studio_embeddable_options || {}
         self.recording_studio_embeddable_options = current.merge(options).reverse_merge(enabled: true)
 

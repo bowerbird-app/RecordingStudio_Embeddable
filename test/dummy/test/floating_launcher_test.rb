@@ -183,13 +183,23 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
     refute_includes @widget_embed.floating.to_json, "clipboard-write"
   end
 
-  test "launcher rejects an unknown sandbox token" do
-    assert_raises(ArgumentError) do
-      with_popup_frame(sandbox: "allow-scripts allow-evil") do
-        get "/recording_studio_embeddable/embeds/#{@widget_embed.token}/launcher",
-            headers: { "Origin" => "https://partner.example.com" }
-      end
-    end
+  test "launcher json renders sandbox and allow from floating_defaults" do
+    previous = RecordingStudioEmbeddable.configuration.floating_defaults
+    RecordingStudioEmbeddable.configuration.floating_defaults = previous.merge(
+      "sandbox" => %w[allow-scripts allow-forms allow-popups],
+      "allow" => "clipboard-write"
+    )
+
+    get "/recording_studio_embeddable/embeds/#{@widget_embed.token}/launcher",
+        headers: { "Origin" => "https://partner.example.com" }
+
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal "allow-scripts allow-forms allow-popups", body.fetch("sandbox")
+    assert_equal "clipboard-write", body.fetch("allow")
+    assert_equal 24, body.fetch("edge_spacing")
+  ensure
+    RecordingStudioEmbeddable.configuration.floating_defaults = previous if previous
   end
 
   test "launcher is rate limited" do

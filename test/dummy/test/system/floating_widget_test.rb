@@ -90,6 +90,23 @@ class FloatingWidgetTest < ApplicationSystemTestCase
     assert_nil attributes.fetch("allow")
   end
 
+  test "floating_defaults sandbox and allow render on the popup iframe" do
+    previous = RecordingStudioEmbeddable.configuration.floating_defaults
+    RecordingStudioEmbeddable.configuration.floating_defaults = previous.merge(
+      "sandbox" => "allow-scripts allow-forms allow-popups",
+      "allow" => "clipboard-write"
+    )
+    page.current_window.resize_to(1400, 900)
+    visit widget_on_site_path(tokens: @right_embed.token)
+    find("[data-widget-launcher]").click
+
+    attributes = popup_iframe_attributes
+    assert_equal "allow-scripts allow-forms allow-popups", attributes.fetch("sandbox")
+    assert_equal "clipboard-write", attributes.fetch("allow")
+  ensure
+    RecordingStudioEmbeddable.configuration.floating_defaults = previous if previous
+  end
+
   test "opt-in sandbox and allow render on the popup iframe" do
     page.current_window.resize_to(1400, 900)
     visit widget_on_site_path(tokens: @right_embed.token)

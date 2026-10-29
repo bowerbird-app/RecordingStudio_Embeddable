@@ -119,10 +119,10 @@ Spacing, panel size, the icon, and the management label are host configuration. 
 - `popup_width`: 280–440 (default 380)
 - `popup_height`: 360–720 (default 560)
 - `icon_url`: optional. An Attachable direct URL for that recording, or an `http(s)` URL on `config.floating_icon_hosts`. A script URL or an unlisted host is dropped.
-- `sandbox`: optional popup iframe `sandbox` tokens. A string or an array. Unknown tokens raise `ArgumentError`. Omit it and the iframe stays `sandbox="allow-scripts allow-forms allow-same-origin"`.
-- `allow`: optional popup iframe `allow` features, such as `clipboard-write`. A string or an array. Unknown features raise `ArgumentError`. Omit it and the iframe has no `allow` attribute.
+- `sandbox`: optional popup iframe `sandbox` tokens. A string or an array. Unknown tokens raise `ArgumentError` when `config.floating_defaults` is assigned, or when the type registers `floating_options`. Omit it and the iframe stays `sandbox="allow-scripts allow-forms allow-same-origin"`.
+- `allow`: optional popup iframe `allow` features. Bare feature names only, such as `clipboard-write`. A string or an array. Origin lists such as `camera 'self'` are rejected. Unknown features raise `ArgumentError` at that same assignment or registration. Omit it and the iframe has no `allow` attribute.
 
-`sandbox` and `allow` are not stored on the embed. A type's `floating_options` replace the app-wide value for that key. Several features in `allow` are rendered with `; ` between them. `sandbox` tokens are rendered in the order you list them, separated by a single space.
+`sandbox` and `allow` are not stored on the embed. A type's `floating_options` replace the app-wide value for that key. Several bare features in `allow` are rendered with `; ` between them. `sandbox` tokens are rendered in the order you list them, separated by a single space. The launcher request and the host helper read those stored strings. They do not validate again.
 
 Hosting the Recording Studio Agents ChatKit page in the popup needs scripts, same-origin, forms, popups, and the clipboard. That combination is opt-in:
 
@@ -134,6 +134,13 @@ floating_options: {
 ```
 
 Leave both keys unset for every other popup. The built-in iframe markup does not change.
+
+Some sandbox tokens change what the framed page can do to the host:
+
+- `allow-top-navigation`, `allow-top-navigation-by-user-activation`, and `allow-top-navigation-to-custom-protocols` let the frame navigate the host page.
+- `allow-popups-to-escape-sandbox` gives those popups no sandbox.
+- `allow-scripts` together with `allow-same-origin` lets the framed page remove its own sandbox. That pair is already the default. It is safe because the popup is same-origin and trusted.
+- Leaving out `allow-scripts` breaks the popup.
 
 Management copy lives under `recording_studio.embeddable` and interpolates `%{label}`. A locale translates the sentence. It does not translate the host's word.
 
