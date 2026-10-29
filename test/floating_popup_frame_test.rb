@@ -116,9 +116,21 @@ class FloatingPopupFrameTest < Minitest::Test
 
     assert_raises(FrozenError) { options[:allow] = "fullscreen" }
     assert_raises(FrozenError) { options[:sandbox] << " allow-popups" }
-    assert_raises(FrozenError) { capability.options[:floating_options] = { sandbox: "allow-forms" } }
     assert_equal "allow-scripts", options[:sandbox]
     assert_equal "clipboard-write", options[:allow]
+  end
+
+  def test_capability_options_other_than_popup_settings_stay_mutable
+    capability = register(sandbox: "allow-scripts", allow: "clipboard-write")
+
+    refute capability.options.frozen?
+    capability.options[:embed_controller] = "widget_popups"
+    capability.options[:floating] = false
+
+    assert_equal "widget_popups", capability.options[:embed_controller]
+    assert_equal false, capability.options[:floating]
+    assert_raises(FrozenError) { capability.options[:floating_options][:sandbox] << " allow-popups" }
+    assert_equal "allow-scripts", capability.options[:floating_options][:sandbox]
   end
 
   def test_type_registration_rejects_unknown_tokens
