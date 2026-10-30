@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-10-30
+
+### Changed
+- Pin `flat_pack` `>= 0.1.331` (git tag `v0.1.331`).
+- Pin `recording_studio_publishable` `~> 0.13` (git tag `v0.13.0`).
+- Disabled management section buttons pass `disabled:` and drop `href` so FlatPack renders `<button disabled>`.
+- Style reset dispatches `color-swatch:reset` with `detail.value` set to the theme default hex.
+- Embed code and stats country titles use `FlatPack::Heading::Component`.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.15.0`, pin `flat_pack` `>= 0.1.331` (git tag `v0.1.331`), and pin `recording_studio_publishable` `~> 0.13` (git tag `v0.13.0`). No migration.
+- Reload kit JavaScript so Color Swatch reset is available. Rebuild host Tailwind so heading size tokens (`text-[length:var(--text-base)]`, `text-[length:var(--text-sm)]`) exist if the host did not already use them. Do not rerun the FlatPack install generator.
+- Disabled section controls are `<button disabled>`, not muted links. Font Swatch reset is unchanged.
+
 ## [0.14.0] - 2026-10-29
 
 ### Added
@@ -590,7 +604,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.3...v0.14.0
 [0.13.3]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.2...v0.13.3
 [0.13.2]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.1...v0.13.2

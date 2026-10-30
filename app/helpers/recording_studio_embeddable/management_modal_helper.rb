@@ -71,20 +71,15 @@ module RecordingStudioEmbeddable
     # register_page_nav passes a component through unchanged, so current and
     # disabled have to be set here.
     def recording_studio_embeddable_management_section_button(screen:, text:, disabled: false)
-      arguments = {
+      FlatPack::Button::Component.new(
         text: text,
-        href: recording_studio_embeddable_management_screen_path(@embed, screen),
+        href: (disabled ? nil : recording_studio_embeddable_management_screen_path(@embed, screen)),
         style: :ghost,
         size: :sm,
         current: recording_studio_embeddable_management_tab_active?(screen),
-        data: recording_studio_embeddable_management_tab_data
-      }
-      if disabled
-        arguments[:class] = "pointer-events-none opacity-50"
-        arguments[:tabindex] = "-1"
-        arguments[:aria] = { disabled: true }
-      end
-      FlatPack::Button::Component.new(**arguments)
+        data: recording_studio_embeddable_management_tab_data,
+        disabled: disabled
+      )
     end
   end
 

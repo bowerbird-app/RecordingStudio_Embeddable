@@ -87,6 +87,23 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", recording_studio_embeddable.preview_management_embed_path(@page_embed)
     assert_select "a[data-turbo=false]", count: 0
     refute_includes response.body, "variant=modal"
+
+    assert_includes response.body, "You need to publish this page before you can enable embeddable."
+    assert_select ".fp-button-group-menu__row a", text: "Style", count: 0
+    assert_select ".fp-button-group-menu__row button[disabled]", text: "Style", count: 1
+    assert_select ".fp-button-group-menu__row button[disabled]", text: "Settings", count: 1
+    assert_select ".fp-button-group-menu__row button[disabled]", text: "Stats", count: 1
+  end
+
+  test "style color swatch reset targets are six-digit hex" do
+    get recording_studio_embeddable.styling_management_embed_path(@widget_embed)
+
+    assert_response :success
+    swatches = css_select("[data-default-color]")
+    assert_operator swatches.size, :>, 0
+    swatches.each do |node|
+      assert_match(/\A#[0-9a-fA-F]{6}\z/, node["data-default-color"].to_s)
+    end
   end
 
   test "turbo frame request renders the modal variant" do

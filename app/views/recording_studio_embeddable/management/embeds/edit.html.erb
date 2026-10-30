@@ -59,7 +59,11 @@
         <% if @embed.enabled %>
           <div class="space-y-4">
             <div class="space-y-1">
-              <h2 class="text-base font-semibold"><%= t("recording_studio.embeddable.management.edit.embed_code_heading", default: "Embed code") %></h2>
+              <%= render FlatPack::Heading::Component.new(
+                text: t("recording_studio.embeddable.management.edit.embed_code_heading", default: "Embed code"),
+                level: 2,
+                size: :base
+              ) %>
               <p class="text-sm text-(--text-muted-color)"><%= t(
                 "recording_studio.embeddable.management.edit.embed_code_help",
                 default: "Add this code to your website wherever you want this to appear, for example inside a page or blog post. Paste it into the page's HTML, or ask your web developer to add it."
