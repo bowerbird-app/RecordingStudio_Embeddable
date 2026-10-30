@@ -40,23 +40,6 @@ Rails.application.config.to_prepare do
   card = FlatPack::Card::Component
   card.prepend(DummyCardWithoutStyle) unless card.ancestors.include?(DummyCardWithoutStyle)
 
-  # Publishable 0.12.0 still defines menu_classes with no arguments.
-  # FlatPack 0.1.331 passes host menu classes in.
-  if defined?(RecordingStudioPublishable::QuickActions::DropdownComponent)
-    dropdown = RecordingStudioPublishable::QuickActions::DropdownComponent
-    if dropdown.instance_method(:menu_classes).arity.zero?
-      dropdown.class_eval do
-        def menu_classes(*extra)
-          RecordingStudioPublishable::ClassNames.merge(
-            super,
-            self.class::MENU_HOOK_CLASS,
-            @menu_class
-          )
-        end
-      end
-    end
-  end
-
   helper = RecordingStudio::LayoutHelper
   next if helper.method_defined?(:recording_studio_page_nav)
   next if helper.ancestors.include?(DummyRecordingStudioPageNav)

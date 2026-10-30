@@ -35,7 +35,7 @@ Two delivery modes ship in this gem:
 - `recording_studio_logs` `>= 0.7.1, < 1.0` (git tag `v0.7.1`) for embed view-log
   registration. The table stays unpartitioned; prune is still `PruneViewsJob`.
 - `recording_studio_accessible` `~> 0.23` (git tag `v0.23.1`) and
-  `recording_studio_publishable` `~> 0.12` (git tag `v0.12.0`).
+  `recording_studio_publishable` `~> 0.13` (git tag `v0.13.0`).
 
 ## Install
 
@@ -408,7 +408,7 @@ bundle exec rake test:dummy
 cd test/dummy && bin/dev
 ```
 
-The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine. It pins Accessible `v0.23.1`, Publishable `v0.12.0`, Attachable `v0.22.0`, Admin `v2.2.0`, Recording Studio API `v0.5.5` (held), RootSwitchable `v0.11.0`, and Metrics `v0.7.0`. It mounts the public API so GET `:embed` can be exercised over HTTP. Dummy grants access through Accessible's public services and shims `RecordingStudio::Access.roles` so API 0.5.5 can still authorize member actions against string roles.
+The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine. It pins Accessible `v0.23.1`, Publishable `v0.13.0`, Attachable `v0.22.0`, Admin `v2.2.0`, Recording Studio API `v0.5.5` (held), RootSwitchable `v0.11.0`, and Metrics `v0.7.0`. It mounts the public API so GET `:embed` can be exercised over HTTP. Dummy grants access through Accessible's public services and shims `RecordingStudio::Access.roles` so API 0.5.5 can still authorize member actions against string roles.
 
 Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key. The dummy blob includes `recording_studio_artifacts.cdn` placeholders (`dev_placeholder`, fake `public_base_url`) so the key shape is visible — **never real R2 secrets** (this repo is public).
 
