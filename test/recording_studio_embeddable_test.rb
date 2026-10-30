@@ -129,7 +129,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.14.0", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.15.0", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -463,8 +463,11 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes nav, "recording_studio_embeddable_management_section_button"
     assert_includes helper, "recording_studio_embeddable_management_tab_data"
     assert_includes helper, "current: recording_studio_embeddable_management_tab_active?(screen)"
-    assert_includes helper, "pointer-events-none opacity-50"
-    assert_includes helper, 'tabindex] = "-1"'
+    assert_includes helper, "href: (disabled ? nil :"
+    assert_includes helper, "disabled: disabled"
+    refute_includes helper, "pointer-events-none opacity-50"
+    refute_includes helper, 'tabindex] = "-1"'
+    refute_includes helper, "aria-disabled"
     modal_layout = File.read(
       File.expand_path("../app/views/layouts/recording_studio_embeddable/management_modal.html.erb", __dir__)
     )
@@ -705,6 +708,10 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes source, "content_for :subtitle, recordable_title"
     refute_includes source, "large_subtitle"
     assert_includes source, "section_nav"
+    assert_includes source, "FlatPack::Heading::Component.new("
+    assert_includes source, "level: 2"
+    assert_includes source, "size: :base"
+    refute_includes source, '<h2 class="text-base font-semibold">'
   end
 
   def test_linking_embed_screens_drop_repeated_chrome
@@ -774,6 +781,10 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, "default_font: reset_font_css"
     assert_includes styling, 'data-controller~="flat-pack--color-swatch"'
     assert_includes styling, 'data-controller~="flat-pack--font-swatch"'
+    assert_includes styling, 'new CustomEvent("color-swatch:reset"'
+    assert_includes styling, "detail: {value: defaultColor}"
+    refute_includes styling, "querySelector('input[type=\"color\"]')"
+    refute_includes styling, "picker.value"
     assert_includes styling, 'id: "embed_appearance_font_family"'
     assert_includes styling, 'id="embed-styling-preview"'
     assert_includes styling, "recording_studio_embeddable_management_embed_document_path(@embed)"
@@ -839,6 +850,10 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
     assert_includes stats, 'default: "Stats"'
     assert_includes stats, 'default: "Apply"), style: :primary'
+    assert_includes stats, "FlatPack::Heading::Component.new("
+    assert_includes stats, "level: 2,"
+    assert_includes stats, "size: :sm"
+    refute_includes stats, '<h2 class="text-sm font-semibold'
     refute_includes stats, "Embed Stats"
     assert_includes stats, "FlatPack::Table::Component.new("
     assert_includes stats, "data: @stats_geo_rows"

@@ -265,13 +265,7 @@
           const defaultColor = root.dataset.defaultColor;
           if (!defaultColor) return;
 
-          const picker = root.querySelector('input[type="color"]');
-          if (!picker) return;
-
-          picker.value = defaultColor;
-          picker.setAttribute("value", defaultColor);
-          picker.dispatchEvent(new Event("input", { bubbles: true }));
-          picker.dispatchEvent(new Event("change", { bubbles: true }));
+          root.dispatchEvent(new CustomEvent("color-swatch:reset", {detail: {value: defaultColor}}));
         });
 
         form.querySelectorAll('[data-controller~="flat-pack--font-swatch"]').forEach((root) => {

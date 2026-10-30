@@ -24,7 +24,7 @@ Two delivery modes ship in this gem:
 - Rails 8.1 or newer.
 - A host application that can mount the engine and run the supplied migrations.
 - `recording_studio` `>= 6.3.0` (git tag `v6.3.0`). Do not pin a `~>` range on core.
-- `flat_pack` `>= 0.1.328` (git tag `v0.1.328`).
+- `flat_pack` `>= 0.1.331` (git tag `v0.1.331`).
 - `view_component` `>= 4.14`, `< 5`.
 - `recording_studio_artifacts` `~> 0.4.0` from git tag `v0.4.4` (the gem
   `VERSION` constant is still `0.4.0`; usage gated by `config.artifacts_enabled`,

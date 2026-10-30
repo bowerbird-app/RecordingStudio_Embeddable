@@ -8,7 +8,7 @@ require_relative "test/support/widen_recording_studio_requirement"
 gemspec
 
 # These gems are not published to RubyGems; resolve the gemspec pins from GitHub.
-gem "flat_pack", ">= 0.1.328", github: "bowerbird-app/flatpack", tag: "v0.1.328"
+gem "flat_pack", ">= 0.1.331", github: "bowerbird-app/flatpack", tag: "v0.1.331"
 gem "recording_studio", ">= 6.3.0", github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"
 gem "recording_studio_accessible", "~> 0.23", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.23.1"
 # Tag v0.4.4 still ships gem VERSION 0.4.0, so the constraint stays ~> 0.4.0.

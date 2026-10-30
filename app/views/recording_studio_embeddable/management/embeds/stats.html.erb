@@ -127,7 +127,11 @@
 
   <section class="overflow-hidden rounded-lg border border-(--surface-border-color) bg-(--surface-background-color)">
     <div class="border-b border-(--surface-border-color) px-4 py-3">
-      <h2 class="text-sm font-semibold text-(--surface-content-color)"><%= t("recording_studio.embeddable.management.stats.countries", default: "Countries") %></h2>
+      <%= render FlatPack::Heading::Component.new(
+        text: t("recording_studio.embeddable.management.stats.countries", default: "Countries"),
+        level: 2,
+        size: :sm
+      ) %>
     </div>
 
     <% if @stats_geo_rows.present? %>
