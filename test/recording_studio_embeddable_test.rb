@@ -129,7 +129,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.15.0", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.15.1", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -783,8 +783,15 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, 'data-controller~="flat-pack--font-swatch"'
     assert_includes styling, 'new CustomEvent("color-swatch:reset"'
     assert_includes styling, "detail: {value: defaultColor}"
+    assert_includes styling, 'new CustomEvent("font-swatch:reset"'
+    assert_includes styling, "detail: {value: defaultFont}"
     refute_includes styling, "querySelector('input[type=\"color\"]')"
     refute_includes styling, "picker.value"
+    refute_includes styling, 'data-flat-pack--font-swatch-target="input"'
+    refute_includes styling, 'data-flat-pack--font-swatch-target="swatch"'
+    refute_includes styling, 'data-flat-pack--font-swatch-target="option"'
+    refute_includes styling, 'data-flat-pack--font-swatch-target="trigger"'
+    refute_includes styling, 'new CustomEvent("font-swatch:change"'
     assert_includes styling, 'id: "embed_appearance_font_family"'
     assert_includes styling, 'id="embed-styling-preview"'
     assert_includes styling, "recording_studio_embeddable_management_embed_document_path(@embed)"

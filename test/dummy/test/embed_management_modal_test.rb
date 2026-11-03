@@ -106,6 +106,15 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "style font swatch reset uses the kit event" do
+    get recording_studio_embeddable.styling_management_embed_path(@widget_embed)
+
+    assert_response :success
+    assert_includes response.body, "font-swatch:reset"
+    assert_select "[data-default-font]", minimum: 1
+    refute_includes response.body, 'data-flat-pack--font-swatch-target="input"'
+  end
+
   test "turbo frame request renders the modal variant" do
     get recording_studio_embeddable.styling_management_embed_path(@page_embed),
         headers: frame_headers
