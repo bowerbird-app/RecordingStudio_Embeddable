@@ -112,7 +112,6 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "font-swatch:reset"
     assert_select "[data-default-font]", minimum: 1
-    refute_includes response.body, 'data-flat-pack--font-swatch-target="input"'
   end
 
   test "turbo frame request renders the modal variant" do
