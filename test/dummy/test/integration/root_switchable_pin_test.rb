@@ -3,9 +3,11 @@
 require "test_helper"
 
 class RootSwitchablePinTest < ActiveSupport::TestCase
-  test "dummy pins root_switchable 0.11.0 and metrics 0.7.0" do
+  test "dummy pins root_switchable 0.11.0, metrics 0.7.2, accessible 0.24.0, and admin 2.5.1" do
     assert_equal "0.11.0", RecordingStudioRootSwitchable::VERSION
-    assert_equal "0.7.0", RecordingStudioMetrics::VERSION
+    assert_equal "0.7.2", RecordingStudioMetrics::VERSION
+    assert_equal "0.24.0", RecordingStudioAccessible::VERSION
+    assert_equal "2.5.1", RecordingStudioAdmin::VERSION
   end
 
   test "default page_copy boots with English defaults" do
