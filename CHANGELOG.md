@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-11-03
+
+### Changed
+- Pin `flat_pack` `>= 0.1.341` (git tag `v0.1.341`).
+- Style reset dispatches `font-swatch:reset` with `detail.value` set to the theme default font stack.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.15.1` and pin `flat_pack` `>= 0.1.341` (git tag `v0.1.341`). No migration.
+- Reload kit JavaScript so Font Swatch reset is available. Do not rerun the FlatPack install generator.
+
 ## [0.15.0] - 2026-10-30
 
 ### Changed
@@ -604,7 +614,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.1...HEAD
+[0.15.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.3...v0.14.0
 [0.13.3]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.2...v0.13.3

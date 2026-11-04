@@ -19,7 +19,6 @@
 <% reset_font_css = RecordingStudioEmbeddable::Styling::Tokens.font_swatch_css_for(resolved_font.presence || default_font.presence || "sans") %>
 <% font_tooltip_raw = RecordingStudioEmbeddable::Styling::Tokens.font_swatch_label_for(font_source) %>
 <% font_tooltip = t("recording_studio.embeddable.management.fonts.#{font_tooltip_raw.to_s.downcase}", default: font_tooltip_raw) %>
-<% font_label_fallback = t("recording_studio.embeddable.management.styling.font_fallback", default: "Font") %>
 <% width_label = t("recording_studio.embeddable.management.styling.width", default: "Width") %>
 
 <% content_for :title, t("recording_studio.embeddable.management.styling.title", default: "Style") %>
@@ -51,7 +50,7 @@
         </p>
       <% end %>
 
-      <%= form_with model: @embed, url: recording_studio_embeddable_management_screen_path(@embed, :styling), method: :patch, class: "space-y-4", data: { styling_form: true, font_label_fallback: font_label_fallback }.merge(recording_studio_embeddable_management_form_data) do |_form| %>
+      <%= form_with model: @embed, url: recording_studio_embeddable_management_screen_path(@embed, :styling), method: :patch, class: "space-y-4", data: { styling_form: true }.merge(recording_studio_embeddable_management_form_data) do |_form| %>
         <%= recording_studio_embeddable_management_variant_field %>
 
         <div class="flex flex-wrap items-start gap-[var(--stack-gap-md)]">
@@ -272,30 +271,7 @@
           const defaultFont = root.dataset.defaultFont;
           if (!defaultFont) return;
 
-          const input = root.querySelector('[data-flat-pack--font-swatch-target="input"]');
-          const swatch = root.querySelector('[data-flat-pack--font-swatch-target="swatch"]');
-          if (input) {
-            input.value = defaultFont;
-            input.dispatchEvent(new Event("change", { bubbles: true }));
-          }
-          if (swatch) {
-            swatch.style.fontFamily = defaultFont;
-          }
-
-          root.querySelectorAll('[data-flat-pack--font-swatch-target="option"]').forEach((option) => {
-            option.setAttribute("aria-selected", (option.dataset.value === defaultFont).toString());
-          });
-
-          const label = (root.querySelector(`[data-flat-pack--font-swatch-target="option"][data-value="${CSS.escape(defaultFont)}"]`)?.dataset.label) || form.dataset.fontLabelFallback || "Font";
-          const trigger = root.querySelector('[data-flat-pack--font-swatch-target="trigger"]');
-          if (trigger) trigger.setAttribute("aria-label", label);
-          const tooltip = root.querySelector('[role="tooltip"]');
-          if (tooltip) tooltip.textContent = label;
-
-          root.dispatchEvent(new CustomEvent("font-swatch:change", {
-            detail: { value: defaultFont, label },
-            bubbles: true
-          }));
+          root.dispatchEvent(new CustomEvent("font-swatch:reset", {detail: {value: defaultFont}}));
         });
 
         const customInput = styleCustomWidthInput();
