@@ -129,8 +129,28 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.15.1", RecordingStudioEmbeddable::VERSION
+    assert_equal "0.15.2", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
+  end
+
+  def test_accessible_floor_is_0_24
+    assert_equal "0.24.0", Gem.loaded_specs.fetch("recording_studio_accessible").version.to_s
+    assert_equal "0.7.2", Gem.loaded_specs.fetch("recording_studio_metrics").version.to_s
+
+    spec = Gem.loaded_specs.fetch("recording_studio_embeddable")
+    dependency = spec.dependencies.find { |item| item.name == "recording_studio_accessible" }
+
+    assert_equal "~> 0.24", dependency.requirement.to_s
+  end
+
+  def test_template_leftovers_are_gone
+    root = File.expand_path("..", __dir__)
+
+    refute File.exist?(File.join(root, "UPDATE_SUMMARY.md"))
+    refute File.exist?(File.join(root, "MIGRATION_NOTES.md"))
+    refute File.exist?(File.join(root, "docs/gem_template"))
+    refute File.exist?(File.join(root, ".github/copilot-instructions.md"))
+    refute File.exist?(File.join(root, ".github/agents"))
   end
 
   def test_configuration_defaults_fail_closed_for_publishable_and_domains

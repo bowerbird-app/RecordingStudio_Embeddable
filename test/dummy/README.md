@@ -1,6 +1,6 @@
 # Dummy App
 
-This Rails app exists to validate the Recording Studio addon template in a real host application.
+This Rails app exists to validate Recording Studio Embeddable in a real host application.
 
 ## What It Covers
 
@@ -16,7 +16,7 @@ This Rails app exists to validate the Recording Studio addon template in a real 
 - RootSwitchable (`v0.11.0`) + seeded `AdminRoot` so API admin HTML
   (`/recording_studio_api/admin_api` and settings / rate_limiting / requests /
   errors / logs) can resolve `current_root_recording`. RootSwitchable 0.11
-  needs `recording_studio_metrics` (`v0.7.0`) in this Gemfile.
+  needs `recording_studio_metrics` (`v0.7.2`) in this Gemfile.
 - A starter sidebar menu and companion docs pages for gem-specific onboarding
 
 ## Quick Start

@@ -7,7 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.15.1] - 2026-11-03
+## [0.15.2] - 2026-11-04
+
+### Changed
+- Pin `recording_studio_accessible` `~> 0.24` (git tag `v0.24.0`).
+- Development and dummy pin `recording_studio_metrics` `>= 0.7.2, < 1.0` (git tag `v0.7.2`).
+- Dummy Admin pin is `v2.5.1` (was `v2.2.0`). Core stays `>= 6.3.0` (`v6.3.0`). FlatPack stays `>= 0.1.341` (`v0.1.341`). `view_component` stays `>= 4.14`, `< 5`.
+- Patch security gems: `rack` `3.2.8`, `crass` `1.0.8`, `nokogiri` `1.19.7`, `rails-html-sanitizer` `1.7.2`, `bcrypt` `3.1.22`, `devise` `5.0.4`, `puma` `~> 7.2.1`. Dummy also patches `addressable` `2.9.2`, `msgpack` `1.8.7`, and `net-ssh` `7.3.8`.
+- Drop template leftovers: `docs/gem_template/`, `UPDATE_SUMMARY.md`, `MIGRATION_NOTES.md`, Copilot instructions, and `.github/agents/`.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.15.2` and pin Accessible `~> 0.24` (git tag `v0.24.0`). Development and dummy also pin Metrics `v0.7.2`. Dummy Admin is `v2.5.1`. No migration.
+- Development and dummy pin `puma` `~> 7.2.1` for the PROXY Protocol advisories. `view_component` is unchanged.
+- Layout is unchanged: gem screens still use `recording_studio_layout` with `config.layout` falling through to core's Default Layout. Public iframe and popup layouts stay chromeless.
+
+
 
 ### Changed
 - Pin `flat_pack` `>= 0.1.341` (git tag `v0.1.341`).
@@ -614,7 +628,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.2...HEAD
+[0.15.2]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.1...v0.15.2
 [0.15.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.13.3...v0.14.0
