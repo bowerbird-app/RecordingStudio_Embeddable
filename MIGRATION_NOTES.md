@@ -7,7 +7,7 @@ No schema change. Hosts pick up new git tags through the `0.13.1` gemspec floors
 1. Pin `recording_studio_embeddable` `0.13.1`, `recording_studio` `>= 6.3.0` (git tag `v6.3.0`, no `~>`), and `flat_pack` `>= 0.1.328` (git tag `v0.1.328`). Keep `view_component` at `>= 4.14`, `< 5`.
 2. Raise sibling pins to Accessible `v0.23.1`, Artifacts git tag `v0.4.4` (keep `~> 0.4.0` because that tag still ships gem `VERSION` `0.4.0`), Attachable `v0.22.0`, Cache `v0.6.0`, Logs `v0.7.1`, Publishable `v0.12.0`. Logs and Attachable pull Metrics `v0.7.0`.
 3. Leave the Bundler widen hook in this repository. Artifacts `0.4.4` still declares `recording_studio` `~> 4.2`. Hosts that already bumped Artifacts past that range should not copy the hook.
-4. Dummy-only RootSwitchable is `v0.11.0` so Metrics `v0.7.0` resolves. That pin is not a host requirement of this gem.
+4. Dummy-only RootSwitchable is `v0.11.0` so Metrics `0.7.0` resolves. That pin is not a host requirement of this gem.
 
 ## 0.13.0 — Recording Studio 6.1 layout
 
@@ -39,3 +39,55 @@ copy-and-switch or add a summary table.
    RecordingStudioLogs registers this log with indefinite retention, so Logs
    cleanup does not prune it. Do not schedule `PartitionMaintenanceJob` for this
    table.
+
+---
+
+# Historical notes — private gems to public gems
+
+## Changes Made
+
+1. ✅ Removed repository access entries from `.devcontainer/devcontainer.json`
+2. ✅ Updated documentation in `CODESPACES.md` and `PRIVATE_GEMS.md`
+3. ✅ Updated copilot instructions to reference local docs
+4. ✅ Replaced `makeup_artist` with `flat_pack` in `test/dummy/Gemfile`
+
+## Next Steps (Requires Ruby 3.3.0+)
+
+The following steps need to be completed in an environment with Ruby 3.3.0 or higher:
+
+1. **Update Gemfile.lock**: Run `bundle install` in the test/dummy directory to update the lockfile
+   ```bash
+   cd test/dummy
+   bundle install
+   ```
+
+2. **Run FlatPack installer**: After bundle install, run the FlatPack installation generator
+   ```bash
+   cd test/dummy
+   rails generate flat_pack:install
+   ```
+
+3. **Update views**: Replace any `makeup_artist` component references with `flat_pack` components
+   - Search for: `MakeupArtist::`, `makeup_artist/`
+   - Replace with equivalent FlatPack components
+
+4. **Test the application**: Start the dummy app and verify all UI components work
+   ```bash
+   cd test/dummy
+   bin/dev
+   ```
+
+5. **Run tests**: Execute the test suite
+   ```bash
+   bundle exec rake test
+   ```
+
+## Component Migration Guide
+
+FlatPack is the successor to MakeupArtist with similar components:
+
+- Both use ViewComponent architecture
+- Both integrate with Tailwind CSS
+- Component names and APIs may differ slightly
+
+See: https://github.com/bowerbird-app/flatpack for component documentation

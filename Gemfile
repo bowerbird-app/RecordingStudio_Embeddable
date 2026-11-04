@@ -2,6 +2,8 @@
 
 source "https://rubygems.org"
 
+require_relative "test/support/widen_recording_studio_requirement"
+
 # Specify your gem's dependencies in recording_studio_embeddable.gemspec
 gemspec
 

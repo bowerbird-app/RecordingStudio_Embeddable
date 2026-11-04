@@ -14,14 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Development and dummy pin `recording_studio_metrics` `>= 0.7.2, < 1.0` (git tag `v0.7.2`).
 - Dummy Admin pin is `v2.5.1` (was `v2.2.0`). Core stays `>= 6.3.0` (`v6.3.0`). FlatPack stays `>= 0.1.341` (`v0.1.341`). `view_component` stays `>= 4.14`, `< 5`.
 - Patch security gems: `rack` `3.2.8`, `crass` `1.0.8`, `nokogiri` `1.19.7`, `rails-html-sanitizer` `1.7.2`, `bcrypt` `3.1.22`, `devise` `5.0.4`, `puma` `~> 7.2.1`. Dummy also patches `addressable` `2.9.2`, `msgpack` `1.8.7`, and `net-ssh` `7.3.8`.
-- Drop template leftovers: `docs/gem_template/`, `UPDATE_SUMMARY.md`, Copilot instructions, and `.github/agents/`.
-- Pin `recording_studio_artifacts` `~> 0.4.5` (git tag `v0.4.5`) in the root Gemfile, matching dummy. Drop the Bundler widen hook.
+- Pin `recording_studio_artifacts` `~> 0.4.5` (git tag `v0.4.5`) in the root Gemfile, matching dummy.
 
 ### Upgrade notes
-- Bump `recording_studio_embeddable` to `0.15.2` and pin Accessible `~> 0.24` (git tag `v0.24.0`). Development and dummy also pin Metrics `v0.7.2`. Dummy Admin is `v2.5.1`. No migration.
+- Bump `recording_studio_embeddable` to `0.15.2` and pin Accessible `~> 0.24` (git tag `v0.24.0`). That floor is narrower than `~> 0.23` (which already includes `0.24.0`) because it drops Accessible `0.23` for host apps. Development and dummy also pin Metrics `v0.7.2`. Dummy Admin is `v2.5.1`. No migration.
 - Development and dummy pin `puma` `~> 7.2.1` for the PROXY Protocol advisories. `view_component` is unchanged.
 - Layout is unchanged: gem screens still use `recording_studio_layout` with `config.layout` falling through to core's Default Layout. Public iframe and popup layouts stay chromeless.
-- Pin Artifacts `v0.4.5` in the host Gemfile if you still use `v0.4.4`. Host migration notes for 0.13.1, 0.13.0, and 0.12.0 stay in `MIGRATION_NOTES.md`.
+- Pin Artifacts `v0.4.5` in the host Gemfile if you still use `v0.4.4`.
 
 ## [0.15.1] - 2026-11-03
 
