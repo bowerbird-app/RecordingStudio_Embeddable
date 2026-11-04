@@ -2,8 +2,6 @@
 
 source "https://rubygems.org"
 
-require_relative "test/support/widen_recording_studio_requirement"
-
 # Specify your gem's dependencies in recording_studio_embeddable.gemspec
 gemspec
 
@@ -11,9 +9,9 @@ gemspec
 gem "flat_pack", ">= 0.1.341", github: "bowerbird-app/flatpack", tag: "v0.1.341"
 gem "recording_studio", ">= 6.3.0", github: "bowerbird-app/RecordingStudio", tag: "v6.3.0"
 gem "recording_studio_accessible", "~> 0.24", github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.24.0"
-# Tag v0.4.4 still ships gem VERSION 0.4.0, so the constraint stays ~> 0.4.0.
-gem "recording_studio_artifacts", "~> 0.4.0",
-    github: "bowerbird-app/RecordingStudio_artifacts", tag: "v0.4.4"
+# Tag v0.4.5 ships gem VERSION 0.4.5 and allows recording_studio >= 4.2, < 7.
+gem "recording_studio_artifacts", "~> 0.4.5",
+    github: "bowerbird-app/RecordingStudio_artifacts", tag: "v0.4.5"
 gem "recording_studio_attachable", "~> 0.22",
     github: "bowerbird-app/RecordingStudio_attachable", tag: "v0.22.0"
 gem "recording_studio_cache", "~> 0.6",

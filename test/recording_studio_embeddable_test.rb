@@ -141,16 +141,28 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     dependency = spec.dependencies.find { |item| item.name == "recording_studio_accessible" }
 
     assert_equal "~> 0.24", dependency.requirement.to_s
+    assert_equal "0.4.5", Gem.loaded_specs.fetch("recording_studio_artifacts").version.to_s
   end
 
   def test_template_leftovers_are_gone
     root = File.expand_path("..", __dir__)
 
     refute File.exist?(File.join(root, "UPDATE_SUMMARY.md"))
-    refute File.exist?(File.join(root, "MIGRATION_NOTES.md"))
     refute File.exist?(File.join(root, "docs/gem_template"))
     refute File.exist?(File.join(root, ".github/copilot-instructions.md"))
     refute File.exist?(File.join(root, ".github/agents"))
+    refute File.exist?(File.join(root, "test/support/widen_recording_studio_requirement.rb"))
+  end
+
+  def test_host_migration_notes_keep_layout_and_view_log_steps
+    notes = File.read(File.expand_path("../MIGRATION_NOTES.md", __dir__))
+
+    assert_includes notes, "## 0.13.1 — Recording Studio 6.3 sibling pins"
+    assert_includes notes, "## 0.13.0 — Recording Studio 6.1 layout"
+    assert_includes notes, "recording_studio_page_nav"
+    assert_includes notes, "root_recording_id"
+    assert_includes notes, "bin/rails generate recording_studio_embeddable:migrations"
+    refute_includes notes, "Historical notes — private gems to public gems"
   end
 
   def test_configuration_defaults_fail_closed_for_publishable_and_domains
