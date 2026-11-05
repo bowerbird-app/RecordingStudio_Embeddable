@@ -62,7 +62,10 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_equal "https://partner.example.com", response.headers["Access-Control-Allow-Origin"]
-    assert_equal "Origin", response.headers["Vary"]
+    vary = response.headers["Vary"].to_s.split(",").map(&:strip)
+    assert_includes vary, "Origin"
+    assert_includes vary, "Accept"
+    assert_includes vary, "X-Requested-With"
     assert_nil response.headers["Access-Control-Allow-Credentials"]
     refute_includes response.headers["Access-Control-Allow-Origin"].to_s, "*"
 

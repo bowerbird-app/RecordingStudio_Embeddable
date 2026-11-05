@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.3] - 2026-11-05
+
+### Changed
+- Lock Rails `8.1.4.1` in the gem and dummy lockfiles. `rack` `3.2.8`, `nokogiri` `1.19.7`, `loofah` `2.25.3`, and `rails-html-sanitizer` `1.7.2` stay. Dummy `net-ssh` stays `7.3.8`.
+- Launcher JSON still sets `Vary: Origin`. Rails `8.1.4.1` then appends `Accept` and `X-Requested-With` for format negotiation.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.15.3` and `bundle update rails` so hosts land on Rails `8.1.4.1`. No migration.
+- If a host asserted launcher `Vary` as exactly `Origin`, expect `Origin, Accept, X-Requested-With`. CORS still echoes an allowlisted origin and never `*`.
+
 ## [0.15.2] - 2026-11-04
 
 ### Changed
@@ -629,7 +639,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.2...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.3...HEAD
+[0.15.3]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.2...v0.15.3
 [0.15.2]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.1...v0.15.2
 [0.15.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.14.0...v0.15.0
