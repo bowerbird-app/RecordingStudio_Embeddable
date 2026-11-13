@@ -165,16 +165,16 @@ GIT
 PATH
   remote: ../..
   specs:
-    recording_studio_embeddable (0.15.3)
-      flat_pack (>= 0.1.341)
+    recording_studio_embeddable (0.15.4)
+      flat_pack (>= 0.1.341, < 1.0)
       rails (~> 8.1.0)
-      recording_studio (>= 6.3.0)
-      recording_studio_accessible (~> 0.24)
-      recording_studio_artifacts (~> 0.4.0)
-      recording_studio_attachable (~> 0.22)
-      recording_studio_cache (~> 0.6)
+      recording_studio (~> 6.0, >= 6.3.0)
+      recording_studio_accessible (>= 0.24, < 1.0)
+      recording_studio_artifacts (>= 0.4.0, < 1.0)
+      recording_studio_attachable (>= 0.22, < 1.0)
+      recording_studio_cache (>= 0.6, < 1.0)
       recording_studio_logs (>= 0.7.1, < 1.0)
-      recording_studio_publishable (~> 0.13)
+      recording_studio_publishable (>= 0.13, < 1.0)
       view_component (>= 4.14, < 5)
 
 GEM
@@ -806,7 +806,7 @@ CHECKSUMS
   recording_studio_artifacts (0.4.5)
   recording_studio_attachable (0.22.0)
   recording_studio_cache (0.6.0)
-  recording_studio_embeddable (0.15.3)
+  recording_studio_embeddable (0.15.4)
   recording_studio_icons (0.1.1)
   recording_studio_logs (0.7.1)
   recording_studio_metrics (0.7.2)

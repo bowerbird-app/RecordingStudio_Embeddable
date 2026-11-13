@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.4] - 2026-11-13
+
+### Changed
+- Widen 0.x `recording_studio_*` and `flat_pack` gemspec ranges to `>=` the previous floor and `< 1.0`. Artifacts is `>= 0.4.0, < 1.0` (was `~> 0.4.0`, which rejected `0.5` and later). Accessible is `>= 0.24, < 1.0`, Attachable `>= 0.22, < 1.0`, Cache `>= 0.6, < 1.0`, and Publishable `>= 0.13, < 1.0`. Logs stays `>= 0.7.1, < 1.0`. FlatPack is `>= 0.1.341, < 1.0`.
+- Core is `~> 6.0, >= 6.3.0`. Rails stays `~> 8.1.0`. `view_component` stays `>= 4.14, < 5`.
+- Development and dummy GitHub tags stay on the current floors.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.15.4`. No migration.
+- Hosts can resolve later 0.x siblings and FlatPack below `1.0`, and Recording Studio `6.x` at or above `6.3.0`.
+
 ## [0.15.3] - 2026-11-05
 
 ### Changed
@@ -639,7 +650,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.3...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.4...HEAD
+[0.15.4]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.3...v0.15.4
 [0.15.3]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.2...v0.15.3
 [0.15.2]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.1...v0.15.2
 [0.15.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.0...v0.15.1

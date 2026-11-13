@@ -23,19 +23,18 @@ Two delivery modes ship in this gem:
 - Ruby 3.3 or newer.
 - Rails 8.1 or newer.
 - A host application that can mount the engine and run the supplied migrations.
-- `recording_studio` `>= 6.3.0` (git tag `v6.3.0`). Do not pin a `~>` range on core.
-- `flat_pack` `>= 0.1.341` (git tag `v0.1.341`).
+- `recording_studio` `~> 6.0, >= 6.3.0` (development git tag `v6.3.0`).
+- `flat_pack` `>= 0.1.341, < 1.0` (development git tag `v0.1.341`).
 - `view_component` `>= 4.14`, `< 5`.
-- `recording_studio_artifacts` `~> 0.4.0` from git tag `v0.4.4` (the gem
-  `VERSION` constant is still `0.4.0`; usage gated by `config.artifacts_enabled`,
-  default off).
-- `recording_studio_attachable` `~> 0.22` for direct image URLs on rich embeds
-  (`url_mode: :direct` + `direct_url_host`).
-- `recording_studio_cache` `~> 0.6` (git tag `v0.6.0`) for the shared public-embed rate limiter.
-- `recording_studio_logs` `>= 0.7.1, < 1.0` (git tag `v0.7.1`) for embed view-log
+- `recording_studio_artifacts` `>= 0.4.0, < 1.0` (development git tag `v0.4.5`;
+  usage gated by `config.artifacts_enabled`, default off).
+- `recording_studio_attachable` `>= 0.22, < 1.0` for direct image URLs on rich embeds
+  (`url_mode: :direct` + `direct_url_host`; development git tag `v0.22.0`).
+- `recording_studio_cache` `>= 0.6, < 1.0` (development git tag `v0.6.0`) for the shared public-embed rate limiter.
+- `recording_studio_logs` `>= 0.7.1, < 1.0` (development git tag `v0.7.1`) for embed view-log
   registration. The table stays unpartitioned; prune is still `PruneViewsJob`.
-- `recording_studio_accessible` `~> 0.24` (git tag `v0.24.0`) and
-  `recording_studio_publishable` `~> 0.13` (git tag `v0.13.0`).
+- `recording_studio_accessible` `>= 0.24, < 1.0` (development git tag `v0.24.0`) and
+  `recording_studio_publishable` `>= 0.13, < 1.0` (development git tag `v0.13.0`).
 
 ## Install
 
