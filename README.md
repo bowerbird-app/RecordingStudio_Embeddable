@@ -23,18 +23,20 @@ Two delivery modes ship in this gem:
 - Ruby 3.3 or newer.
 - Rails 8.1 or newer.
 - A host application that can mount the engine and run the supplied migrations.
-- `recording_studio` `~> 6.0, >= 6.3.0` (development git tag `v6.3.0`).
-- `flat_pack` `>= 0.1.341, < 1.0` (development git tag `v0.1.341`).
+- `recording_studio` `~> 6.0, >= 6.3.0` (development git tag `v6.7.0`).
+- `flat_pack` `>= 0.1.341, < 1.0` (development git tag `v0.1.356`).
 - `view_component` `>= 4.14`, `< 5`.
-- `recording_studio_artifacts` `>= 0.4.0, < 1.0` (development git tag `v0.4.5`;
+- `recording_studio_artifacts` `>= 0.4.0, < 1.0` (development git tag `v0.4.7`;
   usage gated by `config.artifacts_enabled`, default off).
 - `recording_studio_attachable` `>= 0.22, < 1.0` for direct image URLs on rich embeds
-  (`url_mode: :direct` + `direct_url_host`; development git tag `v0.22.0`).
-- `recording_studio_cache` `>= 0.6, < 1.0` (development git tag `v0.6.0`) for the shared public-embed rate limiter.
-- `recording_studio_logs` `>= 0.7.1, < 1.0` (development git tag `v0.7.1`) for embed view-log
+  (`url_mode: :direct` + `direct_url_host`; development git tag `v0.23.0`).
+- `recording_studio_cache` `>= 0.6, < 1.0` (development git tag `v0.6.3`) for the shared public-embed rate limiter.
+- `recording_studio_logs` `>= 0.7.1, < 1.0` (development git tag `v0.7.4`) for embed view-log
   registration. The table stays unpartitioned; prune is still `PruneViewsJob`.
-- `recording_studio_accessible` `>= 0.24, < 1.0` (development git tag `v0.24.0`) and
-  `recording_studio_publishable` `>= 0.13, < 1.0` (development git tag `v0.13.0`).
+- `recording_studio_accessible` `>= 0.24, < 1.0` (development git tag `v0.32.0`) and
+  `recording_studio_publishable` `>= 0.13, < 1.0` (development git tag `v0.14.0`).
+- Development also pins Trashable `v0.14.0`, and Attachable `v0.23.0` pulls API
+  `v0.23.0`, Moveable `v4.1.1`, and Icons `v0.2.1` (those three are not on RubyGems).
 
 ## Install
 
@@ -295,8 +297,8 @@ The dummy app mounts that public API at `/recording_studio_api` and allowlists `
 
 Admin HTML under `/recording_studio_api/admin_api` needs a host
 `current_root_recording` that is an `AdminRoot`. The dummy supplies that through
-`recording_studio_root_switchable` (ControllerSupport; dummy pin `v0.11.0`, plus
-`recording_studio_metrics` `v0.7.2`), a seeded AdminRoot
+`recording_studio_root_switchable` (ControllerSupport; dummy pin `v0.15.0`, plus
+`recording_studio_metrics` `v0.8.0`), a seeded AdminRoot
 with Accessible owner access, and a RootSwitchable default that prefers
 AdminRoot — the same contract as the RecordingStudio_api dummy.
 
@@ -407,7 +409,7 @@ bundle exec rake test:dummy
 cd test/dummy && bin/dev
 ```
 
-The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine. It pins Accessible `v0.24.0`, Publishable `v0.13.0`, Attachable `v0.22.0`, Admin `v2.5.1`, Recording Studio API `v0.18.0`, RootSwitchable `v0.11.0`, and Metrics `v0.7.2`. It mounts the public API so GET `:embed` can be exercised over HTTP. Dummy grants access through Accessible's public services.
+The dummy app under `test/dummy` is the quickest way to verify host-app integration while working on the engine. It pins Accessible `v0.32.0`, Publishable `v0.14.0`, Attachable `v0.23.0`, Trashable `v0.14.0`, Admin `v2.13.0`, Recording Studio API `v0.23.0`, Moveable `v4.1.1`, Icons `v0.2.1`, RootSwitchable `v0.15.0`, and Metrics `v0.8.0`. It mounts the public API so GET `:embed` can be exercised over HTTP. Dummy grants access through Accessible's public services. Writes go through `config.authorize_write`, which allows the write when an actor is present.
 
 Dummy credentials (`test/dummy/config/credentials.yml.enc`) are encrypted with the shared RecordingStudio_* development master key. Set `RAILS_MASTER_KEY` or put that key in `test/dummy/config/master.key` (gitignored). Keep the encrypted file; do not generate a per-repo dummy key. The dummy blob includes `recording_studio_artifacts.cdn` placeholders (`dev_placeholder`, fake `public_base_url`) so the key shape is visible — **never real R2 secrets** (this repo is public).
 

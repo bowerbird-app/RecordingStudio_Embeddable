@@ -133,15 +133,26 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
-  def test_accessible_floor_is_0_24
-    assert_equal "0.24.0", Gem.loaded_specs.fetch("recording_studio_accessible").version.to_s
-    assert_equal "0.7.2", Gem.loaded_specs.fetch("recording_studio_metrics").version.to_s
+  def test_development_pins_keep_the_accessible_gemspec_floor
+    assert_equal "6.7.0", Gem.loaded_specs.fetch("recording_studio").version.to_s
+    assert_equal "0.1.356", Gem.loaded_specs.fetch("flat_pack").version.to_s
+    assert_equal "0.32.0", Gem.loaded_specs.fetch("recording_studio_accessible").version.to_s
+    assert_equal "0.8.0", Gem.loaded_specs.fetch("recording_studio_metrics").version.to_s
+    assert_equal "0.4.7", Gem.loaded_specs.fetch("recording_studio_artifacts").version.to_s
+    assert_equal "0.23.0", Gem.loaded_specs.fetch("recording_studio_attachable").version.to_s
+    assert_equal "0.6.3", Gem.loaded_specs.fetch("recording_studio_cache").version.to_s
+    assert_equal "0.7.4", Gem.loaded_specs.fetch("recording_studio_logs").version.to_s
+    assert_equal "0.14.0", Gem.loaded_specs.fetch("recording_studio_publishable").version.to_s
+    assert_equal "0.14.0", Gem.loaded_specs.fetch("recording_studio_trashable").version.to_s
+    assert_equal "0.23.0", Gem.loaded_specs.fetch("recording_studio_api").version.to_s
+    assert_equal "4.1.1", Gem.loaded_specs.fetch("recording_studio_moveable").version.to_s
+    assert_equal "0.2.1", Gem.loaded_specs.fetch("recording_studio_icons").version.to_s
+    refute File.exist?(File.expand_path("support/widen_recording_studio_requirement.rb", __dir__))
 
     spec = Gem.loaded_specs.fetch("recording_studio_embeddable")
     dependency = spec.dependencies.find { |item| item.name == "recording_studio_accessible" }
 
     assert_equal ">= 0.24, < 1.0", dependency.requirement.to_s
-    assert_equal "0.4.5", Gem.loaded_specs.fetch("recording_studio_artifacts").version.to_s
   end
 
   def test_configuration_defaults_fail_closed_for_publishable_and_domains

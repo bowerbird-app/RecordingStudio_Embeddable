@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Development and dummy Gemfiles pin the wave 5 GitHub release tags: FlatPack `v0.1.356`, Recording Studio `v6.7.0`, Accessible `v0.32.0`, Artifacts `v0.4.7`, Attachable `v0.23.0`, Cache `v0.6.3`, Logs `v0.7.4`, Metrics `v0.8.0`, Publishable `v0.14.0`, Trashable `v0.14.0`, API `v0.23.0`, Moveable `v4.1.1`, Icons `v0.2.1`, Admin `v2.13.0`, and Root Switchable `v0.15.0`.
+- Removed the Bundler widen hook. Artifacts `v0.4.7` already allows Recording Studio 6.x.
+- Dummy writes set `config.authorize_write` so an actor is required (Recording Studio 6.5+).
+
+### Upgrade notes
+- Gemspec floors are unchanged. Hosts that follow these development tags should pin the same releases.
+- Hosts on Recording Studio 6.5+ need `config.authorize_write` (or `config.allow_unauthorized_writes = true`).
+- Hosts that install Trashable `0.14.0` should run `bin/rails generate recording_studio_trashable:migrations` and migrate so `recording_studio_recordings.purge_at` exists.
+
 ## [0.15.4] - 2026-11-13
 
 ### Changed
