@@ -7,11 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.1] - 2026-11-14
+
 ### Changed
 - `ensure_embed!` creates the embed recording through `Recording#record`. The embed recording gets a `created` event with the actor, and `before_record` / `after_record` hooks run. The one-embed-per-parent unique index still returns the existing embed on a race.
 - `update_embed!`, `enable_embed!`, and `disable_embed!` still mutate the embed row in place (the public token stays on that row) and append `embeddable.embed.updated` on the embed recording. The event includes the actor and `embed_id`. A logging failure raises.
 
 ### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.16.1`. No migration.
 - Pass `actor:` to `ensure_embed!` and the update helpers, or set `RecordingStudio` `config.actor`. Writes no longer skip authorisation.
 - Read the embed recording's `created` event. There is no `embeddable.embed.created` event.
 
@@ -683,7 +686,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.16.1...HEAD
+[0.16.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.5...v0.16.0
 [0.15.5]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.4...v0.15.5
 [0.15.4]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.3...v0.15.4
