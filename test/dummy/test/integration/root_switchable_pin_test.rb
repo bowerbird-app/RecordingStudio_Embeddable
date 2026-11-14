@@ -12,7 +12,7 @@ class RootSwitchablePinTest < ActiveSupport::TestCase
     assert_equal "0.23.0", RecordingStudioApi::VERSION
     assert_equal "4.1.1", RecordingStudioMoveable::VERSION
     assert_equal "0.2.1", RecordingStudioIcons::VERSION
-    assert_equal "0.1.356", FlatPack::VERSION
+    assert_equal "0.1.364", FlatPack::VERSION
 
     authorizer = RecordingStudio.configuration.authorize_write
     assert authorizer.call(actor: Object.new)

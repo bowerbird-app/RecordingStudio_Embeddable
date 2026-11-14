@@ -71,6 +71,10 @@ class LocalesTest < Minitest::Test
         t("errors.invalid_embedder_domain", domain: "bad!")
       )
       assert_equal "Sans", t("management.fonts.sans")
+      assert_equal "No description provided.", t("public.no_description")
+      assert_equal "Embedded page", t("public.embedded_page")
+      assert_equal "Gallery", t("public.gallery")
+      assert_equal "More shots from this page", t("public.gallery_subtitle")
     end
   end
 

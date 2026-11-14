@@ -49,7 +49,10 @@
         <%= recording_studio_embeddable_management_variant_field %>
 
         <% if @embed.errors.any? %>
-          <p role="alert" class="text-sm text-red-700"><%= @embed.errors.full_messages.to_sentence %></p>
+          <%= render FlatPack::Alert::Component.new(
+            description: @embed.errors.full_messages.to_sentence,
+            style: :danger
+          ) %>
         <% end %>
 
         <%= render FlatPack::TextArea::Component.new(

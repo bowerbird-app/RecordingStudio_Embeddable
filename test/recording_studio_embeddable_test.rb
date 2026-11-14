@@ -135,7 +135,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
   def test_development_pins_keep_the_accessible_gemspec_floor
     assert_equal "6.7.0", Gem.loaded_specs.fetch("recording_studio").version.to_s
-    assert_equal "0.1.356", Gem.loaded_specs.fetch("flat_pack").version.to_s
+    assert_equal "0.1.364", Gem.loaded_specs.fetch("flat_pack").version.to_s
     assert_equal "0.32.0", Gem.loaded_specs.fetch("recording_studio_accessible").version.to_s
     assert_equal "0.8.0", Gem.loaded_specs.fetch("recording_studio_metrics").version.to_s
     assert_equal "0.4.7", Gem.loaded_specs.fetch("recording_studio_artifacts").version.to_s
@@ -733,7 +733,11 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes source, "FlatPack::Heading::Component.new("
     assert_includes source, "level: 2"
     assert_includes source, "size: :base"
+    assert_includes source, "FlatPack::Text::Component.new("
+    assert_includes source, "style: :muted"
     refute_includes source, '<h2 class="text-base font-semibold">'
+    refute_includes source, "embed-enabled-switch"
+    refute_includes source, "!important"
   end
 
   def test_linking_embed_screens_drop_repeated_chrome
@@ -789,6 +793,16 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_includes styling, "icon_only: true"
     assert_includes styling, 'class: "rounded-full"'
     assert_includes styling, 'default: "Width"'
+    assert_includes styling, "FlatPack::Notice::Component.new("
+    assert_includes styling, "style: :info"
+    assert_includes styling, "FlatPack::Alert::Component.new("
+    assert_includes styling, "style: :danger"
+    assert_includes styling, "human_attribute_name"
+    assert_includes styling, "FlatPack::Heading::Component.new("
+    assert_includes styling, "level: 3"
+    refute_includes styling, "border-amber"
+    refute_includes styling, ".humanize"
+    refute_includes styling, '<h3 class="text-sm font-semibold">'
     assert_includes styling, "FlatPack::Tabs::Component.new("
     assert_includes styling, "variant: :underline"
     assert_includes styling, 'default: "Auto"'
@@ -879,9 +893,14 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
     assert_includes stats, 'default: "Stats"'
     assert_includes stats, 'default: "Apply"), style: :primary'
+    assert_includes stats, "FlatPack::Card::Component.new(padding: :none)"
+    assert_includes stats, "card.header"
+    assert_includes stats, "FlatPack::Text::Component.new("
+    assert_includes stats, "style: :muted"
     assert_includes stats, "FlatPack::Heading::Component.new("
     assert_includes stats, "level: 2,"
     assert_includes stats, "size: :sm"
+    refute_includes stats, "overflow-hidden rounded-lg border"
     refute_includes stats, '<h2 class="text-sm font-semibold'
     refute_includes stats, "Embed Stats"
     assert_includes stats, "FlatPack::Table::Component.new("

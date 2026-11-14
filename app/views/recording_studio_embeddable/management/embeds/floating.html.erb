@@ -27,7 +27,10 @@
       <%= form_with model: @embed, url: recording_studio_embeddable_management_screen_path(@embed, :floating), method: :patch, class: "space-y-6", html: { id: "launcher-settings" }, data: recording_studio_embeddable_management_form_data do %>
         <%= recording_studio_embeddable_management_variant_field %>
         <% if @embed.errors.any? %>
-          <p role="alert"><%= @embed.errors.full_messages.to_sentence %></p>
+          <%= render FlatPack::Alert::Component.new(
+            description: @embed.errors.full_messages.to_sentence,
+            style: :danger
+          ) %>
         <% end %>
 
         <%= render FlatPack::Switch::Component.new(
@@ -56,12 +59,18 @@
       <% if snippet.present? %>
         <div class="space-y-4">
           <div class="space-y-1">
-            <h2 class="text-base font-semibold"><%= t("recording_studio.embeddable.management.floating.snippet_heading", label: floating_label, default: "%{label} snippet") %></h2>
-            <p class="text-sm text-(--text-muted-color)"><%= t(
-              "recording_studio.embeddable.management.floating.snippet_help_html",
-              label: floating_label,
-              default: "Add this code to every page of your website where you want the %{label} to appear. Paste it just before the closing <code>&lt;/head&gt;</code> tag, or ask your web developer to add it."
-            ) %></p>
+            <%= render FlatPack::Heading::Component.new(
+              text: t("recording_studio.embeddable.management.floating.snippet_heading", label: floating_label, default: "%{label} snippet"),
+              level: 2,
+              size: :base
+            ) %>
+            <%= render FlatPack::Text::Component.new(size: :sm, style: :muted) do %>
+              <%= t(
+                "recording_studio.embeddable.management.floating.snippet_help_html",
+                label: floating_label,
+                default: "Add this code to every page of your website where you want the %{label} to appear. Paste it just before the closing <code>&lt;/head&gt;</code> tag, or ask your web developer to add it."
+              ) %>
+            <% end %>
           </div>
           <%= render FlatPack::TextArea::Component.new(
             name: "launcher_snippet",

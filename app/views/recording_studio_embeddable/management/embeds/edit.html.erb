@@ -44,7 +44,7 @@
   <% else %>
     <%= render FlatPack::Grid::Component.new(cols: 2) do %>
       <div class="space-y-6">
-        <%= form_with model: @embed, url: recording_studio_embeddable_management_screen_path(@embed, :update), method: :patch, class: "embed-enabled-switch", data: recording_studio_embeddable_management_form_data do |_form| %>
+        <%= form_with model: @embed, url: recording_studio_embeddable_management_screen_path(@embed, :update), method: :patch, data: recording_studio_embeddable_management_form_data do |_form| %>
           <%= recording_studio_embeddable_management_variant_field %>
           <input type="hidden" name="embed[enabled]" value="0">
           <%= render FlatPack::Switch::Component.new(
@@ -64,10 +64,14 @@
                 level: 2,
                 size: :base
               ) %>
-              <p class="text-sm text-(--text-muted-color)"><%= t(
-                "recording_studio.embeddable.management.edit.embed_code_help",
-                default: "Add this code to your website wherever you want this to appear, for example inside a page or blog post. Paste it into the page's HTML, or ask your web developer to add it."
-              ) %></p>
+              <%= render FlatPack::Text::Component.new(
+                text: t(
+                  "recording_studio.embeddable.management.edit.embed_code_help",
+                  default: "Add this code to your website wherever you want this to appear, for example inside a page or blog post. Paste it into the page's HTML, or ask your web developer to add it."
+                ),
+                size: :sm,
+                style: :muted
+              ) %>
             </div>
 
             <%= render FlatPack::TextArea::Component.new(
@@ -89,16 +93,6 @@
     <% end %>
   <% end %>
 </div>
-
-<style>
-  .embed-enabled-switch input.peer:not(:checked) + [role="switch"] {
-    background-color: var(--switch-track-background-color) !important;
-  }
-
-  .embed-enabled-switch input.peer:checked + [role="switch"] {
-    background-color: var(--switch-track-checked-background-color) !important;
-  }
-</style>
 
 <script>
   (() => {

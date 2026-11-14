@@ -17,12 +17,11 @@
 
   <%= render "section_nav" %>
 
-  <iframe
-    src="<%= recording_studio_embeddable_management_embed_document_path(@embed) %>"
-    title="<%= t("recording_studio.embeddable.management.styling.preview_title", default: "Embed preview") %>"
-    class="w-full border-0"
-    style="min-height: 32rem;"
-    loading="eager"
-    referrerpolicy="strict-origin-when-cross-origin"
-  ></iframe>
+  <%= render FlatPack::Embed::Component.new(
+    src: recording_studio_embeddable_management_embed_document_path(@embed),
+    title: t("recording_studio.embeddable.management.styling.preview_title", default: "Embed preview"),
+    height: :md,
+    loading: :eager,
+    referrerpolicy: "strict-origin-when-cross-origin"
+  ) %>
 </div>

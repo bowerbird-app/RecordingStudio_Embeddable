@@ -152,7 +152,8 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_active_section "Preview"
     assert_inactive_section "Embed"
     assert_inactive_section "Style"
-    assert_select "iframe[src=?]", document_path
+    assert_select "iframe[src=?][loading=eager][referrerpolicy=?]", document_path, "strict-origin-when-cross-origin"
+    assert_includes response.body, "h-[32rem]"
     refute_includes response.body, 'name="turbo-visit-control"'
 
     get document_path
@@ -169,7 +170,7 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     assert_modal_frame
     assert_active_section "Preview"
     assert_inactive_section "Embed"
-    assert_select "iframe[src=?]", document_path
+    assert_select "iframe[src=?][loading=eager][referrerpolicy=?]", document_path, "strict-origin-when-cross-origin"
   end
 
   test "settings validation error and successful save stay in the frame" do
@@ -179,7 +180,7 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_modal_frame
-    assert_includes response.body, "Invalid embedder domain: localhost"
+    assert_select "[role=alert]", text: /Invalid embedder domain: localhost/
     assert_includes response.body, "Embed settings"
     assert_active_section "Settings"
     assert_inactive_section "Style"
@@ -239,10 +240,23 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_modal_frame
-    assert_includes response.body, "Text color must be a valid hex color"
+    assert_select "[role=alert]", text: /Text color must be a valid hex color/
     assert_active_section "Style"
     assert_inactive_section "Settings"
     assert_select "[data-fp-style=primary]", text: "Save", count: 1
+  end
+
+  test "disabled styling renders a status notice" do
+    previous = RecordingStudioEmbeddable.configuration.allow_custom_styling
+    RecordingStudioEmbeddable.configuration.allow_custom_styling = false
+
+    get recording_studio_embeddable.styling_management_embed_path(@page_embed)
+
+    assert_response :success
+    assert_select "[role=status]", text: /Custom styling is currently disabled for this embed/
+    assert_select "[role=alert]", count: 0
+  ensure
+    RecordingStudioEmbeddable.configuration.allow_custom_styling = previous
   end
 
   test "demo page renders one modal shell and an opener for page and widget" do

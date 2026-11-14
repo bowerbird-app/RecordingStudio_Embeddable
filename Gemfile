@@ -6,7 +6,7 @@ source "https://rubygems.org"
 gemspec
 
 # These gems are not published to RubyGems; resolve the gemspec pins from GitHub.
-gem "flat_pack", ">= 0.1.356", github: "bowerbird-app/flatpack", tag: "v0.1.356"
+gem "flat_pack", ">= 0.1.364", github: "bowerbird-app/flatpack", tag: "v0.1.364"
 gem "recording_studio", ">= 6.7.0", github: "bowerbird-app/RecordingStudio", tag: "v6.7.0"
 gem "recording_studio_accessible", ">= 0.32.0", "< 1.0",
     github: "bowerbird-app/RecordingStudio_accessible", tag: "v0.32.0"

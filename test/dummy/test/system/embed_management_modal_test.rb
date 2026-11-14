@@ -78,6 +78,37 @@ class EmbedManagementModalTest < ApplicationSystemTestCase
     assert_current_path embed_modals_path
   end
 
+  test "embed switch autosaves and keeps the accessible checked state" do
+    sign_in_and_open_modals
+    click_button "Page embed"
+
+    within_management_frame do
+      find("a", exact_text: "Embed").click
+      assert_selector "h1", exact_text: "Embed"
+      assert_predicate embed_switch, :checked?
+      assert_equal "true", accessible_checked
+      assert_equal resolved_token("--switch-track-checked-background-color"), track_color
+    end
+
+    click_embed_switch
+
+    within_management_frame do
+      assert_text "Embeddable is off"
+      refute_predicate embed_switch, :checked?
+      assert_equal "false", accessible_checked
+      assert_equal resolved_token("--switch-track-background-color"), track_color
+    end
+
+    click_embed_switch
+
+    within_management_frame do
+      assert_text "Embed code"
+      assert_predicate embed_switch, :checked?
+      assert_equal "true", accessible_checked
+      assert_equal resolved_token("--switch-track-checked-background-color"), track_color
+    end
+  end
+
   private
 
   def sign_in_and_open_modals
@@ -105,6 +136,56 @@ class EmbedManagementModalTest < ApplicationSystemTestCase
 
   def domains
     find("textarea[name='embed[allowed_embedder_domains_text]']")
+  end
+
+  def embed_switch
+    find("input[name='embed[enabled]'][role='switch']", visible: :all)
+  end
+
+  def click_embed_switch
+    embed_switch.find(:xpath, "./parent::label").click
+  end
+
+  def track_color
+    page.evaluate_script(<<~JS)
+      (() => {
+        const input = document.querySelector("input[name='embed[enabled]'][role='switch']")
+        return getComputedStyle(input.nextElementSibling).backgroundColor
+      })()
+    JS
+  end
+
+  def resolved_token(name)
+    page.evaluate_script(<<~JS, name)
+      (() => {
+        const specified = getComputedStyle(document.documentElement).getPropertyValue(arguments[0]).trim()
+        const probe = document.createElement("div")
+        probe.style.backgroundColor = specified
+        probe.hidden = true
+        document.body.appendChild(probe)
+        const color = getComputedStyle(probe).backgroundColor
+        probe.remove()
+        return color
+      })()
+    JS
+  end
+
+  def accessible_checked
+    browser = page.driver.browser
+    document = browser.execute_cdp("DOM.getDocument", depth: 0)
+    node = browser.execute_cdp(
+      "DOM.querySelector",
+      nodeId: document.dig("root", "nodeId"),
+      selector: "input[name='embed[enabled]'][role='switch']"
+    )
+    tree = browser.execute_cdp(
+      "Accessibility.getPartialAXTree",
+      nodeId: node.fetch("nodeId"),
+      fetchRelatives: false
+    )
+    checked = tree.dig("nodes", 0, "properties")&.find { |property| property["name"] == "checked" }
+
+    checked.dig("value", "value")
   end
 
   def restore_page_embed

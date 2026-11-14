@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Development and dummy Gemfiles pin FlatPack `v0.1.364`. The gemspec floor is `flat_pack >= 0.1.364, < 1.0`.
+- Management screens use Flatpack Notice, Alert, Card, Heading, Text, and Embed. The embed-code switch no longer overrides the track colour. Rich embed fallback copy lives in the English locale.
+
+### Upgrade notes
+- Pin `flat_pack` to GitHub tag `v0.1.364` (not on RubyGems). `0.1.363` adds `FlatPack::Notice`. `0.1.364` fixes the switch track so it follows the checkbox. Hosts below that tag will fail to render Style, Settings, Floating, Stats, and Preview.
+
 ## [0.15.5] - 2026-11-14
 
 ### Changed
