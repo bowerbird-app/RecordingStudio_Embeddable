@@ -7,11 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-11-14
+
 ### Changed
 - Development and dummy Gemfiles pin FlatPack `v0.1.364`. The gemspec floor is `flat_pack >= 0.1.364, < 1.0`.
 - Management screens use Flatpack Notice, Alert, Card, Heading, Text, and Embed. The embed-code switch no longer overrides the track colour. Rich embed fallback copy lives in the English locale.
 
 ### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.16.0`. No migration.
 - Pin `flat_pack` to GitHub tag `v0.1.364` (not on RubyGems). `0.1.363` adds `FlatPack::Notice`. `0.1.364` fixes the switch track so it follows the checkbox. Hosts below that tag will fail to render Style, Settings, Floating, Stats, and Preview.
 
 ## [0.15.5] - 2026-11-14
@@ -672,7 +675,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.5...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.5...v0.16.0
 [0.15.5]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.4...v0.15.5
 [0.15.4]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.3...v0.15.4
 [0.15.3]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.2...v0.15.3
