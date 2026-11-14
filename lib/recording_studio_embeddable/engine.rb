@@ -44,7 +44,6 @@ module RecordingStudioEmbeddable
 
     initializer "recording_studio_embeddable.recording_methods" do
       ActiveSupport.on_load(:active_record) do
-        require_dependency "recording_studio_embeddable/recordable"
         include RecordingStudioEmbeddable::Recordable
       end
 
@@ -57,17 +56,6 @@ module RecordingStudioEmbeddable
         include RecordingStudioEmbeddable::DirectImageHelper
         include RecordingStudioEmbeddable::FloatingWidgetHelper
         include RecordingStudioEmbeddable::ManagementModalHelper
-      end
-
-      config.to_prepare do
-        next unless defined?(ActiveRecord::Base)
-
-        require_dependency "recording_studio_embeddable/recording_methods"
-        ActiveRecord::Base.include RecordingStudioEmbeddable::Recordable
-
-        if defined?(RecordingStudio::Recording)
-          RecordingStudio::Recording.include RecordingStudioEmbeddable::RecordingMethods
-        end
       end
     end
 
