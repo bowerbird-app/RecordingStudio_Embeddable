@@ -60,14 +60,14 @@ page_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
   parent_recording_id: folder_recording.id,
   recordable: page
 )
-page_recording.ensure_embed!(enabled: true, allowed_embedder_domains: ["example.com"]) if page_recording.respond_to?(:ensure_embed!)
+page_recording.ensure_embed!(actor: user, enabled: true, allowed_embedder_domains: ["example.com"]) if page_recording.respond_to?(:ensure_embed!)
 
 article_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
   root_recording_id: root_recording.id,
   parent_recording_id: folder_recording.id,
   recordable: article
 )
-article_recording.ensure_embed!(enabled: true, allowed_embedder_domains: ["example.com"]) if
+article_recording.ensure_embed!(actor: user, enabled: true, allowed_embedder_domains: ["example.com"]) if
   article_recording.respond_to?(:ensure_embed!) && article_recording.embeddable?
 
 document_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
@@ -84,7 +84,7 @@ widget_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
   recordable: widget
 )
 if widget_recording.respond_to?(:ensure_embed!)
-  widget_embed = widget_recording.ensure_embed!(enabled: false, floating_enabled: true)
+  widget_embed = widget_recording.ensure_embed!(actor: user, enabled: false, floating_enabled: true)
   RecordingStudioEmbeddable::Embed.where(id: widget_embed.id).update_all(
     enabled: false,
     floating_enabled: true,

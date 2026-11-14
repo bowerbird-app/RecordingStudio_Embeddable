@@ -33,7 +33,7 @@ class EmbedDirectImagesTest < ActionDispatch::IntegrationTest
       parent_recording_id: @root.id,
       recordable: @page
     )
-    @embed = @page_recording.ensure_embed!(enabled: true, allowed_embedder_domains: ["example.com"])
+    @embed = @page_recording.ensure_embed!(actor: @user, enabled: true, allowed_embedder_domains: ["example.com"])
     unless @page_recording.currently_published?
       publish = RecordingStudioPublishable::Services::Publishables::Update.call(
         parent_recording: @page_recording,
