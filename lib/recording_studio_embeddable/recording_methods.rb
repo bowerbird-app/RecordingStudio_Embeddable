@@ -27,9 +27,8 @@ module RecordingStudioEmbeddable
         existing = embed
         return existing if existing
 
-        embed_record = RecordingStudioEmbeddable::Embed.create!(attributes.reverse_merge(enabled: false))
-        RecordingStudio::Recording.create!(recording_attributes_for_embed(embed_record))
-        log_embeddable_event("embeddable.embed.created", actor: actor, embed: embed_record)
+        embed_record = RecordingStudioEmbeddable::Embed.new(attributes.reverse_merge(enabled: false))
+        record(embed_record, actor: actor, parent_recording: self)
         embed_record
       end
     rescue ActiveRecord::RecordNotUnique
@@ -82,7 +81,7 @@ module RecordingStudioEmbeddable
     end
 
     def update_embed!(actor: nil, **attributes)
-      record = ensure_embed!
+      record = ensure_embed!(actor: actor)
       record.assign_attributes(sanitize_floating_attributes(attributes))
       record.persist_changes!
       log_embeddable_event("embeddable.embed.updated", actor: actor, embed: record)
@@ -119,18 +118,12 @@ module RecordingStudioEmbeddable
       !embed.cdn_published?
     end
 
-    def recording_attributes_for_embed(embed_record)
-      attrs = { recordable: embed_record, parent_recording_id: id }
-      attrs[:root_recording_id] = root_recording_id.presence || id if respond_to?(:root_recording_id)
-      attrs
-    end
-
     def log_embeddable_event(name, actor:, embed:)
-      return unless respond_to?(:log_event!)
-
-      log_event!(name, actor: actor, metadata: { embed_id: embed.id })
-    rescue StandardError
-      nil
+      embed_child_recording.log_event!(
+        action: name,
+        actor: actor,
+        metadata: { embed_id: embed.id }
+      )
     end
   end
 

@@ -83,10 +83,14 @@ end
 Once the record is ready, create an embed and use the generated public URL or iframe helper:
 
 ```ruby
-article.ensure_embed!
+article.ensure_embed!(actor: current_user)
 article.embed_public_url(host: "example.com")
 article.embed_code(host: "example.com")
 ```
+
+`ensure_embed!` creates the embed through `Recording#record` on the parent. Pass `actor:`, or set `RecordingStudio` `config.actor`. The embed recording gets a `created` event for that actor, and `before_record` / `after_record` hooks run. A second call returns the same embed.
+
+`update_embed!`, `enable_embed!`, and `disable_embed!` write the same embed row in place, so the public token stays put. Each of those calls appends `embeddable.embed.updated` on the embed recording, with the actor and `embed_id` in the event metadata. A logging failure raises.
 
 `embed_code` is the iframe markup. Put it in the page HTML where the recording should appear, such as inside a page or a blog post. The floating launcher is separate and belongs in the page head.
 
@@ -377,7 +381,7 @@ config.management_authorizer = lambda do |controller:, recording:|
 end
 ```
 
-`:admin` satisfies `:edit`. `:view` does not. A host that resolves a different actor should read that actor in the lambda and still require `:edit` on `recording`. `ensure_embed!` records `current_user` as the actor on the create event.
+`:admin` satisfies `:edit`. `:view` does not. A host that resolves a different actor should read that actor in the lambda and still require `:edit` on `recording`. `ensure_embed!` records `current_user` on the embed recording's `created` event.
 
 Studio and management screens use `recording_studio/default_layout` through `recording_studio_layout`. `config.layout` defaults to `nil`. `nil` uses `RecordingStudio.configuration.layout`, then `"recording_studio/default_layout"`. `false` renders no layout. A string is a layout name. A callable is invoked as `call(controller:)`. Do not wrap these screens in a second application shell. The core layout sets `data-theme="rounded"` on `<html>` and loads `flat_pack/variables`, `flat_pack/application`, and `flat_pack/rich_text` before Tailwind. The public iframe at `/recording_studio_embeddable/embeds/:token` stays on the chrome-free embed layout.
 

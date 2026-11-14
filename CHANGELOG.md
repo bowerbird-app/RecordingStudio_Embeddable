@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- `ensure_embed!` creates the embed recording through `Recording#record`. The embed recording gets a `created` event with the actor, and `before_record` / `after_record` hooks run. The one-embed-per-parent unique index still returns the existing embed on a race.
+- `update_embed!`, `enable_embed!`, and `disable_embed!` still mutate the embed row in place (the public token stays on that row) and append `embeddable.embed.updated` on the embed recording. The event includes the actor and `embed_id`. A logging failure raises.
+
+### Upgrade notes
+- Pass `actor:` to `ensure_embed!` and the update helpers, or set `RecordingStudio` `config.actor`. Writes no longer skip authorisation.
+- Read the embed recording's `created` event. There is no `embeddable.embed.created` event.
+
 ## [0.16.0] - 2026-11-14
 
 ### Changed
