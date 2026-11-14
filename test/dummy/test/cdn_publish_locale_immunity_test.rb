@@ -2,9 +2,9 @@
 
 require "test_helper"
 
-# CDN/published HTML is persisted lib output. Layout <title>, rich-body fallbacks,
-# and Gallery chrome stay English literals (as on main) so locale and host English
-# overrides cannot change the published document.
+# CDN/published HTML is persisted output. The layout <title> stays the English
+# literal. Rich-body fallbacks and gallery chrome come from i18n, so the locale
+# active at publish time is what gets stored.
 class CdnPublishLocaleImmunityTest < ActiveSupport::TestCase
   HOST_TITLE = "HOST Embedded recording"
   FR_TITLE = "Enregistrement intégré"
@@ -47,7 +47,7 @@ class CdnPublishLocaleImmunityTest < ActiveSupport::TestCase
     RecordingStudioEmbeddable.configuration.require_publishable = true
   end
 
-  test "cdn publish html matches main english under fr and host english overrides" do
+  test "cdn publish keeps the english title and localizes rich body chrome" do
     baseline = publish_html!(@embed)
 
     assert_includes baseline, "<title>Embedded recording</title>"
@@ -90,15 +90,20 @@ class CdnPublishLocaleImmunityTest < ActiveSupport::TestCase
       assert_equal HOST_TITLE, I18n.t("recording_studio.embeddable.common.embedded_recording", locale: :en)
 
       html = publish_html!(RecordingStudioEmbeddable::Embed.find(@embed.id))
-      assert_equal baseline, html
       assert_includes html, "<title>Embedded recording</title>"
-      assert_includes html, "Gallery"
-      assert_includes html, "More shots from this page"
+      assert_includes html, FR_GALLERY
+      assert_includes html, FR_GALLERY_SUBTITLE
+      refute_includes html, "More shots from this page"
       refute_includes html, FR_TITLE
       refute_includes html, HOST_TITLE
-      refute_includes html, FR_GALLERY
       refute_includes html, "HOST Gallery"
     end
+
+    english = publish_html!(RecordingStudioEmbeddable::Embed.find(@embed.id))
+    assert_includes english, "<title>Embedded recording</title>"
+    assert_includes english, "HOST Gallery"
+    assert_includes english, "HOST More shots from this page"
+    refute_includes english, FR_GALLERY
   end
 
   private

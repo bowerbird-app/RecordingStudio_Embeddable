@@ -99,8 +99,11 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "launcher_snippet"
     assert_includes response.body, "Chat button snippet"
+    assert_select "h2.fp-heading", text: "Chat button snippet"
+    assert_select "p.fp-text", text: /Add this code to every page/
     assert_includes response.body, "Add this code to every page of your website where you want the Chat button to appear."
     assert_includes response.body, "<code>&lt;/head&gt;</code>"
+    assert_select "p.fp-text code", text: "</head>"
     refute_includes response.body, "<code></head></code>"
     refute_includes response.body, "Using Squarespace, Wix or WordPress?"
     refute_includes response.body, "Header code injection"
@@ -126,6 +129,9 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     assert_equal "frame-ancestors 'self'", response.headers["Content-Security-Policy"]
     assert_nil response.headers["X-Frame-Options"]
     assert_includes response.body, "widget.js"
+    assert_includes response.body, "flat_pack/variables"
+    assert_includes response.body, "var(--surface-background-color)"
+    refute_includes response.body, "#f7f6f4"
     assert_includes response.body, 'data-preview-open="true"'
     assert_includes response.body, "data-config="
     refute_includes response.body, "data-widget-launcher"
@@ -219,5 +225,18 @@ class FloatingManagementTest < ActionDispatch::IntegrationTest
     assert_equal true, @embed.floating_enabled
     assert_equal({ "position" => "bottom-right" }, @embed.floating.to_h)
     refute_includes @embed.floating.to_json, "javascript"
+  end
+
+  test "an invalid position renders a danger alert" do
+    patch recording_studio_embeddable.floating_management_embed_path(@embed),
+          params: {
+            embed: {
+              floating_enabled: "1",
+              floating: { position: "sideways" }
+            }
+          }
+
+    assert_response :unprocessable_entity
+    assert_select "[role=alert]", text: /position must be bottom-left or bottom-right/
   end
 end

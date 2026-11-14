@@ -6,7 +6,11 @@
 ) do |modal| %>
   <% modal.body do %>
     <%= turbo_frame_tag RecordingStudioEmbeddable::MANAGEMENT_FRAME_ID, loading: :eager, class: "block w-full" do %>
-      <p class="text-sm text-(--text-muted-color)"><%= t("recording_studio.embeddable.management.modal.loading", default: "Loading…") %></p>
+      <%= render FlatPack::Text::Component.new(
+        text: t("recording_studio.embeddable.management.modal.loading", default: "Loading…"),
+        size: :sm,
+        style: :muted
+      ) %>
     <% end %>
   <% end %>
 <% end %>

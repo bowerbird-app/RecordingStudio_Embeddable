@@ -125,48 +125,52 @@
     <% end %>
   <% end %>
 
-  <section class="overflow-hidden rounded-lg border border-(--surface-border-color) bg-(--surface-background-color)">
-    <div class="border-b border-(--surface-border-color) px-4 py-3">
+  <%= render FlatPack::Card::Component.new(padding: :none) do |card| %>
+    <% card.header(padding: :md) do %>
       <%= render FlatPack::Heading::Component.new(
         text: t("recording_studio.embeddable.management.stats.countries", default: "Countries"),
         level: 2,
         size: :sm
       ) %>
-    </div>
+    <% end %>
 
-    <% if @stats_geo_rows.present? %>
-      <%= render FlatPack::Table::Component.new(
-        data: @stats_geo_rows,
-        dividers: true,
-        style: :plain
-      ) do |table| %>
-        <% table.column(
-          title: t("recording_studio.embeddable.management.stats.country", default: "Country"),
-          html: ->(row) {
-            row[:country] == "Unknown" ? t("recording_studio.embeddable.management.stats.unknown_country", default: "Unknown") : row[:country]
-          }
-        ) %>
-        <% table.column(
-          title: t("recording_studio.embeddable.management.stats.views", default: "Views"),
-          html: ->(row) { row[:views].to_s }
-        ) %>
-        <% table.column(
-          title: t("recording_studio.embeddable.management.stats.unique_views", default: "Unique views"),
-          html: ->(row) { row[:unique_views].to_s }
-        ) %>
-        <% table.column(
-          title: t("recording_studio.embeddable.management.stats.human_views", default: "Human views"),
-          html: ->(row) { row[:human_views].to_s }
-        ) %>
-        <% table.column(
-          title: t("recording_studio.embeddable.management.stats.bot_views", default: "Bot views"),
-          html: ->(row) { row[:bot_views].to_s }
+    <% card.body(padding: (@stats_geo_rows.present? ? :none : :md)) do %>
+      <% if @stats_geo_rows.present? %>
+        <%= render FlatPack::Table::Component.new(
+          data: @stats_geo_rows,
+          dividers: true,
+          style: :plain
+        ) do |table| %>
+          <% table.column(
+            title: t("recording_studio.embeddable.management.stats.country", default: "Country"),
+            html: ->(row) {
+              row[:country] == "Unknown" ? t("recording_studio.embeddable.management.stats.unknown_country", default: "Unknown") : row[:country]
+            }
+          ) %>
+          <% table.column(
+            title: t("recording_studio.embeddable.management.stats.views", default: "Views"),
+            html: ->(row) { row[:views].to_s }
+          ) %>
+          <% table.column(
+            title: t("recording_studio.embeddable.management.stats.unique_views", default: "Unique views"),
+            html: ->(row) { row[:unique_views].to_s }
+          ) %>
+          <% table.column(
+            title: t("recording_studio.embeddable.management.stats.human_views", default: "Human views"),
+            html: ->(row) { row[:human_views].to_s }
+          ) %>
+          <% table.column(
+            title: t("recording_studio.embeddable.management.stats.bot_views", default: "Bot views"),
+            html: ->(row) { row[:bot_views].to_s }
+          ) %>
+        <% end %>
+      <% else %>
+        <%= render FlatPack::Text::Component.new(
+          text: t("recording_studio.embeddable.management.stats.empty_geo", default: "No geo access data for this filter and date range."),
+          size: :sm,
+          style: :muted
         ) %>
       <% end %>
-    <% else %>
-      <p class="px-4 py-4 text-sm text-(--surface-muted-content-color)">
-        <%= t("recording_studio.embeddable.management.stats.empty_geo", default: "No geo access data for this filter and date range.") %>
-      </p>
     <% end %>
-  </section>
+  <% end %>
 </div>

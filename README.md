@@ -24,7 +24,7 @@ Two delivery modes ship in this gem:
 - Rails 8.1 or newer.
 - A host application that can mount the engine and run the supplied migrations.
 - `recording_studio` `~> 6.0, >= 6.3.0` (development git tag `v6.7.0`).
-- `flat_pack` `>= 0.1.341, < 1.0` (development git tag `v0.1.356`).
+- `flat_pack` `>= 0.1.364, < 1.0` (development git tag `v0.1.364`).
 - `view_component` `>= 4.14`, `< 5`.
 - `recording_studio_artifacts` `>= 0.4.0, < 1.0` (development git tag `v0.4.7`;
   usage gated by `config.artifacts_enabled`, default off).
@@ -255,7 +255,9 @@ or publishable changes that affect the rendered document.
 ### Rich embeds and Attachable direct images
 
 The shared Flatpack embed body (`recording_studio_embeddable/embeds/rich_body`)
-renders title, description, cover, and gallery. Image `src` / `srcset` values come
+renders title, description, cover, and gallery. Missing description and title,
+plus the gallery heading, come from `config/locales/en.yml` under
+`recording_studio.embeddable.public`. Image `src` / `srcset` values come
 from Attachable direct URLs only:
 
 ```ruby

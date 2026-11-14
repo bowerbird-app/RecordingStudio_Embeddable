@@ -39,15 +39,19 @@
   <%= render FlatPack::Grid::Component.new(cols: 2) do %>
     <div class="space-y-4">
       <% unless @styling_editable %>
-        <p class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-          <%= t("recording_studio.embeddable.management.styling.disabled_notice", default: "Custom styling is currently disabled for this embed. You can still review the resolved values below.") %>
-        </p>
+        <%= render FlatPack::Notice::Component.new(
+          description: t("recording_studio.embeddable.management.styling.disabled_notice", default: "Custom styling is currently disabled for this embed. You can still review the resolved values below."),
+          style: :info
+        ) %>
       <% end %>
 
       <% if @styling_errors.present? %>
-        <p role="alert" class="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          <%= @styling_errors.map { |field, message| "#{field.to_s.humanize} #{message}" }.join(", ") %>
-        </p>
+        <%= render FlatPack::Alert::Component.new(
+          description: @styling_errors.map { |field, message|
+            "#{@embed.class.human_attribute_name(field)} #{message}"
+          }.join(", "),
+          style: :danger
+        ) %>
       <% end %>
 
       <%= form_with model: @embed, url: recording_studio_embeddable_management_screen_path(@embed, :styling), method: :patch, class: "space-y-4", data: { styling_form: true }.merge(recording_studio_embeddable_management_form_data) do |_form| %>
@@ -112,7 +116,11 @@
         <%= render FlatPack::Popover::Component.new(trigger_id: "embed-width-trigger", placement: :bottom) do |popover| %>
           <% popover.popover_content do %>
             <div class="space-y-3" data-style-width-popover="true">
-              <h3 class="text-sm font-semibold"><%= width_label %></h3>
+              <%= render FlatPack::Heading::Component.new(
+                text: width_label,
+                level: 3,
+                size: :sm
+              ) %>
               <%= render FlatPack::Tabs::Component.new(
                 default_tab: (@width_mode == "custom" ? 1 : 0),
                 variant: :underline,
