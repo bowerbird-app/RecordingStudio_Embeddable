@@ -7,13 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.5] - 2026-11-14
+
 ### Changed
-- Drop the prepare hook that re-included embeddable recording methods and the recordable mixin. Core applies the capability on prepare, and the mixin is included when Active Record loads.
+- Removed the redundant `to_prepare` re-include of `RecordingMethods` and `Recordable`. Core applies the capability on prepare, and the recordable mixin is included when Active Record loads.
+- Added a boot/reload test that the mixin is present at boot, after reload, and on a real recording.
 - Development and dummy Gemfiles pin the wave 5 GitHub release tags: FlatPack `v0.1.356`, Recording Studio `v6.7.0`, Accessible `v0.32.0`, Artifacts `v0.4.7`, Attachable `v0.23.0`, Cache `v0.6.3`, Logs `v0.7.4`, Metrics `v0.8.0`, Publishable `v0.14.0`, Trashable `v0.14.0`, API `v0.23.0`, Moveable `v4.1.1`, Icons `v0.2.1`, Admin `v2.13.0`, and Root Switchable `v0.15.0`.
 - Removed the Bundler widen hook. Artifacts `v0.4.7` already allows Recording Studio 6.x.
 - Dummy writes set `config.authorize_write` so an actor is required (Recording Studio 6.5+).
 
 ### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.15.5`. No migration. Hosts do not re-include these mixins.
 - Gemspec floors are unchanged. Hosts that follow these development tags should pin the same releases.
 - Hosts on Recording Studio 6.5+ need `config.authorize_write` (or `config.allow_unauthorized_writes = true`).
 - Hosts that install Trashable `0.14.0` should run `bin/rails generate recording_studio_trashable:migrations` and migrate so `recording_studio_recordings.purge_at` exists.
@@ -661,7 +665,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.4...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.5...HEAD
+[0.15.5]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.4...v0.15.5
 [0.15.4]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.3...v0.15.4
 [0.15.3]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.2...v0.15.3
 [0.15.2]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.1...v0.15.2
