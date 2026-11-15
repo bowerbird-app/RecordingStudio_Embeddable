@@ -11,7 +11,7 @@ class EmbedRecordingEventsTest < ActiveSupport::TestCase
     )
     Current.actor = @user
     workspace = Workspace.create!(name: "Embed events #{SecureRandom.hex(4)}")
-    @root = RecordingStudio.root_recording_for(workspace)
+    @root = RecordingStudio.create_root_recording!(workspace, actor: @user)
     @page = @root.record(Page, actor: @user) { |page| page.title = "Event page" }
   end
 
@@ -26,6 +26,9 @@ class EmbedRecordingEventsTest < ActiveSupport::TestCase
     after = []
     RecordingStudio.configuration.hooks.before_record { |context| before << context }
     RecordingStudio.configuration.hooks.after_record { |event| after << event }
+
+    root_created = RecordingStudio::Event.find_by!(recording_id: @root.id, action: "created")
+    assert_equal @root.id, root_created.root_recording_id
 
     embed = @page.ensure_embed!(actor: @user, enabled: false)
     child = @page.embed_child_recording

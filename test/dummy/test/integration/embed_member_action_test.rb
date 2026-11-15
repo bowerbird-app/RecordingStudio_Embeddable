@@ -75,7 +75,7 @@ class EmbedMemberActionTest < ActionDispatch::IntegrationTest
     user = create_user
     Current.actor = user
     workspace = Workspace.create!(name: "Embed proof #{SecureRandom.hex(4)}")
-    root_recording = RecordingStudio.root_recording_for(workspace)
+    root_recording = RecordingStudio.create_root_recording!(workspace, actor: user)
     access_recording = bootstrap_admin!(root_recording: root_recording, actor: user)
     page_recording = record_page!(root_recording: root_recording, title: "Embed proof page")
     page_recording.ensure_embed!(enabled: true, actor: user)
@@ -88,7 +88,7 @@ class EmbedMemberActionTest < ActionDispatch::IntegrationTest
     user = create_user(email: "foreign-#{SecureRandom.hex(4)}@example.com")
     Current.actor = user
     workspace = Workspace.create!(name: "Foreign #{SecureRandom.hex(4)}")
-    root_recording = RecordingStudio.root_recording_for(workspace)
+    root_recording = RecordingStudio.create_root_recording!(workspace, actor: user)
     bootstrap_admin!(root_recording: root_recording, actor: user)
     page_recording = record_page!(root_recording: root_recording, title: "Foreign page")
     page_recording.ensure_embed!(enabled: true, actor: user)

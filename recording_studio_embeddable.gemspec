@@ -22,14 +22,14 @@ Gem::Specification.new do |spec|
     Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
   end
 
-  spec.add_dependency "flat_pack", ">= 0.1.364", "< 1.0"
+  spec.add_dependency "flat_pack", ">= 0.1.376", "< 1.0"
   spec.add_dependency "rails", "~> 8.1.0"
-  spec.add_dependency "recording_studio", ">= 6.3.0", "< 8.0"
-  spec.add_dependency "recording_studio_accessible", ">= 0.24", "< 1.0"
-  spec.add_dependency "recording_studio_artifacts", ">= 0.4.0", "< 1.0"
-  spec.add_dependency "recording_studio_attachable", ">= 0.22", "< 1.0"
-  spec.add_dependency "recording_studio_cache", ">= 0.6", "< 1.0"
-  spec.add_dependency "recording_studio_logs", ">= 0.7.1", "< 1.0"
-  spec.add_dependency "recording_studio_publishable", ">= 0.13", "< 1.0"
+  spec.add_dependency "recording_studio", ">= 7.0", "< 8.0"
+  spec.add_dependency "recording_studio_accessible", ">= 0.44.0"
+  spec.add_dependency "recording_studio_artifacts", ">= 0.5.0"
+  spec.add_dependency "recording_studio_attachable", ">= 0.28.0"
+  spec.add_dependency "recording_studio_cache", ">= 0.6"
+  spec.add_dependency "recording_studio_logs", ">= 0.8.0"
+  spec.add_dependency "recording_studio_publishable", ">= 0.18.1"
   spec.add_dependency "view_component", ">= 4.14", "< 5"
 end

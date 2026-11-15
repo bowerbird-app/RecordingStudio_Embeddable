@@ -10,7 +10,7 @@ class FloatingWidgetTest < ApplicationSystemTestCase
     end
     Current.actor = @user
     workspace = Workspace.create!(name: "System #{SecureRandom.hex(4)}")
-    root = RecordingStudio.root_recording_for(workspace)
+    root = RecordingStudio.create_root_recording!(workspace, actor: @user)
     @right = root.record(Widget, actor: @user) { |widget| widget.title = "Right chat" }
     @right_embed = @right.ensure_embed!(
       floating_enabled: true,

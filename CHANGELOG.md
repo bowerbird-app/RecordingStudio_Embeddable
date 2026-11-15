@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-11-15
+
+### Changed
+- Require Recording Studio `>= 7.0, < 8.0`.
+- Recording Studio sibling runtime dependencies are open lower bounds: Accessible `>= 0.44.0`, Artifacts `>= 0.5.0`, Attachable `>= 0.28.0`, Cache `>= 0.6`, Logs `>= 0.8.0`, and Publishable `>= 0.18.1`.
+- Development and dummy Gemfiles pin Recording Studio `v7.0.0` and the core 7 addon tags the dummy actually uses. Artifacts moves to `v0.5.0` because `v0.4.7` requires `recording_studio < 7`. FlatPack moves to `v0.1.376` because Attachable `0.28.0` requires `flat_pack >= 0.1.376`. Cache stays `v0.6.3`. Icons stay `v0.2.1`.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.17.0`. This gem has no migration.
+- Pin `flat_pack` to `v0.1.376`. The gemspec floor is `>= 0.1.376, < 1.0`.
+- Hosts need Recording Studio 7. Hosts that create roots call `RecordingStudio.create_root_recording!(recordable, actor:)`. `root_recording_for` only finds.
+- Run core's `events.root_recording_id` migration before booting app code that writes events. The dummy copies that migration, and API `0.24.0`'s `arrived_at` / `latency_bucket_ms` columns on request logs.
+- Trashable `0.17` removed `kept_sql`. Use `Recording.kept`.
+- Admin `2.16.0` removed `site_admin_recording_resolver`. The dummy keeps the same root lookup on `access_recording_resolver`.
+- Development and the dummy pin Puma `8.1.0`.
+
 ## [0.16.2] - 2026-11-15
 
 ### Changed
@@ -695,7 +711,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.16.2...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.16.2...v0.17.0
 [0.16.2]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.16.1...v0.16.2
 [0.16.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.5...v0.16.0

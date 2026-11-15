@@ -15,7 +15,7 @@ class PublishableAccessSeedTest < ActionDispatch::IntegrationTest
       password_confirmation: TEST_PASSWORD
     )
     workspace = Workspace.create!(name: "Publishable Seed Workspace #{SecureRandom.hex(3)}")
-    @root = RecordingStudio::Recording.unscoped.create!(recordable: workspace, parent_recording_id: nil)
+    @root = RecordingStudio.create_root_recording!(workspace, actor: @user)
     folder = Folder.create!(name: "Docs")
     folder_recording = RecordingStudio::Recording.unscoped.create!(
       root_recording_id: @root.id,

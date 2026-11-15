@@ -42,7 +42,7 @@ class DummyPagesController < ApplicationController
     return existing_root if existing_root
 
     workspace = Workspace.create!(name: "Dummy Workspace")
-    RecordingStudio::Recording.create!(recordable: workspace)
+    RecordingStudio.create_root_recording!(workspace, actor: Current.actor)
   end
 
   def next_page_title

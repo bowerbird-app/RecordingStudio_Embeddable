@@ -38,7 +38,7 @@ class EmbeddableViewLogLogsTest < ActiveSupport::TestCase
     end
     Current.actor = user
     workspace = Workspace.create!(name: "Logs #{SecureRandom.hex(4)}")
-    root = RecordingStudio.root_recording_for(workspace)
+    root = RecordingStudio.create_root_recording!(workspace, actor: user)
     page = root.record(Page, actor: user) { |record| record.title = "Logged page" }
     embed = page.ensure_embed!(enabled: true)
 
