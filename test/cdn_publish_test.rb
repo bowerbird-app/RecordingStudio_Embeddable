@@ -171,7 +171,7 @@ class CdnPublishTest < Minitest::Test
   def test_publish_defers_when_image_variants_are_not_yet_processed
     embed = build_embed(token: "defer-variants")
     ensure_mod = RecordingStudioEmbeddable::Services::EnsureEmbedImageVariants
-    failure = RecordingStudioEmbeddable::Services::BaseService::Result.new(
+    failure = RecordingStudio::Services::BaseService::Result.new(
       success: false,
       error: "Embed image variants are not processed yet: att-1:med"
     )
@@ -315,7 +315,7 @@ class CdnPublishTest < Minitest::Test
     unpublish_calls = []
     @artifacts_module.define_singleton_method(:unpublish) do |**kwargs|
       unpublish_calls << kwargs
-      RecordingStudioEmbeddable::Services::BaseService::Result.new(
+      RecordingStudio::Services::BaseService::Result.new(
         success: true,
         value: { id: kwargs[:id], destroyed: true }
       )
@@ -344,7 +344,7 @@ class CdnPublishTest < Minitest::Test
 
   def stub_document_render(html)
     klass = RecordingStudioEmbeddable::Services::RenderEmbedDocument
-    result = RecordingStudioEmbeddable::Services::BaseService::Result.new(success: true, value: html)
+    result = RecordingStudio::Services::BaseService::Result.new(success: true, value: html)
     original = klass.method(:call)
     klass.define_singleton_method(:call) { |**_| result }
     yield
@@ -354,7 +354,7 @@ class CdnPublishTest < Minitest::Test
 
   def stub_ensure_variants_success!
     klass = RecordingStudioEmbeddable::Services::EnsureEmbedImageVariants
-    result = RecordingStudioEmbeddable::Services::BaseService::Result.new(
+    result = RecordingStudio::Services::BaseService::Result.new(
       success: true,
       value: { attachments: [], variants: [] }
     )
@@ -382,7 +382,7 @@ class CdnPublishTest < Minitest::Test
         object_key: "recording_studio_artifacts/#{id}",
         etag: "etag-1"
       )
-      RecordingStudioEmbeddable::Services::BaseService::Result.new(
+      RecordingStudio::Services::BaseService::Result.new(
         success: true,
         value: { artifact: artifact, public_url: public_url, enqueued: false }
       )
@@ -398,7 +398,7 @@ class CdnPublishTest < Minitest::Test
         object_key: "recording_studio_artifacts/#{id}",
         etag: "etag-2"
       )
-      RecordingStudioEmbeddable::Services::BaseService::Result.new(
+      RecordingStudio::Services::BaseService::Result.new(
         success: true,
         value: { artifact: artifact, public_url: public_url, enqueued: false }
       )

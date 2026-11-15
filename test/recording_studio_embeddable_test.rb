@@ -129,7 +129,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "0.17.0", RecordingStudioEmbeddable::VERSION
+    assert_equal "1.0.0", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -155,6 +155,25 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
     assert_equal ">= 0.44.0", accessible.requirement.to_s
     assert_equal ">= 7.0, < 8.0", studio.requirement.to_s
+  end
+
+  def test_embed_services_inherit_core_base_service
+    services = [
+      RecordingStudioEmbeddable::RenderPayload,
+      RecordingStudioEmbeddable::Services::EnsureEmbedImageVariants,
+      RecordingStudioEmbeddable::Services::RenderEmbedDocument,
+      RecordingStudioEmbeddable::Services::PublishEmbedToCdn
+    ]
+
+    services.each do |service|
+      assert_equal RecordingStudio::Services::BaseService, service.superclass, service.name
+    end
+
+    refute RecordingStudioEmbeddable.const_defined?(:Hooks, false)
+    refute RecordingStudioEmbeddable::Services.const_defined?(:BaseService, false)
+    refute RecordingStudioEmbeddable::Services.const_defined?(:ExampleService, false)
+    refute_respond_to RecordingStudioEmbeddable.configuration, :hooks
+    refute_includes RecordingStudioEmbeddable.configuration.to_h.keys, :hooks_registered
   end
 
   def test_configuration_defaults_fail_closed_for_publishable_and_domains

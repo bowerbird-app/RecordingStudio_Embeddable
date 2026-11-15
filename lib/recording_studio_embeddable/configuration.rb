@@ -50,7 +50,7 @@ module RecordingStudioEmbeddable
       :cdn_purger,
       :floating_icon_hosts
     )
-    attr_reader :hooks, :layout, :floating_defaults
+    attr_reader :layout, :floating_defaults
 
     def initialize
       @allowed_embedder_domains = []
@@ -138,7 +138,6 @@ module RecordingStudioEmbeddable
       }
       # nil falls through to RecordingStudio.configuration.layout, then the core default.
       @layout = nil
-      @hooks = Hooks.new
     end
 
     def layout=(value)
@@ -185,8 +184,7 @@ module RecordingStudioEmbeddable
         prune_views_after: prune_views_after,
         cdn_withhold_snippet_until_published: cdn_withhold_snippet_until_published,
         floating_icon_hosts: floating_icon_hosts,
-        floating_defaults: floating_defaults,
-        hooks_registered: hooks.instance_variable_get(:@registry).transform_values(&:size)
+        floating_defaults: floating_defaults
       }
     end
   end

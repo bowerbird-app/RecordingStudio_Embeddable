@@ -1,49 +1,13 @@
-> **Architecture Documentation**
-> *   **Canonical Source:** [bowerbird-app/gem_template](https://github.com/bowerbird-app/gem_template/tree/main/docs/gem_template)
-> *   **Last Updated:** December 11, 2025
->
-> *Maintainers: Please update the date above when modifying this file.*
+# Services
 
----
+`RenderPayload`, `RenderEmbedDocument`, `EnsureEmbedImageVariants`, and `PublishEmbedToCdn` inherit `RecordingStudio::Services::BaseService`.
 
-# Service Objects
+Call a service with `.call`. The return value is `RecordingStudio::Services::BaseService::Result`.
 
-Business logic in GemTemplate is encapsulated in service objects using the Result monad pattern.
+- `success?` and `failure?` report the outcome.
+- `value` is set when the call succeeds.
+- `error` is a string when the call fails. `errors` is an array of extra detail.
+- `value!` returns `value`, or raises `error`.
+- `on_success` and `on_failure` yield and return the same result.
 
----
-
-## Usage
-
-```ruby
-result = GemTemplate::Services::ExampleService.call(name: "World")
-
-if result.success?
-  puts result.value  # => "Hello, World!"
-else
-  puts result.error
-end
-```
-
-## Creating Services
-
-Create your own services by inheriting from `BaseService`:
-
-```ruby
-module GemTemplate
-  module Services
-    class MyService < BaseService
-      def initialize(param:)
-        @param = param
-      end
-
-      private
-
-      def perform
-        # Your logic here
-        success(result_value)
-        # or: failure("Error message")
-      end
-    end
-  end
-end
-```
+Register `before_service`, `after_service`, and `around_service` on `RecordingStudio.configuration.hooks`.

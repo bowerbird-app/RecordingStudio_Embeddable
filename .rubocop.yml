@@ -20,7 +20,6 @@ Layout/LineLength:
 Metrics/ClassLength:
   Exclude:
     - 'test/**/*'
-    - 'lib/recording_studio_embeddable/hooks.rb'
     - 'lib/recording_studio_embeddable/configuration.rb'
     - 'lib/recording_studio_embeddable/renderer.rb'
     - 'app/controllers/recording_studio_embeddable/embeds_controller.rb'

@@ -72,8 +72,7 @@ For current UI work, prefer the top-level README plus the live FlatPack demo app
 | [Configuration](CONFIGURATION.md) | Details on configuring the gem via initializers and environment variables. |
 | [Private Gems](PRIVATE_GEMS.md) | How to authenticate and access private gem dependencies in Codespaces, local, and production environments. |
 | [Database Migrations](MIGRATIONS.md) | How to generate and manage database migrations for the engine. |
-| [Service Objects](SERVICES.md) | Explanation of the Service Object pattern and Result monad used for business logic. |
-| [Engine Hooks](HOOKS.md) | Guide to customizing engine behavior using lifecycle and service hooks. |
+| [Service Objects](SERVICES.md) | The four embed services inherit Recording Studio `BaseService`. |
 | [Asset Architecture](CSS_JS_ASSETS_ARCHITECTURE.md) | Details on TailwindCSS setup and asset pipeline integration. |
 | [Security](SECURITY.md) | Security considerations. |
 | [Changelog](../../CHANGELOG.md) | Version history. |
@@ -94,10 +93,7 @@ gem_template/
 │   ├── gem_template/
 │   │   ├── configuration.rb
 │   │   ├── engine.rb
-│   │   ├── version.rb
-│   │   └── services/        # Service objects
-│   │       ├── base_service.rb
-│   │       └── example_service.rb
+│   │   └── version.rb
 │   └── generators/
 ├── test/dummy/              # Test Rails app
 ├── docs/                    # Documentation
