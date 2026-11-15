@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
+require "recording_studio"
+
 module RecordingStudioEmbeddable
   module Services
     # Pre-renders an embed HTML document and publishes it via RecordingStudioArtifacts.
     #
     # First publish calls +RecordingStudioArtifacts.publish+; re-publish calls +.update+
     # so the Artifacts public URL stays stable. Spaces / EMBED_CDN upload is not used.
-    class PublishEmbedToCdn < BaseService # rubocop:disable Metrics/ClassLength
+    class PublishEmbedToCdn < RecordingStudio::Services::BaseService # rubocop:disable Metrics/ClassLength
       UNAVAILABLE_HTML = <<~HTML
         <!DOCTYPE html>
         <html lang="en">

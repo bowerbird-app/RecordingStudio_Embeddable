@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "recording_studio"
+
 module RecordingStudioEmbeddable
   module Services
     # Processes Attachable preprocessed variants before CDN HTML is rendered.
@@ -8,7 +10,7 @@ module RecordingStudioEmbeddable
     # fallback. This service runs +PreprocessVariantsJob+ synchronously for
     # every image on the recording, then verifies +variant_processed?+ for each
     # configured preprocessed name. Callers defer publish when verification fails.
-    class EnsureEmbedImageVariants < BaseService
+    class EnsureEmbedImageVariants < RecordingStudio::Services::BaseService
       def initialize(recording:)
         super()
         @recording = recording

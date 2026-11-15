@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
+require "recording_studio"
+
 module RecordingStudioEmbeddable
-  class RenderPayload < Services::BaseService
+  class RenderPayload < RecordingStudio::Services::BaseService
     SIZING_KEYS = %w[width mode max_width min_height height].freeze
 
     def initialize(recording:, embed: nil, assigns: nil)

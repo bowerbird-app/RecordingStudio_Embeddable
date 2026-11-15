@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
+require "recording_studio"
+
 module RecordingStudioEmbeddable
   module Services
     # Renders the full iframe HTML document (layout + body) for CDN / Artifacts publish.
-    class RenderEmbedDocument < BaseService
+    class RenderEmbedDocument < RecordingStudio::Services::BaseService
       def initialize(recording:, embed:, frame_ancestors: nil, assigns: nil)
         super()
         @recording = recording

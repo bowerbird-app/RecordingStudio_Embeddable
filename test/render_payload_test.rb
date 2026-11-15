@@ -169,8 +169,39 @@ class RenderPayloadTest < Minitest::Test
   def test_fails_when_recording_blank
     result = RecordingStudioEmbeddable::RenderPayload.call(recording: nil, embed: embed)
 
+    assert_instance_of RecordingStudio::Services::BaseService::Result, result
     assert result.failure?
-    assert_match(/recording/i, result.error)
+    assert_equal "recording is required", result.error
+    assert_equal [], result.errors
+    seen = nil
+    result.on_failure { |error, errors| seen = [error, errors] }
+    assert_equal ["recording is required", []], seen
+    error = assert_raises(RuntimeError) { result.value! }
+    assert_equal "recording is required", error.message
+  end
+
+  def test_failure_runs_core_service_hooks
+    previous_zone = Time.zone
+    Time.zone = "UTC"
+    seen = []
+    RecordingStudio.configuration.hooks.before_service do |service_class, args|
+      seen << [:before, service_class, args]
+    end
+    RecordingStudio.configuration.hooks.after_service do |service_class, result|
+      seen << [:after, service_class, result.failure?, result.error]
+    end
+
+    result = RecordingStudioEmbeddable::RenderPayload.call(recording: nil, embed: embed)
+
+    assert_equal "recording is required", result.error
+    assert_equal [
+      [:before, RecordingStudioEmbeddable::RenderPayload, { recording: nil, embed: embed, assigns: {} }],
+      [:after, RecordingStudioEmbeddable::RenderPayload, true, "recording is required"]
+    ], seen
+  ensure
+    RecordingStudio.configuration.hooks.clear(:before_service)
+    RecordingStudio.configuration.hooks.clear(:after_service)
+    Time.zone = previous_zone
   end
 
   def test_fails_when_embed_nil

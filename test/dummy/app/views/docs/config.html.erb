@@ -36,7 +36,7 @@
           "min_height" => 320
         }
 
-        # Rendering hooks/resolvers
+        # Rendering resolvers
         config.renderer_resolver = nil # Optional callable for resolving recording-level renderer/template.
         config.embed_renderer_resolver = nil # Optional callable for resolving embed-specific renderer/template.
 
@@ -82,9 +82,6 @@
         }
         config.token_bytes = 24 # Random byte length used to generate embed/public tokens.
         config.prune_views_after = 90.days # Retention period before view logs are pruned.
-
-        # Hook registration object (read-only accessor)
-        # config.hooks.on(:event_name) { ... }
       end
     CODE
   ) %>
@@ -144,8 +141,7 @@
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">bot_detector</td><td class="px-3 py-2 font-mono">nil</td><td class="px-3 py-2">Optional custom bot detector strategy/service.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">management_authorizer</td><td class="px-3 py-2 font-mono">lambda { |controller:, recording:| authorized?(actor:, recording:, role: :edit) }</td><td class="px-3 py-2">Called with the parent recording for every management action. Return true only when the actor may edit that recording. False or an error is a 404.</td></tr>
         <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">token_bytes</td><td class="px-3 py-2 font-mono">24</td><td class="px-3 py-2">Byte length for generated embed/public tokens.</td></tr>
-        <tr class="border-b border-(--surface-border-color)"><td class="px-3 py-2 font-mono">prune_views_after</td><td class="px-3 py-2 font-mono">90.days</td><td class="px-3 py-2">Retention duration before view logs are pruned.</td></tr>
-        <tr><td class="px-3 py-2 font-mono">hooks (reader)</td><td class="px-3 py-2 font-mono">Hooks.new</td><td class="px-3 py-2">Hook registry object for lifecycle/event integrations.</td></tr>
+        <tr><td class="px-3 py-2 font-mono">prune_views_after</td><td class="px-3 py-2 font-mono">90.days</td><td class="px-3 py-2">Retention duration before view logs are pruned.</td></tr>
       </tbody>
     </table>
   </div>

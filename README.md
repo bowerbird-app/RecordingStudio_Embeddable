@@ -332,6 +332,8 @@ Common settings include:
   indefinite retention, so Logs cleanup does not prune it.
 - `management_authorizer` — `call(controller:, recording:)` must allow `:edit` on that recording
 
+`RenderPayload`, `RenderEmbedDocument`, `EnsureEmbedImageVariants`, and `PublishEmbedToCdn` inherit `RecordingStudio::Services::BaseService`. Register `before_service`, `after_service`, and `around_service` on `RecordingStudio.configuration.hooks`.
+
 The initializer generator writes a working starting point at `config/initializers/recording_studio_embeddable.rb`.
 
 ## Management UI
