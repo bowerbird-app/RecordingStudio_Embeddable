@@ -44,10 +44,7 @@ Article.where(id: article.id).update_all(description: "What changed in the sprin
 Document.where(id: document.id).update_all(description: "Brand colors, type, and asset rules for published pages.")
 
 # Create the root recording
-root_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
-  recordable: workspace,
-  parent_recording_id: nil
-)
+root_recording = RecordingStudio.create_root_recording!(workspace, actor: user)
 
 folder_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
   root_recording_id: root_recording.id,
@@ -98,10 +95,7 @@ end
 # Site AdminRoot for RecordingStudioApi admin HTML (/recording_studio_api/admin_api*).
 # RootSwitchable defaults to this root when the actor can view it.
 admin_root = AdminRoot.find_or_create_by!(name: "Admin")
-admin_root_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
-  recordable: admin_root,
-  parent_recording_id: nil
-)
+admin_root_recording = RecordingStudio.create_root_recording!(admin_root, actor: user)
 unless RecordingStudioAccessible.authorized?(actor: user, recording: admin_root_recording, role: :admin)
   admin_bootstrap = RecordingStudioAccessible.bootstrap_owner_access!(
     recording: admin_root_recording,

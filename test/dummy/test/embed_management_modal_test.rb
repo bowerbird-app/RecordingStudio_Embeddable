@@ -15,7 +15,7 @@ class EmbedManagementModalTest < ActionDispatch::IntegrationTest
     Current.actor = @user
 
     workspace = Workspace.create!(name: "Modal #{SecureRandom.hex(4)}")
-    root = RecordingStudio.root_recording_for(workspace)
+    root = RecordingStudio.create_root_recording!(workspace, actor: @user)
     grant_embed_management!(actor: @user, recording: root)
     @page = root.record(Page, actor: @user) { |record| record.title = "Modal page" }
     @page_embed = @page.ensure_embed!(enabled: true, allowed_embedder_domains: ["example.com"])

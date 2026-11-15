@@ -22,7 +22,7 @@ class RecordingMethodsBootTest < ActiveSupport::TestCase
     )
     Current.actor = actor
     workspace = Workspace.create!(name: "Boot #{SecureRandom.hex(4)}")
-    page = RecordingStudio.root_recording_for(workspace).record(Page, actor: actor) do |record|
+    page = RecordingStudio.create_root_recording!(workspace, actor: actor).record(Page, actor: actor) do |record|
       record.title = "Boot page"
     end
 

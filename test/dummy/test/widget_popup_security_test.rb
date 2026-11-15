@@ -21,7 +21,7 @@ class WidgetPopupSecurityTest < ActionDispatch::IntegrationTest
     end
     Current.actor = @user
     workspace = Workspace.create!(name: "Popup #{SecureRandom.hex(4)}")
-    root = RecordingStudio.root_recording_for(workspace)
+    root = RecordingStudio.create_root_recording!(workspace, actor: @user)
     @widget = root.record(Widget, actor: @user) { |widget| widget.title = "Hello widget" }
     @embed = @widget.ensure_embed!(
       enabled: false,

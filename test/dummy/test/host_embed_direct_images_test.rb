@@ -18,10 +18,7 @@ class HostEmbedDirectImagesTest < ActionDispatch::IntegrationTest
     sign_in @user
 
     @workspace = Workspace.find_or_create_by!(name: "Host Embed Workspace")
-    @root = RecordingStudio::Recording.unscoped.find_or_create_by!(
-      recordable: @workspace,
-      parent_recording_id: nil
-    )
+    @root = RecordingStudio.create_root_recording!(@workspace, actor: @user)
     unless RecordingStudioAccessible.authorized?(actor: @user, recording: @root, role: :admin)
       result = RecordingStudioAccessible.bootstrap_owner_access!(recording: @root, actor: @user)
       raise result.error unless result.success?

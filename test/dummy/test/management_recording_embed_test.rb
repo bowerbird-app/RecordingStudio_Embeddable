@@ -16,7 +16,7 @@ class ManagementRecordingEmbedTest < ActionDispatch::IntegrationTest
     Current.actor = @owner
 
     workspace = Workspace.create!(name: "Manage link #{SecureRandom.hex(4)}")
-    @root = RecordingStudio.root_recording_for(workspace)
+    @root = RecordingStudio.create_root_recording!(workspace, actor: @owner)
     grant_embed_management!(actor: @owner, recording: @root)
     grant_role!(@editor, :edit)
     grant_role!(@viewer, :view)
@@ -24,9 +24,9 @@ class ManagementRecordingEmbedTest < ActionDispatch::IntegrationTest
     @page = @root.record(Page, actor: @owner) { |page| page.title = "Managed page" }
     @document = @root.record(Document, actor: @owner) { |document| document.title = "Notes" }
 
-    other_workspace = Workspace.create!(name: "Other link #{SecureRandom.hex(4)}")
-    @other_root = RecordingStudio.root_recording_for(other_workspace)
     @other_owner = create_user("other-owner")
+    other_workspace = Workspace.create!(name: "Other link #{SecureRandom.hex(4)}")
+    @other_root = RecordingStudio.create_root_recording!(other_workspace, actor: @other_owner)
     Current.actor = @other_owner
     grant_embed_management!(actor: @other_owner, recording: @other_root)
     @other_page = @other_root.record(Page, actor: @other_owner) { |page| page.title = "Other page" }

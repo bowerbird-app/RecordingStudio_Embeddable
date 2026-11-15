@@ -27,10 +27,7 @@ class AdminApiPagesTest < ActionDispatch::IntegrationTest
 
     # Own AdminRoot so bootstrap stays available even when seeds already own "Admin".
     @admin_root = AdminRoot.create!(name: "Admin API Pages #{SecureRandom.hex(3)}")
-    @admin_root_recording = RecordingStudio::Recording.unscoped.create!(
-      recordable: @admin_root,
-      parent_recording_id: nil
-    )
+    @admin_root_recording = RecordingStudio.create_root_recording!(@admin_root, actor: @user)
 
     result = RecordingStudioAccessible.bootstrap_owner_access!(
       recording: @admin_root_recording,
