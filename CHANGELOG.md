@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.2] - 2026-11-15
+
+### Changed
+- Allow recording_studio < 8.0 (core 7 phase 1).
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `0.16.2`. No migration.
+- The gemspec requirement is `recording_studio >= 6.3.0, < 8.0` (was `~> 6.0, >= 6.3.0`). The floor stays `6.3.0`.
+
 ## [0.16.1] - 2026-11-14
 
 ### Changed
@@ -686,7 +695,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.16.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.16.2...HEAD
+[0.16.2]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.16.1...v0.16.2
 [0.16.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.5...v0.16.0
 [0.15.5]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.15.4...v0.15.5

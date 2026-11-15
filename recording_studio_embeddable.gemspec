@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "flat_pack", ">= 0.1.364", "< 1.0"
   spec.add_dependency "rails", "~> 8.1.0"
-  spec.add_dependency "recording_studio", "~> 6.0", ">= 6.3.0"
+  spec.add_dependency "recording_studio", ">= 6.3.0", "< 8.0"
   spec.add_dependency "recording_studio_accessible", ">= 0.24", "< 1.0"
   spec.add_dependency "recording_studio_artifacts", ">= 0.4.0", "< 1.0"
   spec.add_dependency "recording_studio_attachable", ">= 0.22", "< 1.0"

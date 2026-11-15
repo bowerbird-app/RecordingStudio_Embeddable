@@ -23,7 +23,7 @@ Two delivery modes ship in this gem:
 - Ruby 3.3 or newer.
 - Rails 8.1 or newer.
 - A host application that can mount the engine and run the supplied migrations.
-- `recording_studio` `~> 6.0, >= 6.3.0` (development git tag `v6.7.0`).
+- `recording_studio` `>= 6.3.0`, `< 8.0` (development git tag `v6.7.0`).
 - `flat_pack` `>= 0.1.364, < 1.0` (development git tag `v0.1.364`).
 - `view_component` `>= 4.14`, `< 5`.
 - `recording_studio_artifacts` `>= 0.4.0, < 1.0` (development git tag `v0.4.7`;
