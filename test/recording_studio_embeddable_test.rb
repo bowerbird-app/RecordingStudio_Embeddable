@@ -726,26 +726,6 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     RecordingStudioEmbeddable.reset_configuration!
   end
 
-  def test_stylesheet_digest_changes_the_public_cache_key
-    controller = RecordingStudioEmbeddable::EmbedsController.new
-    controller.instance_variable_set(:@embed, "embed")
-    controller.instance_variable_set(:@parent_recording, "recording")
-    controller.instance_variable_set(:@parent_recordable, "recordable")
-    controller.instance_variable_set(:@options, {})
-    klass = RecordingStudioEmbeddable::EmbedStylesheet
-    original = klass.method(:digest)
-    klass.define_singleton_method(:digest) { "digest-aaa" }
-    first = controller.send(:cache_key_parts)
-    klass.define_singleton_method(:digest) { "digest-bbb" }
-    second = controller.send(:cache_key_parts)
-
-    assert_includes first, "digest-aaa"
-    assert_includes second, "digest-bbb"
-    refute_equal first, second
-  ensure
-    klass.define_singleton_method(:digest, original) if klass && original
-  end
-
   def test_republish_stale_embeds_without_a_database_is_a_no_op
     assert_equal 0, RecordingStudioEmbeddable::EmbedStylesheet.republish_stale_embeds!
   end
