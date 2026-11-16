@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-16
+
+### Added
+- A recordable may define `public_embed_allowed?(viewer:)`. `Security::PublicAccess` calls it after the publishable check. `viewer` is nil. False, nil, and a raised error refuse the public iframe, launcher, and popup the same way an unpublished recording is refused: a 404 and no view log. A raised error logs a warning with the error class and not the message.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `1.3.0`. No migration.
+- Recordables that do not define `public_embed_allowed?` keep today's public embed behavior.
+- Define `public_embed_allowed?(viewer:)` to refuse an otherwise published embed. `viewer` is nil.
+
 ## [1.2.2] - 2026-11-16
 
 ### Changed

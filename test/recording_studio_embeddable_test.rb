@@ -129,7 +129,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "1.2.2", RecordingStudioEmbeddable::VERSION
+    assert_equal "1.3.0", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -583,6 +583,91 @@ class RecordingStudioEmbeddableTest < Minitest::Test
 
     refute result.allowed?
     assert_equal :not_found, result.status
+  end
+
+  def test_public_embed_allowed_false_or_nil_is_refused
+    [false, nil].each do |answer|
+      recordable = Object.new
+      recordable.define_singleton_method(:public_embed_allowed?) { |viewer:| viewer.nil? ? answer : true }
+      result = public_access_result(FakeRecording.new(recordable, Time.now))
+
+      refute result.allowed?, "expected #{answer.inspect} to refuse"
+      assert_equal :not_found, result.status
+      assert_equal :unpublished, result.reason
+    end
+  end
+
+  def test_public_embed_allowed_raise_refuses_without_the_error_text
+    recordable = Object.new
+    recordable.define_singleton_method(:public_embed_allowed?) do |viewer:|
+      raise "secret boom" if viewer.nil?
+
+      true
+    end
+    io = StringIO.new
+    previous_logger = Rails.logger
+    Rails.logger = Logger.new(io)
+
+    result = public_access_result(FakeRecording.new(recordable, Time.now))
+
+    refute result.allowed?
+    assert_equal :not_found, result.status
+    assert_equal :unpublished, result.reason
+    assert_includes io.string, "RuntimeError"
+    refute_includes io.string, "secret boom"
+  ensure
+    Rails.logger = previous_logger
+  end
+
+  def test_recordable_without_public_embed_allowed_stays_allowed
+    result = public_access_result(FakeRecording.new(Object.new, Time.now))
+
+    assert result.allowed?
+  end
+
+  def test_public_embed_allowed_true_receives_a_nil_viewer
+    seen = :missing
+    recordable = Object.new
+    recordable.define_singleton_method(:public_embed_allowed?) do |viewer:|
+      seen = viewer
+      true
+    end
+
+    result = public_access_result(FakeRecording.new(recordable, Time.now))
+
+    assert result.allowed?
+    assert_nil seen
+  end
+
+  def test_unpublished_recording_does_not_call_public_embed_allowed
+    called = false
+    recordable = Object.new
+    recordable.define_singleton_method(:public_embed_allowed?) do |viewer:|
+      called = true
+      viewer.nil?
+    end
+    recording = FakeRecording.new(recordable, Time.now)
+    recording.define_singleton_method(:currently_published?) { false }
+
+    result = public_access_result(recording, require_publishable: true)
+
+    refute result.allowed?
+    assert_equal :unpublished, result.reason
+    refute called
+  end
+
+  def public_access_result(recording, require_publishable: false)
+    embed = Struct.new(:enabled?, :allowed_domains, :blocked_domains).new(true, ["example.com"], [])
+    request = Struct.new(:referer, :remote_ip, :user_agent) do
+      def get_header(_) = "https://example.com"
+    end.new("https://example.com", "127.0.0.1", "test")
+
+    RecordingStudioEmbeddable::Security::PublicAccess.call(
+      embed: embed,
+      request: request,
+      recording: recording,
+      options: { enabled: true, require_publishable: require_publishable }
+    )
   end
 
   def test_domain_policy_csp_includes_apex_for_wildcards

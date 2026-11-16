@@ -22,6 +22,7 @@ module RecordingStudioEmbeddable
         return deny(:not_found, :missing_recording) unless recording
         return deny(:not_found, :not_embeddable) unless embeddable_recordable?
         return deny(:not_found, :unpublished) unless publishable_allowed?
+        return deny(:not_found, :unpublished) unless recordable_allows_public_embed?
         return deny(:forbidden, :domain_blocked) unless domain_policy.allowed?
 
         Result.new(allowed?: true, status: :ok, reason: :ok, domain_policy: domain_policy)
@@ -54,6 +55,27 @@ module RecordingStudioEmbeddable
         return !!recording.publishable_child_recording if recording.respond_to?(:publishable_child_recording)
 
         false
+      end
+
+      def recordable_allows_public_embed?
+        recordable = recording.recordable if recording.respond_to?(:recordable)
+        return true unless recordable.respond_to?(:public_embed_allowed?)
+
+        !!recordable.public_embed_allowed?(viewer: viewer)
+      rescue StandardError => e
+        warn_refused_public_embed(e.class)
+        false
+      end
+
+      # Public iframe, launcher, and popup requests are anonymous.
+      def viewer
+        nil
+      end
+
+      def warn_refused_public_embed(error_class)
+        return unless defined?(Rails) && Rails.respond_to?(:logger)
+
+        Rails.logger&.warn("[RecordingStudioEmbeddable] public_embed_allowed? failed (#{error_class})")
       end
 
       def embeddable_recordable?
