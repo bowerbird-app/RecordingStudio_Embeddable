@@ -20,6 +20,14 @@ module RecordingStudioEmbeddable
       def allow?(**)
         self.class.allow?(**)
       end
+
+      def self.count(**)
+        0
+      end
+
+      def count(**)
+        self.class.count(**)
+      end
     end
   end
 end

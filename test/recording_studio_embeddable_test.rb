@@ -183,6 +183,13 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     assert_equal [], config.blocked_embedder_domains
     assert_equal true, config.require_publishable
     assert_equal :null, config.rate_limiter
+    assert_equal 600, config.per_ip_rate_limit
+    assert_equal 60, config.per_ip_rate_limit_window
+    assert_equal 30, config.invalid_token_rate_limit
+    assert_equal 60, config.invalid_token_rate_limit_window
+    assert_in_delta 0.01, config.invalid_token_log_sample_rate
+    assert_equal 600, config.to_h[:per_ip_rate_limit]
+    assert_in_delta 0.01, config.to_h[:invalid_token_log_sample_rate]
   end
 
   def test_capability_key_and_options

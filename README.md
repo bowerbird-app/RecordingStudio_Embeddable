@@ -312,6 +312,8 @@ AdminRoot — the same contract as the RecordingStudio_api dummy.
 
 Browser-payload and API embeds do **not** count as public iframe views. `CaptureView` stays on `EmbedsController` only. That avoids double-counting when the WordPress Plugin Demo SDK refreshes or previews a payload.
 
+Unknown tokens, disabled or other not-found embeds, and rate-limited requests do not write a view log and do not enqueue `LogViewJob`. Those requests write a sampled `Rails.logger` line instead (`invalid_token_log_sample_rate`). The line has a reason and an IP digest. It does not include the raw token. A rendered embed and a 304 still log as before. A domain block (403) still logs until that IP has used its miss budget.
+
 ## Configuration
 
 The default configuration is intentionally locked down. At a minimum, you will usually want to set allowed embedder domains and any app-specific management authorization.
@@ -323,8 +325,12 @@ Common settings include:
 - `allowed_embedder_domains` and `blocked_embedder_domains`
 - `require_domain_allowlist` and `allow_any_domain`
 - `require_publishable` and `fallback_to_publishable_renderer`
-- `rate_limiting_enabled`, `rate_limiter`, `rate_limit`, and `rate_limit_window`
-  (adapters over `RecordingStudioCache::RateLimiter`; Redis clients need `eval`)
+- `rate_limiting_enabled`, `rate_limiter`, `rate_limit` (default 120), and `rate_limit_window` (default 60) — one embed token plus the IP
+- `per_ip_rate_limit` (default 600) and `per_ip_rate_limit_window` (default 60) — every public embed request from one IP, checked before the token lookup. The key is `public-ip:` plus a digest of the IP
+- `invalid_token_rate_limit` (default 30) and `invalid_token_rate_limit_window` (default 60) — unknown, disabled, and denied tokens from one IP. Once the budget is spent, the next request is 429 and does not look the token up. The key is `public-ip-miss:` plus a digest of the IP
+- `invalid_token_log_sample_rate` (default `0.01`) — chance of a logger line for a rejected public embed. `0` logs nothing. `1` logs every rejection. The line never includes the raw token
+- `rate_limit_fail_closed` (default false) — when the limiter errors, block the request if true. The same flag covers the per-IP check, the miss check, and the token check
+- Limiters are the existing `RateLimiters` (`:rails_cache`, `:redis`, `:null`, or any object with `allow?`). Redis clients need `eval`
 - `cache_mode` and `cache_policy`
 - `view_logging_enabled` and the related sampling/privacy flags
 - `prune_views_after` (default 90 days) — `PruneViewsJob` deletes raw view logs

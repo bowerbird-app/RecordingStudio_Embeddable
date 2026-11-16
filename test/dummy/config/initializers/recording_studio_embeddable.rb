@@ -6,6 +6,11 @@ RecordingStudioEmbeddable.configure do |config|
   config.allow_any_domain = true
   config.require_publishable = true
   config.rate_limiter = :rails_cache
+  config.per_ip_rate_limit = 600
+  config.per_ip_rate_limit_window = 60
+  config.invalid_token_rate_limit = 30
+  config.invalid_token_rate_limit_window = 60
+  config.invalid_token_log_sample_rate = 0.01
   # True only when the actor may edit this parent recording. False, or a
   # raised error, is a 404 on every management action.
   config.management_authorizer = lambda do |controller:, recording:|

@@ -5,13 +5,22 @@ module RecordingStudioEmbeddable
     layout "recording_studio_embeddable/embed"
     helper RecordingStudioEmbeddable::EmbedLayoutHelper
 
-    before_action :load_embed
-
     def show
-      return render_rate_limited if rate_limited?
+      enforce_ip_limit
+      return if performed?
+
+      enforce_miss_limit
+      return if performed?
+
+      @embed = Embed.find_by(token: embed_token)
+      enforce_token_limit
+      return if performed?
 
       unless @embed
-        capture_public_view(nil, "invalid_token", 404, metadata: { reason: "invalid_token" })
+        record_token_miss
+        return if performed?
+
+        log_rejected_public_embed("invalid_token")
         return render_not_found
       end
 
@@ -19,11 +28,12 @@ module RecordingStudioEmbeddable
       @parent_recording = @recording&.parent_recording if @recording.respond_to?(:parent_recording)
       @parent_recordable = @parent_recording&.recordable if @parent_recording.respond_to?(:recordable)
       @recordable = @parent_recordable
-      assign_recordable_instance_variable
       @options = Renderer.options_for(@parent_recording)
       access = Security::PublicAccess.call(embed: @embed, request: request, recording: @parent_recording,
                                            options: @options)
       return render_denied(access) unless access.allowed?
+
+      assign_recordable_instance_variable
 
       set_security_headers(access.domain_policy)
       if cache_policy[:enabled]
@@ -45,29 +55,32 @@ module RecordingStudioEmbeddable
 
     private
 
-    def load_embed
-      @embed = Embed.find_by(token: params[:token].to_s)
+    def embed_token
+      params[:token].to_s
     end
 
-    def rate_limited?
-      return false unless RecordingStudioEmbeddable.configuration.rate_limiting_enabled
+    def enforce_ip_limit
+      return if RequestRateLimit.public_ip_allowed?(request.remote_ip)
 
-      configured = RecordingStudioEmbeddable.configuration.rate_limiter
-      limiter = if configured.respond_to?(:allow?)
-                  configured
-                else
-                  case configured
-                  when :rails_cache then RateLimiters::RailsCache
-                  when :redis then RateLimiters::Redis
-                  else RateLimiters::Null
-                  end
-                end
-      limiter = RateLimiters::Redis if configured.respond_to?(:incr)
-      !limiter.allow?(
-        key: Services::LogView.digest("#{params[:token]}:#{request.remote_ip}"),
-        limit: RecordingStudioEmbeddable.configuration.rate_limit,
-        window: RecordingStudioEmbeddable.configuration.rate_limit_window
-      )
+      render_rate_limited(window: embed_configuration.per_ip_rate_limit_window)
+    end
+
+    def enforce_miss_limit
+      return unless RequestRateLimit.public_miss_blocked?(request.remote_ip)
+
+      render_rate_limited(window: embed_configuration.invalid_token_rate_limit_window)
+    end
+
+    def enforce_token_limit
+      return if RequestRateLimit.public_token_allowed?(embed_token, request.remote_ip)
+
+      render_rate_limited(window: embed_configuration.rate_limit_window)
+    end
+
+    def record_token_miss
+      return if RequestRateLimit.record_public_miss(request.remote_ip)
+
+      render_rate_limited(window: embed_configuration.invalid_token_rate_limit_window)
     end
 
     def set_security_headers(domain_policy)
@@ -97,14 +110,26 @@ module RecordingStudioEmbeddable
     end
 
     def render_denied(access)
+      if access.status == :not_found
+        record_token_miss
+        return if performed?
+
+        log_rejected_public_embed("not_found")
+        return render_not_found
+      end
+
+      record_token_miss
+      return if performed?
+
       response.cache_control.replace(no_store: true)
       set_security_headers(access.domain_policy)
-      status = access.reason == :unpublished ? "unpublished" : access.status.to_s
-      capture_public_view(@embed, status, Rack::Utils.status_code(access.status), metadata: { reason: access.reason })
-      access.status == :not_found ? render_not_found : head(access.status)
+      capture_public_view(@embed, access.status.to_s, Rack::Utils.status_code(access.status),
+                          metadata: { reason: access.reason })
+      head(access.status)
     end
 
     def render_not_found
+      clear_embed_render_state
       response.cache_control.replace(no_store: true)
       response.set_header("Content-Security-Policy", "frame-ancestors 'none'")
       response.delete_header("X-Frame-Options")
@@ -114,11 +139,36 @@ module RecordingStudioEmbeddable
              status: :not_found
     end
 
-    def render_rate_limited
+    def render_rate_limited(window: embed_configuration.rate_limit_window)
       response.cache_control.replace(no_store: true)
-      response.set_header("Retry-After", RecordingStudioEmbeddable.configuration.rate_limit_window.to_i.to_s)
-      capture_public_view(@embed, "rate_limited", 429, rate_limited: true)
+      response.set_header("Retry-After", window.to_i.to_s)
+      log_rejected_public_embed("rate_limited")
       head :too_many_requests
+    end
+
+    def clear_embed_render_state
+      @embed = nil
+      @embed_theme = nil
+      @recording = nil
+      @parent_recording = nil
+      @parent_recordable = nil
+      @recordable = nil
+    end
+
+    def log_rejected_public_embed(reason)
+      sample = embed_configuration.invalid_token_log_sample_rate.to_f
+      return if sample <= 0
+      return if sample < 1.0 && Kernel.rand >= sample
+      return unless defined?(Rails) && Rails.logger
+
+      ip_digest = Services::LogView.digest(request.remote_ip)
+      Rails.logger.info(
+        "[RecordingStudioEmbeddable] public embed rejected reason=#{reason} ip_digest=#{ip_digest}"
+      )
+    end
+
+    def embed_configuration
+      RecordingStudioEmbeddable.configuration
     end
 
     def cache_key_parts
