@@ -40,10 +40,8 @@ module RecordingStudioEmbeddable
       set_security_headers(access.domain_policy)
       if cache_policy[:enabled]
         set_public_cache_headers
-        unless stale?(etag: cache_key_parts, last_modified: last_modified_at, public: true)
-          capture_public_view(@embed, "not_modified", 304, cache_hit: true)
-          return
-        end
+        # A 304 means the embedder already has this document. It is not a view.
+        return unless stale?(etag: cache_key_parts, last_modified: last_modified_at, public: true)
       else
         response.cache_control.replace(no_store: true)
       end

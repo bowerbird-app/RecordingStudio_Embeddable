@@ -338,59 +338,24 @@ module RecordingStudioEmbeddable
         relation = relation.humans if @stats_viewer_filter == "humans"
         relation = relation.bots if @stats_viewer_filter == "bots"
 
-        grouped_counts =
-          if @stats_viewer_filter == "unique"
-            relation
-              .where.not(viewer_digest: nil)
-              .pluck(:viewed_at, :viewer_digest)
-              .group_by { |viewed_at, _digest| stats_bucket_key(viewed_at.in_time_zone.to_date, @stats_granularity) }
-              .transform_values { |rows| rows.map { |_viewed_at, digest| digest }.uniq.size }
-          else
-            relation
-              .pluck(:viewed_at)
-              .group_by { |value| stats_bucket_key(value.in_time_zone.to_date, @stats_granularity) }
-              .transform_values(&:size)
-          end
+        grouped_counts = RecordingStudioEmbeddable::EmbeddableViewLog.counts_by_period(
+          relation,
+          granularity: @stats_granularity,
+          unique_viewers: @stats_viewer_filter == "unique"
+        )
         periods = stats_periods(from_time.to_date, to_time.to_date, @stats_granularity)
 
         @stats_chart_categories = periods.map { |period| stats_bucket_label(period, @stats_granularity) }
         @stats_chart_points = periods.map { |period| grouped_counts.fetch(period, 0) }
         @stats_chart_total = @stats_chart_points.sum
         @stats_chart_series = [{ name: @stats_viewer_options.fetch(@stats_viewer_filter), data: @stats_chart_points }]
-        @stats_geo_rows = build_geo_rows(relation)
+        @stats_geo_rows = RecordingStudioEmbeddable::EmbeddableViewLog.country_totals(relation)
         @stats_subtitle_range =
           if @stats_custom_range
             "#{@stats_from_date.strftime('%b %-d, %Y')} to #{@stats_to_date.strftime('%b %-d, %Y')}"
           else
             @stats_range_options.fetch(@stats_range).downcase
           end
-      end
-
-      def build_geo_rows(relation)
-        geo_counts = Hash.new { |hash, key| hash[key] = { views: 0, unique_digests: {}, human_views: 0, bot_views: 0 } }
-
-        relation.pluck(:metadata, :viewer_digest, :bot).each do |metadata, viewer_digest, bot|
-          country_code = metadata.is_a?(Hash) ? metadata["country"].presence : nil
-          country = country_code || "Unknown"
-          geo_counts[country][:views] += 1
-          geo_counts[country][:unique_digests][viewer_digest] = true if viewer_digest.present?
-          if bot
-            geo_counts[country][:bot_views] += 1
-          else
-            geo_counts[country][:human_views] += 1
-          end
-        end
-
-        rows = geo_counts.map do |country, data|
-          {
-            country: country,
-            views: data[:views],
-            unique_views: data[:unique_digests].size,
-            human_views: data[:human_views],
-            bot_views: data[:bot_views]
-          }
-        end
-        rows.sort_by { |row| [-row[:views], row[:country]] }.first(15)
       end
 
       def stats_range_picker
@@ -441,14 +406,6 @@ module RecordingStudioEmbeddable
           periods
         else
           (start_date..end_date).to_a
-        end
-      end
-
-      def stats_bucket_key(date, granularity)
-        case granularity
-        when "week" then date.beginning_of_week
-        when "month" then date.beginning_of_month
-        else date
         end
       end
 

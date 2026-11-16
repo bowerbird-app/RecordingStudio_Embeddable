@@ -36,5 +36,59 @@ module RecordingStudioEmbeddable
         referer_hosts: relation.where.not(referer_host: nil).group(:referer_host).count
       }
     end
+
+    # View totals are sum(1 / sample_rate), which is the row count when every
+    # row was logged (rate 1, or no rate stored). Unique viewers stay a distinct
+    # count of logged digests. Buckets follow the app time zone, matching the
+    # previous per-row date grouping.
+    def self.counts_by_period(relation, granularity:, unique_viewers: false)
+      period = period_sql(granularity)
+      scope = unique_viewers ? relation.where.not(viewer_digest: nil) : relation
+      value_sql = unique_viewers ? "COUNT(DISTINCT viewer_digest)" : "ROUND(SUM(#{sample_weight_sql}))"
+      scope.group(Arel.sql(period)).pluck(Arel.sql(period), Arel.sql(value_sql)).each_with_object({}) do |row, counts|
+        bucket, count = row
+        counts[bucket.to_date] = count.to_i
+      end
+    end
+
+    def self.country_totals(relation, limit: 15)
+      country = country_sql
+      weight = sample_weight_sql
+      relation.group(Arel.sql(country)).order(Arel.sql("2 DESC, 1 ASC")).limit(limit).pluck(
+        Arel.sql(country),
+        Arel.sql("ROUND(COALESCE(SUM(#{weight}), 0))"),
+        Arel.sql("COUNT(DISTINCT viewer_digest)"),
+        Arel.sql("ROUND(COALESCE(SUM(#{weight}) FILTER (WHERE bot = FALSE), 0))"),
+        Arel.sql("ROUND(COALESCE(SUM(#{weight}) FILTER (WHERE bot = TRUE), 0))")
+      ).map do |name, views, unique_views, human_views, bot_views|
+        {
+          country: name,
+          views: views.to_i,
+          unique_views: unique_views.to_i,
+          human_views: human_views.to_i,
+          bot_views: bot_views.to_i
+        }
+      end
+    end
+
+    PERIOD_UNITS = { "day" => "day", "week" => "week", "month" => "month" }.freeze
+
+    def self.period_sql(granularity)
+      unit = PERIOD_UNITS.fetch(granularity.to_s, "day")
+      zone = Time.zone&.tzinfo&.name || "UTC"
+      viewed_at = "viewed_at AT TIME ZONE 'UTC' AT TIME ZONE #{connection.quote(zone)}"
+      "date_trunc(#{connection.quote(unit)}, #{viewed_at})::date"
+    end
+
+    def self.country_sql
+      "COALESCE(NULLIF(metadata->>'country', ''), 'Unknown')"
+    end
+
+    # Missing or zero rates count as one logged view, not an inflated estimate.
+    def self.sample_weight_sql
+      "1.0 / COALESCE(NULLIF((metadata->>'sample_rate')::numeric, 0), 1)"
+    end
+
+    private_class_method :period_sql, :country_sql, :sample_weight_sql
   end
 end

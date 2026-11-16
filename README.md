@@ -314,7 +314,7 @@ AdminRoot — the same contract as the RecordingStudio_api dummy.
 
 Browser-payload and API embeds do **not** count as public iframe views. `CaptureView` stays on `EmbedsController` only. That avoids double-counting when the WordPress Plugin Demo SDK refreshes or previews a payload.
 
-Unknown tokens, disabled or other not-found embeds, and rate-limited requests do not write a view log and do not enqueue `LogViewJob`. Those requests write a sampled `Rails.logger` line instead (`invalid_token_log_sample_rate`). The line has a reason and an IP digest. It does not include the raw token. A rendered embed and a 304 still log as before. A domain block (403) still logs until that IP has used its miss budget.
+Unknown tokens, disabled or other not-found embeds, and rate-limited requests do not write a view log and do not enqueue `LogViewJob`. Those requests write a sampled `Rails.logger` line instead (`invalid_token_log_sample_rate`). The line has a reason and an IP digest. It does not include the raw token. A 304 Not Modified response is not a view and is not logged. Rendered embeds, and a domain block (403) until that IP has used its miss budget, are logged according to `view_log_success_sample_rate`.
 
 ## Configuration
 
@@ -331,6 +331,7 @@ Common settings include:
 - `per_ip_rate_limit` (default 600) and `per_ip_rate_limit_window` (default 60) — every public embed, launcher, and popup request from one IP, checked before the token lookup. The key is `public-ip:` plus a digest of the IP
 - `invalid_token_rate_limit` (default 30) and `invalid_token_rate_limit_window` (default 60) — unknown, disabled, and denied public embeds, plus launcher and popup 404s, from one IP. Once the budget is spent, the next request is 429 and does not look the token up. The key is `public-ip-miss:` plus a digest of the IP
 - `invalid_token_log_sample_rate` (default `0.01`) — chance of a logger line for a rejected public embed. `0` logs nothing. `1` logs every rejection. The line never includes the raw token
+- `view_log_success_sample_rate` (default `1`) — chance `CaptureView` writes a public view, checked before the row or `LogViewJob`. `0` writes nothing. `1` writes every view. `0.1` writes about one view in ten. The rate is stored on the row as `metadata["sample_rate"]`. Stats estimate view totals as the sum of `1 / sample_rate` (a missing rate counts as 1). Unique visitors count sampled rows only. Day, week, and month buckets are `date_trunc` on `viewed_at` in the app time zone
 - `rate_limit_fail_closed` (default false) — when the limiter errors, block the request if true. The same flag covers the per-IP check, the miss check, and the token check
 - Limiters are the existing `RateLimiters` (`:rails_cache`, `:redis`, `:null`, or any object with `allow?`). Redis clients need `eval`
 - `cache_mode` and `cache_policy`
