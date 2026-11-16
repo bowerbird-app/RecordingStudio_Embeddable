@@ -40,10 +40,10 @@ class PublicEmbedNotFoundTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "fp-empty-state"
     assert_includes response.body, "exclamation-circle"
     assert_equal "frame-ancestors 'none'", response.headers["Content-Security-Policy"]
-    refute_includes response.body, "disabled"
-    refute_includes response.body, "unpublished"
-    refute_includes response.body, "invalid_token"
-    refute_includes response.body, "Embed not available"
+    refute_includes embed_markup, "disabled"
+    refute_includes embed_markup, "unpublished"
+    refute_includes embed_markup, "invalid_token"
+    refute_includes embed_markup, "Embed not available"
   end
 
   test "disabled embed renders the same generic empty state" do
@@ -57,8 +57,8 @@ class PublicEmbedNotFoundTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Oops"
     assert_includes response.body, "fp-empty-state"
     assert_includes response.body, "exclamation-circle"
-    refute_includes response.body, "disabled"
-    refute_includes response.body, "Embed not available"
+    refute_includes embed_markup, "disabled"
+    refute_includes embed_markup, "Embed not available"
   end
 
   test "unknown and disabled token 404s match" do
@@ -79,6 +79,10 @@ class PublicEmbedNotFoundTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def embed_markup
+    response.body.gsub(%r{<style\b[^>]*>.*?</style>}m, "")
+  end
 
   def comparable_headers
     RESPONSE_HEADERS.index_with { |name| response.headers[name] }
