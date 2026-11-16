@@ -89,7 +89,7 @@ module RecordingStudioEmbeddable
     end
 
     def disable_embed!(actor: nil)
-      update_embed!(actor: actor, enabled: false)
+      update_embed!(actor: actor, enabled: false, floating_enabled: false)
     end
 
     def enable_embed!(actor: nil)
@@ -107,7 +107,10 @@ module RecordingStudioEmbeddable
       attrs = attributes.symbolize_keys
       return attrs if floating_capable?
 
-      attrs.except(:floating_enabled, :floating)
+      floating_enabled = attrs[:floating_enabled]
+      attrs = attrs.except(:floating_enabled, :floating)
+      attrs[:floating_enabled] = false if floating_enabled == false
+      attrs
     end
 
     def withhold_cdn_snippet?

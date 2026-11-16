@@ -13,11 +13,13 @@ class FloatingWidgetTest < ApplicationSystemTestCase
     root = RecordingStudio.create_root_recording!(workspace, actor: @user)
     @right = root.record(Widget, actor: @user) { |widget| widget.title = "Right chat" }
     @right_embed = @right.ensure_embed!(
+      enabled: true,
       floating_enabled: true,
       floating: { "position" => "bottom-right" }
     )
     @left = root.record(Widget, actor: @user) { |widget| widget.title = "Left chat" }
     @left_embed = @left.ensure_embed!(
+      enabled: true,
       floating_enabled: true,
       floating: { "position" => "bottom-left" }
     )

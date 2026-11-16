@@ -7,9 +7,9 @@ module RecordingStudioEmbeddable
   class LaunchersController < ActionController::Base
     def show
       return head(:forbidden) if echoed_origin.nil?
-      return head(:not_found) unless floating_embed?
+      return render_rate_limited unless RequestRateLimit.allow?(key: rate_limit_key)
+      return head(:not_found) unless public_embed?
       return head(:forbidden) unless origin_allowed?
-      return render_rate_limited unless RequestRateLimit.allow?(key: "launcher:#{params[:token]}:#{request.remote_ip}")
 
       payload = Floating::LauncherConfig.call(embed: @embed, recording: @recording, request: request)
       return head(:not_found) if payload.nil?
@@ -22,7 +22,8 @@ module RecordingStudioEmbeddable
 
     def preflight
       return head(:forbidden) if echoed_origin.nil?
-      return head(:not_found) unless floating_embed?
+      return render_rate_limited unless RequestRateLimit.allow?(key: rate_limit_key)
+      return head(:not_found) unless public_embed?
       return head(:forbidden) unless origin_allowed?
 
       apply_cors!(echoed_origin)
@@ -32,10 +33,14 @@ module RecordingStudioEmbeddable
 
     private
 
-    def floating_embed?
+    def rate_limit_key
+      "launcher:#{params[:token]}:#{request.remote_ip}"
+    end
+
+    def public_embed?
       @embed = Embed.find_by(token: params[:token].to_s)
       @recording = @embed&.parent_recording
-      @embed&.floating_enabled? && @recording.present? && Floating::Capability.for(@recording).enabled?
+      Floating::PublicDocument.available?(embed: @embed, recording: @recording, request: request)
     end
 
     def echoed_origin

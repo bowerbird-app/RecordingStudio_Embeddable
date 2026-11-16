@@ -81,9 +81,9 @@ widget_recording = RecordingStudio::Recording.unscoped.find_or_create_by!(
   recordable: widget
 )
 if widget_recording.respond_to?(:ensure_embed!)
-  widget_embed = widget_recording.ensure_embed!(actor: user, enabled: false, floating_enabled: true)
+  widget_embed = widget_recording.ensure_embed!(actor: user, enabled: true, floating_enabled: true)
   RecordingStudioEmbeddable::Embed.where(id: widget_embed.id).update_all(
-    enabled: false,
+    enabled: true,
     floating_enabled: true,
     allowed_embedder_domains: ["partner.example.test", "example.com"],
     floating: {

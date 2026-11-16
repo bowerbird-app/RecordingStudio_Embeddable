@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- The public launcher and popup run `Security::PublicAccess` before they build a title or a document. A disabled embed, a trashed parent, an unpublished parent when that type requires publishing, or `public_embeds_enabled = false` is an empty 404.
+- `disable_embed!` sets `floating_enabled` to false.
+- The launcher (`GET` and `OPTIONS`) and the popup rate limit before they look up the embed token.
+
+### Upgrade notes
+- A floating button whose embed was left `enabled: false` stops responding until you enable the embed again. `disable_embed!` now turns the button off. After you enable the embed, turn floating back on if you still want the button.
+- No migration.
+
 ## [1.2.0] - 2026-11-16
 
 ### Changed

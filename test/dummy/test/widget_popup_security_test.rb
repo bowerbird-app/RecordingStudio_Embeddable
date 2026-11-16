@@ -24,7 +24,7 @@ class WidgetPopupSecurityTest < ActionDispatch::IntegrationTest
     root = RecordingStudio.create_root_recording!(workspace, actor: @user)
     @widget = root.record(Widget, actor: @user) { |widget| widget.title = "Hello widget" }
     @embed = @widget.ensure_embed!(
-      enabled: false,
+      enabled: true,
       floating_enabled: true,
       allowed_embedder_domains: ["partner.example.com"]
     )
@@ -84,7 +84,7 @@ class WidgetPopupSecurityTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "Thanks, we got your note."
     assert_equal 1, WidgetInquiry.where(widget_token: @embed.token).count
-    assert_equal false, @embed.reload.enabled
+    assert_equal true, @embed.reload.enabled
   end
 
   test "pages are not a popup and the bridge is not an embed document" do
@@ -96,5 +96,98 @@ class WidgetPopupSecurityTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "postMessage"
     refute_match(/postMessage\(\s*[^,\n]+,\s*["']\*["']\s*\)/, response.body)
+  end
+
+  test "popup hides embeds that are not public" do
+    title = "Hello widget"
+    path = widget_popup_path(@embed.token)
+    headers = { "Referer" => "https://partner.example.com/page" }
+
+    with_widget_publish_required do
+      assert_hidden_popup(path, headers, title)
+
+      publish_widget!
+      https!
+      get path, headers: headers
+      assert_response :success
+      assert_includes response.body, title
+    end
+
+    previous_public = RecordingStudioEmbeddable.configuration.public_embeds_enabled
+    RecordingStudioEmbeddable.configuration.public_embeds_enabled = false
+    assert_hidden_popup(path, headers, title)
+    RecordingStudioEmbeddable.configuration.public_embeds_enabled = previous_public
+
+    @widget.update_embed!(actor: @user, enabled: false, floating_enabled: true)
+    assert_hidden_popup(path, headers, title)
+
+    @widget.disable_embed!(actor: @user)
+    @embed.reload
+    assert_equal false, @embed.enabled
+    assert_equal false, @embed.floating_enabled
+    assert_hidden_popup(path, headers, title)
+
+    @widget.update_embed!(actor: @user, enabled: true, floating_enabled: true)
+    @widget.update_columns(trashed_at: Time.current)
+    assert_hidden_popup(path, headers, title)
+  end
+
+  test "popup rate limit runs before the embed lookup" do
+    previous_cache = Rails.cache
+    previous_limit = RecordingStudioEmbeddable.configuration.rate_limit
+    previous_limiter = RecordingStudioEmbeddable.configuration.rate_limiter
+    Rails.cache = ActiveSupport::Cache::MemoryStore.new
+    RecordingStudioEmbeddable.configuration.rate_limiting_enabled = true
+    RecordingStudioEmbeddable.configuration.rate_limiter = :rails_cache
+    RecordingStudioEmbeddable.configuration.rate_limit = 1
+
+    path = widget_popup_path("missing-#{SecureRandom.hex(4)}")
+    https!
+    get path
+    assert_response :not_found
+    assert_empty response.body
+
+    https!
+    get path
+    assert_response :too_many_requests
+    refute_includes response.body, "Hello widget"
+  ensure
+    Rails.cache = previous_cache if previous_cache
+    RecordingStudioEmbeddable.configuration.rate_limit = previous_limit if previous_limit
+    RecordingStudioEmbeddable.configuration.rate_limiter = previous_limiter if previous_limiter
+  end
+
+  private
+
+  def assert_hidden_popup(path, headers, title)
+    https!
+    get path, headers: headers
+    assert_response :not_found
+    assert_empty response.body
+    refute_includes response.body, title
+  end
+
+  def with_widget_publish_required
+    options = widget_embeddable_options
+    previous = options[:require_publishable]
+    options[:require_publishable] = true
+    yield
+  ensure
+    options[:require_publishable] = previous if options
+  end
+
+  def widget_embeddable_options
+    Widget.recording_studio_capabilities
+          .find { |candidate| candidate.respond_to?(:key) && candidate.key.to_sym == :embeddable }
+          .options
+  end
+
+  def publish_widget!
+    result = RecordingStudioPublishable::Services::Publishables::Update.call(
+      parent_recording: @widget,
+      actor: @user,
+      attributes: { slug: "popup-widget-#{SecureRandom.hex(3)}", status: "published" }
+    )
+    raise result.error unless result.success?
   end
 end

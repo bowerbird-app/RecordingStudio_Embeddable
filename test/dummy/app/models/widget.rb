@@ -3,6 +3,13 @@
 class Widget < ApplicationRecord
   recording_studio_recordable label: "Widget", root: false, allowed_parent_types: ["Workspace", "Folder"]
 
+  include RecordingStudio::Capabilities::Publishable.to(
+    public_controller: "widget_popups",
+    public_action: :show,
+    schedule: false,
+    seo: false
+  )
+
   include RecordingStudio::Capabilities::Embeddable.to(
     embed_controller: "widgets",
     embed_action: :embed,

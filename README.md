@@ -90,13 +90,13 @@ article.embed_code(host: "example.com")
 
 `ensure_embed!` creates the embed through `Recording#record` on the parent. Pass `actor:`, or set `RecordingStudio` `config.actor`. The embed recording gets a `created` event for that actor, and `before_record` / `after_record` hooks run. A second call returns the same embed.
 
-`update_embed!`, `enable_embed!`, and `disable_embed!` write the same embed row in place, so the public token stays put. Each of those calls appends `embeddable.embed.updated` on the embed recording, with the actor and `embed_id` in the event metadata. A logging failure raises.
+`update_embed!`, `enable_embed!`, and `disable_embed!` write the same embed row in place, so the public token stays put. Each of those calls appends `embeddable.embed.updated` on the embed recording, with the actor and `embed_id` in the event metadata. A logging failure raises. `disable_embed!` sets `enabled` and `floating_enabled` to false.
 
 `embed_code` is the iframe markup. Put it in the page HTML where the recording should appear, such as inside a page or a blog post. The floating launcher is separate and belongs in the page head.
 
 ## Floating launcher
 
-Inline embeds and the floating launcher are separate. `enabled` still switches the public document (iframe or CDN). `floating_enabled` switches the launcher. Types that do not opt in never float and never show launcher controls. Page and Article in the dummy app stay inline-only.
+The public document and the floating launcher share one access check. `enabled` has to be on for the iframe, the CDN document, the launcher, and the popup. `floating_enabled` switches the button. `disable_embed!` turns both off. Types that do not opt in never float and never show launcher controls. Page and Article in the dummy app stay inline-only. Management preview still draws the button so you can place it before the embed is public.
 
 ```ruby
 include RecordingStudio::Capabilities::Embeddable.to(
@@ -156,7 +156,9 @@ The public config endpoint is:
 
 `GET /recording_studio_embeddable/embeds/:token/launcher`
 
-The JSON `id` is `embed.token`. Browsers must send an `Origin` header. The response echoes that exact origin in `Access-Control-Allow-Origin` when the domain policy allows it, and never `*`. A missing or rejected origin fails closed, with no credential header. The endpoint is rate limited. Management forms are the only place that can turn floating on; the public embed request cannot.
+The JSON `id` is `embed.token`. Browsers must send an `Origin` header. The response echoes that exact origin in `Access-Control-Allow-Origin` when the domain policy allows it, and never `*`. A missing or rejected origin fails closed, with no credential header. The endpoint rate limit runs before the embed lookup. Management forms are the only place that can turn floating on; the public embed request cannot.
+
+The launcher and the popup call `Security::PublicAccess` before they build a title or a document. That is the same check as the public embed: `public_embeds_enabled`, `embed.enabled?`, an embeddable parent, and `require_publishable` when the type asks for it. A trashed parent is a bare 404 as well. Failure is an empty 404, with no title. The domain allowlist and the CORS echo stay in place. `OPTIONS` uses the same gate and the same rate limit.
 
 `RenderPayload`, `HtmlSanitizer`, and `PublishEmbedToCdn` do not read floating settings. Turning the launcher on does not change the inline document or the CDN object.
 
@@ -176,7 +178,7 @@ On a host page, render the same launcher without the iframe embed code:
 <%= recording_studio_floating_widget(recording: recording) %>
 ```
 
-That helper inlines the same JSON the endpoint would return, so a same-origin page does not depend on a cross-origin fetch. Copy the external snippet from the floating screen with `recording_studio_floating_widget_snippet` when the launcher is on. The Embed screen keeps only the inline embed code. Inline `enabled` and the launcher stay independent: a page can float while the public document is off, and a Page or Article never gets either control.
+That helper inlines the same JSON the endpoint would return, so a same-origin page does not depend on a cross-origin fetch. It uses the same public gate, except `preview: true` on the management screen. Copy the external snippet from the floating screen with `recording_studio_floating_widget_snippet` when the launcher is on. The Embed screen keeps only the inline embed code. A Page or Article never gets either control.
 
 When that JSON includes `sandbox` or `allow`, `widget.js` sets those attributes on the popup iframe. When it does not, the iframe is `sandbox="allow-scripts allow-forms allow-same-origin"` and has no `allow` attribute.
 
@@ -185,7 +187,7 @@ When that JSON includes `sandbox` or `allow`, `widget.js` sets those attributes 
 Include `RecordingStudioEmbeddable::FloatingWidget::Interactive` on the host controller that renders `floating_popup`. Inherit `ActionController::Base` (or another controller that does not load the host session). The concern:
 
 - Sets `Content-Security-Policy: frame-ancestors` from the embed domain allowlist and drops `X-Frame-Options`.
-- Sets `Cache-Control: private, no-store` and rate limits the popup.
+- Rate limits the popup before the embed lookup, then sets `Cache-Control: private, no-store`.
 - Issues `recording_studio_embeddable_widget_csrf` (`HttpOnly`, `Secure`, `SameSite=None`, `Partitioned`), path-scoped to the popup. It does not read or write the host session cookie.
 - Renders `recording_studio_widget_bridge_tag` so the iframe can `postMessage` `close` and `resize` to the parent origin only. The target origin is never `*`.
 
@@ -204,7 +206,7 @@ Capable types get a screen next to Style. Its tab, heading, form labels, snippet
 | `floating: true` | recordable capability | Opt in. Off types never float. |
 | `floating_popup` | capability | `{ controller:, action: }`. Route accepts `:token`. |
 | `floating_options` | capability | `label`, `edge_spacing`, `popup_width`, `popup_height`, optional `icon_url`, optional `sandbox`, optional `allow`. Overrides `config.floating_defaults` for that type. |
-| `floating_enabled` | embed column | Show switch. Independent of `enabled`. |
+| `floating_enabled` | embed column | Show switch. The public launcher also needs `enabled`. `disable_embed!` clears both. |
 | `floating` | embed jsonb | `position` only. `sandbox` and `allow` stored here are rejected. |
 | `config.floating_defaults` | initializer | App-wide label, spacing, panel size, and icon. Optional `sandbox` and `allow`. `label` defaults to "Floating button". Omit `sandbox` and `allow` to keep the built-in popup iframe. |
 | `config.floating_icon_hosts` | initializer | Extra icon hosts. Attachable direct URLs are also allowed. |

@@ -42,6 +42,8 @@ module RecordingStudioEmbeddable
       end
 
       def prepare_floating_widget!
+        return render_widget_rate_limited unless widget_rate_limit_allows?
+
         @recording_studio_widget_embed = Embed.find_by(token: params[:token].to_s)
         @recording_studio_widget_recording = @recording_studio_widget_embed&.parent_recording
         return head(:not_found) unless floating_widget_document?
@@ -51,17 +53,24 @@ module RecordingStudioEmbeddable
         response.delete_header("X-Frame-Options")
         response.set_header("X-Content-Type-Options", "nosniff")
         @recording_studio_widget_parent_origin = resolved_parent_origin
+      end
 
-        return if RequestRateLimit.allow?(key: "widget:#{params[:token]}:#{request.remote_ip}")
+      def widget_rate_limit_allows?
+        RequestRateLimit.allow?(key: "widget:#{params[:token]}:#{request.remote_ip}")
+      end
 
+      def render_widget_rate_limited
+        response.set_header("Cache-Control", "private, no-store")
         response.set_header("Retry-After", RecordingStudioEmbeddable.configuration.rate_limit_window.to_i.to_s)
         head :too_many_requests
       end
 
       def floating_widget_document?
-        embed = @recording_studio_widget_embed
-        recording = @recording_studio_widget_recording
-        embed&.floating_enabled? && recording.present? && Floating::Capability.for(recording).enabled?
+        Floating::PublicDocument.available?(
+          embed: @recording_studio_widget_embed,
+          recording: @recording_studio_widget_recording,
+          request: request
+        )
       end
 
       def widget_frame_ancestors

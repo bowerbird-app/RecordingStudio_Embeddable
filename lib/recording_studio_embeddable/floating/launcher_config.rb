@@ -17,8 +17,8 @@ module RecordingStudioEmbeddable
 
       def call
         return unless embed
-        return unless preview || embed.floating_enabled?
         return unless capability.enabled?
+        return unless preview || PublicDocument.available?(embed: embed, recording: recording, request: request)
 
         validated = Schema.validate(embed.read_attribute(:floating), recording: recording)
         return unless validated.valid?
