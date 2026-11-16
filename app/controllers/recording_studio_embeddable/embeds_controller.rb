@@ -2,6 +2,8 @@
 
 module RecordingStudioEmbeddable
   class EmbedsController < ActionController::Base
+    include PublicRequestLimits
+
     layout "recording_studio_embeddable/embed"
     helper RecordingStudioEmbeddable::EmbedLayoutHelper
 
@@ -59,28 +61,10 @@ module RecordingStudioEmbeddable
       params[:token].to_s
     end
 
-    def enforce_ip_limit
-      return if RequestRateLimit.public_ip_allowed?(request.remote_ip)
-
-      render_rate_limited(window: embed_configuration.per_ip_rate_limit_window)
-    end
-
-    def enforce_miss_limit
-      return unless RequestRateLimit.public_miss_blocked?(request.remote_ip)
-
-      render_rate_limited(window: embed_configuration.invalid_token_rate_limit_window)
-    end
-
     def enforce_token_limit
       return if RequestRateLimit.public_token_allowed?(embed_token, request.remote_ip)
 
       render_rate_limited(window: embed_configuration.rate_limit_window)
-    end
-
-    def record_token_miss
-      return if RequestRateLimit.record_public_miss(request.remote_ip)
-
-      render_rate_limited(window: embed_configuration.invalid_token_rate_limit_window)
     end
 
     def set_security_headers(domain_policy)

@@ -5,6 +5,7 @@ module RecordingStudioEmbeddable
     # Host popup controllers include this. It does not use the app session or current_user.
     module Interactive
       extend ActiveSupport::Concern
+      include PublicRequestLimits
 
       included do
         protect_from_forgery with: :exception, store: CsrfCookieStore.new
@@ -42,11 +43,17 @@ module RecordingStudioEmbeddable
       end
 
       def prepare_floating_widget!
-        return render_widget_rate_limited unless widget_rate_limit_allows?
+        enforce_ip_limit
+        return if performed?
+
+        enforce_miss_limit
+        return if performed?
+
+        return render_rate_limited unless widget_rate_limit_allows?
 
         @recording_studio_widget_embed = Embed.find_by(token: params[:token].to_s)
         @recording_studio_widget_recording = @recording_studio_widget_embed&.parent_recording
-        return head(:not_found) unless floating_widget_document?
+        return not_found_after_miss unless floating_widget_document?
 
         response.set_header("Cache-Control", "private, no-store")
         response.set_header("Content-Security-Policy", "frame-ancestors #{widget_frame_ancestors}")
@@ -59,9 +66,9 @@ module RecordingStudioEmbeddable
         RequestRateLimit.allow?(key: "widget:#{params[:token]}:#{request.remote_ip}")
       end
 
-      def render_widget_rate_limited
+      def render_rate_limited(window: RecordingStudioEmbeddable.configuration.rate_limit_window)
         response.set_header("Cache-Control", "private, no-store")
-        response.set_header("Retry-After", RecordingStudioEmbeddable.configuration.rate_limit_window.to_i.to_s)
+        response.set_header("Retry-After", window.to_i.to_s)
         head :too_many_requests
       end
 

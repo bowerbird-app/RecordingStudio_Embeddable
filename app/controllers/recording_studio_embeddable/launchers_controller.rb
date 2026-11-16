@@ -5,14 +5,23 @@ module RecordingStudioEmbeddable
   # Missing Origin fails closed. This response is not the embed document and
   # is not published to Artifacts.
   class LaunchersController < ActionController::Base
+    include PublicRequestLimits
+
     def show
       return head(:forbidden) if echoed_origin.nil?
+
+      enforce_ip_limit
+      return if performed?
+
+      enforce_miss_limit
+      return if performed?
+
       return render_rate_limited unless RequestRateLimit.allow?(key: rate_limit_key)
-      return head(:not_found) unless public_embed?
+      return not_found_after_miss unless public_embed?
       return head(:forbidden) unless origin_allowed?
 
       payload = Floating::LauncherConfig.call(embed: @embed, recording: @recording, request: request)
-      return head(:not_found) if payload.nil?
+      return not_found_after_miss if payload.nil?
 
       apply_cors!(echoed_origin)
       response.set_header("Cache-Control", "private, no-store")
@@ -22,8 +31,15 @@ module RecordingStudioEmbeddable
 
     def preflight
       return head(:forbidden) if echoed_origin.nil?
+
+      enforce_ip_limit
+      return if performed?
+
+      enforce_miss_limit
+      return if performed?
+
       return render_rate_limited unless RequestRateLimit.allow?(key: rate_limit_key)
-      return head(:not_found) unless public_embed?
+      return not_found_after_miss unless public_embed?
       return head(:forbidden) unless origin_allowed?
 
       apply_cors!(echoed_origin)
@@ -73,10 +89,10 @@ module RecordingStudioEmbeddable
       response.headers.delete("Access-Control-Allow-Credentials")
     end
 
-    def render_rate_limited
+    def render_rate_limited(window: RecordingStudioEmbeddable.configuration.rate_limit_window)
       apply_cors!(echoed_origin)
       response.set_header("Cache-Control", "private, no-store")
-      response.set_header("Retry-After", RecordingStudioEmbeddable.configuration.rate_limit_window.to_i.to_s)
+      response.set_header("Retry-After", window.to_i.to_s)
       head :too_many_requests
     end
   end

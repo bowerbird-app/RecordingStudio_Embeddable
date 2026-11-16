@@ -15,6 +15,9 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
       rate_limiting_enabled: RecordingStudioEmbeddable.configuration.rate_limiting_enabled,
       rate_limit: RecordingStudioEmbeddable.configuration.rate_limit,
       rate_limiter: RecordingStudioEmbeddable.configuration.rate_limiter,
+      per_ip_rate_limit: RecordingStudioEmbeddable.configuration.per_ip_rate_limit,
+      invalid_token_rate_limit: RecordingStudioEmbeddable.configuration.invalid_token_rate_limit,
+      invalid_token_rate_limit_window: RecordingStudioEmbeddable.configuration.invalid_token_rate_limit_window,
       floating_icon_hosts: RecordingStudioEmbeddable.configuration.floating_icon_hosts
     }
     @previous_cache = Rails.cache
@@ -260,6 +263,37 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
     assert_empty response.body
   end
 
+  test "random tokens on the launcher hit the miss budget" do
+    Rails.cache = ActiveSupport::Cache::MemoryStore.new
+    configuration = RecordingStudioEmbeddable.configuration
+    configuration.rate_limiting_enabled = true
+    configuration.rate_limiter = :rails_cache
+    configuration.rate_limit = 100
+    configuration.per_ip_rate_limit = 100
+    configuration.invalid_token_rate_limit = 3
+    configuration.invalid_token_rate_limit_window = 45
+
+    headers = { "Origin" => "https://partner.example.com" }
+    3.times do |index|
+      get "/recording_studio_embeddable/embeds/missing-#{index}-#{SecureRandom.hex(4)}/launcher",
+          headers: headers,
+          env: { "REMOTE_ADDR" => "203.0.113.40" }
+      assert_response :not_found
+      assert_empty response.body
+    end
+
+    queries = embed_queries do
+      get "/recording_studio_embeddable/embeds/missing-over-#{SecureRandom.hex(4)}/launcher",
+          headers: headers,
+          env: { "REMOTE_ADDR" => "203.0.113.40" }
+    end
+
+    assert_response :too_many_requests
+    assert_equal "45", response.headers["Retry-After"]
+    assert_empty response.body
+    assert_empty queries
+  end
+
   test "forced floating flag on a page still does not launch" do
     RecordingStudioEmbeddable::Embed.where(id: @page_embed.id).update_all(
       floating_enabled: true,
@@ -273,6 +307,16 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def embed_queries
+    queries = []
+    callback = lambda do |_name, _started, _finished, _id, payload|
+      sql = payload[:sql].to_s
+      queries << sql if sql.match?(/recording_studio_embeddable_embeds/i)
+    end
+    ActiveSupport::Notifications.subscribed(callback, "sql.active_record") { yield }
+    queries
+  end
 
   def assert_hidden_launcher(path, headers, title)
     get path, headers: headers

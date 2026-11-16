@@ -156,9 +156,9 @@ The public config endpoint is:
 
 `GET /recording_studio_embeddable/embeds/:token/launcher`
 
-The JSON `id` is `embed.token`. Browsers must send an `Origin` header. The response echoes that exact origin in `Access-Control-Allow-Origin` when the domain policy allows it, and never `*`. A missing or rejected origin fails closed, with no credential header. The endpoint rate limit runs before the embed lookup. Management forms are the only place that can turn floating on; the public embed request cannot.
+The JSON `id` is `embed.token`. Browsers must send an `Origin` header. The response echoes that exact origin in `Access-Control-Allow-Origin` when the domain policy allows it, and never `*`. A missing or rejected origin fails closed, with no credential header. The launcher checks the shared public per-IP limit and the invalid-token miss budget before it looks up the embed token, then the launcher token limit. A 404 spends that miss budget. Management forms are the only place that can turn floating on; the public embed request cannot.
 
-The launcher and the popup call `Security::PublicAccess` before they build a title or a document. That is the same check as the public embed: `public_embeds_enabled`, `embed.enabled?`, an embeddable parent, and `require_publishable` when the type asks for it. A trashed parent is a bare 404 as well. Failure is an empty 404, with no title. The domain allowlist and the CORS echo stay in place. `OPTIONS` uses the same gate and the same rate limit.
+The launcher and the popup call `Security::PublicAccess` before they build a title or a document. That is the same check as the public embed: `public_embeds_enabled`, `embed.enabled?`, an embeddable parent, and `require_publishable` when the type asks for it. A trashed parent is a bare 404 as well. Failure is an empty 404, with no title. The domain allowlist and the CORS echo stay in place. `OPTIONS` uses the same gate, the same per-IP limit, and the same miss budget. A preflight 404 spends the miss budget too.
 
 `RenderPayload`, `HtmlSanitizer`, and `PublishEmbedToCdn` do not read floating settings. Turning the launcher on does not change the inline document or the CDN object.
 
@@ -187,7 +187,7 @@ When that JSON includes `sandbox` or `allow`, `widget.js` sets those attributes 
 Include `RecordingStudioEmbeddable::FloatingWidget::Interactive` on the host controller that renders `floating_popup`. Inherit `ActionController::Base` (or another controller that does not load the host session). The concern:
 
 - Sets `Content-Security-Policy: frame-ancestors` from the embed domain allowlist and drops `X-Frame-Options`.
-- Rate limits the popup before the embed lookup, then sets `Cache-Control: private, no-store`.
+- Checks the same per-IP limit and invalid-token miss budget as the public embed before the embed lookup, then the popup token limit. A 404 spends that miss budget. A response that gets past the limit sets `Cache-Control: private, no-store`.
 - Issues `recording_studio_embeddable_widget_csrf` (`HttpOnly`, `Secure`, `SameSite=None`, `Partitioned`), path-scoped to the popup. It does not read or write the host session cookie.
 - Renders `recording_studio_widget_bridge_tag` so the iframe can `postMessage` `close` and `resize` to the parent origin only. The target origin is never `*`.
 
@@ -328,8 +328,8 @@ Common settings include:
 - `require_domain_allowlist` and `allow_any_domain`
 - `require_publishable` and `fallback_to_publishable_renderer`
 - `rate_limiting_enabled`, `rate_limiter`, `rate_limit` (default 120), and `rate_limit_window` (default 60) — one embed token plus the IP
-- `per_ip_rate_limit` (default 600) and `per_ip_rate_limit_window` (default 60) — every public embed request from one IP, checked before the token lookup. The key is `public-ip:` plus a digest of the IP
-- `invalid_token_rate_limit` (default 30) and `invalid_token_rate_limit_window` (default 60) — unknown, disabled, and denied tokens from one IP. Once the budget is spent, the next request is 429 and does not look the token up. The key is `public-ip-miss:` plus a digest of the IP
+- `per_ip_rate_limit` (default 600) and `per_ip_rate_limit_window` (default 60) — every public embed, launcher, and popup request from one IP, checked before the token lookup. The key is `public-ip:` plus a digest of the IP
+- `invalid_token_rate_limit` (default 30) and `invalid_token_rate_limit_window` (default 60) — unknown, disabled, and denied public embeds, plus launcher and popup 404s, from one IP. Once the budget is spent, the next request is 429 and does not look the token up. The key is `public-ip-miss:` plus a digest of the IP
 - `invalid_token_log_sample_rate` (default `0.01`) — chance of a logger line for a rejected public embed. `0` logs nothing. `1` logs every rejection. The line never includes the raw token
 - `rate_limit_fail_closed` (default false) — when the limiter errors, block the request if true. The same flag covers the per-IP check, the miss check, and the token check
 - Limiters are the existing `RateLimiters` (`:rails_cache`, `:redis`, `:null`, or any object with `allow?`). Redis clients need `eval`
