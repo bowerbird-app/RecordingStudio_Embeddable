@@ -95,16 +95,19 @@ module RecordingStudioEmbeddable
       end
 
       def publish_via_artifacts(html, frame_ancestors:)
+        stylesheet_digest = EmbedStylesheet.digest
         args = {
           body: html,
           content_type: CONTENT_TYPE,
           source: {
             "gem" => "recording_studio_embeddable",
-            "external_id" => embed.token
+            "external_id" => embed.token,
+            "stylesheet_digest" => stylesheet_digest
           },
           metadata: {
             "embed_token" => embed.token,
-            "frame_ancestors" => Array(frame_ancestors)
+            "frame_ancestors" => Array(frame_ancestors),
+            "stylesheet_digest" => stylesheet_digest
           },
           synchronous: synchronous
         }
@@ -167,7 +170,8 @@ module RecordingStudioEmbeddable
           artifact_id: artifact&.id,
           public_url: public_url,
           object_key: artifact&.try(:object_key),
-          etag: artifact&.try(:etag)
+          etag: artifact&.try(:etag),
+          stylesheet_digest: EmbedStylesheet.digest
         )
       end
 

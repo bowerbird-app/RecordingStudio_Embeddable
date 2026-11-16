@@ -53,7 +53,10 @@ module RecordingStudioEmbeddable
       :cdn_variant_retry_wait,
       :cdn_storage,
       :cdn_purger,
-      :floating_icon_hosts
+      :floating_icon_hosts,
+      :embed_document_theme,
+      :embed_view_paths,
+      :embed_stylesheet_paths
     )
     attr_reader :layout, :floating_defaults
 
@@ -136,6 +139,16 @@ module RecordingStudioEmbeddable
       # Hosts that may supply a launcher icon. Attachable direct URLs on the
       # parent recording are allowed as well. Anything else is rejected.
       @floating_icon_hosts = []
+      # data-theme on the embed document. The inlined stylesheet carries the
+      # FlatPack theme variables; this name selects which block applies.
+      @embed_document_theme = "rounded"
+      # Extra files or directories the embed Tailwind build scans, on top of
+      # the gem embed templates and FlatPack components. Rebuild after changing
+      # these: bin/rails recording_studio_embeddable:embed_css:build
+      @embed_view_paths = []
+      # Extra CSS inlined into the embed stylesheet (a host theme file).
+      # Rebuild after changing these.
+      @embed_stylesheet_paths = []
       # App-wide launcher spacing, panel size, icon, and management label.
       # A type can override these with floating_options: on Embeddable.to.
       # Optional sandbox and allow on either hash set the popup iframe.
@@ -202,7 +215,10 @@ module RecordingStudioEmbeddable
         prune_views_after: prune_views_after,
         cdn_withhold_snippet_until_published: cdn_withhold_snippet_until_published,
         floating_icon_hosts: floating_icon_hosts,
-        floating_defaults: floating_defaults
+        floating_defaults: floating_defaults,
+        embed_document_theme: embed_document_theme,
+        embed_view_paths: Array(embed_view_paths).map(&:to_s),
+        embed_stylesheet_paths: Array(embed_stylesheet_paths).map(&:to_s)
       }
     end
   end

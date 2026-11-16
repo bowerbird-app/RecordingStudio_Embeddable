@@ -23,6 +23,7 @@ Metrics/ClassLength:
     - 'lib/recording_studio_embeddable/configuration.rb'
     - 'lib/recording_studio_embeddable/request_rate_limit.rb'
     - 'lib/recording_studio_embeddable/renderer.rb'
+    - 'lib/recording_studio_embeddable/embed_stylesheet.rb'
     - 'app/controllers/recording_studio_embeddable/embeds_controller.rb'
     - 'app/controllers/recording_studio_embeddable/management/embeds_controller.rb'
     - 'app/models/recording_studio_embeddable/**/*'

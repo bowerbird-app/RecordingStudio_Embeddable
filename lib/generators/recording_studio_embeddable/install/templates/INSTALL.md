@@ -12,6 +12,10 @@ Next steps:
    and `config.embed_url_strategy = :cdn`. See docs/CDN.md.
    Embeddable does not ship production R2 secrets. Leave `artifacts_enabled`
    false to serve embeds only from the Rails mount (Artifacts stays installed).
-6. Run `bin/rails tailwindcss:build` if you use Tailwind CSS.
+6. Run `bin/rails recording_studio_embeddable:embed_css:build` so public embeds
+   inline their stylesheet. Add host embed partials to `config.embed_view_paths`
+   first when those partials use Tailwind classes of their own. After a later
+   stylesheet change, run `bin/rails recording_studio_embeddable:republish_embeds`
+   so CDN embeds publish the new digest. See docs/CDN.md.
 7. Mount routes are added at the configured mount path. Adjust auth, layout, and current actor integration to match your host app.
 8. Link embed management with `recording_studio_embeddable_management_path(recording)` and `data-turbo-prefetch="false"`. `management_authorizer` receives `recording:` and must allow `:edit` on that recording.

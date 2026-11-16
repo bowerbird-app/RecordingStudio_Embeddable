@@ -129,7 +129,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "1.1.0", RecordingStudioEmbeddable::VERSION
+    assert_equal "1.2.0", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -693,8 +693,61 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   def test_public_embed_layout_stays_chrome_free_with_rounded_theme
     source = File.read(File.expand_path("../app/views/layouts/recording_studio_embeddable/embed.html.erb", __dir__))
 
-    assert_includes source, '<html data-theme="rounded">'
+    assert_includes source, "embed_document_theme"
+    assert_includes source, "document_styles"
+    refute_includes source, "stylesheet_link_tag"
+    refute_includes source, "javascript_importmap_tags"
     refute_includes source, "recording_studio/default_layout"
+    assert_equal "rounded", RecordingStudioEmbeddable::Configuration.new.embed_document_theme
+  end
+
+  def test_embed_stylesheet_scans_gem_views_flatpack_and_host_paths
+    dir = Dir.mktmpdir("embed-views")
+    File.write(File.join(dir, "embed.html.erb"), "<p class=\"host-only\">Hi</p>")
+    RecordingStudioEmbeddable.configure { |config| config.embed_view_paths = [dir] }
+
+    paths = RecordingStudioEmbeddable::EmbedStylesheet.source_paths.map(&:to_s)
+
+    assert_includes paths, dir
+    assert(paths.any? { |path| path.end_with?("/embeds") })
+    assert(paths.any? { |path| path.end_with?("app/components") })
+  ensure
+    RecordingStudioEmbeddable.reset_configuration!
+    FileUtils.remove_entry(dir) if dir
+  end
+
+  def test_embed_stylesheet_rejects_a_missing_host_view_path
+    missing = File.join(Dir.tmpdir, "missing-embed-views-#{SecureRandom.hex(4)}")
+    RecordingStudioEmbeddable.configure { |config| config.embed_view_paths = [missing] }
+
+    error = assert_raises(ArgumentError) { RecordingStudioEmbeddable::EmbedStylesheet.source_paths }
+    assert_includes error.message, missing
+  ensure
+    RecordingStudioEmbeddable.reset_configuration!
+  end
+
+  def test_stylesheet_digest_changes_the_public_cache_key
+    controller = RecordingStudioEmbeddable::EmbedsController.new
+    controller.instance_variable_set(:@embed, "embed")
+    controller.instance_variable_set(:@parent_recording, "recording")
+    controller.instance_variable_set(:@parent_recordable, "recordable")
+    controller.instance_variable_set(:@options, {})
+    klass = RecordingStudioEmbeddable::EmbedStylesheet
+    original = klass.method(:digest)
+    klass.define_singleton_method(:digest) { "digest-aaa" }
+    first = controller.send(:cache_key_parts)
+    klass.define_singleton_method(:digest) { "digest-bbb" }
+    second = controller.send(:cache_key_parts)
+
+    assert_includes first, "digest-aaa"
+    assert_includes second, "digest-bbb"
+    refute_equal first, second
+  ensure
+    klass.define_singleton_method(:digest, original) if klass && original
+  end
+
+  def test_republish_stale_embeds_without_a_database_is_a_no_op
+    assert_equal 0, RecordingStudioEmbeddable::EmbedStylesheet.republish_stale_embeds!
   end
 
   def test_dummy_home_uses_flatpack_dropdown_actions

@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-16
+
+### Changed
+- The public embed document inlines one stylesheet. It no longer links the host `application`, `flat_pack/variables`, `flat_pack/application`, or `tailwind` stylesheets, and it no longer loads the import map.
+- That stylesheet is a Tailwind build of the gem embed templates, FlatPack components, and `config.embed_view_paths`, plus FlatPack theme variables and component rules. Inter is inlined. Google Fonts links stay when an embed asks for a Google family.
+- `config.embed_document_theme` (default `rounded`) sets `data-theme` on the embed document.
+- The stylesheet digest is part of the public HTTP cache key and the Artifacts publish source (`stylesheet_digest`). `bin/rails recording_studio_embeddable:republish_embeds` republishes CDN embeds when that digest changes. An origin render of a CDN embed enqueues the same republish.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `1.2.0`. No migration.
+- Build the embed stylesheet on deploy: `bin/rails recording_studio_embeddable:embed_css:build`. In this repo the dummy runs that at the end of `tailwindcss:build`.
+- Add host embed partials that use their own Tailwind classes to `config.embed_view_paths`, and a host theme file to `config.embed_stylesheet_paths`. Rebuild after either change.
+- Set `config.embed_document_theme` when the host FlatPack theme is not `rounded`.
+- Run `bin/rails recording_studio_embeddable:republish_embeds` after a stylesheet build so CDN embeds pick up the new digest. Until then, a published embed keeps the previous HTML.
+- Embeds do not load host JavaScript. An embed type that needs script has to ship that script inside the document.
+
 ## [1.1.0] - 2026-11-16
 
 ### Changed

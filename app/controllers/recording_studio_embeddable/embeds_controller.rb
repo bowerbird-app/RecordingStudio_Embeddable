@@ -48,6 +48,7 @@ module RecordingStudioEmbeddable
 
       capture_public_view(@embed, "rendered", 200)
       @embed_theme = Renderer.embed_theme_for(@parent_recording, embed: @embed)
+      enqueue_stylesheet_republish
       render Renderer.resolve(@parent_recording, @embed),
              formats: [:html],
              layout: Renderer.layout_for(@parent_recording, @embed)
@@ -178,8 +179,22 @@ module RecordingStudioEmbeddable
         @parent_recordable,
         @options,
         RecordingStudioEmbeddable.configuration.cache_mode,
-        RecordingStudioEmbeddable.configuration.public_embed_cache_control
+        RecordingStudioEmbeddable.configuration.public_embed_cache_control,
+        RecordingStudioEmbeddable::EmbedStylesheet.digest
       ]
+    end
+
+    # A CDN embed served from the origin republishes when the stylesheet
+    # digest no longer matches the copy stored at the last publish.
+    def enqueue_stylesheet_republish
+      return unless @embed.respond_to?(:cdn_url_strategy?) && @embed.cdn_url_strategy?
+
+      stored = @embed.metadata.dig("artifact", "stylesheet_digest") if @embed.metadata.respond_to?(:dig)
+      return if stored.present? && stored == RecordingStudioEmbeddable::EmbedStylesheet.digest
+
+      @embed.enqueue_cdn_publish!
+    rescue StandardError
+      nil
     end
 
     def capture_public_view(embed, status, status_code, cache_hit: false, rate_limited: false, metadata: {})

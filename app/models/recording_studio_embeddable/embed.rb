@@ -126,7 +126,7 @@ module RecordingStudioEmbeddable
       artifact_metadata["published_at"].present? || cdn_metadata["published_at"].present?
     end
 
-    def mark_cdn_published!(artifact_id:, public_url:, object_key: nil, etag: nil)
+    def mark_cdn_published!(artifact_id:, public_url:, object_key: nil, etag: nil, stylesheet_digest: nil)
       stamp = Time.now.utc.iso8601
       next_metadata = (metadata || {}).deep_dup
       next_metadata["artifact"] = (next_metadata["artifact"] || {}).merge(
@@ -134,7 +134,8 @@ module RecordingStudioEmbeddable
         "public_url" => public_url,
         "object_key" => object_key,
         "etag" => etag,
-        "published_at" => stamp
+        "published_at" => stamp,
+        "stylesheet_digest" => stylesheet_digest
       ).compact
       # Keep a thin cdn mirror for older readers; Artifacts is the source of truth.
       next_metadata["cdn"] = (next_metadata["cdn"] || {}).merge(

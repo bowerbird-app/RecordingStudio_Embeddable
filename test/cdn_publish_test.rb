@@ -71,7 +71,7 @@ class CdnPublishTest < Minitest::Test
       nil
     end
 
-    def mark_cdn_published!(artifact_id:, public_url:, object_key: nil, etag: nil)
+    def mark_cdn_published!(artifact_id:, public_url:, object_key: nil, etag: nil, stylesheet_digest: nil)
       stamp = Time.now.utc.iso8601
       @metadata = (@metadata || {}).deep_dup
       @metadata["artifact"] = {
@@ -79,6 +79,7 @@ class CdnPublishTest < Minitest::Test
         "public_url" => public_url,
         "object_key" => object_key,
         "etag" => etag,
+        "stylesheet_digest" => stylesheet_digest,
         "published_at" => stamp
       }.compact
       @published_calls << @metadata["artifact"]
@@ -240,6 +241,33 @@ class CdnPublishTest < Minitest::Test
         assert_includes @bodies[embed.artifact_id], "v2 other.example"
       end
     end
+  end
+
+  def test_stylesheet_digest_is_part_of_the_publish_key
+    embed = build_embed(token: "css-token")
+    klass = RecordingStudioEmbeddable::EmbedStylesheet
+    original = klass.method(:digest)
+    klass.define_singleton_method(:digest) { "digest-aaa" }
+    stub_document_render("<html><head></head><body>css</body></html>") do
+      first = publish_embed(embed)
+      assert first.success?, first.error.to_s
+
+      source = @publish_calls.last[:source]
+      metadata = @publish_calls.last[:metadata]
+      assert_equal "digest-aaa", source["stylesheet_digest"]
+      assert_equal "digest-aaa", metadata["stylesheet_digest"]
+      assert_equal "digest-aaa", embed.metadata.dig("artifact", "stylesheet_digest")
+
+      klass.define_singleton_method(:digest) { "digest-bbb" }
+      second = publish_embed(embed)
+      assert second.success?, second.error.to_s
+
+      assert_equal "digest-bbb", @update_calls.last[:source]["stylesheet_digest"]
+      assert_equal "digest-bbb", @update_calls.last[:metadata]["stylesheet_digest"]
+      refute_equal source, @update_calls.last[:source]
+    end
+  ensure
+    klass.define_singleton_method(:digest, original) if klass && original
   end
 
   def test_publish_bakes_frame_ancestors_from_domain_policy

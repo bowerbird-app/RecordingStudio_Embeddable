@@ -41,6 +41,18 @@ RecordingStudioEmbeddable.configure do |config|
   # Embed styling inherits your host app's FlatPack theme by default.
   # Declare per-recordable customizable styles with
   # `customizable_embed_styles:` on RecordingStudio::Capabilities::Embeddable.
+  # data-theme on the embed document. The inlined stylesheet carries FlatPack's
+  # theme variables; this name selects which block applies.
+  config.embed_document_theme = "rounded"
+  # Directories or files the embed Tailwind build scans, in addition to the
+  # gem embed templates and FlatPack components. Add a host embed partial here
+  # when it uses Tailwind classes of its own, then rebuild:
+  #   bin/rails recording_studio_embeddable:embed_css:build
+  # CDN copies update with:
+  #   bin/rails recording_studio_embeddable:republish_embeds
+  config.embed_view_paths = []
+  # Extra CSS inlined after FlatPack (a host theme file, for example).
+  config.embed_stylesheet_paths = []
   config.view_logging_enabled = true
   config.async_view_logging = true
   config.view_log_raw_ip = false

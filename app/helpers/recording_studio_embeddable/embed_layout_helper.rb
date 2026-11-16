@@ -74,6 +74,20 @@ module RecordingStudioEmbeddable
       font_family
     end
 
+    def embed_document_theme
+      theme = RecordingStudioEmbeddable.configuration.embed_document_theme.to_s.strip
+      theme.presence || "rounded"
+    end
+
+    def embed_document_stylesheet_tag
+      css = RecordingStudioEmbeddable::EmbedStylesheet.css
+      digest = RecordingStudioEmbeddable::EmbedStylesheet.digest
+      safe_css = css.gsub(%r{</style}i, "<\\/style")
+      comment = "<!-- recording-studio-embeddable-stylesheet: #{digest} -->"
+      opening = %(<style data-recording-studio-embeddable="embed-stylesheet" data-stylesheet-digest="#{digest}">)
+      "#{comment}\n#{opening}#{safe_css}</style>".html_safe
+    end
+
     def embed_layout_google_font_stylesheet_url(font_family)
       return nil if font_family.blank?
 

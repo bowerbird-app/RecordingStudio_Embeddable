@@ -62,6 +62,28 @@ The install generator will:
 
 If you prefer to install pieces manually, the default mount path is `/recording_studio_embeddable`.
 
+## Embed stylesheet
+
+Public embed documents inline one stylesheet. They do not link the host
+application, FlatPack, or Tailwind stylesheets, and they do not load the
+import map. Google Fonts stays available when an embed theme names a Google
+family.
+
+The stylesheet is a Tailwind build of the gem embed templates, FlatPack
+components, and any paths in `config.embed_view_paths`, plus FlatPack theme
+variables. `config.embed_document_theme` (default `rounded`) selects the theme
+block. Per-embed colors and fonts stay on the document body.
+
+```bash
+bin/rails recording_studio_embeddable:embed_css:build
+bin/rails recording_studio_embeddable:republish_embeds
+```
+
+`embed_view_paths` is how a host adds its own embed partials to the build.
+`embed_stylesheet_paths` adds extra CSS, such as a host theme file. Rebuild
+after either change, then republish so CDN embeds pick up the new digest.
+Details: [docs/CDN.md](docs/CDN.md).
+
 Do not strip this engine's `lib/` from the host's `eager_load_paths` or
 `autoload_paths` once you are on `0.10.0` or newer. The engine keeps gem `lib/`
 off those lists; code there loads through the gem entrypoint and is not

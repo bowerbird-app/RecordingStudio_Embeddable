@@ -151,6 +151,52 @@ RecordingStudioArtifacts.configure do |config|
 end
 ```
 
+## Self-contained embed CSS
+
+Published HTML is one document. It does not link the host origin for CSS or
+JavaScript (a Google Fonts stylesheet is the exception, and only when the embed
+theme names a Google family).
+
+`RecordingStudioEmbeddable::EmbedStylesheet` builds that CSS:
+
+1. Tailwind scans the gem embed templates, FlatPack component sources, and
+   `config.embed_view_paths`.
+2. The build inlines FlatPack theme variables (`flat_pack/variables.css`) and
+   the FlatPack component rules (`flat_pack/application.css`, without its
+   editor imports). Inter is stored in the CSS as data URIs.
+3. `config.embed_stylesheet_paths` appends host CSS, such as a theme file.
+4. `config.embed_document_theme` (default `rounded`) is the `data-theme` value
+   that selects the FlatPack variable block. Per-embed color and font overrides
+   stay on the body style.
+
+```bash
+bin/rails recording_studio_embeddable:embed_css:build
+bin/rails recording_studio_embeddable:republish_embeds
+```
+
+Add a host embed partial to the build when it uses Tailwind classes that are
+not already in the gem templates or FlatPack components:
+
+```ruby
+config.embed_view_paths = [
+  Rails.root.join("app/views/pages/embed.html.erb"),
+  Rails.root.join("app/views/articles")
+]
+config.embed_stylesheet_paths = [
+  Rails.root.join("app/assets/tailwind/theme.css")
+]
+config.embed_document_theme = "rounded"
+```
+
+Rebuild after changing those paths or the templates they scan. The digest of
+the built CSS is stored on the Artifacts source and metadata as
+`stylesheet_digest`, and it is part of the origin HTTP cache key. A different
+digest makes `republish_embeds` enqueue `PublishEmbedToCdnJob` for CDN embeds
+whose stored digest does not match. An origin render of a CDN embed does the
+same for that one embed.
+
+The document inlines the CSS. Artifacts still publishes one HTML object.
+
 ## Publish triggers
 
 `PublishEmbedToCdnJob` runs only when `artifacts_enabled` is true and the embed
@@ -158,6 +204,8 @@ uses CDN strategy:
 
 - An embed with CDN strategy is created or updated (settings, domains, styling, enable/disable)
 - The host calls `recording.enqueue_embed_cdn_publish!` after parent recording / theme / publishable changes
+- `bin/rails recording_studio_embeddable:republish_embeds` after the embed stylesheet digest changes
+- An origin request for a CDN embed whose stored `stylesheet_digest` does not match the current stylesheet
 
 The job calls `Services::PublishEmbedToCdn`, which:
 

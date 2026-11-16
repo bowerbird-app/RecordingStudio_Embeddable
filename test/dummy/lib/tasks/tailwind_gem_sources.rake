@@ -16,6 +16,9 @@ end
 
 if Rake::Task.task_defined?("tailwindcss:build")
   Rake::Task["tailwindcss:build"].enhance(["tailwindcss:inject_gem_sources"])
+  Rake::Task["tailwindcss:build"].enhance do
+    Rake::Task["recording_studio_embeddable:embed_css:build"].invoke
+  end
 end
 
 if Rake::Task.task_defined?("tailwindcss:watch")

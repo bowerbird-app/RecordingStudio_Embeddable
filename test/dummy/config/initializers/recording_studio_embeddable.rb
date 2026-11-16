@@ -34,6 +34,19 @@ RecordingStudioEmbeddable.configure do |config|
   config.cdn_withhold_snippet_until_published = false
   config.cdn_publish_queue = :default
   config.floating_icon_hosts = ["images.example.com"]
+  # FlatPack theme name on the embed document. The stylesheet inlines that theme's variables.
+  config.embed_document_theme = "rounded"
+  # Host embed templates scanned by the embed Tailwind build, plus the gem
+  # embed views and FlatPack components. Rebuild with
+  # bin/rails recording_studio_embeddable:embed_css:build
+  # (the dummy also runs that at the end of tailwindcss:build).
+  config.embed_view_paths = [
+    Rails.root.join("app/views/pages/embed.html.erb"),
+    Rails.root.join("app/views/pages/_embed.html.erb"),
+    Rails.root.join("app/views/articles/embed.html.erb"),
+    Rails.root.join("app/views/widgets/embed.html.erb")
+  ]
+  config.embed_stylesheet_paths = []
   # sandbox and allow are optional. Unset, the popup iframe keeps the built-in sandbox.
   config.floating_defaults = {
     "edge_spacing" => 20,
