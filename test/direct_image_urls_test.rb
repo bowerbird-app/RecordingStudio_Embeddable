@@ -105,4 +105,83 @@ class DirectImageUrlsTest < Minitest::Test
     assert_equal "https://cdn.example.test/original-key", source.src
     assert_nil source.srcset
   end
+
+  def test_preloaded_variant_records_do_not_look_up_each_size
+    unless RecordingStudioAttachable::DirectUrl.respond_to?(:build)
+      RecordingStudioAttachable::DirectUrl.define_singleton_method(:build) do |key|
+        "https://cdn.example.test/#{key}"
+      end
+    end
+
+    attachment = PreloadedAttachment.new(host: @host)
+    source = RecordingStudioEmbeddable::DirectImageUrls.for_attachment(
+      attachment,
+      variant_names: [:med],
+      variant_records: [PreloadedVariantRecord.new]
+    )
+
+    assert_equal "https://cdn.example.test/variant-blob-med", source.src
+    assert_equal "https://cdn.example.test/variant-blob-med 960w", source.srcset
+    assert_equal 0, attachment.lookups
+  end
+
+  class LoadedAssociation
+    def initialize(target)
+      @target = target
+    end
+
+    def loaded? = true
+
+    attr_reader :target
+  end
+
+  class PreloadedVariantBlob
+    def key = "variant-blob-med"
+  end
+
+  class PreloadedImageAttachment
+    def association(name)
+      raise "unexpected association #{name}" unless name == :blob
+
+      LoadedAssociation.new(PreloadedVariantBlob.new)
+    end
+  end
+
+  class PreloadedVariantRecord
+    def variation_digest = "digest-med"
+
+    def association(name)
+      raise "unexpected association #{name}" unless name == :image_attachment
+
+      LoadedAssociation.new(PreloadedImageAttachment.new)
+    end
+  end
+
+  class PreloadedNamedVariant
+    Variation = Struct.new(:digest)
+    def variation = Variation.new("digest-med")
+  end
+
+  class PreloadedAttachment < FakeAttachment
+    attr_reader :lookups
+
+    def initialize(...)
+      super
+      @lookups = 0
+    end
+
+    def variant_processed?(*)
+      @lookups += 1
+      raise "per-size variant lookup"
+    end
+
+    def url_for_variant(*)
+      @lookups += 1
+      raise "per-size variant lookup"
+    end
+
+    def variant_named(_name)
+      PreloadedNamedVariant.new
+    end
+  end
 end
