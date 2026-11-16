@@ -43,6 +43,9 @@ RecordingStudioEmbeddable.configure do |config|
   # `customizable_embed_styles:` on RecordingStudio::Capabilities::Embeddable.
   config.view_logging_enabled = true
   config.async_view_logging = true
+  # 0 writes nothing. 1 writes every public view. 0.1 writes about one in ten.
+  # Checked before the row or LogViewJob. Stats scale totals by the stored rate.
+  config.view_log_success_sample_rate = 1.0
   config.view_log_raw_ip = false
   config.view_log_raw_user_agent = false
   config.view_log_raw_referer = false

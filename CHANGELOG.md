@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.2] - 2026-11-16
+
+### Changed
+- `view_log_success_sample_rate` is applied in `CaptureView` before a view row is written or `LogViewJob` is enqueued. `0` writes nothing. `1` writes every view. `0.1` writes about one view in ten. The rate is stored on the row as `metadata["sample_rate"]`.
+- A 304 Not Modified response does not write a view log and does not enqueue `LogViewJob`.
+- Embed stats aggregate in SQL (`date_trunc` on `viewed_at` in the app time zone). View, human, and bot totals are the sum of `1 / sample_rate`. Unique visitors count sampled rows only.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `1.2.2`. No migration.
+- Existing rows have no `sample_rate` and still count as one view each.
+- Set `view_log_success_sample_rate` below 1 to sample the public views that still log. Stats scale view, human, and bot totals back up. Unique visitors count sampled rows only.
+- 304s stop appearing in new view logs and in stats.
+
 ## [1.2.1] - 2026-11-16
 
 ### Changed
