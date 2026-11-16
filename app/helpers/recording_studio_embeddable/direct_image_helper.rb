@@ -31,20 +31,15 @@ module RecordingStudioEmbeddable
     def embed_image_sources_for(recording)
       return [] unless recording.respond_to?(:images)
 
-      Array(recording.images(per_page: 100)).filter_map do |image_recording|
-        attachment = image_recording.respond_to?(:recordable) ? image_recording.recordable : nil
-        next unless attachment
-
-        DirectImageUrls.for_attachment(attachment)
-      end
+      DirectImageUrls.sources_for(recording.images(per_page: 100))
     end
 
     def embed_cover_and_gallery(recording)
       sources = embed_image_sources_for(recording)
-      cover = sources.first
-      gallery = sources.drop(1)
-      cover = DirectImageUrls.cover_for_attachment(cover.attachment) if cover
-      { cover: cover, gallery: gallery }
+      {
+        cover: DirectImageUrls.with_sizes(sources.first, DirectImageUrls::COVER_SIZES),
+        gallery: sources.drop(1)
+      }
     end
   end
 end

@@ -36,6 +36,13 @@ Each image includes `srcset` / `sizes`, explicit `width` / `height`, and
 padded `figcaption` below the media (Flatpack Carousel pattern) so
 `overflow-hidden` on the image wrapper never clips the first glyph.
 
+`embed_cover_and_gallery` loads the embed's image recordings once, then
+preloads their attachment recordables, original blobs, and variant records
+(with each variant's image blob) in bulk. Direct URLs are read from that
+preloaded set, so the query count stays the same as the gallery grows. The
+cover is the first source with cover `sizes` (`100vw`); it is not resolved
+again.
+
 ## Artifacts publish
 
 `PublishEmbedToCdn` runs `EnsureEmbedImageVariants` first (sync
