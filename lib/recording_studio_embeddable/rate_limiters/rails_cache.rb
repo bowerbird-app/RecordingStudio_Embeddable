@@ -47,6 +47,36 @@ module RecordingStudioEmbeddable
         self.class.allow?(**)
       end
 
+      def self.count(key:, window:)
+        period = window.to_i
+        return 0 if period <= 0
+
+        store = rails_cache_store
+        return 0 unless store
+
+        store.read(storage_key(key, period)).to_i
+      end
+
+      def count(**)
+        self.class.count(**)
+      end
+
+      def self.storage_key(key, period)
+        "recording_studio_embeddable:rate:#{key}:#{epoch / period}"
+      end
+      private_class_method :storage_key
+
+      def self.epoch
+        if defined?(Time.zone) && Time.zone
+          Time.zone.now.to_i
+        elsif Time.respond_to?(:current)
+          Time.current.to_i
+        else
+          Time.now.to_i
+        end
+      end
+      private_class_method :epoch
+
       def self.rails_cache_store
         return unless defined?(Rails) && Rails.respond_to?(:cache)
 

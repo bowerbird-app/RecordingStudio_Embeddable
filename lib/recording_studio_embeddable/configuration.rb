@@ -21,6 +21,11 @@ module RecordingStudioEmbeddable
       :redis,
       :rate_limit,
       :rate_limit_window,
+      :per_ip_rate_limit,
+      :per_ip_rate_limit_window,
+      :invalid_token_rate_limit,
+      :invalid_token_rate_limit_window,
+      :invalid_token_log_sample_rate,
       :rate_limit_fail_closed,
       :rate_limiting_enabled,
       :cache_policy,
@@ -81,6 +86,14 @@ module RecordingStudioEmbeddable
       @redis = nil
       @rate_limit = 120
       @rate_limit_window = 60
+      # All public embed requests from one IP, checked before the token lookup.
+      @per_ip_rate_limit = 600
+      @per_ip_rate_limit_window = 60
+      # Unknown, disabled, and denied tokens. Stricter than the per-IP budget.
+      @invalid_token_rate_limit = 30
+      @invalid_token_rate_limit_window = 60
+      # Sampled logger line for rejected public embeds. 0 logs nothing.
+      @invalid_token_log_sample_rate = 0.01
       @rate_limit_fail_closed = false
       @rate_limiting_enabled = true
       @cache_policy = { public: true, max_age: 300, stale_while_revalidate: 60 }
@@ -173,6 +186,11 @@ module RecordingStudioEmbeddable
         redis: redis,
         rate_limit: rate_limit,
         rate_limit_window: rate_limit_window,
+        per_ip_rate_limit: per_ip_rate_limit,
+        per_ip_rate_limit_window: per_ip_rate_limit_window,
+        invalid_token_rate_limit: invalid_token_rate_limit,
+        invalid_token_rate_limit_window: invalid_token_rate_limit_window,
+        invalid_token_log_sample_rate: invalid_token_log_sample_rate,
         rate_limit_fail_closed: rate_limit_fail_closed,
         rate_limiting_enabled: rate_limiting_enabled,
         cache_mode: cache_mode,

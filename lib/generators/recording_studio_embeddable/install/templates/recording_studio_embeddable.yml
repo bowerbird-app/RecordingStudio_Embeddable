@@ -5,6 +5,11 @@ default: &default
   rate_limiter: rails_cache
   rate_limit: 120
   rate_limit_window: 60
+  per_ip_rate_limit: 600
+  per_ip_rate_limit_window: 60
+  invalid_token_rate_limit: 30
+  invalid_token_rate_limit_window: 60
+  invalid_token_log_sample_rate: 0.01
 
 development:
   <<: *default

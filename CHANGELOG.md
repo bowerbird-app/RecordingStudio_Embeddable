@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-16
+
+### Changed
+- Public embed requests are limited per IP before the token is loaded. The bucket key is `public-ip:` plus a digest of the IP (`per_ip_rate_limit` 600, `per_ip_rate_limit_window` 60).
+- Unknown, disabled, and denied tokens share a stricter per-IP miss budget (`invalid_token_rate_limit` 30, `invalid_token_rate_limit_window` 60). Once that budget is spent, the next request is 429 and does not look the token up.
+- The existing per-token and IP limit is unchanged. Its key is still a digest, so the raw token is not stored in the limiter.
+- Unknown tokens, not-found embeds (disabled, unpublished, missing), and rate-limited requests do not write view logs and do not enqueue `LogViewJob`. A sampled logger line replaces them (`invalid_token_log_sample_rate` 0.01). The line has no raw token.
+- The 404 for an unknown token and the 404 for a disabled or other not-found embed use the same response.
+- `rate_limit_fail_closed` still applies when a limiter read or write errors.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `1.1.0`. No migration.
+- Set `per_ip_rate_limit`, `per_ip_rate_limit_window`, `invalid_token_rate_limit`, `invalid_token_rate_limit_window`, and `invalid_token_log_sample_rate` if the defaults are wrong for the host. Leaving them unset uses the defaults above.
+- Stats and view-log rows for `invalid_token`, `not_found`, `disabled`, `unpublished`, and `rate_limited` public embed requests stop growing. Rendered embeds and 304s still log. A 403 still logs until that IP has used the miss budget, then it is a 429 with no view log.
+- An IP that sprays tokens, or sends more than `per_ip_rate_limit` public embed requests in the window, receives 429. A normal single-embed view stays on the existing per-token limit.
+
 ## [1.0.0] - 2026-11-15
 
 ### Removed

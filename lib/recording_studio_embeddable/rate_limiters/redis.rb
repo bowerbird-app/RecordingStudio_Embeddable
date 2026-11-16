@@ -48,6 +48,36 @@ module RecordingStudioEmbeddable
         self.class.allow?(**)
       end
 
+      def self.count(key:, window:)
+        period = window.to_i
+        return 0 if period <= 0
+
+        redis = redis_client
+        return 0 if redis.nil? || !redis.respond_to?(:get)
+
+        redis.get(storage_key(key, period)).to_i
+      end
+
+      def count(**)
+        self.class.count(**)
+      end
+
+      def self.storage_key(key, period)
+        "recording_studio_embeddable:rate:#{key}:#{epoch / period}"
+      end
+      private_class_method :storage_key
+
+      def self.epoch
+        if defined?(Time.zone) && Time.zone
+          Time.zone.now.to_i
+        elsif Time.respond_to?(:current)
+          Time.current.to_i
+        else
+          Time.now.to_i
+        end
+      end
+      private_class_method :epoch
+
       def self.redis_client
         redis = RecordingStudioEmbeddable.configuration.redis
         if RecordingStudioEmbeddable.configuration.rate_limiter.respond_to?(:incr)

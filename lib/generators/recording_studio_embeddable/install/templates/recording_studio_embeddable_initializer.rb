@@ -27,6 +27,14 @@ RecordingStudioEmbeddable.configure do |config|
   config.rate_limiter = :rails_cache
   config.rate_limit = 120
   config.rate_limit_window = 60
+  # Every public embed request from one IP, before the token lookup.
+  config.per_ip_rate_limit = 600
+  config.per_ip_rate_limit_window = 60
+  # Unknown, disabled, and denied tokens. The next request is 429 with no lookup.
+  config.invalid_token_rate_limit = 30
+  config.invalid_token_rate_limit_window = 60
+  # Sampled logger line for those rejections. 0 logs nothing. Never includes the token.
+  config.invalid_token_log_sample_rate = 0.01
   config.rate_limit_fail_closed = false
   config.cache_mode = :http_validation
   config.cache_policy = { public: true, max_age: 300, stale_while_revalidate: 60 }
