@@ -19,7 +19,7 @@ class FloatingWidgetHelperTest < ActionDispatch::IntegrationTest
     grant_embed_management!(actor: @user, recording: root)
     @widget = root.record(Widget, actor: @user) { |widget| widget.title = "Hello widget" }
     @embed = @widget.ensure_embed!(
-      enabled: false,
+      enabled: true,
       floating_enabled: true,
       floating: { "position" => "bottom-right" }
     )

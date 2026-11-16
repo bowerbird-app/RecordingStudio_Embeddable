@@ -15,6 +15,9 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
       rate_limiting_enabled: RecordingStudioEmbeddable.configuration.rate_limiting_enabled,
       rate_limit: RecordingStudioEmbeddable.configuration.rate_limit,
       rate_limiter: RecordingStudioEmbeddable.configuration.rate_limiter,
+      per_ip_rate_limit: RecordingStudioEmbeddable.configuration.per_ip_rate_limit,
+      invalid_token_rate_limit: RecordingStudioEmbeddable.configuration.invalid_token_rate_limit,
+      invalid_token_rate_limit_window: RecordingStudioEmbeddable.configuration.invalid_token_rate_limit_window,
       floating_icon_hosts: RecordingStudioEmbeddable.configuration.floating_icon_hosts
     }
     @previous_cache = Rails.cache
@@ -38,7 +41,7 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
     grant_embed_management!(actor: @user, recording: root)
     @widget_recording = root.record(Widget, actor: @user) { |widget| widget.title = "Hello widget" }
     @widget_embed = @widget_recording.ensure_embed!(
-      enabled: false,
+      enabled: true,
       floating_enabled: true,
       allowed_embedder_domains: ["partner.example.com"],
       floating: { "position" => "bottom-left" }
@@ -140,6 +143,7 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
     end
     assert_equal "bottom-left", @widget_embed.reload.floating["position"]
 
+    @widget_recording.update_embed!(actor: @user, enabled: false)
     get "/recording_studio_embeddable/embeds/#{@widget_embed.token}",
         headers: { "Origin" => "https://partner.example.com" }
     assert_response :not_found
@@ -207,6 +211,89 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
     refute_includes response.headers["Access-Control-Allow-Origin"].to_s, "*"
   end
 
+  test "launcher hides embeds that are not public" do
+    title = "Hello widget"
+    path = "/recording_studio_embeddable/embeds/#{@widget_embed.token}/launcher"
+    headers = { "Origin" => "https://partner.example.com" }
+
+    with_widget_publish_required do
+      assert_hidden_launcher(path, headers, title)
+
+      publish_widget!
+      get path, headers: headers
+      assert_response :success
+      assert_equal title, JSON.parse(response.body).fetch("title")
+    end
+
+    RecordingStudioEmbeddable.configuration.public_embeds_enabled = false
+    assert_hidden_launcher(path, headers, title)
+    RecordingStudioEmbeddable.configuration.public_embeds_enabled = true
+
+    @widget_recording.update_embed!(actor: @user, enabled: false, floating_enabled: true)
+    assert_hidden_launcher(path, headers, title)
+    options path, headers: headers.merge("Access-Control-Request-Method" => "GET")
+    assert_response :not_found
+    assert_empty response.body
+
+    @widget_recording.disable_embed!(actor: @user)
+    @widget_embed.reload
+    assert_equal false, @widget_embed.enabled
+    assert_equal false, @widget_embed.floating_enabled
+    assert_hidden_launcher(path, headers, title)
+
+    @widget_recording.update_embed!(actor: @user, enabled: true, floating_enabled: true)
+    @widget_recording.update_columns(trashed_at: Time.current)
+    assert_hidden_launcher(path, headers, title)
+  end
+
+  test "launcher rate limit runs before the embed lookup" do
+    Rails.cache = ActiveSupport::Cache::MemoryStore.new
+    RecordingStudioEmbeddable.configuration.rate_limiting_enabled = true
+    RecordingStudioEmbeddable.configuration.rate_limiter = :rails_cache
+    RecordingStudioEmbeddable.configuration.rate_limit = 1
+
+    headers = { "Origin" => "https://partner.example.com" }
+    path = "/recording_studio_embeddable/embeds/missing-token-#{SecureRandom.hex(4)}/launcher"
+    get path, headers: headers
+    assert_response :not_found
+    assert_empty response.body
+
+    get path, headers: headers
+    assert_response :too_many_requests
+    assert_empty response.body
+  end
+
+  test "random tokens on the launcher hit the miss budget" do
+    Rails.cache = ActiveSupport::Cache::MemoryStore.new
+    configuration = RecordingStudioEmbeddable.configuration
+    configuration.rate_limiting_enabled = true
+    configuration.rate_limiter = :rails_cache
+    configuration.rate_limit = 100
+    configuration.per_ip_rate_limit = 100
+    configuration.invalid_token_rate_limit = 3
+    configuration.invalid_token_rate_limit_window = 45
+
+    headers = { "Origin" => "https://partner.example.com" }
+    3.times do |index|
+      get "/recording_studio_embeddable/embeds/missing-#{index}-#{SecureRandom.hex(4)}/launcher",
+          headers: headers,
+          env: { "REMOTE_ADDR" => "203.0.113.40" }
+      assert_response :not_found
+      assert_empty response.body
+    end
+
+    queries = embed_queries do
+      get "/recording_studio_embeddable/embeds/missing-over-#{SecureRandom.hex(4)}/launcher",
+          headers: headers,
+          env: { "REMOTE_ADDR" => "203.0.113.40" }
+    end
+
+    assert_response :too_many_requests
+    assert_equal "45", response.headers["Retry-After"]
+    assert_empty response.body
+    assert_empty queries
+  end
+
   test "forced floating flag on a page still does not launch" do
     RecordingStudioEmbeddable::Embed.where(id: @page_embed.id).update_all(
       floating_enabled: true,
@@ -217,5 +304,48 @@ class FloatingLauncherTest < ActionDispatch::IntegrationTest
         headers: { "Origin" => "https://partner.example.com" }
 
     assert_response :not_found
+  end
+
+  private
+
+  def embed_queries
+    queries = []
+    callback = lambda do |_name, _started, _finished, _id, payload|
+      sql = payload[:sql].to_s
+      queries << sql if sql.match?(/recording_studio_embeddable_embeds/i)
+    end
+    ActiveSupport::Notifications.subscribed(callback, "sql.active_record") { yield }
+    queries
+  end
+
+  def assert_hidden_launcher(path, headers, title)
+    get path, headers: headers
+    assert_response :not_found
+    assert_empty response.body
+    refute_includes response.body, title
+  end
+
+  def with_widget_publish_required
+    options = widget_embeddable_options
+    previous = options[:require_publishable]
+    options[:require_publishable] = true
+    yield
+  ensure
+    options[:require_publishable] = previous if options
+  end
+
+  def widget_embeddable_options
+    Widget.recording_studio_capabilities
+          .find { |candidate| candidate.respond_to?(:key) && candidate.key.to_sym == :embeddable }
+          .options
+  end
+
+  def publish_widget!
+    result = RecordingStudioPublishable::Services::Publishables::Update.call(
+      parent_recording: @widget_recording,
+      actor: @user,
+      attributes: { slug: "hello-widget-#{SecureRandom.hex(3)}", status: "published" }
+    )
+    raise result.error unless result.success?
   end
 end

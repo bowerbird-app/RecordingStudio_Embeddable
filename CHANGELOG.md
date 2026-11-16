@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-11-16
+
+### Changed
+- The public launcher and popup run `Security::PublicAccess` before they build a title or a document. A disabled embed, a trashed parent, an unpublished parent when that type requires publishing, or `public_embeds_enabled = false` is an empty 404.
+- `disable_embed!` sets `floating_enabled` to false.
+- The launcher (`GET` and `OPTIONS`) and the popup use the same per-IP limit and invalid-token miss budget as the public embed. Both checks run before the token lookup. A 404 from the launcher or the popup spends that miss budget.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `1.2.1`. No migration.
+- A floating button whose embed was left `enabled: false` stops responding until you enable the embed again. `disable_embed!` now turns the button off. After you enable the embed, turn floating back on if you still want the button.
+- The launcher and the popup share `per_ip_rate_limit` and `invalid_token_rate_limit` with public embed requests. An IP that spends the miss budget on embeds is also 429 on the launcher and the popup. A launcher or popup 404 spends that same budget.
+
 ## [1.2.0] - 2026-11-16
 
 ### Changed

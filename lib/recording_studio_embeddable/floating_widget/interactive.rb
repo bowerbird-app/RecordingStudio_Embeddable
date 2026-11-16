@@ -5,6 +5,7 @@ module RecordingStudioEmbeddable
     # Host popup controllers include this. It does not use the app session or current_user.
     module Interactive
       extend ActiveSupport::Concern
+      include PublicRequestLimits
 
       included do
         protect_from_forgery with: :exception, store: CsrfCookieStore.new
@@ -42,26 +43,41 @@ module RecordingStudioEmbeddable
       end
 
       def prepare_floating_widget!
+        enforce_ip_limit
+        return if performed?
+
+        enforce_miss_limit
+        return if performed?
+
+        return render_rate_limited unless widget_rate_limit_allows?
+
         @recording_studio_widget_embed = Embed.find_by(token: params[:token].to_s)
         @recording_studio_widget_recording = @recording_studio_widget_embed&.parent_recording
-        return head(:not_found) unless floating_widget_document?
+        return not_found_after_miss unless floating_widget_document?
 
         response.set_header("Cache-Control", "private, no-store")
         response.set_header("Content-Security-Policy", "frame-ancestors #{widget_frame_ancestors}")
         response.delete_header("X-Frame-Options")
         response.set_header("X-Content-Type-Options", "nosniff")
         @recording_studio_widget_parent_origin = resolved_parent_origin
+      end
 
-        return if RequestRateLimit.allow?(key: "widget:#{params[:token]}:#{request.remote_ip}")
+      def widget_rate_limit_allows?
+        RequestRateLimit.allow?(key: "widget:#{params[:token]}:#{request.remote_ip}")
+      end
 
-        response.set_header("Retry-After", RecordingStudioEmbeddable.configuration.rate_limit_window.to_i.to_s)
+      def render_rate_limited(window: RecordingStudioEmbeddable.configuration.rate_limit_window)
+        response.set_header("Cache-Control", "private, no-store")
+        response.set_header("Retry-After", window.to_i.to_s)
         head :too_many_requests
       end
 
       def floating_widget_document?
-        embed = @recording_studio_widget_embed
-        recording = @recording_studio_widget_recording
-        embed&.floating_enabled? && recording.present? && Floating::Capability.for(recording).enabled?
+        Floating::PublicDocument.available?(
+          embed: @recording_studio_widget_embed,
+          recording: @recording_studio_widget_recording,
+          request: request
+        )
       end
 
       def widget_frame_ancestors

@@ -33,6 +33,10 @@ class FloatingConfigTest < Minitest::Test
       recording.send(:sanitize_floating_attributes,
                      { enabled: true, floating_enabled: true, floating: { "position" => "bottom-left" } })
     )
+    assert_equal(
+      { enabled: false, floating_enabled: false },
+      recording.send(:sanitize_floating_attributes, { enabled: false, floating_enabled: false })
+    )
   end
 
   def test_capable_recordings_keep_floating_attributes
