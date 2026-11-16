@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-16
+
+### Changed
+- Embed images now load in a constant number of queries regardless of image count (PR #63).
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `1.2.0`. No migration.
+
 ## [1.1.0] - 2026-11-16
 
 ### Changed
