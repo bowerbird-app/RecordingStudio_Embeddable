@@ -264,6 +264,30 @@ class CdnPublishTest < Minitest::Test
     assert_includes injected, "frame-ancestors https://partner.example"
   end
 
+  def test_refused_public_embed_hook_replaces_cdn_copy_with_unavailable_page
+    embed = build_embed(token: "hook-flip")
+    recordable = embed.parent_recording.recordable
+    recordable.define_singleton_method(:public_embed_allowed?) { |viewer:| viewer.nil? }
+
+    stub_document_render("<html><head></head><body>live embed</body></html>") do
+      first = publish_embed(embed)
+      assert first.success?, first.error.to_s
+      assert_equal true, first.value[:available]
+      assert_includes @bodies[embed.artifact_id], "live embed"
+
+      recordable.define_singleton_method(:public_embed_allowed?) { |viewer:| !viewer.nil? }
+      second = publish_embed(embed)
+      assert second.success?, second.error.to_s
+      assert_equal false, second.value[:available]
+      body = @bodies[embed.artifact_id]
+      assert_includes body, "Embed unavailable"
+      assert_includes body, "frame-ancestors 'none'"
+      refute_includes body, "live embed"
+      assert_equal 1, @publish_calls.size
+      assert_equal 1, @update_calls.size
+    end
+  end
+
   def test_unavailable_embed_overwrites_with_none_ancestors
     embed = build_embed(token: "off-token")
     embed.enabled = false

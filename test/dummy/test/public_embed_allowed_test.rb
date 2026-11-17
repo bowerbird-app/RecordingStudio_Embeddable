@@ -136,6 +136,32 @@ class PublicEmbedAllowedTest < ActionDispatch::IntegrationTest
     refute_includes warnings, "secret boom"
   end
 
+  test "a recordable that defines the hook is not publicly cached" do
+    previous_cache = RecordingStudioEmbeddable.configuration.cache_policy
+    RecordingStudioEmbeddable.configuration.cache_policy = {
+      enabled: true, public: true, max_age: 300, stale_while_revalidate: 60
+    }
+
+    get iframe_path, headers: @headers
+    assert_response :success
+    etag = response.headers["ETag"]
+    assert etag.present?
+    assert_includes response.headers["Cache-Control"], "public"
+
+    get iframe_path, headers: @headers.merge("If-None-Match" => etag)
+    assert_response :not_modified
+
+    with_public_embed_allowed(Page, ->(viewer:) { true }) do
+      get iframe_path, headers: @headers.merge("If-None-Match" => etag)
+      assert_response :success
+      assert_includes response.headers["Cache-Control"], "no-store"
+      refute_includes response.headers["Cache-Control"], "public"
+      assert_includes response.body, @page.recordable.title
+    end
+  ensure
+    RecordingStudioEmbeddable.configuration.cache_policy = previous_cache
+  end
+
   test "a recordable that allows the embed receives a nil viewer" do
     seen = :missing
     with_public_embed_allowed(Page, lambda { |viewer:|

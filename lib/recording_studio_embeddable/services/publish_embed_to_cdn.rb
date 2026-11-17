@@ -120,23 +120,19 @@ module RecordingStudioEmbeddable
       end
 
       def publicly_available?(recording, options)
-        return false unless RecordingStudioEmbeddable.configuration.public_embeds_enabled
-        return false unless embed.enabled?
-        return false if recording.blank?
-        return false unless options[:enabled] == true
-
-        publishable_allowed?(recording, options)
+        Security::PublicAccess.call(
+          embed: embed,
+          request: cdn_access_request,
+          recording: recording,
+          options: options
+        ).allowed?
       end
 
-      def publishable_allowed?(recording, options)
-        required = options.fetch(:require_publishable, RecordingStudioEmbeddable.configuration.require_publishable)
-        return true unless required
-
-        return !!recording.currently_published? if recording.respond_to?(:currently_published?)
-        return !!recording.current_publishable if recording.respond_to?(:current_publishable)
-        return !!recording.publishable_child_recording if recording.respond_to?(:publishable_child_recording)
-
-        false
+      # No browser Origin. DomainPolicy then uses the allowlist only.
+      def cdn_access_request
+        @cdn_access_request ||= Struct.new(:referer, :host) do
+          def get_header(_name) = nil
+        end.new(nil, nil)
       end
 
       def inject_unavailable_csp(html, frame_ancestors:)

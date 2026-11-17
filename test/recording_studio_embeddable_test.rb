@@ -129,7 +129,7 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "1.3.0", RecordingStudioEmbeddable::VERSION
+    assert_equal "1.3.1", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
@@ -623,6 +623,34 @@ class RecordingStudioEmbeddableTest < Minitest::Test
     result = public_access_result(FakeRecording.new(Object.new, Time.now))
 
     assert result.allowed?
+  end
+
+  def test_public_embed_allowed_truthy_object_is_refused
+    decision = Struct.new(:allowed?).new(false)
+    recordable = Object.new
+    recordable.define_singleton_method(:public_embed_allowed?) { |viewer:| viewer.nil? ? decision : true }
+    result = public_access_result(FakeRecording.new(recordable, Time.now))
+
+    refute result.allowed?
+    assert_equal :not_found, result.status
+    assert_equal :unpublished, result.reason
+  end
+
+  def test_private_public_embed_allowed_is_refused
+    recordable = Class.new do
+      def public_embed_allowed?(viewer:)
+        @called = true
+        viewer.nil?
+      end
+      private :public_embed_allowed?
+    end.new
+
+    result = public_access_result(FakeRecording.new(recordable, Time.now))
+
+    refute result.allowed?
+    assert_equal :not_found, result.status
+    assert_equal :unpublished, result.reason
+    refute recordable.instance_variable_get(:@called)
   end
 
   def test_public_embed_allowed_true_receives_a_nil_viewer
