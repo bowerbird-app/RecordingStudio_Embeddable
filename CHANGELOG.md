@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-11-17
+
+### Fixed
+- `PublishEmbedToCdn` uses `Security::PublicAccess`. A recordable whose `public_embed_allowed?(viewer:)` does not return exactly `true` is written to the Artifacts object as the unavailable page. A later publish replaces a previously allowed document with that page.
+- `public_embed_allowed?` allows the embed only when the return value is exactly `true`. Any other object is a refusal.
+- When the recordable defines `public_embed_allowed?`, the public iframe response is `Cache-Control: no-store`. Conditional GET and the public cache policy are skipped.
+- A private `public_embed_allowed?` is a refusal.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `1.3.1`. No migration.
+- CDN publish now follows `public_embed_allowed?(viewer:)`. A refusal overwrites the Artifacts HTML with the unavailable page. Republish after the hook starts returning `true` again to put the document back.
+- A truthy object from `public_embed_allowed?` no longer counts as allow. Return exactly `true`.
+- Recordables that define `public_embed_allowed?` are not publicly cached on the iframe route.
+- Declare `public_embed_allowed?` as a public method. A private method refuses the embed.
+
 ## [1.3.0] - 2026-11-16
 
 ### Added

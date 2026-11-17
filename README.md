@@ -158,7 +158,7 @@ The public config endpoint is:
 
 The JSON `id` is `embed.token`. Browsers must send an `Origin` header. The response echoes that exact origin in `Access-Control-Allow-Origin` when the domain policy allows it, and never `*`. A missing or rejected origin fails closed, with no credential header. The launcher checks the shared public per-IP limit and the invalid-token miss budget before it looks up the embed token, then the launcher token limit. A 404 spends that miss budget. Management forms are the only place that can turn floating on; the public embed request cannot.
 
-The launcher and the popup call `Security::PublicAccess` before they build a title or a document. That is the same check as the public embed: `public_embeds_enabled`, `embed.enabled?`, an embeddable parent, `require_publishable` when the type asks for it, and `public_embed_allowed?(viewer:)` when the recordable defines it. A trashed parent is a bare 404 as well. Failure is an empty 404, with no title. The domain allowlist and the CORS echo stay in place. `OPTIONS` uses the same gate, the same per-IP limit, and the same miss budget. A preflight 404 spends the miss budget too.
+The launcher and the popup call `Security::PublicAccess` before they build a title or a document. That is the same check as the public embed: `public_embeds_enabled`, `embed.enabled?`, an embeddable parent, `require_publishable` when the type asks for it, and `public_embed_allowed?(viewer:)` when the recordable defines it. Only an exact `true` allows the embed. A trashed parent is a bare 404 as well. Failure is an empty 404, with no title. The domain allowlist and the CORS echo stay in place. `OPTIONS` uses the same gate, the same per-IP limit, and the same miss budget. A preflight 404 spends the miss budget too.
 
 `RenderPayload`, `HtmlSanitizer`, and `PublishEmbedToCdn` do not read floating settings. Turning the launcher on does not change the inline document or the CDN object.
 
@@ -218,7 +218,11 @@ Run the migrations after you upgrade. `floating_enabled` and `floating` are new 
 
 ## Public access
 
-After the publishable check, `Security::PublicAccess` calls `public_embed_allowed?(viewer:)` when the recordable defines it. False, nil, and a raised error are refused like an unpublished recording: the iframe 404 page, or an empty 404 from the launcher and popup, with no view log. The warning on a raised error names the error class and leaves out the message. `viewer` is nil, because these requests are anonymous and this check has no signed-in actor. Recordables that omit the method stay allowed.
+After the publishable check, `Security::PublicAccess` calls `public_embed_allowed?(viewer:)` when the recordable defines it, including a private method. The embed is allowed only when that method is public and returns exactly `true`. `false`, `nil`, any other object, a private method, and a raised error are refused like an unpublished recording: the iframe 404 page, or an empty 404 from the launcher and popup, with no view log. The warning on a raised error names the error class and leaves out the message. `viewer` is nil, because these requests are anonymous and this check has no signed-in actor. Recordables that omit the method stay allowed.
+
+`PublishEmbedToCdn` asks `Security::PublicAccess` before it writes the Artifacts object. A refusal overwrites that object with the unavailable page (`frame-ancestors 'none'`). The next publish that is allowed writes the document again.
+
+When the recordable defines the hook, the public iframe response sends `Cache-Control: no-store` and skips conditional GET. The public cache policy still applies to recordables that omit the method.
 
 ## Iframe mode
 

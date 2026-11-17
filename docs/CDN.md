@@ -183,8 +183,11 @@ the public API. Deferral is only the safety valve when verification still fails
 (slow disk, transient errors) — Artifacts HTML is never published with Rails
 fallback image URLs.
 
-Disabled or publishable-blocked embeds overwrite the same artifact with a
-minimal “unavailable” document (`frame-ancestors 'none'`). Embeddable does not
+Disabled embeds, publishable-blocked embeds, and embeds refused by
+`Security::PublicAccess` (including `public_embed_allowed?(viewer:)` when it
+does not return exactly `true`) overwrite the same artifact with a minimal
+“unavailable” document (`frame-ancestors 'none'`). A later allowed publish
+writes the document back to that same URL. Embeddable does not
 destroy embeds and does not call `RecordingStudioArtifacts.unpublish` — disable
 keeps the stable Artifacts URL. Hosts that need to remove the R2 object can call
 `RecordingStudioArtifacts.unpublish(id:)` themselves and clear `metadata.artifact`.

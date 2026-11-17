@@ -59,9 +59,10 @@ module RecordingStudioEmbeddable
 
       def recordable_allows_public_embed?
         recordable = recording.recordable if recording.respond_to?(:recordable)
-        return true unless recordable.respond_to?(:public_embed_allowed?)
+        return true unless recordable.respond_to?(:public_embed_allowed?, true)
+        return false unless recordable.respond_to?(:public_embed_allowed?)
 
-        !!recordable.public_embed_allowed?(viewer: viewer)
+        recordable.public_embed_allowed?(viewer: viewer) == true
       rescue StandardError => e
         warn_refused_public_embed(e.class)
         false

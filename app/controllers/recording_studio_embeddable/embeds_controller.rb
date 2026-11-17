@@ -38,7 +38,7 @@ module RecordingStudioEmbeddable
       assign_recordable_instance_variable
 
       set_security_headers(access.domain_policy)
-      if cache_policy[:enabled]
+      if cache_policy[:enabled] && !public_embed_hook_defined?
         set_public_cache_headers
         # A 304 means the embedder already has this document. It is not a view.
         return unless stale?(etag: cache_key_parts, last_modified: last_modified_at, public: true)
@@ -84,6 +84,10 @@ module RecordingStudioEmbeddable
 
     def cache_policy
       @cache_policy ||= CachePolicy.resolve(embed: @embed, recording: @parent_recording)
+    end
+
+    def public_embed_hook_defined?
+      @parent_recordable.respond_to?(:public_embed_allowed?, true)
     end
 
     def last_modified_at
