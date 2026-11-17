@@ -52,6 +52,32 @@ class EmbedMemberActionTest < ActionDispatch::IntegrationTest
     assert_equal RecordingStudioEmbeddable::Api::EmbedRecording, action.handler
   end
 
+  def test_embed_action_openapi_copy_describes_the_payload_without_access_roles
+    action = RecordingStudioApi.capability_action(:embed)
+    openapi = action.openapi
+    responses = openapi.fetch(:responses)
+    description = openapi.fetch(:description)
+
+    assert_equal RecordingStudioEmbeddable::Api::ACTION_SUMMARY, openapi.fetch(:summary)
+    assert_equal RecordingStudioEmbeddable::Api::ACTION_DESCRIPTION, description
+    refute_includes description, "Press Kit"
+    RecordingStudioEmbeddable::Api::ACTION_RESPONSE_DESCRIPTIONS.each do |status, text|
+      response = responses[status] || responses[status.to_s] || responses[status.to_sym]
+      assert response, "missing #{status} response in #{responses.keys.inspect}"
+      assert_equal text, response.fetch(:description)
+    end
+
+    blob = [
+      openapi.fetch(:summary),
+      description,
+      *responses.values.map { |entry| entry.fetch(:description) }
+    ].join(" ").downcase
+    %w[access role admin authorized permission].each do |word|
+      refute_match(/\b#{Regexp.escape(word)}\b/, blob)
+    end
+    refute_includes blob, ":view"
+  end
+
   def test_iframe_embed_route_still_mounted
     recognized = Rails.application.routes.recognize_path(
       "/recording_studio_embeddable/embeds/example-token"

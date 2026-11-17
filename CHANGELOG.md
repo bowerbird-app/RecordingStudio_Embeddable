@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-11-17
+
+### Changed
+- OpenAPI copy for the `:embed` capability action. Summary, description, and 200/403/404 response text now say what the action reads, what it needs first, what it rejects, and what it returns. Action name, fields, and behavior did not change.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `1.3.2`. No migration.
+- MCP and OpenAPI text for `:embed` changed. The action still has no input fields and still only reads an existing embed.
+
 ## [1.3.1] - 2026-11-17
 
 ### Fixed

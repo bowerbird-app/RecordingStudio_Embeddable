@@ -79,8 +79,8 @@ class ApiTest < Minitest::Test
       assert_equal :member, registration.fetch(:scope)
       assert_equal :view, registration.fetch(:required_role)
       assert_equal RecordingStudioEmbeddable::Api::EmbedRecording, registration.fetch(:handler)
-      assert_equal "Embed", registration.fetch(:openapi).fetch(:summary)
-      assert_equal "API access is not authorized to view this recording.",
+      assert_equal RecordingStudioEmbeddable::Api::ACTION_SUMMARY, registration.fetch(:openapi).fetch(:summary)
+      assert_equal RecordingStudioEmbeddable::Api::ACTION_RESPONSE_DESCRIPTIONS.fetch("403"),
                    registration.fetch(:openapi).fetch(:responses).fetch("403").fetch(:description)
     end
   end

@@ -17,6 +17,28 @@ module RecordingStudioEmbeddable
       handler: "RecordingStudioEmbeddable::Api::EmbedRecording"
     }.freeze
 
+    ACTION_SUMMARY = "Get the embed payload for this recording."
+    ACTION_DESCRIPTION =
+      "An embed lets this recording be shown inside another web page. " \
+      "This returns the recording's embed as a browser payload: a cleaned HTML " \
+      "fragment plus its display settings, ready for the embed script to place " \
+      "on a page. Run it on the recording itself, using that recording's id " \
+      "(the same id you use for its other actions). The recording must already " \
+      "have an embed, set up in the app's embed settings; this action only " \
+      "reads and never creates one. A recording id that is not found is " \
+      "rejected. A recording with no embed is rejected " \
+      "(\"Embed was not found for this recording\"). If the embed can't be " \
+      "rendered, the call is rejected as invalid. Repeat calls change nothing " \
+      "and return the same payload while the embed is unchanged. Returns " \
+      "schema_version (1), html (the cleaned fragment), configuration (theme " \
+      "and sizing), and sdk.minimum_version (the oldest embed script version " \
+      "that can show it)."
+    ACTION_RESPONSE_DESCRIPTIONS = {
+      "200" => "The embed payload for this recording.",
+      "403" => "The caller is not allowed to view this recording.",
+      "404" => "This recording was not found, or it has no embed."
+    }.freeze
+
     class << self
       def descriptor
         DESCRIPTOR
@@ -65,13 +87,9 @@ module RecordingStudioEmbeddable
           required_role: DESCRIPTOR[:required_role],
           handler: EmbedRecording,
           openapi: {
-            summary: "Embed",
-            description: "Returns a browser payload fragment for the recording embed.",
-            responses: {
-              "200" => { description: "Embed payload rendered successfully." },
-              "403" => { description: "API access is not authorized to view this recording." },
-              "404" => { description: "Embed was not found for this recording." }
-            }
+            summary: ACTION_SUMMARY,
+            description: ACTION_DESCRIPTION,
+            responses: ACTION_RESPONSE_DESCRIPTIONS.transform_values { |text| { description: text } }
           }
         }
       end
