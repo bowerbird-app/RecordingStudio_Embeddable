@@ -48,6 +48,7 @@ class ApiTest < Minitest::Test
     ActionController::Base.remove_instance_variable(:@payload_test_renderer) if
       ActionController::Base.instance_variable_defined?(:@payload_test_renderer)
     Object.send(:remove_const, :RecordingStudioApi) if Object.const_defined?(:RecordingStudioApi, false)
+    RecordingStudioEmbeddable::Api::OpenapiOverrides.reset!
   end
 
   def test_descriptor_matches_embed_capability_action
@@ -89,6 +90,99 @@ class ApiTest < Minitest::Test
     with_fake_recording_studio_api(existing_action: Object.new) do |api|
       assert_nil RecordingStudioEmbeddable::Api.register_capability_action!
       assert_empty api.registrations
+    end
+  end
+
+  def test_override_openapi_applies_to_one_type
+    press_center = "RecordingStudioPressCenters::PressCenter"
+
+    RecordingStudioEmbeddable::Api.override_openapi(
+      type: press_center,
+      action: :embed,
+      title: "Embed press center",
+      description: "Place this press center on another page."
+    )
+
+    press = RecordingStudioEmbeddable::Api.openapi_for(type: press_center, action: :embed)
+    page = RecordingStudioEmbeddable::Api.openapi_for(type: "Page", action: :embed)
+
+    assert_equal "Embed press center", press.fetch(:title)
+    assert_equal "Place this press center on another page.", press.fetch(:description)
+    assert_equal RecordingStudioEmbeddable::Api::ACTION_SUMMARY, press.fetch(:summary)
+    assert_equal RecordingStudioEmbeddable::Api::ACTION_RESPONSE_DESCRIPTIONS.fetch("200"),
+                 press.fetch(:responses).fetch("200").fetch(:description)
+    refute page.key?(:title)
+    assert_equal RecordingStudioEmbeddable::Api::ACTION_SUMMARY, page.fetch(:summary)
+    assert_equal RecordingStudioEmbeddable::Api::ACTION_DESCRIPTION, page.fetch(:description)
+    assert_equal press.fetch(:responses), page.fetch(:responses)
+  end
+
+  def test_override_openapi_keeps_the_default_description_when_omitted
+    press_center = Class.new
+
+    RecordingStudioEmbeddable::Api.override_openapi(
+      type: press_center,
+      action: "embed",
+      title: "Embed press center"
+    )
+
+    press = RecordingStudioEmbeddable::Api.openapi_for(type: press_center.to_s, action: :embed)
+
+    assert_equal "Embed press center", press.fetch(:title)
+    assert_equal RecordingStudioEmbeddable::Api::ACTION_DESCRIPTION, press.fetch(:description)
+  end
+
+  def test_override_openapi_rejects_unknown_action_and_blank_title
+    assert_raises(ArgumentError) do
+      RecordingStudioEmbeddable::Api.override_openapi(type: "Page", action: :publish, title: "Publish page")
+    end
+    assert_raises(ArgumentError) do
+      RecordingStudioEmbeddable::Api.override_openapi(type: "Page", action: 1, title: "Embed page")
+    end
+    assert_raises(ArgumentError) do
+      RecordingStudioEmbeddable::Api.override_openapi(type: "Page", action: :embed, title: "  ")
+    end
+    assert_raises(ArgumentError) do
+      RecordingStudioEmbeddable::Api.override_openapi(type: "Page", action: :embed, title: nil)
+    end
+    assert_raises(ArgumentError) do
+      RecordingStudioEmbeddable::Api.override_openapi(type: "  ", action: :embed, title: "Embed page")
+    end
+    assert_raises(ArgumentError) do
+      RecordingStudioEmbeddable::Api.openapi_for(type: "Page", action: :publish)
+    end
+
+    page = RecordingStudioEmbeddable::Api.openapi_for(type: "Page", action: :embed)
+
+    refute page.key?(:title)
+  end
+
+  def test_registered_openapi_for_is_what_mcp_reads
+    press_center = "RecordingStudioPressCenters::PressCenter"
+
+    with_fake_recording_studio_api do |api|
+      RecordingStudioEmbeddable::Api.register_capability_action!
+      RecordingStudioEmbeddable::Api.override_openapi(
+        type: press_center,
+        action: :embed,
+        title: "Embed press center"
+      )
+
+      registration = api.registrations.fetch(0)
+      base = registration.fetch(:openapi)
+      reader = registration.fetch(:openapi_for)
+      press = reader.call(type: press_center, action: :embed)
+      page = reader.call(type: "Page", action: :embed)
+      merged = base.merge(press)
+
+      refute base.key?(:title)
+      assert_equal RecordingStudioEmbeddable::Api::ACTION_SUMMARY, base.fetch(:summary)
+      assert_equal "Embed press center", press.fetch(:title)
+      assert_equal "Embed press center", merged.fetch(:title)
+      assert_equal RecordingStudioEmbeddable::Api::ACTION_DESCRIPTION, merged.fetch(:description)
+      assert_equal base.fetch(:responses), merged.fetch(:responses)
+      refute page.key?(:title)
+      assert_equal RecordingStudioEmbeddable::Api.openapi_for(type: press_center, action: :embed), press
     end
   end
 

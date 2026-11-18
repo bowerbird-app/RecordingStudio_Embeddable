@@ -309,6 +309,18 @@ hash = result.value!.to_h
 
 When `recording_studio_api` is loaded, the engine soft-registers a member `:embed` action (`GET`, `required_role: :view`) whose handler returns the same `to_h` shape. OpenAPI summary, description, and 200/403/404 text for that action live on the registration in `RecordingStudioEmbeddable::Api`.
 
+Set a per-type title so MCP can show an action-first name such as "Embed press center". The override replaces that title. Pass `description:` to replace the description for that type. The action, fields, auth, and responses stay the same. Call it from an initializer:
+
+```ruby
+RecordingStudioEmbeddable::Api.override_openapi(
+  type: "RecordingStudioPressCenters::PressCenter",
+  action: :embed,
+  title: "Embed press center"
+)
+```
+
+`type` is the recordable class or its name. `action` is `:embed`. `title` is the OpenAPI and MCP title for that type. A type with no override keeps the default summary and description. An unknown action, a blank type, or a blank title raises `ArgumentError`. `RecordingStudioEmbeddable::Api.openapi_for(type:, action:)` returns that type's summary, description, and responses, and includes `title` when the type has an override.
+
 The dummy app mounts that public API at `/recording_studio_api` and allowlists `:embed` on Page. That is the HTTP proof for WordPress Plugin Demo clients. Named-API enablement for FlatPack hosts remains a later step.
 
 Admin HTML under `/recording_studio_api/admin_api` needs a host

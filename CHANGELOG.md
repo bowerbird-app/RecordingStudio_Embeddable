@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-18
+
+### Added
+- Hosts can set the OpenAPI and MCP title for `:embed` on one recordable type with `RecordingStudioEmbeddable::Api.override_openapi`. Pass `description:` to replace that type's action description. Other types keep the default text. Fields, auth, and responses stay the same.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `1.4.0`. No migration.
+- To show an action-first MCP title, call `override_openapi` from an initializer:
+
+```ruby
+RecordingStudioEmbeddable::Api.override_openapi(
+  type: "RecordingStudioPressCenters::PressCenter",
+  action: :embed,
+  title: "Embed press center"
+)
+```
+
+- Omit `description` to keep the default action description. An unknown action, a blank type, or a blank title raises `ArgumentError`.
+
 ## [1.3.2] - 2026-11-17
 
 ### Changed

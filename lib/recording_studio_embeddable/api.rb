@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "recording_studio_embeddable/api/embed_recording"
+require "recording_studio_embeddable/api/openapi_overrides"
 
 module RecordingStudioEmbeddable
   module Api
@@ -56,6 +57,14 @@ module RecordingStudioEmbeddable
         end
       end
 
+      def override_openapi(type:, action:, title:, description: nil)
+        OpenapiOverrides.write(type: type, action: action, title: title, description: description)
+      end
+
+      def openapi_for(type:, action:)
+        OpenapiOverrides.document(type: type, action: action)
+      end
+
       private
 
       def register_capability_action_for(api_name)
@@ -86,11 +95,8 @@ module RecordingStudioEmbeddable
           scope: DESCRIPTOR[:scope],
           required_role: DESCRIPTOR[:required_role],
           handler: EmbedRecording,
-          openapi: {
-            summary: ACTION_SUMMARY,
-            description: ACTION_DESCRIPTION,
-            responses: ACTION_RESPONSE_DESCRIPTIONS.transform_values { |text| { description: text } }
-          }
+          openapi: OpenapiOverrides.default_openapi,
+          openapi_for: ->(type:, action:) { openapi_for(type: type, action: action) }
         }
       end
 
