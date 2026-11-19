@@ -35,10 +35,10 @@ class AdminApiPagesTest < ActionDispatch::IntegrationTest
     )
     raise result.error unless result.success?
 
-    RecordingStudioApi::Admin::ApiAuthorization.recording_for(
+    RecordingStudioApi::Admin::ApiAuthorization.provision!(
       api: :public,
       root_recording: @admin_root_recording,
-      create: true
+      actor: @user
     )
 
     sign_in @user

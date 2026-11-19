@@ -4,21 +4,21 @@ require "test_helper"
 
 class RootSwitchablePinTest < ActiveSupport::TestCase
   test "dummy pins the wave 5 Recording Studio ladder" do
-    assert_equal "7.3.0", RecordingStudio::VERSION
-    assert_equal "0.16.0", RecordingStudioRootSwitchable::VERSION
-    assert_equal "0.9.0", RecordingStudioMetrics::VERSION
-    assert_equal "0.45.1", RecordingStudioAccessible::VERSION
-    assert_equal "2.18.0", RecordingStudioAdmin::VERSION
-    assert_equal "1.2.1", RecordingStudioApi::VERSION
-    assert_equal "6.0.0", RecordingStudioMoveable::VERSION
-    assert_equal "0.4.0", RecordingStudioIcons::VERSION
-    assert_equal "0.1.377", FlatPack::VERSION
-    assert_equal "0.5.0", RecordingStudioArtifacts::VERSION
-    assert_equal "0.31.0", RecordingStudioAttachable::VERSION
-    assert_equal "0.7.0", RecordingStudioCache::VERSION
-    assert_equal "0.8.0", RecordingStudioLogs::VERSION
-    assert_equal "1.1.0", RecordingStudioPublishable::VERSION
-    assert_equal "1.0.1", RecordingStudioTrashable::VERSION
+    assert_equal "7.8.0", RecordingStudio::VERSION
+    assert_equal "0.17.0", RecordingStudioRootSwitchable::VERSION
+    assert_equal "0.10.0", RecordingStudioMetrics::VERSION
+    assert_equal "0.58.0", RecordingStudioAccessible::VERSION
+    assert_equal "2.20.0", RecordingStudioAdmin::VERSION
+    assert_equal "1.21.2", RecordingStudioApi::VERSION
+    assert_equal "6.1.0", RecordingStudioMoveable::VERSION
+    assert_equal "0.5.0", RecordingStudioIcons::VERSION
+    assert_equal "0.2.0", FlatPack::VERSION
+    assert_equal "0.6.0", RecordingStudioArtifacts::VERSION
+    assert_equal "0.34.0", RecordingStudioAttachable::VERSION
+    assert_equal "0.8.0", RecordingStudioCache::VERSION
+    assert_equal "0.9.0", RecordingStudioLogs::VERSION
+    assert_equal "1.5.0", RecordingStudioPublishable::VERSION
+    assert_equal "1.3.0", RecordingStudioTrashable::VERSION
 
     authorizer = RecordingStudio.configuration.authorize_write
     assert authorizer.call(actor: Object.new)
