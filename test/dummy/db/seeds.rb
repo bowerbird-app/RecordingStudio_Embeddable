@@ -103,10 +103,10 @@ unless RecordingStudioAccessible.authorized?(actor: user, recording: admin_root_
   )
   raise admin_bootstrap.error unless admin_bootstrap.success?
 end
-RecordingStudioApi::Admin::ApiAuthorization.recording_for(
+RecordingStudioApi::Admin::ApiAuthorization.provision!(
   api: :public,
   root_recording: admin_root_recording,
-  create: true
+  actor: user
 )
 
 # First admin on an empty owned root must bootstrap — grant_access alone fails

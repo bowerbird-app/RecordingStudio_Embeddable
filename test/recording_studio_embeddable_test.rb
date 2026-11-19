@@ -129,24 +129,24 @@ class RecordingStudioEmbeddableTest < Minitest::Test
   end
 
   def test_version_and_engine_are_renamed
-    assert_equal "1.4.0", RecordingStudioEmbeddable::VERSION
+    assert_equal "1.5.0", RecordingStudioEmbeddable::VERSION
     assert_equal RecordingStudioEmbeddable, RecordingStudioEmbeddable::Engine.railtie_namespace
   end
 
   def test_development_pins_keep_the_accessible_gemspec_floor
-    assert_equal "7.0.0", Gem.loaded_specs.fetch("recording_studio").version.to_s
-    assert_equal "0.1.376", Gem.loaded_specs.fetch("flat_pack").version.to_s
-    assert_equal "0.44.0", Gem.loaded_specs.fetch("recording_studio_accessible").version.to_s
-    assert_equal "0.9.0", Gem.loaded_specs.fetch("recording_studio_metrics").version.to_s
-    assert_equal "0.5.0", Gem.loaded_specs.fetch("recording_studio_artifacts").version.to_s
-    assert_equal "0.28.0", Gem.loaded_specs.fetch("recording_studio_attachable").version.to_s
-    assert_equal "0.6.3", Gem.loaded_specs.fetch("recording_studio_cache").version.to_s
-    assert_equal "0.8.0", Gem.loaded_specs.fetch("recording_studio_logs").version.to_s
-    assert_equal "0.18.1", Gem.loaded_specs.fetch("recording_studio_publishable").version.to_s
-    assert_equal "0.17.0", Gem.loaded_specs.fetch("recording_studio_trashable").version.to_s
-    assert_equal "0.24.0", Gem.loaded_specs.fetch("recording_studio_api").version.to_s
-    assert_equal "5.0.0", Gem.loaded_specs.fetch("recording_studio_moveable").version.to_s
-    assert_equal "0.2.1", Gem.loaded_specs.fetch("recording_studio_icons").version.to_s
+    assert_equal "7.8.0", Gem.loaded_specs.fetch("recording_studio").version.to_s
+    assert_equal "0.2.0", Gem.loaded_specs.fetch("flat_pack").version.to_s
+    assert_equal "0.58.0", Gem.loaded_specs.fetch("recording_studio_accessible").version.to_s
+    assert_equal "0.10.0", Gem.loaded_specs.fetch("recording_studio_metrics").version.to_s
+    assert_equal "0.6.0", Gem.loaded_specs.fetch("recording_studio_artifacts").version.to_s
+    assert_equal "0.34.0", Gem.loaded_specs.fetch("recording_studio_attachable").version.to_s
+    assert_equal "0.8.0", Gem.loaded_specs.fetch("recording_studio_cache").version.to_s
+    assert_equal "0.9.0", Gem.loaded_specs.fetch("recording_studio_logs").version.to_s
+    assert_equal "1.5.0", Gem.loaded_specs.fetch("recording_studio_publishable").version.to_s
+    assert_equal "1.3.0", Gem.loaded_specs.fetch("recording_studio_trashable").version.to_s
+    assert_equal "1.21.2", Gem.loaded_specs.fetch("recording_studio_api").version.to_s
+    assert_equal "6.1.0", Gem.loaded_specs.fetch("recording_studio_moveable").version.to_s
+    assert_equal "0.5.0", Gem.loaded_specs.fetch("recording_studio_icons").version.to_s
     refute File.exist?(File.expand_path("support/widen_recording_studio_requirement.rb", __dir__))
 
     spec = Gem.loaded_specs.fetch("recording_studio_embeddable")
