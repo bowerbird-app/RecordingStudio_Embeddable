@@ -1,0 +1,13 @@
+<div id="embed-assigns"
+     data-parent-recording="<%= @parent_recording&.id %>"
+     data-recording="<%= @recording&.id %>"
+     data-recordable="<%= @recordable&.id %>"
+     data-parent-recordable="<%= @parent_recordable&.id %>"
+     data-page="<%= @page&.id %>"
+     data-embed="<%= @embed&.id %>"
+     data-option-keys="<%= Array(@options&.keys).map(&:to_s).sort.join(",") %>"
+     data-theme="<%= @embed_theme.present? ? "present" : "missing" %>">
+  <% if @parent_recording %>
+    <h1><%= @page&.title %></h1>
+  <% end %>
+</div>
