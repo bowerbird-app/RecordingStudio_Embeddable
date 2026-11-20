@@ -7,14 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.5.1] - 2026-11-20
+## [1.6.0] - 2026-11-20
 
 ### Fixed
 - The management preview document, the CDN document, and `RenderPayload` assign the same template variables as the public iframe. `@parent_recording` is the embedded recording. `@options` is the embeddable options for that recording. A host template that reads `@parent_recording` renders in the management Preview tab.
 
 ### Upgrade notes
-- Bump `recording_studio_embeddable` to `1.5.1`. No migration.
-- Read the embedded recording from `@parent_recording`. On the management preview document and the CDN document, `@recording` is now the embed's own recording, the same as the public iframe.
+- Bump `recording_studio_embeddable` to `1.6.0`. No migration.
+- On CDN-published HTML and RenderPayload, `@recording` is now the embed's own recording; templates that need the embedded content should read `@parent_recording`.
 
 ## [1.5.0] - 2026-11-19
 
@@ -853,8 +853,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.5.1...HEAD
-[1.5.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.5.0...v1.5.1
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.4.0...v1.5.0
 [1.0.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.17.0...v1.0.0
 [0.17.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.16.2...v0.17.0
