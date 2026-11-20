@@ -94,6 +94,20 @@ article.embed_code(host: "example.com")
 
 `embed_code` is the iframe markup. Put it in the page HTML where the recording should appear, such as inside a page or a blog post. The floating launcher is separate and belongs in the page head.
 
+## Template variables
+
+A host template such as `articles/embed` receives the same variables on the public iframe, the management preview document, the CDN document, and `RenderPayload`.
+
+- `@parent_recording` is the recording that was embedded.
+- `@parent_recordable` and `@recordable` are that recording's recordable.
+- The recordable is also assigned under its model name, for example `@article`.
+- `@options` is the embeddable options for that recording.
+- `@embed` is the embed.
+- `@embed_theme` is the resolved style tokens.
+- `@recording` is the embed's own recording.
+
+Read the embedded recording from `@parent_recording`. The floating preview renders the launcher, not this template. That screen sets `@recording` to the embedded recording so the launcher can find the embed.
+
 ## Floating launcher
 
 The public document and the floating launcher share one access check. `enabled` has to be on for the iframe, the CDN document, the launcher, and the popup. `floating_enabled` switches the button. `disable_embed!` turns both off. Types that do not opt in never float and never show launcher controls. Page and Article in the dummy app stay inline-only. Management preview still draws the button so you can place it before the embed is public.

@@ -26,16 +26,10 @@ module RecordingStudioEmbeddable
         return render_not_found
       end
 
-      @recording = @embed.recording
-      @parent_recording = @recording&.parent_recording if @recording.respond_to?(:parent_recording)
-      @parent_recordable = @parent_recording&.recordable if @parent_recording.respond_to?(:recordable)
-      @recordable = @parent_recordable
-      @options = Renderer.options_for(@parent_recording)
+      Renderer.apply_template_variables(self, @embed)
       access = Security::PublicAccess.call(embed: @embed, request: request, recording: @parent_recording,
                                            options: @options)
       return render_denied(access) unless access.allowed?
-
-      assign_recordable_instance_variable
 
       set_security_headers(access.domain_policy)
       if cache_policy[:enabled] && !public_embed_hook_defined?
@@ -47,7 +41,6 @@ module RecordingStudioEmbeddable
       end
 
       capture_public_view(@embed, "rendered", 200)
-      @embed_theme = Renderer.embed_theme_for(@parent_recording, embed: @embed)
       render Renderer.resolve(@parent_recording, @embed),
              formats: [:html],
              layout: Renderer.layout_for(@parent_recording, @embed)
@@ -171,12 +164,6 @@ module RecordingStudioEmbeddable
     def capture_public_view(embed, status, status_code, cache_hit: false, rate_limited: false, metadata: {})
       Services::CaptureView.call(embed: embed, request: request, status: status, status_code: status_code,
                                  cache_hit: cache_hit, rate_limited: rate_limited, metadata: metadata)
-    end
-
-    def assign_recordable_instance_variable
-      return unless @parent_recordable.respond_to?(:model_name)
-
-      instance_variable_set(:"@#{@parent_recordable.model_name.element}", @parent_recordable)
     end
   end
 end

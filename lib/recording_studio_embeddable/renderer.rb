@@ -53,6 +53,30 @@ module RecordingStudioEmbeddable
       from_macro(recordable).merge(from_capabilities(recordable))
     end
 
+    def self.assigns_for(embed, recording: nil, theme: nil)
+      embed_recording = embed.recording if embed.respond_to?(:recording)
+      parent_recording = embed_recording.parent_recording if embed_recording.respond_to?(:parent_recording)
+      parent_recording = recording if parent_recording.nil? && recording && recording != embed_recording
+      recordable = parent_recording.recordable if parent_recording.respond_to?(:recordable)
+      assigns = {
+        recording: embed_recording || parent_recording,
+        parent_recording: parent_recording,
+        parent_recordable: recordable,
+        recordable: recordable,
+        options: options_for(parent_recording),
+        embed: embed,
+        embed_theme: theme || embed_theme_for(parent_recording, embed: embed)
+      }
+      assigns[recordable.model_name.element.to_sym] = recordable if recordable.respond_to?(:model_name)
+      assigns
+    end
+
+    def self.apply_template_variables(target, embed, recording: nil, theme: nil)
+      assigns_for(embed, recording: recording, theme: theme).each do |name, value|
+        target.instance_variable_set(:"@#{name}", value)
+      end
+    end
+
     def self.from_macro(recordable)
       klass = recordable&.class
       klass.respond_to?(:recording_studio_embeddable_options) ? (klass.recording_studio_embeddable_options || {}) : {}

@@ -56,16 +56,7 @@ module RecordingStudioEmbeddable
     end
 
     def fragment_assigns(theme)
-      recordable = recording.respond_to?(:recordable) ? recording.recordable : nil
-      base = {
-        parent_recording: recording,
-        parent_recordable: recordable,
-        recordable: recordable,
-        embed: embed,
-        embed_theme: theme
-      }
-      base[recordable.model_name.element.to_sym] = recordable if recordable.respond_to?(:model_name)
-      base.merge(assigns.transform_keys(&:to_sym))
+      Renderer.assigns_for(embed, recording: recording, theme: theme).merge(assigns.transform_keys(&:to_sym))
     end
 
     def renderer
