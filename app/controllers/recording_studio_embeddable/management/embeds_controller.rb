@@ -126,15 +126,12 @@ module RecordingStudioEmbeddable
       private
 
       def render_embed_document
-        @recording = @embed.parent_recording
-        @parent_recordable = @recording&.recordable if @recording.respond_to?(:recordable)
-        @recordable = @parent_recordable
-        assign_recordable_instance_variable
-        @embed_theme = Renderer.embed_theme_for(@recording, embed: @embed)
+        Renderer.apply_template_variables(self, @embed)
         response.delete_header("X-Frame-Options")
         response.set_header("Content-Security-Policy", "frame-ancestors 'self'")
-        render Renderer.resolve(@recording, @embed),
-               layout: Renderer.layout_for(@recording, @embed)
+        render Renderer.resolve(@parent_recording, @embed),
+               formats: [:html],
+               layout: Renderer.layout_for(@parent_recording, @embed)
       end
 
       def management_layout

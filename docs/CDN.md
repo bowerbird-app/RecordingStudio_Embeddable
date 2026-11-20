@@ -167,7 +167,8 @@ The job calls `Services::PublishEmbedToCdn`, which:
    still missing, publish **defers** and re-enqueues the job after
    `config.cdn_variant_retry_wait` (default 15s) instead of writing HTML that
    would fall back to Rails preview paths.
-2. Renders the full iframe document (`RenderEmbedDocument`) and bakes
+2. Renders the full iframe document (`RenderEmbedDocument`) with the same
+   template variables as the public iframe, and bakes
    `DomainPolicy#frame_ancestors` into an HTML CSP meta marker
 3. Runs `PublishedHtmlGuard` so the body never contains `/rails/active_storage`
    or Attachable Rails preview/file paths
