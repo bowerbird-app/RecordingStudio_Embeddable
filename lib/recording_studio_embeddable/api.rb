@@ -23,21 +23,22 @@ module RecordingStudioEmbeddable
       "An embed lets this recording be shown inside another web page. " \
       "This returns the recording's embed as a browser payload: a cleaned HTML " \
       "fragment plus its display settings, ready for the embed script to place " \
-      "on a page. Run it on the recording itself, using that recording's id " \
-      "(the same id you use for its other actions). The recording must already " \
-      "have an embed, set up in the app's embed settings; this action only " \
-      "reads and never creates one. A recording id that is not found is " \
-      "rejected. A recording with no embed is rejected " \
-      "(\"Embed was not found for this recording\"). If the embed can't be " \
-      "rendered, the call is rejected as invalid. Repeat calls change nothing " \
-      "and return the same payload while the embed is unchanged. Returns " \
-      "schema_version (1), html (the cleaned fragment), configuration (theme " \
-      "and sizing), and sdk.minimum_version (the oldest embed script version " \
-      "that can show it)."
+      "on a page. You need view access on the recording. Run it on the " \
+      "recording itself, using that recording's id (the same id you use for " \
+      "its other actions). This action only reads. The recording must already " \
+      "have an embed set up by an editor in the app's embed settings; it never " \
+      "creates one. A recording that is not found, or one where embedding is " \
+      "not enabled yet, is rejected — an editor must enable embedding first in " \
+      "the app's embed settings. If the embed can't be rendered, the call is " \
+      "rejected as invalid. Repeat calls change nothing and return the same " \
+      "payload while the embed is unchanged. Returns schema_version (1), html " \
+      "(the cleaned fragment), configuration (theme and sizing), and " \
+      "sdk.minimum_version (the oldest embed script version that can show it)."
     ACTION_RESPONSE_DESCRIPTIONS = {
       "200" => "The embed payload for this recording.",
-      "403" => "The caller is not allowed to view this recording.",
-      "404" => "This recording was not found, or it has no embed."
+      "403" => "The caller does not have view access on this recording.",
+      "404" => "This recording was not found, or embedding is not enabled yet. " \
+               "An editor must enable embedding in the app's embed settings."
     }.freeze
 
     class << self

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-11-23
+
+### Changed
+- Behaviour is unchanged since 1.6.0: `:embed` is still read-only, still needs `:view`, and still returns 404 when there is no embed. Only the missing-embed error message and action copy are clearer.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `1.6.1`. No migration.
+
 ## [1.6.0] - 2026-11-20
 
 ### Fixed
@@ -853,7 +861,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.6.1...HEAD
+[1.6.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.4.0...v1.5.0
 [1.0.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.17.0...v1.0.0

@@ -218,6 +218,31 @@ class ApiTest < Minitest::Test
     RecordingStudioEmbeddable::Services::CaptureView.define_singleton_method(:call, original) if original
   end
 
+  def test_handler_rejects_missing_embed_without_creating_one
+    recording = FakeRecording.new(
+      recordable: FakeRecordable.new,
+      updated_at: Time.at(1_700_000_000),
+      embed: nil
+    )
+    created = false
+    recording.define_singleton_method(:ensure_embed!) do |**|
+      created = true
+      FakeEmbed.new
+    end
+
+    with_fake_recording_studio_api do
+      error = assert_raises(RecordingStudioApi::NotFoundError) do
+        RecordingStudioEmbeddable::Api::EmbedRecording.call(
+          ActionContext.new(recording: recording, access_grant: AccessGrant.new, params: {})
+        )
+      end
+
+      assert_match(/isn't set up for this recording yet/i, error.message)
+      assert_match(/editor must enable embedding first in the app's embed settings/i, error.message)
+      refute created
+    end
+  end
+
   private
 
   def with_fake_recording_studio_api(existing_action: nil)

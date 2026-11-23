@@ -35,7 +35,10 @@ module RecordingStudioEmbeddable
         embed = recording.embed if recording.respond_to?(:embed)
         return embed unless embed.nil?
 
-        raise not_found_error("Embed was not found for this recording")
+        raise not_found_error(
+          "Embedding isn't set up for this recording yet. " \
+          "An editor must enable embedding first in the app's embed settings."
+        )
       end
 
       def render_error(result)
