@@ -7,16 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.7.0] - 2026-11-23
+## [1.6.1] - 2026-11-23
 
 ### Changed
-- The `:embed` API/MCP action now requires edit access on the recording, matching the management UI.
-- The first call finds or creates the embed (switched off for public embedding) instead of rejecting a recording with no embed.
+- OpenAPI and MCP copy for `:embed` now says the action is read-only, needs view access, and only works when an editor has already set up embedding.
+- A recording with no embed still returns 404. The error now says embedding isn't set up yet and an editor must enable it first in the app's embed settings.
 
 ### Upgrade notes
-- Bump `recording_studio_embeddable` to `1.7.0`. No migration.
-- View-only API and MCP callers now get `403` on `:embed`. Grant edit access, or keep using the public iframe for anonymous display.
-- The first `:embed` call creates the embed record when the recording does not have one yet. Repeat calls reuse that embed. A freshly created embed is switched off for public embedding; `RenderPayload` still returns HTML for that record.
+- Bump `recording_studio_embeddable` to `1.6.1`. No migration.
+- `:embed` still only reads. View access is enough. The action does not create an embed.
 
 ## [1.6.0] - 2026-11-20
 
@@ -864,8 +863,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.7.0...HEAD
-[1.7.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.6.0...v1.7.0
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.6.1...HEAD
+[1.6.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.4.0...v1.5.0
 [1.0.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v0.17.0...v1.0.0

@@ -12,7 +12,7 @@ module RecordingStudioEmbeddable
       end
 
       def call
-        authorize_edit!
+        authorize_view!
         embed = resolve_embed!
         result = RenderPayload.call(recording: context.recording, embed: embed)
         raise render_error(result) if result.failure?
@@ -24,22 +24,35 @@ module RecordingStudioEmbeddable
 
       attr_reader :context
 
-      def authorize_edit!
+      def authorize_view!
         return unless context.respond_to?(:access_grant) && context.access_grant.respond_to?(:authorize!)
 
-        context.access_grant.authorize!(recording: context.recording, role: :edit)
+        context.access_grant.authorize!(recording: context.recording, role: :view)
       end
 
       def resolve_embed!
-        kwargs = {}
-        kwargs[:actor] = context.actor if context.respond_to?(:actor)
-        context.recording.ensure_embed!(**kwargs)
+        recording = context.recording
+        embed = recording.embed if recording.respond_to?(:embed)
+        return embed unless embed.nil?
+
+        raise not_found_error(
+          "Embedding isn't set up for this recording yet. " \
+          "An editor must enable embedding first in the app's embed settings."
+        )
       end
 
       def render_error(result)
         message = result.error.to_s
         if defined?(RecordingStudioApi::InvalidActionInputError)
           RecordingStudioApi::InvalidActionInputError.new(message, details: [message])
+        else
+          StandardError.new(message)
+        end
+      end
+
+      def not_found_error(message)
+        if defined?(RecordingStudioApi::NotFoundError)
+          RecordingStudioApi::NotFoundError.new(message)
         else
           StandardError.new(message)
         end

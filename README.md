@@ -321,7 +321,7 @@ hash = result.value!.to_h
 
 `html` is a fragment (`layout: false`), sanitized server-side (no `script` / `iframe` / `object` / `embed` / `link` / `meta`, no `on*` handlers, no `javascript:` URLs). `configuration.theme` is the allowlisted token map from `ResolveTheme`; `configuration.sizing` is the allowlisted sizing subset (`width`, `mode`, `max_width`, `min_height`, `height`).
 
-When `recording_studio_api` is loaded, the engine soft-registers a member `:embed` action (`GET`, `required_role: :edit`) whose handler returns the same `to_h` shape. The caller needs edit access on the recording. If the recording has no embed yet, the handler creates one through `ensure_embed!` (switched off for public embedding). OpenAPI summary, description, and 200/403/404 text for that action live on the registration in `RecordingStudioEmbeddable::Api`.
+When `recording_studio_api` is loaded, the engine soft-registers a member `:embed` action (`GET`, `required_role: :view`) whose handler returns the same `to_h` shape. The caller needs view access. The recording must already have an embed set up by an editor in the app's embed settings; the action only reads and never creates one. A recording with no embed is 404. OpenAPI summary, description, and 200/403/404 text for that action live on the registration in `RecordingStudioEmbeddable::Api`.
 
 Set a per-type title so MCP can show an action-first name such as "Embed press center". The override replaces that title. Pass `description:` to replace the description for that type. The action, fields, auth, and responses stay the same. Call it from an initializer:
 
