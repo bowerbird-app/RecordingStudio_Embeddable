@@ -4,7 +4,7 @@ require "test_helper"
 require "action_controller"
 
 class ApiTest < Minitest::Test
-  ActionContext = Struct.new(:recording, :access_grant, :params, :actor, keyword_init: true)
+  ActionContext = Struct.new(:recording, :access_grant, :params, keyword_init: true)
 
   class AccessGrant
     attr_reader :authorized_recordings
@@ -28,11 +28,7 @@ class ApiTest < Minitest::Test
     def self.model_name = ActiveModel::Name.new(self, nil, "FakePage")
   end
 
-  FakeRecording = Struct.new(:recordable, :updated_at, :embed, keyword_init: true) do
-    def ensure_embed!(**)
-      embed
-    end
-  end
+  FakeRecording = Struct.new(:recordable, :updated_at, :embed, keyword_init: true)
 
   class FakeRenderer
     def render(**)

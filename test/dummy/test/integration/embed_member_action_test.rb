@@ -74,7 +74,7 @@ class EmbedMemberActionTest < ActionDispatch::IntegrationTest
     ].join(" ").downcase
     assert_match(/\bview access\b/, blob)
     assert_match(/read/, blob)
-    %w[role admin authorized accessible].each do |word|
+    %w[role admin authorized accessible permission].each do |word|
       refute_match(/\b#{Regexp.escape(word)}\b/, blob)
     end
     refute_includes blob, ":view"

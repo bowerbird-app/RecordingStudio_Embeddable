@@ -10,12 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.6.1] - 2026-11-23
 
 ### Changed
-- OpenAPI and MCP copy for `:embed` now says the action is read-only, needs view access, and only works when an editor has already set up embedding.
-- A recording with no embed still returns 404. The error now says embedding isn't set up yet and an editor must enable it first in the app's embed settings.
+- Behaviour is unchanged since 1.6.0: `:embed` is still read-only, still needs `:view`, and still returns 404 when there is no embed. Only the missing-embed error message and action copy are clearer.
 
 ### Upgrade notes
 - Bump `recording_studio_embeddable` to `1.6.1`. No migration.
-- `:embed` still only reads. View access is enough. The action does not create an embed.
 
 ## [1.6.0] - 2026-11-20
 
