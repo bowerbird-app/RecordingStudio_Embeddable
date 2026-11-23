@@ -72,10 +72,46 @@ class EmbedMemberActionTest < ActionDispatch::IntegrationTest
       description,
       *responses.values.map { |entry| entry.fetch(:description) }
     ].join(" ").downcase
-    %w[access role admin authorized permission].each do |word|
+    assert_match(/\bedit access\b/, blob)
+    %w[role admin authorized accessible].each do |word|
       refute_match(/\b#{Regexp.escape(word)}\b/, blob)
     end
     refute_includes blob, ":view"
+    refute_includes blob, ":edit"
+  end
+
+  def test_view_only_caller_is_forbidden
+    page_recording, token = provision_view_only_client_and_page!
+
+    get "/recording_studio_api/api/v1/pages/#{page_recording.id}/actions/embed",
+        headers: { "Authorization" => "Bearer #{token}" }
+
+    assert_response :forbidden
+    assert_nil page_recording.reload.embed
+  end
+
+  def test_edit_caller_creates_one_embed_and_reuses_it
+    page_recording, token = provision_edit_client_without_embed!
+
+    assert_nil page_recording.embed
+
+    get "/recording_studio_api/api/v1/pages/#{page_recording.id}/actions/embed",
+        headers: { "Authorization" => "Bearer #{token}" }
+
+    assert_response :ok
+    assert_schema_v1(JSON.parse(response.body))
+    first_embed = page_recording.reload.embed
+    assert first_embed
+    refute first_embed.enabled?
+    assert_equal 1, embed_count(page_recording)
+
+    get "/recording_studio_api/api/v1/pages/#{page_recording.id}/actions/embed",
+        headers: { "Authorization" => "Bearer #{token}" }
+
+    assert_response :ok
+    assert_schema_v1(JSON.parse(response.body))
+    assert_equal first_embed.id, page_recording.reload.embed.id
+    assert_equal 1, embed_count(page_recording)
   end
 
   def test_iframe_embed_route_still_mounted
@@ -95,6 +131,35 @@ class EmbedMemberActionTest < ActionDispatch::IntegrationTest
     assert body.fetch("configuration").key?("theme")
     assert body.fetch("configuration").key?("sizing")
     assert_equal "0.3.0", body.fetch("sdk").fetch("minimum_version")
+  end
+
+  def provision_edit_client_without_embed!
+    user = create_user
+    Current.actor = user
+    workspace = Workspace.create!(name: "Embed create #{SecureRandom.hex(4)}")
+    root_recording = RecordingStudio.create_root_recording!(workspace, actor: user)
+    access_recording = bootstrap_admin!(root_recording: root_recording, actor: user)
+    page_recording = record_page!(root_recording: root_recording, title: "Embed create page")
+    token = issue_client_token!(access_recording: access_recording, name: "Embed create client")
+
+    [ page_recording, token ]
+  end
+
+  def provision_view_only_client_and_page!
+    owner = create_user
+    Current.actor = owner
+    workspace = Workspace.create!(name: "Embed view-only #{SecureRandom.hex(4)}")
+    root_recording = RecordingStudio.create_root_recording!(workspace, actor: owner)
+    bootstrap_admin!(root_recording: root_recording, actor: owner)
+    page_recording = record_page!(root_recording: root_recording, title: "Embed view-only page")
+    token = issue_client_token!(
+      access_point_recording: root_recording,
+      manager_actor: owner,
+      role: :view,
+      name: "Embed view-only client"
+    )
+
+    [ page_recording, token ]
   end
 
   def provision_view_client_and_page_embed!
@@ -141,11 +206,21 @@ class EmbedMemberActionTest < ActionDispatch::IntegrationTest
     end
   end
 
-  def issue_client_token!(access_recording:, name:)
-    provision = RecordingStudioApi::Services::ProvisionApiClient.call(
-      access_recording: access_recording,
-      name: name
-    )
+  def embed_count(recording)
+    RecordingStudio::Recording.where(
+      parent_recording_id: recording.id,
+      recordable_type: "RecordingStudioEmbeddable::Embed",
+      trashed_at: nil
+    ).count
+  end
+
+  def issue_client_token!(name:, access_recording: nil, access_point_recording: nil, manager_actor: nil, role: nil)
+    provision_args = { name: name }
+    provision_args[:access_recording] = access_recording if access_recording
+    provision_args[:access_point_recording] = access_point_recording if access_point_recording
+    provision_args[:manager_actor] = manager_actor if manager_actor
+    provision_args[:role] = role if role
+    provision = RecordingStudioApi::Services::ProvisionApiClient.call(**provision_args)
     raise provision.error unless provision.success?
 
     token = RecordingStudioApi::Services::IssueOauthAccessToken.call(

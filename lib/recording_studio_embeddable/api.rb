@@ -14,30 +14,28 @@ module RecordingStudioEmbeddable
       version_notes: ["Embeddable-owned browser payload action"],
       http_verb: :get,
       scope: :member,
-      required_role: :view,
+      required_role: :edit,
       handler: "RecordingStudioEmbeddable::Api::EmbedRecording"
     }.freeze
 
-    ACTION_SUMMARY = "Get the embed payload for this recording."
+    ACTION_SUMMARY = "Get the embed payload for this recording, creating the embed if needed."
     ACTION_DESCRIPTION =
       "An embed lets this recording be shown inside another web page. " \
       "This returns the recording's embed as a browser payload: a cleaned HTML " \
       "fragment plus its display settings, ready for the embed script to place " \
-      "on a page. Run it on the recording itself, using that recording's id " \
-      "(the same id you use for its other actions). The recording must already " \
-      "have an embed, set up in the app's embed settings; this action only " \
-      "reads and never creates one. A recording id that is not found is " \
-      "rejected. A recording with no embed is rejected " \
-      "(\"Embed was not found for this recording\"). If the embed can't be " \
-      "rendered, the call is rejected as invalid. Repeat calls change nothing " \
-      "and return the same payload while the embed is unchanged. Returns " \
-      "schema_version (1), html (the cleaned fragment), configuration (theme " \
-      "and sizing), and sdk.minimum_version (the oldest embed script version " \
-      "that can show it)."
+      "on a page. You need edit access on the recording. Run it on the " \
+      "recording itself, using that recording's id (the same id you use for " \
+      "its other actions). If the recording does not have an embed yet, this " \
+      "creates one, switched off for public embedding. Repeat calls reuse that " \
+      "embed and return the same payload while it is unchanged. A recording id " \
+      "that is not found is rejected. If the embed can't be rendered, the call " \
+      "is rejected as invalid. Returns schema_version (1), html (the cleaned " \
+      "fragment), configuration (theme and sizing), and sdk.minimum_version " \
+      "(the oldest embed script version that can show it)."
     ACTION_RESPONSE_DESCRIPTIONS = {
       "200" => "The embed payload for this recording.",
-      "403" => "The caller is not allowed to view this recording.",
-      "404" => "This recording was not found, or it has no embed."
+      "403" => "The caller does not have edit access on this recording.",
+      "404" => "This recording was not found."
     }.freeze
 
     class << self

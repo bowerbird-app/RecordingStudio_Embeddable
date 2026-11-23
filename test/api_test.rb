@@ -4,7 +4,7 @@ require "test_helper"
 require "action_controller"
 
 class ApiTest < Minitest::Test
-  ActionContext = Struct.new(:recording, :access_grant, :params, keyword_init: true)
+  ActionContext = Struct.new(:recording, :access_grant, :params, :actor, keyword_init: true)
 
   class AccessGrant
     attr_reader :authorized_recordings
@@ -28,7 +28,11 @@ class ApiTest < Minitest::Test
     def self.model_name = ActiveModel::Name.new(self, nil, "FakePage")
   end
 
-  FakeRecording = Struct.new(:recordable, :updated_at, :embed, keyword_init: true)
+  FakeRecording = Struct.new(:recordable, :updated_at, :embed, keyword_init: true) do
+    def ensure_embed!(**)
+      embed
+    end
+  end
 
   class FakeRenderer
     def render(**)
@@ -58,7 +62,7 @@ class ApiTest < Minitest::Test
     assert_equal :embeddable, descriptor[:capability]
     assert_equal :get, descriptor[:http_verb]
     assert_equal :member, descriptor[:scope]
-    assert_equal :view, descriptor[:required_role]
+    assert_equal :edit, descriptor[:required_role]
     assert_equal "RecordingStudioEmbeddable::Api::EmbedRecording", descriptor[:handler]
   end
 
@@ -78,7 +82,7 @@ class ApiTest < Minitest::Test
       assert_equal :embeddable, registration.fetch(:capability)
       assert_equal :get, registration.fetch(:http_verb)
       assert_equal :member, registration.fetch(:scope)
-      assert_equal :view, registration.fetch(:required_role)
+      assert_equal :edit, registration.fetch(:required_role)
       assert_equal RecordingStudioEmbeddable::Api::EmbedRecording, registration.fetch(:handler)
       assert_equal RecordingStudioEmbeddable::Api::ACTION_SUMMARY, registration.fetch(:openapi).fetch(:summary)
       assert_equal RecordingStudioEmbeddable::Api::ACTION_RESPONSE_DESCRIPTIONS.fetch("403"),
@@ -211,11 +215,44 @@ class ApiTest < Minitest::Test
 
       assert_equal 1, hash.fetch("schema_version")
       assert_equal "<p>payload</p>", hash.fetch("html")
-      assert_equal [[recording, :view]], access_grant.authorized_recordings
+      assert_equal [[recording, :edit]], access_grant.authorized_recordings
       refute called
     end
   ensure
     RecordingStudioEmbeddable::Services::CaptureView.define_singleton_method(:call, original) if original
+  end
+
+  def test_handler_finds_or_creates_embed_with_context_actor
+    actor = Object.new
+    created = FakeEmbed.new(
+      sizing: { "width" => "100%", "height" => "auto" },
+      appearance: {},
+      updated_at: Time.at(1_700_000_000)
+    )
+    recording = FakeRecording.new(
+      recordable: FakeRecordable.new,
+      updated_at: Time.at(1_700_000_000),
+      embed: nil
+    )
+    passed_actor = nil
+    recording.define_singleton_method(:ensure_embed!) do |actor: nil, **|
+      passed_actor = actor
+      created
+    end
+
+    with_fake_recording_studio_api do
+      hash = RecordingStudioEmbeddable::Api::EmbedRecording.call(
+        ActionContext.new(
+          recording: recording,
+          access_grant: AccessGrant.new,
+          params: {},
+          actor: actor
+        )
+      )
+
+      assert_equal actor, passed_actor
+      assert_equal 1, hash.fetch("schema_version")
+    end
   end
 
   private

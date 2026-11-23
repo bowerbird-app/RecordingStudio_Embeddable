@@ -12,7 +12,7 @@ This Rails app exists to validate the Recording Studio addon template in a real 
   docs (the engine itself only returns an empty `200`)
 - FlatPack layout integration and Tailwind source scanning
 - Mounted `RecordingStudio::Engine` route behavior inside a host app
-- Public Recording Studio API at `/recording_studio_api` with GET `:embed` on Page for WordPress Plugin Demo clients
+- Public Recording Studio API at `/recording_studio_api` with GET `:embed` on Page (edit access; creates the embed if needed) for WordPress Plugin Demo clients
 - RootSwitchable (`v0.16.0`) + seeded `AdminRoot` so API admin HTML
   (`/recording_studio_api/admin_api` and settings / rate_limiting / requests /
   errors / logs) can resolve `current_root_recording`. The switcher lists
