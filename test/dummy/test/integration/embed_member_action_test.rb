@@ -101,9 +101,124 @@ class EmbedMemberActionTest < ActionDispatch::IntegrationTest
 
     assert_response :not_found
     assert_match(/isn't set up for this recording yet/i, response.body)
-    assert_match(/editor must enable embedding first in the app's embed settings/i, response.body)
+    assert_match(/enable_embed/i, response.body)
+    assert_match(/open the Embed screen once/i, response.body)
+    refute_match(/press center/i, response.body)
     assert_nil page_recording.reload.embed
     assert_equal 0, embed_count(page_recording)
+  end
+
+  def test_enable_embed_action_openapi_copy_avoids_forbidden_words
+    action = RecordingStudioApi.capability_action(:enable_embed)
+    openapi = action.openapi
+    responses = openapi.fetch(:responses)
+    description = openapi.fetch(:description)
+
+    assert_equal RecordingStudioEmbeddable::Api::ENABLE_EMBED_ACTION_SUMMARY, openapi.fetch(:summary)
+    assert_equal RecordingStudioEmbeddable::Api::ENABLE_EMBED_ACTION_DESCRIPTION, description
+    refute_includes description, "Press Kit"
+    RecordingStudioEmbeddable::Api::ENABLE_EMBED_ACTION_RESPONSE_DESCRIPTIONS.each do |status, text|
+      response = responses[status] || responses[status.to_s] || responses[status.to_sym]
+      assert response, "missing #{status} response in #{responses.keys.inspect}"
+      assert_equal text, response.fetch(:description)
+    end
+
+    blob = [
+      openapi.fetch(:summary),
+      description,
+      *responses.values.map { |entry| entry.fetch(:description) }
+    ].join(" ").downcase
+    %w[role admin authorized accessible permission access authorization].each do |word|
+      refute_match(/\b#{Regexp.escape(word)}\b/, blob)
+    end
+    refute_includes blob, ":view"
+    refute_includes blob, ":edit"
+    refute_includes blob, ":admin"
+  end
+
+  def test_enable_embed_is_registered_on_public_api_only
+    public_action = RecordingStudioApi.capability_action(:enable_embed, api: :public)
+    operations_action = if RecordingStudioApi.configuration.respond_to?(:fetch_api)
+                          begin
+                            RecordingStudioApi.capability_action(:enable_embed, api: :operations)
+                          rescue StandardError
+                            nil
+                          end
+                        end
+
+    assert public_action
+    assert_equal RecordingStudioEmbeddable::Api::EnableEmbedRecording, public_action.handler
+    assert_equal :admin, public_action.required_role
+    assert_nil operations_action
+  end
+
+  def test_admin_enable_embed_turns_embedding_on_and_returns_payload
+    page_recording, token = provision_role_client_and_page!(role: :admin)
+
+    assert_nil page_recording.embed
+
+    post "/recording_studio_api/api/v1/pages/#{page_recording.id}/actions/enable_embed",
+         headers: { "Authorization" => "Bearer #{token}" }
+
+    assert_response :ok
+    assert_schema_v1(JSON.parse(response.body))
+    embed = page_recording.reload.embed
+    assert embed
+    assert embed.enabled?
+    assert_equal 1, embed_count(page_recording)
+  end
+
+  def test_enable_embed_is_idempotent
+    page_recording, token = provision_role_client_and_page!(role: :admin)
+    page_recording.ensure_embed!(enabled: true, actor: Current.actor)
+    child = page_recording.embed_child_recording
+    created_before = events_for(child, "created").size
+    updated_before = events_for(child, "embeddable.embed.updated").size
+
+    2.times do
+      post "/recording_studio_api/api/v1/pages/#{page_recording.id}/actions/enable_embed",
+           headers: { "Authorization" => "Bearer #{token}" }
+      assert_response :ok
+    end
+
+    assert_equal 1, embed_count(page_recording)
+    assert page_recording.reload.embed.enabled?
+    assert_equal created_before, events_for(child, "created").size
+    assert_equal updated_before, events_for(child, "embeddable.embed.updated").size
+  end
+
+  def test_editor_cannot_enable_embed
+    page_recording, token = provision_role_client_and_page!(role: :edit)
+
+    post "/recording_studio_api/api/v1/pages/#{page_recording.id}/actions/enable_embed",
+         headers: { "Authorization" => "Bearer #{token}" }
+
+    refute_equal 200, response.status
+    assert_nil page_recording.reload.embed
+  end
+
+  def test_viewer_cannot_enable_embed
+    page_recording, token = provision_role_client_and_page!(role: :view)
+
+    post "/recording_studio_api/api/v1/pages/#{page_recording.id}/actions/enable_embed",
+         headers: { "Authorization" => "Bearer #{token}" }
+
+    refute_equal 200, response.status
+    assert_nil page_recording.reload.embed
+  end
+
+  def test_enable_embed_rejects_a_recording_that_is_not_embeddable
+    page_recording, token = provision_role_client_and_page!(role: :admin)
+    original = RecordingStudioEmbeddable::Renderer.method(:options_for)
+    RecordingStudioEmbeddable::Renderer.define_singleton_method(:options_for) { |*| { enabled: false } }
+
+    post "/recording_studio_api/api/v1/pages/#{page_recording.id}/actions/enable_embed",
+         headers: { "Authorization" => "Bearer #{token}" }
+
+    assert_response :not_found
+    assert_nil page_recording.reload.embed
+  ensure
+    RecordingStudioEmbeddable::Renderer.define_singleton_method(:options_for, original) if original
   end
 
   def test_iframe_embed_route_still_mounted
@@ -123,6 +238,27 @@ class EmbedMemberActionTest < ActionDispatch::IntegrationTest
     assert body.fetch("configuration").key?("theme")
     assert body.fetch("configuration").key?("sizing")
     assert_equal "0.3.0", body.fetch("sdk").fetch("minimum_version")
+  end
+
+  def events_for(recording, action)
+    RecordingStudio::Event.where(recording_id: recording.id, action: action)
+  end
+
+  def provision_role_client_and_page!(role:)
+    owner = create_user
+    Current.actor = owner
+    workspace = Workspace.create!(name: "Embed #{role} #{SecureRandom.hex(4)}")
+    root_recording = RecordingStudio.create_root_recording!(workspace, actor: owner)
+    bootstrap_admin!(root_recording: root_recording, actor: owner)
+    page_recording = record_page!(root_recording: root_recording, title: "Embed #{role} page")
+    token = issue_client_token!(
+      access_point_recording: root_recording,
+      manager_actor: owner,
+      role: role,
+      name: "Embed #{role} client"
+    )
+
+    [ page_recording, token ]
   end
 
   def provision_view_only_client_and_page!(with_embed: false)

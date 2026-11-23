@@ -17,16 +17,17 @@ module RecordingStudioEmbeddable
 
         def document(type:, action:)
           action_name = action_name!(action)
-          base = default_openapi
+          base = default_openapi(action: action_name)
           entry = entries[[type.to_s, action_name]]
           entry ? base.merge(entry) : base
         end
 
-        def default_openapi
+        def default_openapi(action: :embed)
+          action_name = action_name!(action)
           {
-            summary: ACTION_SUMMARY,
-            description: ACTION_DESCRIPTION,
-            responses: ACTION_RESPONSE_DESCRIPTIONS.transform_values { |text| { description: text } }
+            summary: Api.summary_for(action_name),
+            description: Api.description_for(action_name),
+            responses: Api.response_descriptions_for(action_name).transform_values { |text| { description: text } }
           }
         end
 
@@ -51,7 +52,7 @@ module RecordingStudioEmbeddable
           raise ArgumentError, "Unknown Embeddable action #{action.inspect}" unless action.respond_to?(:to_sym)
 
           name = action.to_sym
-          return name if name == :embed
+          return name if Api.known_action?(name)
 
           raise ArgumentError, "Unknown Embeddable action #{action.inspect}"
         end

@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-11-23
+
+### Added
+- Soft-registered member `:enable_embed` (`POST`, `required_role: :admin`) on the public Recording Studio API only. It find-or-creates the embed with `ensure_embed!`, sets `enabled` to true, and saves with `persist_changes`. Repeat calls succeed and do not add a second embed row or extra events. The handler returns the same RenderPayload hash as `:embed`.
+- Hosts can set the OpenAPI and MCP title for `:enable_embed` with `RecordingStudioEmbeddable::Api.override_openapi` the same way they do for `:embed`.
+
+### Changed
+- The `:embed` missing-embed error and 404 copy name `enable_embed` (or opening the Embed screen once) instead of telling an editor to use embed settings only.
+
+### Upgrade notes
+- Bump `recording_studio_embeddable` to `1.6.2`. No migration.
+- Allowlist `:enable_embed` on each public recordable type API that should expose it (`capability_actions`).
+- Per-type MCP names such as `enable_embed_press_center` stay in the host gem. Call `override_openapi` from that gem for the title.
+- `:enable_embed` is registered on `api: :public` only. Operations and staff named APIs do not get it.
+
 ## [1.6.1] - 2026-11-23
 
 ### Changed

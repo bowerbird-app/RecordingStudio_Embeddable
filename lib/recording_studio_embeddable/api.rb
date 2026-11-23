@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 
 require "recording_studio_embeddable/api/embed_recording"
+require "recording_studio_embeddable/api/enable_embed_recording"
+require "recording_studio_embeddable/api/copy"
 require "recording_studio_embeddable/api/openapi_overrides"
+require "recording_studio_embeddable/api/registration"
 
 module RecordingStudioEmbeddable
   module Api
     ACTION_VERSION = "1.0.0"
+    PUBLIC_API = :public
 
     DESCRIPTOR = {
       name: :embed,
@@ -18,27 +22,15 @@ module RecordingStudioEmbeddable
       handler: "RecordingStudioEmbeddable::Api::EmbedRecording"
     }.freeze
 
-    ACTION_SUMMARY = "Get the embed payload for this recording."
-    ACTION_DESCRIPTION =
-      "An embed lets this recording be shown inside another web page. " \
-      "This returns the recording's embed as a browser payload: a cleaned HTML " \
-      "fragment plus its display settings, ready for the embed script to place " \
-      "on a page. You need view access on the recording. Run it on the " \
-      "recording itself, using that recording's id (the same id you use for " \
-      "its other actions). This action only reads. The recording must already " \
-      "have an embed set up by an editor in the app's embed settings; it never " \
-      "creates one. A recording that is not found, or one where embedding is " \
-      "not enabled yet, is rejected — an editor must enable embedding first in " \
-      "the app's embed settings. If the embed can't be rendered, the call is " \
-      "rejected as invalid. Repeat calls change nothing and return the same " \
-      "payload while the embed is unchanged. Returns schema_version (1), html " \
-      "(the cleaned fragment), configuration (theme and sizing), and " \
-      "sdk.minimum_version (the oldest embed script version that can show it)."
-    ACTION_RESPONSE_DESCRIPTIONS = {
-      "200" => "The embed payload for this recording.",
-      "403" => "The caller does not have view access on this recording.",
-      "404" => "This recording was not found, or embedding is not enabled yet. " \
-               "An editor must enable embedding in the app's embed settings."
+    ENABLE_EMBED_DESCRIPTOR = {
+      name: :enable_embed,
+      capability: :embeddable,
+      version: ACTION_VERSION,
+      version_notes: ["Embeddable-owned turn-embedding-on action"],
+      http_verb: :post,
+      scope: :member,
+      required_role: :admin,
+      handler: "RecordingStudioEmbeddable::Api::EnableEmbedRecording"
     }.freeze
 
     class << self
@@ -46,16 +38,28 @@ module RecordingStudioEmbeddable
         DESCRIPTOR
       end
 
-      def register_capability_action!
-        return unless recording_studio_api_available?
+      def enable_embed_descriptor
+        ENABLE_EMBED_DESCRIPTOR
+      end
 
-        if named_api_registration_supported?
-          RecordingStudioApi.configuration.each_api do |api_definition|
-            register_capability_action_for(api_definition.name)
-          end
-        elsif !RecordingStudioApi.capability_action(:embed)
-          RecordingStudioApi.register_capability_action(:embed, **capability_action_options)
-        end
+      def known_action?(name)
+        COPY.key?(name.to_sym)
+      end
+
+      def summary_for(action)
+        COPY.fetch(action.to_sym).fetch(:summary)
+      end
+
+      def description_for(action)
+        COPY.fetch(action.to_sym).fetch(:description)
+      end
+
+      def response_descriptions_for(action)
+        COPY.fetch(action.to_sym).fetch(:responses)
+      end
+
+      def register_capability_action!
+        Registration.register!
       end
 
       def override_openapi(type:, action:, title:, description: nil)
@@ -64,47 +68,6 @@ module RecordingStudioEmbeddable
 
       def openapi_for(type:, action:)
         OpenapiOverrides.document(type: type, action: action)
-      end
-
-      private
-
-      def register_capability_action_for(api_name)
-        return if RecordingStudioApi.capability_action(:embed, api: api_name)
-
-        RecordingStudioApi.register_capability_action(:embed, api: api_name, **capability_action_options)
-      end
-
-      def named_api_registration_supported?
-        RecordingStudioApi.respond_to?(:configuration) &&
-          RecordingStudioApi.configuration.respond_to?(:each_api) &&
-          action_api_accepts_api?(:capability_action) &&
-          action_api_accepts_api?(:register_capability_action)
-      end
-
-      def action_api_accepts_api?(method_name)
-        RecordingStudioApi.method(method_name).parameters.any? do |type, name|
-          type == :keyrest || (name == :api && %i[key keyreq].include?(type))
-        end
-      end
-
-      def capability_action_options
-        {
-          capability: DESCRIPTOR[:capability],
-          version: DESCRIPTOR[:version],
-          version_notes: DESCRIPTOR[:version_notes],
-          http_verb: DESCRIPTOR[:http_verb],
-          scope: DESCRIPTOR[:scope],
-          required_role: DESCRIPTOR[:required_role],
-          handler: EmbedRecording,
-          openapi: OpenapiOverrides.default_openapi,
-          openapi_for: ->(type:, action:) { openapi_for(type: type, action: action) }
-        }
-      end
-
-      def recording_studio_api_available?
-        defined?(RecordingStudioApi) &&
-          RecordingStudioApi.respond_to?(:capability_action) &&
-          RecordingStudioApi.respond_to?(:register_capability_action)
       end
     end
   end

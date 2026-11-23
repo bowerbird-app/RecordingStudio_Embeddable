@@ -37,7 +37,7 @@ module RecordingStudioEmbeddable
 
         raise not_found_error(
           "Embedding isn't set up for this recording yet. " \
-          "An editor must enable embedding first in the app's embed settings."
+          "Turn embedding on once with enable_embed, or open the Embed screen once."
         )
       end
 
