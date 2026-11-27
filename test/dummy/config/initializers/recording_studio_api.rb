@@ -23,7 +23,7 @@ end
 RecordingStudioApi.register_recordable_type_api(
   "Page",
   operations: %i[show],
-  capability_actions: %i[embed enable_embed],
+  capability_actions: %i[embed enable_embed disable_embed],
   serializer: ->(page, **) { { title: page.title } },
   output_keys: %i[title]
 )

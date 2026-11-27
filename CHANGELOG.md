@@ -7,20 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.6.2] - 2026-11-23
+## [1.7.0] - 2026-11-27
 
 ### Added
 - Soft-registered member `:enable_embed` (`POST`, `required_role: :admin`) on the public Recording Studio API only. It find-or-creates the embed with `ensure_embed!`, sets `enabled` to true, and saves with `persist_changes`. Repeat calls succeed and do not add a second embed row or extra events. The handler returns the same RenderPayload hash as `:embed`.
-- Hosts can set the OpenAPI and MCP title for `:enable_embed` with `RecordingStudioEmbeddable::Api.override_openapi` the same way they do for `:embed`.
+- Soft-registered member `:disable_embed` (`POST`, `required_role: :admin`) on the public Recording Studio API only. It sets `enabled` to false and saves with `persist_changes`, the same write the management settings form uses. Repeat calls succeed and do not add extra events. A recording with no embed is 404 and does not create a row (`RenderPayload` needs an embed). The handler returns the same RenderPayload hash as `:embed`.
+- Hosts can set the OpenAPI and MCP title for `:enable_embed` and `:disable_embed` with `RecordingStudioEmbeddable::Api.override_openapi` the same way they do for `:embed`.
 
 ### Changed
 - The `:embed` missing-embed error and 404 copy name `enable_embed` (or opening the Embed screen once) instead of telling an editor to use embed settings only.
 
 ### Upgrade notes
-- Bump `recording_studio_embeddable` to `1.6.2`. No migration.
-- Allowlist `:enable_embed` on each public recordable type API that should expose it (`capability_actions`).
-- Per-type MCP names such as `enable_embed_press_center` stay in the host gem. Call `override_openapi` from that gem for the title.
-- `:enable_embed` is registered on `api: :public` only. Operations and staff named APIs do not get it.
+- Bump `recording_studio_embeddable` to `1.7.0`. No migration.
+- Allowlist `:enable_embed` and `:disable_embed` on each public recordable type API that should expose them (`capability_actions`).
+- Per-type MCP names such as `enable_embed_press_center` and `disable_embed_press_center` stay in the host gem. Call `override_openapi` from that gem for the title.
+- `:enable_embed` and `:disable_embed` are registered on `api: :public` only. Operations and staff named APIs do not get them.
 
 ## [1.6.1] - 2026-11-23
 
@@ -876,7 +877,8 @@ tracked. A warm snapshot skips provision and still fetches skills.
 - Comprehensive README and documentation
 - Basic test suite with Minitest
 
-[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.6.1...HEAD
+[Unreleased]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.6.1...v1.7.0
 [1.6.1]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/bowerbird-app/RecordingStudio_Embeddable/compare/v1.4.0...v1.5.0

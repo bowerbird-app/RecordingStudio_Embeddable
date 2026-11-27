@@ -9,6 +9,7 @@ module RecordingStudioEmbeddable
 
           register_embed_action!
           register_enable_embed_action!
+          register_disable_embed_action!
         end
 
         private
@@ -32,6 +33,18 @@ module RecordingStudioEmbeddable
             )
           else
             register_legacy_action!(ENABLE_EMBED_DESCRIPTOR, handler: EnableEmbedRecording)
+          end
+        end
+
+        def register_disable_embed_action!
+          if named_api_registration_supported?
+            register_named_action!(
+              DISABLE_EMBED_DESCRIPTOR,
+              api_name: PUBLIC_API,
+              handler: DisableEmbedRecording
+            )
+          else
+            register_legacy_action!(DISABLE_EMBED_DESCRIPTOR, handler: DisableEmbedRecording)
           end
         end
 

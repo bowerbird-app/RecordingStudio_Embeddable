@@ -43,6 +43,24 @@ module RecordingStudioEmbeddable
       "422" => "Embedding could not be turned on for this recording."
     }.freeze
 
+    DISABLE_EMBED_ACTION_SUMMARY = "Turn embedding off for this recording."
+    DISABLE_EMBED_ACTION_DESCRIPTION =
+      "An embed lets this recording be shown inside another web page. " \
+      "This turns embedding off so the recording is no longer shown publicly on other sites. " \
+      "The recording must already exist, be embeddable, and already have an embed. " \
+      "Run it on the recording itself, using that recording's id (the same id you use for " \
+      "its other actions). Send no body fields. A recording that is not found, is not " \
+      "embeddable, or has no embed yet, is rejected. This action never creates an embed. " \
+      "If embedding is already off, the call succeeds and writes nothing new. Returns " \
+      "schema_version (1), html (the cleaned fragment), configuration (theme and sizing), " \
+      "and sdk.minimum_version (the oldest embed script version that can show it)."
+    DISABLE_EMBED_ACTION_RESPONSE_DESCRIPTIONS = {
+      "200" => "Embedding is off. The embed payload for this recording.",
+      "403" => "The caller cannot turn embedding off for this recording.",
+      "404" => "This recording was not found, it is not embeddable, or embedding is not set up yet.",
+      "422" => "Embedding could not be turned off for this recording."
+    }.freeze
+
     COPY = {
       embed: {
         summary: ACTION_SUMMARY,
@@ -53,6 +71,11 @@ module RecordingStudioEmbeddable
         summary: ENABLE_EMBED_ACTION_SUMMARY,
         description: ENABLE_EMBED_ACTION_DESCRIPTION,
         responses: ENABLE_EMBED_ACTION_RESPONSE_DESCRIPTIONS
+      },
+      disable_embed: {
+        summary: DISABLE_EMBED_ACTION_SUMMARY,
+        description: DISABLE_EMBED_ACTION_DESCRIPTION,
+        responses: DISABLE_EMBED_ACTION_RESPONSE_DESCRIPTIONS
       }
     }.freeze
   end

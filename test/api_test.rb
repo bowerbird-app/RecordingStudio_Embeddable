@@ -109,6 +109,17 @@ class ApiTest < Minitest::Test
     assert_equal "RecordingStudioEmbeddable::Api::EnableEmbedRecording", descriptor[:handler]
   end
 
+  def test_disable_embed_descriptor_matches_admin_member_action
+    descriptor = RecordingStudioEmbeddable::Api.disable_embed_descriptor
+
+    assert_equal :disable_embed, descriptor[:name]
+    assert_equal :embeddable, descriptor[:capability]
+    assert_equal :post, descriptor[:http_verb]
+    assert_equal :member, descriptor[:scope]
+    assert_equal :admin, descriptor[:required_role]
+    assert_equal "RecordingStudioEmbeddable::Api::DisableEmbedRecording", descriptor[:handler]
+  end
+
   def test_registration_is_a_noop_without_recording_studio_api
     refute Object.const_defined?(:RecordingStudioApi, false)
 
@@ -150,12 +161,30 @@ class ApiTest < Minitest::Test
     end
   end
 
+  def test_registration_registers_disable_embed_on_legacy_api
+    with_fake_recording_studio_api do |api|
+      RecordingStudioEmbeddable::Api.register_capability_action!
+
+      registration = registration_named(api, :disable_embed)
+
+      assert_equal :disable_embed, registration.fetch(:name)
+      assert_equal :embeddable, registration.fetch(:capability)
+      assert_equal :post, registration.fetch(:http_verb)
+      assert_equal :member, registration.fetch(:scope)
+      assert_equal :admin, registration.fetch(:required_role)
+      assert_equal RecordingStudioEmbeddable::Api::DisableEmbedRecording, registration.fetch(:handler)
+      assert_equal RecordingStudioEmbeddable::Api::DISABLE_EMBED_ACTION_SUMMARY,
+                   registration.fetch(:openapi).fetch(:summary)
+    end
+  end
+
   def test_registration_does_not_replace_an_existing_embed_action
     with_fake_recording_studio_api(existing_actions: { embed: Object.new }) do |api|
       RecordingStudioEmbeddable::Api.register_capability_action!
 
       refute(api.registrations.any? { |registration| registration[:name] == :embed })
       assert registration_named(api, :enable_embed)
+      assert registration_named(api, :disable_embed)
     end
   end
 
@@ -163,12 +192,15 @@ class ApiTest < Minitest::Test
     with_named_recording_studio_apis do |api|
       RecordingStudioEmbeddable::Api.register_capability_action!
 
-      embed_apis = api.registrations.select { |registration| registration[:name] == :embed }.map { |r| r[:api] }
-      enable_apis = api.registrations.select { |registration| registration[:name] == :enable_embed }.map { |r| r[:api] }
+      embed_apis = registration_apis(api, :embed)
+      enable_apis = registration_apis(api, :enable_embed)
+      disable_apis = registration_apis(api, :disable_embed)
 
       assert_equal %i[public operations], embed_apis
       assert_equal %i[public], enable_apis
+      assert_equal %i[public], disable_apis
       refute api.registries.dig(:operations, :enable_embed)
+      refute api.registries.dig(:operations, :disable_embed)
     end
   end
 
@@ -221,6 +253,16 @@ class ApiTest < Minitest::Test
 
     assert_equal "Enable embed page", enabled.fetch(:title)
     assert_equal RecordingStudioEmbeddable::Api::ENABLE_EMBED_ACTION_DESCRIPTION, enabled.fetch(:description)
+
+    RecordingStudioEmbeddable::Api.override_openapi(
+      type: "Page",
+      action: :disable_embed,
+      title: "Disable embed page"
+    )
+    disabled = RecordingStudioEmbeddable::Api.openapi_for(type: "Page", action: :disable_embed)
+
+    assert_equal "Disable embed page", disabled.fetch(:title)
+    assert_equal RecordingStudioEmbeddable::Api::DISABLE_EMBED_ACTION_DESCRIPTION, disabled.fetch(:description)
 
     assert_raises(ArgumentError) do
       RecordingStudioEmbeddable::Api.override_openapi(type: "Page", action: :publish, title: "Publish page")
@@ -380,6 +422,81 @@ class ApiTest < Minitest::Test
     assert_equal 2, recording.ensure_embed_actors.size
   end
 
+  def test_disable_embed_handler_authorizes_admin_and_returns_payload
+    actor = Object.new
+    access_grant = AccessGrant.new(actor: actor)
+    embed = MutableEmbed.new(enabled: true)
+    recording = FakeRecording.new(
+      recordable: FakeRecordable.new,
+      updated_at: Time.at(1_700_000_000),
+      embed: embed
+    )
+    created = false
+    recording.define_singleton_method(:ensure_embed!) do |**|
+      created = true
+      embed
+    end
+
+    with_fake_recording_studio_api do
+      hash = RecordingStudioEmbeddable::Api::DisableEmbedRecording.call(
+        ActionContext.new(recording: recording, access_grant: access_grant, params: {})
+      )
+
+      assert_equal false, embed.enabled
+      assert_equal 1, embed.persist_calls
+      refute created
+      assert_equal [[recording, :admin]], access_grant.authorized_recordings
+      assert_equal 1, hash.fetch("schema_version")
+      assert_equal "<p>payload</p>", hash.fetch("html")
+    end
+  end
+
+  def test_disable_embed_handler_is_idempotent_when_already_disabled
+    embed = MutableEmbed.new(enabled: false)
+    recording = FakeRecording.new(
+      recordable: FakeRecordable.new,
+      updated_at: Time.at(1_700_000_000),
+      embed: embed
+    )
+
+    with_fake_recording_studio_api do
+      RecordingStudioEmbeddable::Api::DisableEmbedRecording.call(
+        ActionContext.new(recording: recording, access_grant: AccessGrant.new, params: {})
+      )
+      RecordingStudioEmbeddable::Api::DisableEmbedRecording.call(
+        ActionContext.new(recording: recording, access_grant: AccessGrant.new, params: {})
+      )
+    end
+
+    assert_equal false, embed.enabled
+    assert_equal 0, embed.persist_calls
+  end
+
+  def test_disable_embed_handler_rejects_missing_embed_without_creating_one
+    recording = FakeRecording.new(
+      recordable: FakeRecordable.new,
+      updated_at: Time.at(1_700_000_000),
+      embed: nil
+    )
+    created = false
+    recording.define_singleton_method(:ensure_embed!) do |**|
+      created = true
+      MutableEmbed.new
+    end
+
+    with_fake_recording_studio_api do
+      error = assert_raises(RecordingStudioApi::NotFoundError) do
+        RecordingStudioEmbeddable::Api::DisableEmbedRecording.call(
+          ActionContext.new(recording: recording, access_grant: AccessGrant.new, params: {})
+        )
+      end
+
+      assert_match(/isn't set up for this recording yet/i, error.message)
+      assert_match(/no embed to turn off/i, error.message)
+      refute created
+    end
+  end
+
   def test_enable_embed_handler_rejects_a_recording_that_is_not_embeddable
     created = false
     recording = FakeRecording.new(
@@ -409,6 +526,10 @@ class ApiTest < Minitest::Test
 
   def registration_named(api, name)
     api.registrations.find { |registration| registration[:name] == name }
+  end
+
+  def registration_apis(api, name)
+    api.registrations.select { |registration| registration[:name] == name }.map { |r| r[:api] }
   end
 
   def with_fake_recording_studio_api(existing_actions: {})
