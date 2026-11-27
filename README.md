@@ -12,7 +12,7 @@ Two delivery modes ship in this gem:
 - Public embed routes for tokenized iframe recordings.
 - CDN publish through [`recording_studio_artifacts`](https://github.com/bowerbird-app/RecordingStudio_artifacts) (Cloudflare R2) when `config.artifacts_enabled` is true and `embed_url_strategy` is `:cdn`.
 - `RenderPayload` / `BrowserPayload` for API and SDK consumers (fragment + theme/sizing, no document chrome).
-- Soft `:embed` capability-action registration when `recording_studio_api` is present (no hard dependency).
+- Soft `:embed`, `:enable_embed`, and `:disable_embed` capability-action registration when `recording_studio_api` is present (no hard dependency). `:enable_embed` and `:disable_embed` are public-API only.
 - A management UI for previewing, editing, styling, and reviewing stats for embeds.
 - Host-side configuration for access control, cache policy, rate limiting, and logging.
 - A Rails generator that mounts the engine, installs an initializer, and copies migrations.
@@ -321,7 +321,13 @@ hash = result.value!.to_h
 
 `html` is a fragment (`layout: false`), sanitized server-side (no `script` / `iframe` / `object` / `embed` / `link` / `meta`, no `on*` handlers, no `javascript:` URLs). `configuration.theme` is the allowlisted token map from `ResolveTheme`; `configuration.sizing` is the allowlisted sizing subset (`width`, `mode`, `max_width`, `min_height`, `height`).
 
-When `recording_studio_api` is loaded, the engine soft-registers a member `:embed` action (`GET`, `required_role: :view`) whose handler returns the same `to_h` shape. The caller needs view access. The recording must already have an embed set up by an editor in the app's embed settings; the action only reads and never creates one. A recording with no embed is 404. OpenAPI summary, description, and 200/403/404 text for that action live on the registration in `RecordingStudioEmbeddable::Api`.
+When `recording_studio_api` is loaded, the engine soft-registers three member actions on `RecordingStudioEmbeddable::Api`:
+
+- `:embed` (`GET`, `required_role: :view`) on every named API. It returns the same `to_h` shape. The caller needs view access. The recording must already have embedding turned on. Turn embedding on once with `:enable_embed`, or open the Embed screen once. The action only reads and never creates an embed. A recording with no embed is 404.
+- `:enable_embed` (`POST`, `required_role: :admin`) on the public named API only (`api: :public`). It is not registered on operations or staff APIs. The handler calls `ensure_embed!(actor:)`, sets `enabled` to true, and saves with `persist_changes`. Repeat calls succeed and do not add a second embed or extra events. A recording that is not embeddable is 404. The handler returns the same RenderPayload hash as `:embed`.
+- `:disable_embed` (`POST`, `required_role: :admin`) on the public named API only (`api: :public`). It is not registered on operations or staff APIs. The handler sets `enabled` to false and saves with `persist_changes`, the same write the management settings form uses. Repeat calls succeed and write nothing new. A recording with no embed is 404 and does not create a row, because `RenderPayload` needs an embed. A recording that is not embeddable is 404. The handler returns the same RenderPayload hash as `:embed`.
+
+OpenAPI summary, description, and response text for both actions live on the registration in `RecordingStudioEmbeddable::Api`.
 
 Set a per-type title so MCP can show an action-first name such as "Embed press center". The override replaces that title. Pass `description:` to replace the description for that type. The action, fields, auth, and responses stay the same. Call it from an initializer:
 
@@ -331,11 +337,21 @@ RecordingStudioEmbeddable::Api.override_openapi(
   action: :embed,
   title: "Embed press center"
 )
+RecordingStudioEmbeddable::Api.override_openapi(
+  type: "RecordingStudioPressCenters::PressCenter",
+  action: :enable_embed,
+  title: "Enable embed press center"
+)
+RecordingStudioEmbeddable::Api.override_openapi(
+  type: "RecordingStudioPressCenters::PressCenter",
+  action: :disable_embed,
+  title: "Disable embed press center"
+)
 ```
 
-`type` is the recordable class or its name. `action` is `:embed`. `title` is the OpenAPI and MCP title for that type. A type with no override keeps the default summary and description. An unknown action, a blank type, or a blank title raises `ArgumentError`. `RecordingStudioEmbeddable::Api.openapi_for(type:, action:)` returns that type's summary, description, and responses, and includes `title` when the type has an override.
+`type` is the recordable class or its name. `action` is `:embed`, `:enable_embed`, or `:disable_embed`. `title` is the OpenAPI and MCP title for that type. A type with no override keeps the default summary and description. An unknown action, a blank type, or a blank title raises `ArgumentError`. `RecordingStudioEmbeddable::Api.openapi_for(type:, action:)` returns that type's summary, description, and responses, and includes `title` when the type has an override. Per-type MCP tool names such as `embed_press_center`, `enable_embed_press_center`, and `disable_embed_press_center` belong in the Press Centers gem, not here.
 
-The dummy app mounts that public API at `/recording_studio_api` and allowlists `:embed` on Page. That is the HTTP proof for WordPress Plugin Demo clients. Named-API enablement for FlatPack hosts remains a later step.
+The dummy app mounts that public API at `/recording_studio_api` and allowlists `:embed`, `:enable_embed`, and `:disable_embed` on Page. That is the HTTP proof for WordPress Plugin Demo clients. Named-API enablement for FlatPack hosts remains a later step.
 
 Admin HTML under `/recording_studio_api/admin_api` needs a host
 `current_root_recording` that is an `AdminRoot`. The dummy supplies that through

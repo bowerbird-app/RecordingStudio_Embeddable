@@ -20,11 +20,10 @@ Rails.application.config.to_prepare do
   end
 end
 
-# Host enablement only. The gem already registered :embed.
 RecordingStudioApi.register_recordable_type_api(
   "Page",
   operations: %i[show],
-  capability_actions: %i[embed],
+  capability_actions: %i[embed enable_embed disable_embed],
   serializer: ->(page, **) { { title: page.title } },
   output_keys: %i[title]
 )
